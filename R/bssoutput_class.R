@@ -86,3 +86,13 @@ setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", f
   }
 )
 
+setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", function(bss_out, bss_data, bss_model) {
+
+  log_pvalues <- rep(1, length(bss_data@atlas_image))
+  log_pvalues[bss_data@mask_idx] <- log10_transform(bss_model@pvalues)
+  dim(log_pvalues) <- dim(bss_data@atlas_image)
+  RNifti::writeNifti(log_pvalues, file.path(bss_out@outdir, 'log_pvalues.nii.gz'), template = bss_data@atlas_image)
+
+  return(bss_out)
+  }
+)

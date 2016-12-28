@@ -96,3 +96,43 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
   return(bss_out)
   }
 )
+
+setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", function(bss_out, bss_data, bss_model) {
+
+  outdir = bss_out@outdir
+
+
+  nb_header <- "### BrainSuite ROI statistical analysis report"
+  nb_libraries <-"```{r librar_cmds, echo=FALSE}
+  library('bssr')
+  ```"
+
+  nb_load_data <- sprintf("```{r message=FALSE, warning=FALSE, load_data}\n")
+  # nb_load_data <- paste(nb_load_data, bss_data@load_data_command, sep = "")
+  nb_load_data <- paste(nb_load_data, "\nDT::datatable(bss_data@demographics)\n", sep = "")
+  nb_load_data <- paste(nb_load_data, "\n```\n", sep = "")
+
+
+  nb_commands <- "```{r warning=FALSE, run_command}\n"
+
+  for (i in bss_data@stats_commands) {
+    nb_commands <- paste(nb_commands, i, "\n", sep = "")
+  }
+  nb_commands <- paste(nb_commands, "```\n", sep = "")
+  nb_commands <- paste(nb_commands, sprintf("\n#### Main effect of %d %s on %s controlling for %s
+                                            ", bss_data$roiid, bss_data$roimeas, bss_data$roi_model@main_effect,
+                                            bss_data$roi_model@covariates ), sep = "")
+
+  rmdfileconn<-file(file.path(outdir, "report.Rmd"))
+  writeLines(c(nb_header, nb_libraries, nb_load_data, nb_commands), rmdfileconn)
+  close(rmdfileconn)
+
+  # Render the markdown
+  rmarkdown::render(file.path(outdir, "report.Rmd"), output_file=file.path(outdir, "report.html"), quiet = TRUE)
+
+  return(bss_out)
+  }
+)
+
+
+

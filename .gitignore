@@ -1,0 +1,9 @@
+.Rproj.user
+.Rprofile
+.Rhistory
+.RData
+.Ruserdata
+src/*.o
+src/*.so
+src/*.dll
+packrat/*

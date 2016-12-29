@@ -60,3 +60,53 @@ setMethod("get_colors", valueClass = "matrix", signature = "BssColormap", functi
   return(bss_cmap@rgbcolors)
 
 })
+
+get_tvalue_colormap <- function(cmap_name, values) {
+  hexcolrs <- rev(RColorBrewer::brewer.pal(11, cmap_name))
+  hexcolrs[6] <- "#FFFFFF"
+  N <- 256
+  if ( all(values >= 0) ){
+    if (min(values) == 0)
+      tposmin <- min(values[values > 0])
+    else
+      tposmin <- min(values)
+    tposmax <- max(values)
+    tnegmax <- 0
+    fnmap <-
+      colorRamp(colorRampPalette(rev(RColorBrewer::brewer.pal(9, 'YlOrRd')))(1:256))
+  }
+  else {
+    tnegmin <- -1*min(abs(values[values < 0]))
+    tnegmax <- -1*max(abs(values[values < 0]))
+    tposmin <- min(abs(values[values > 0]))
+    tposmax <- max(abs(values[values > 0]))
+    totlen <- tposmax - tnegmax
+    if ( tnegmin < totlen/256) {
+      tnegmin <- sign(tnegmin)*totlen/256
+    }
+
+    if ( tposmin < totlen/256) {
+      tposmin <- sign(tposmin)*totlen/256
+    }
+
+    neglen <- tnegmin - tnegmax
+    poslen <- tposmax - tposmin
+    midzero_len <- tposmin - tnegmin
+
+
+    negcolors <- rev(hexcolrs[1:5]) # First 5 colors are negative
+    poscolors <- rev(hexcolrs[7:11]) # Last 5 colors are positive
+
+    negcolor_range <- colorRampPalette(negcolors)(round(neglen/(1.001*totlen)*256))
+    midzero_color_range <- colorRampPalette(hexcolrs[6])(round(midzero_len/totlen*256))
+    poscolor_range <- colorRampPalette(poscolors)(round(poslen/(1.001*totlen)*256))
+
+    lut <- c(negcolor_range, midzero_color_range, poscolor_range)
+    fnmap <- colorRamp(lut)
+  }
+
+  values_0_to_1 <- (values - tnegmax ) / (tposmax - tnegmax)
+  rgbcolors <- fnmap(values_0_to_1)/255
+  return (rgbcolors)
+
+}

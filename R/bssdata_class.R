@@ -60,6 +60,7 @@ setMethod("initialize", valueClass = "BssData", signature = "BssData", function(
   return(.Object)
 })
 
+#' @export
 setGeneric("load_data", valueClass = "BssData", function(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = NULL, smooth = NULL, roiid = NULL, roimeas = NULL) {
   standardGeneric("load_data")
 })

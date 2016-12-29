@@ -33,10 +33,12 @@ setMethod("initialize", valueClass = "BssOutput", signature = "BssOutput", funct
   return(.Object)
 })
 
+#' @export
 setGeneric("save_out", valueClass = "BssOutput", function(bss_out, bss_data, bss_model) {
   standardGeneric("save_out")
 })
 
+#' @export
 setMethod("save_out", valueClass = "BssOutput", signature = "BssOutput", function(bss_out, bss_data, bss_model) {
   print("in save")
 })
@@ -107,7 +109,7 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
   library('bssr')
   ```"
 
-  nb_load_data <- sprintf("```{r message=FALSE, warning=FALSE, load_data}\n")
+  nb_load_data <- sprintf("```{r echo=FALSE, message=FALSE, warning=FALSE, load_data}\n")
   # nb_load_data <- paste(nb_load_data, bss_data@load_data_command, sep = "")
   nb_load_data <- paste(nb_load_data, "\nDT::datatable(bss_data@demographics)\n", sep = "")
   nb_load_data <- paste(nb_load_data, "\n```\n", sep = "")
@@ -115,13 +117,13 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
 
   nb_commands <- "```{r warning=FALSE, run_command}\n"
 
-  for (i in bss_data@stats_commands) {
+  for (i in bss_model@stats_commands) {
     nb_commands <- paste(nb_commands, i, "\n", sep = "")
   }
   nb_commands <- paste(nb_commands, "```\n", sep = "")
   nb_commands <- paste(nb_commands, sprintf("\n#### Main effect of %d %s on %s controlling for %s
-                                            ", bss_data$roiid, bss_data$roimeas, bss_data$roi_model@main_effect,
-                                            bss_data$roi_model@covariates ), sep = "")
+                                            ", bss_data@roiid, bss_data@roimeas, bss_model@main_effect,
+                                            bss_model@covariates ), sep = "")
 
   rmdfileconn<-file(file.path(outdir, "report.Rmd"))
   writeLines(c(nb_header, nb_libraries, nb_load_data, nb_commands), rmdfileconn)

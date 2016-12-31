@@ -1,3 +1,4 @@
+#' @export
 read_modelspec <- function(modelspec) {
 
   mspec <- ini::read.ini(modelspec)

@@ -65,7 +65,7 @@ setGeneric("run", valueClass = "BssModel", function(bss_model, bss_data) {
   standardGeneric("run")
 })
 
-
+#' @export
 setMethod("run", signature = "BssModel", function(bss_model, bss_data) {
 
   message('Running the statistical model. This may take a while...', appendLF = FALSE)

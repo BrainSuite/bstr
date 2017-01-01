@@ -18,6 +18,7 @@ Imports:
     readxl,
     tools,
     RColorBrewer,
-    RNifti
+    RNifti,
+    methods
 LinkingTo: Rcpp
 RoxygenNote: 5.0.1

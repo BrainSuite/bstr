@@ -1,3 +1,5 @@
+#' Read modelspec.ini file
+
 #' @export
 read_modelspec <- function(modelspec) {
 

@@ -75,6 +75,7 @@ setMethod("load_data", signature = "BssData", function(bss_data, roiid = NULL, r
 
 setMethod("load_data", signature = "BssCBMData", function(bss_data, atlas_filename, hemi, smooth) {
 
+  bss_data@atlas_filename <- atlas_filename
   bss_data@atlas_surface <- readdfs(atlas_filename)
   cbm_filelist <- get_cbm_file_list(bss_data, hemi, smooth)
   attrib_siz <- bss_data@atlas_surface$hdr$nVertices
@@ -85,6 +86,7 @@ setMethod("load_data", signature = "BssCBMData", function(bss_data, atlas_filena
 
 setMethod("load_data", signature = "BssTBMData", function(bss_data, atlas_filename, maskfile = NULL, smooth) {
 
+  bss_data@atlas_filename <- atlas_filename
   bss_data@atlas_image <- RNifti::readNifti(atlas_filename)
   bss_data@filelist <- get_tbm_file_list(bss_data, smooth)
   attrib_siz <- length(bss_data@atlas_image)

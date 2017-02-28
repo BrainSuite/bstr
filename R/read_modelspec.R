@@ -4,6 +4,7 @@
 read_modelspec <- function(modelspec) {
 
   mspec <- ini::read.ini(modelspec)
+  mspec$mspec_file <- modelspec
 
   if (is.null(mspec$subject)) {
     stop(sprintf('The modelspec file %s does not contain a [subject] section.', modelspec), call. = FALSE)

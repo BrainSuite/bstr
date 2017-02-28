@@ -4,6 +4,7 @@
 BssModel <- setClass(
   "BssModel",
   slots = list(
+    mspec_file = "character",
     main_effect = "character",
     covariates = "character",
     model_type = "character",
@@ -39,8 +40,9 @@ parse_model <- function(main_effect, covariates, demographics) {
   # TODO: Validate covariates
   }
 
+# TODO: Call read_modelspec from within initialize
 setMethod("initialize", valueClass = "BssModel", signature = "BssModel",
-          function(.Object, model_type, main_effect, covariates, demographics) {
+          function(.Object, model_type, main_effect, covariates, demographics, mspec_file) {
             parse_model(main_effect, covariates, demographics)
             .Object@main_effect <- main_effect
             .Object@covariates <- covariates
@@ -57,6 +59,7 @@ setMethod("initialize", valueClass = "BssModel", signature = "BssModel",
             fullvars <- unlist(lapply(unlist(strsplit(.Object@fullmodel, '\\+')), function (x) {gsub("\\s+", '', x)}))
             nullvars <- unlist(lapply(unlist(strsplit(.Object@nullmodel, '\\+')), function (x) {gsub("\\s+", '', x)}))
             .Object@unique <- setdiff(fullvars, nullvars)
+            .Object@mspec_file <- mspec_file
 
             return(.Object)
           })

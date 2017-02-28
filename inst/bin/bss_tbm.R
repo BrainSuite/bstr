@@ -18,7 +18,12 @@ if ( !is.null(opt$mspec) ) {
   # modelspec.ini is provided. Parse it and get the options
   mspec <- bssr::read_modelspec(opt$mspec)
   bssr::bss_tbm(subjdir = mspec$subjdir, csv = mspec$csv, atlas = mspec$nii_atlas, maskfile = mspec$maskfile,
-          sigma_smooth = mspec$smooth, main_effect = mspec$main_effect, covariates = mspec$covariates, outdir = opt$outdir)
+          sigma_smooth = mspec$smooth, main_effect = mspec$main_effect, covariates = mspec$covariates,
+          mspec_file = mspec$mspec_file, outdir = opt$outdir)
 }
+
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
 
 

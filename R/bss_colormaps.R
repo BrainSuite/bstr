@@ -90,7 +90,7 @@ get_logpvalue_colors <- function(cmap_name, values) {
     pex <- -1*log10(0.05)*1.001
     lut <- rep("#FFFFFF", 256)
     fnmap <-
-      colorRamp(colorRampPalette(c("#FFFFFC", "#FFFFFF"))(1:256))
+      colorRamp(colorRampPalette(c("#FFFFFC", "#FFFFFF"))(256))
   }
   else {
 
@@ -126,10 +126,15 @@ get_logpvalue_colors <- function(cmap_name, values) {
 }
 
 get_tvalue_colors <- function(cmap_name, values) {
+
+  # |---------------|-----------|------------|-------------------|
+  # tnegmax     tnegmin         0         tposmin             tposmax
+
   hexcolrs <- rev(RColorBrewer::brewer.pal(11, cmap_name))
   hexcolrs[6] <- "#FFFFFF"
   N <- 256
-  if ( all(values >= 0) ){
+  if ( all(values >= 0) ){  # All t-values are positive
+    # Check if 0 is the minimum element
     if (min(values) == 0)
       tposmin <- min(values[values > 0])
     else
@@ -137,7 +142,32 @@ get_tvalue_colors <- function(cmap_name, values) {
     tposmax <- max(values)
     tnegmax <- 0
     fnmap <-
-      colorRamp(colorRampPalette(rev(RColorBrewer::brewer.pal(9, 'YlOrRd')))(1:256))
+      colorRamp(colorRampPalette(rev(RColorBrewer::brewer.pal(9, 'YlOrRd')))(256))
+  }
+  else if ( all(values <= 0) ) {  # All t-values are negative
+    # Check if 0 is the minimum element
+    if (max(values) == 0)
+      tnegmin <- max(values[values < 0])
+    else
+      tnegmin <- max(values)
+    tnegmax <- min(values)
+    tposmax <- 0;
+
+    totlen <- abs(tnegmax)
+    neglen <- -1*totlen/256 - tnegmax
+    zero_len <- totlen/256
+
+    negcolors <- rev(colorRampPalette(c("#0000FF", "#00FF80"))(256))  # winter colormap
+
+    negcolor_range <- colorRampPalette(negcolors)(round(neglen/(1.001*totlen)*256))
+    zero_color_range <- colorRampPalette("#FFFFFC")(round(zero_len/totlen*256))
+
+    lut <- c(negcolor_range, zero_color_range)
+    fnmap <- colorRamp(lut)
+    values_0_to_1 <- (values - tnegmax ) / (tposmax - tnegmax)
+    rgbcolors <- fnmap(values_0_to_1)/255
+
+    return(list("rgbcolors"=rgbcolors, "lut"=lut, "vmin"=tnegmax, "vmax"=tposmax))
   }
   else {
     tnegmin <- -1*min(abs(values[values < 0]))

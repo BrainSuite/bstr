@@ -162,6 +162,9 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
 
   outdir = bss_out@outdir
 
+  # Copy demographics csv file to output directory
+  csvfilename <- file.path(bss_out@outdir, basename(bss_data@csv))
+  write.csv(bss_data@demographics, csvfilename)
 
   nb_header <- "### BrainSuite ROI statistical analysis report"
 #  nb_libraries <-"```{r librar_cmds, echo=FALSE}

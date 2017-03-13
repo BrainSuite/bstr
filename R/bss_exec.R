@@ -3,6 +3,9 @@
 #' @export
 bss_cbm <- function(subjdir, csv, lh_surf_atlas, rh_surf_atlas, sigma_smooth, main_effect, covariates, mspec_file, outdir) {
 
+  # Get the absolute path of outdir
+  outdir <- tools::file_path_as_absolute(outdir)
+
   # Left hemisphere
   message('Left hemisphere\n', appendLF = FALSE)
   bss_cbm_data <- new("BssCBMData", subjdir, csv)

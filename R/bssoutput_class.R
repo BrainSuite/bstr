@@ -160,7 +160,8 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
 
 setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", function(bss_out, bss_data, bss_model) {
 
-  outdir = bss_out@outdir
+  # Get the absolute path of outdir
+  outdir <- tools::file_path_as_absolute(bss_out@outdir)
 
   # Copy demographics csv file to output directory
   csvfilename <- file.path(bss_out@outdir, basename(bss_data@csv))

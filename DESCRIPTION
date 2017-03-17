@@ -19,6 +19,7 @@ Imports:
     tools,
     RColorBrewer,
     RNifti,
-    methods
+    methods,
+    ggplot2 (>=2.2)
 LinkingTo: Rcpp
 RoxygenNote: 5.0.1

@@ -130,93 +130,31 @@ get_tvalue_colors <- function(cmap_name, values) {
   # |---------------|-----------|------------|-------------------|
   # tnegmax     tnegmin         0         tposmin             tposmax
 
-  hexcolrs <- rev(RColorBrewer::brewer.pal(11, cmap_name))
-  hexcolrs[6] <- "#FFFFFF"
   N <- 256
-  if ( all(values >= 0) ){  # All t-values are positive
-    # Check if 0 is the minimum element
-    if (min(values) == 0)
-      tposmin <- min(values[values > 0])
-    else
-      tposmin <- min(values)
-    tposmax <- max(values)
-    tnegmax <- 0
+  tnegmax <- min( c(values[values < 0], 0) )
+  tnegmin <- max( c(values[values < 0], tnegmax) )
+  tposmax <- max( c(values[values > 0], 0) )
+  tposmin <- min( c(values[values > 0], tposmax) )
 
-    totlen <- abs(tposmax)
-    poslen <- tposmax - tposmin
-    zero_len <- totlen/256
+  totlen <- tposmax - tnegmax
+  poslen <- tposmax - tposmin
+  zerolen <- tposmin - tnegmin
+  neglen <- abs(tnegmax) - abs(tnegmin)
 
-    poscolors <- rev(colorRampPalette(c("#FF00FFFF", "#FF0000FF",  "#FFFF00FF"))(256))  # spring colormap
-    # poscolors <- rev(colorRampPalette(c("#FF0000FF", "#FFFF00FF"))(256))  # autumn colormap
-
-    poscolor_range <- colorRampPalette(poscolors)(round(poslen/(1.001*totlen)*256))
-    zero_color_range <- colorRampPalette("#FFFFFC")(round(zero_len/totlen*256))
-
-    lut <- c(zero_color_range, poscolor_range)
-    fnmap <- colorRamp(lut)
-    values_0_to_1 <- (values - tnegmax ) / (tposmax - tnegmax)
-    rgbcolors <- fnmap(values_0_to_1)/255
-
-    return(list("rgbcolors"=rgbcolors, "lut"=lut, "vmin"=tnegmax, "vmax"=tposmax))
-
-  }
-  else if ( all(values <= 0) ) {  # All t-values are negative
-    # Check if 0 is the minimum element
-    if (max(values) == 0)
-      tnegmin <- max(values[values < 0])
-    else
-      tnegmin <- max(values)
-    tnegmax <- min(values)
-    tposmax <- 0;
-
-    totlen <- abs(tnegmax)
-    neglen <- -1*totlen/256 - tnegmax
-    zero_len <- totlen/256
-
-    negcolors <- rev(colorRampPalette(c("#0000FF", "#00FF80"))(256))  # winter colormap
-
-    negcolor_range <- colorRampPalette(negcolors)(round(neglen/(1.001*totlen)*256))
-    zero_color_range <- colorRampPalette("#FFFFFC")(round(zero_len/totlen*256))
-
-    lut <- c(negcolor_range, zero_color_range)
-    fnmap <- colorRamp(lut)
-    values_0_to_1 <- (values - tnegmax ) / (tposmax - tnegmax)
-    rgbcolors <- fnmap(values_0_to_1)/255
-
-    return(list("rgbcolors"=rgbcolors, "lut"=lut, "vmin"=tnegmax, "vmax"=tposmax))
+  if ( all(totlen == 0) ) {
+    lut <- get_color_palette('white', N)
   }
   else {
-    tnegmin <- -1*min(abs(values[values < 0]))
-    tnegmax <- -1*max(abs(values[values < 0]))
-    tposmin <- min(abs(values[values > 0]))
-    tposmax <- max(abs(values[values > 0]))
-    totlen <- tposmax - tnegmax
-    if ( tnegmin < totlen/256) {
-      tnegmin <- sign(tnegmin)*totlen/256
-    }
-
-    if ( tposmin < totlen/256) {
-      tposmin <- sign(tposmin)*totlen/256
-    }
-
-    neglen <- tnegmin - tnegmax
-    poslen <- tposmax - tposmin
-    midzero_len <- tposmin - tnegmin
-
-
-    negcolors <- rev(hexcolrs[1:5]) # First 5 colors are negative
-    poscolors <- rev(hexcolrs[7:11]) # Last 5 colors are positive
-
-    negcolor_range <- colorRampPalette(negcolors)(round(neglen/(1.001*totlen)*256))
-    midzero_color_range <- colorRampPalette(hexcolrs[6])(round(midzero_len/totlen*256))
-    poscolor_range <- colorRampPalette(poscolors)(round(poslen/(1.001*totlen)*256))
-
-    lut <- c(negcolor_range, midzero_color_range, poscolor_range)
-    fnmap <- colorRamp(lut)
+    negcolors <- get_color_palette('rev_winter', round(neglen/(1.001*totlen)*N))
+    zerocolors <- get_color_palette('white', round(zerolen/(1.001*totlen)*N))
+    poscolors <- get_color_palette('spring', round(poslen/(1.001*totlen)*N))
+    lut <- c(negcolors, zerocolors, poscolors)
   }
-
-  values_0_to_1 <- (values - tnegmax ) / (tposmax - tnegmax)
+  lut <- colorRampPalette(lut)(256) # Set the length of the lut to 256
+  fnmap <- colorRamp(lut)
+  values_0_to_1 <- (values - tnegmax ) / (tposmax - tnegmax + .Machine$double.eps)
   rgbcolors <- fnmap(values_0_to_1)/255
+
   return(list("rgbcolors"=rgbcolors, "lut"=lut, "vmin"=tnegmax, "vmax"=tposmax))
 }
 
@@ -253,6 +191,28 @@ save_colorbar <- function(filename, lut, vmin, vmax, labeltxt) {
     ggplot2::theme(panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1)) +
     ggplot2::ggsave(filename, device = "pdf", width = 1.3, height = 3.5, dpi = 600)
 
+}
+
+#' @export
+get_color_palette <- function(cmap_name, N) {
+
+  switch(cmap_name,
+         rev_spring = {
+           return ( rev(colorRampPalette(c("#FF00FFFF", "#FFFF00FF"))(ceiling(N))) )
+         },
+         spring = {
+           return ( colorRampPalette(c("#FF00FFFF", "#FFFF00FF"))(ceiling(N)) )
+         },
+         rev_winter = {
+           return ( rev(colorRampPalette(c("#0000FF", "#00FF80"))(ceiling(N))) )
+         },
+         winter = {
+           return ( colorRampPalette(c("#0000FF", "#00FF80"))(ceiling(N)) )
+         },
+         white = {
+           return ( colorRampPalette(c("#FFFFFF"))(ceiling(N)) )
+         }
+         )
 }
 
 save_BrainSuiteLUT <- function(filename, lut) {

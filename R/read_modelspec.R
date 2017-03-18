@@ -3,6 +3,9 @@
 #' @export
 read_modelspec <- function(modelspec) {
 
+  if (!file.exists(modelspec))
+    stop(sprintf('The modelspec file %s does not exist', modelspec), call. = FALSE)
+
   mspec <- ini::read.ini(modelspec)
   mspec$mspec_file <- modelspec
 

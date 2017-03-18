@@ -23,6 +23,10 @@ read_roistats_txt <- function(roiwise_txt_filename, roiid, roimeas = 'gmthicknes
   }
   roiwise_stats <- read.table(roiwise_txt_filename, header = TRUE, check.names = FALSE)
   # rownames(roiwise_stats) <- roiwise_stats[,1]
+  if ( !(roiid %in% roiwise_stats$ROI_ID) ) {
+    stop(sprintf('ROI ID %d not found in the roiwise stats file %s.\nPlease check if %d is a valid ROI.\n',
+                 roiid, roiwise_txt_filename, roiid), call. = FALSE)
+  }
   return (roiwise_stats[roiwise_stats$ROI_ID == roiid, as.character(measure_dict[roimeas])])
 }
 

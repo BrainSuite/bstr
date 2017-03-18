@@ -141,8 +141,24 @@ get_tvalue_colors <- function(cmap_name, values) {
       tposmin <- min(values)
     tposmax <- max(values)
     tnegmax <- 0
-    fnmap <-
-      colorRamp(colorRampPalette(rev(RColorBrewer::brewer.pal(9, 'YlOrRd')))(256))
+
+    totlen <- abs(tposmax)
+    poslen <- tposmax - tposmin
+    zero_len <- totlen/256
+
+    poscolors <- rev(colorRampPalette(c("#FF00FFFF", "#FF0000FF",  "#FFFF00FF"))(256))  # spring colormap
+    # poscolors <- rev(colorRampPalette(c("#FF0000FF", "#FFFF00FF"))(256))  # autumn colormap
+
+    poscolor_range <- colorRampPalette(poscolors)(round(poslen/(1.001*totlen)*256))
+    zero_color_range <- colorRampPalette("#FFFFFC")(round(zero_len/totlen*256))
+
+    lut <- c(zero_color_range, poscolor_range)
+    fnmap <- colorRamp(lut)
+    values_0_to_1 <- (values - tnegmax ) / (tposmax - tnegmax)
+    rgbcolors <- fnmap(values_0_to_1)/255
+
+    return(list("rgbcolors"=rgbcolors, "lut"=lut, "vmin"=tnegmax, "vmax"=tposmax))
+
   }
   else if ( all(values <= 0) ) {  # All t-values are negative
     # Check if 0 is the minimum element

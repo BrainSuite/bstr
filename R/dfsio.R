@@ -7,7 +7,7 @@ readdfs <- function(filename) {
     stop(sprintf('Surface file %s does not exist', filename), call. = FALSE)
 
   dfs_fid = file(filename, "rb")
-  dfs_magic <- readBin(dfs_fid, character(12))
+  dfs_magic <- readChar(dfs_fid, 12)
   hdr <- data.frame(dfs_magic)
   if (!grepl("DFS", dfs_magic)) {
     stop(sprintf("File %s is not a dfs file.\n", filename), call. = FALSE)
@@ -64,6 +64,7 @@ readdfs <- function(filename) {
   return(dfs)
 }
 
+#' @export
 readdfsattributes <- function(filename) {
   dfs_fid = file(filename, "rb")
   dfs_magic <- readBin(dfs_fid, character(12))
@@ -103,6 +104,7 @@ read_dfs_attributes_for_all_subjects <- function(dfs_filelist, attrib_siz) {
   return(t(data_matrix))
 }
 
+#' @export
 writedfs <- function(filename, s1) {
 
   ftype_header <- 'DFS_LE v2.00'
@@ -145,7 +147,7 @@ writedfs <- function(filename, s1) {
   }
 
   dfs_fid <- file(filename, "wb")
-  writeChar(ftype_header, dfs_fid, 12, eos = NULL)
+  writeChar(ftype_header, dfs_fid, 12)
   writeBin(hdrsize, dfs_fid)
   writeBin(mdoffset, dfs_fid)
   writeBin(pdoffset, dfs_fid)

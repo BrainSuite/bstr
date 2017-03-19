@@ -80,48 +80,36 @@ setMethod("get_colors", valueClass = "matrix", signature = "BssColormap", functi
 })
 
 get_logpvalue_colors <- function(cmap_name, values) {
+
+  #                   log10(0.05)/1.0001   -log10(0.05)/1.0001
+  # |---------------|---|---------|----------|---|-------------------|
+  # -pex         log10(0.05)      0             -log10(0.05)        pex
+
+  # **important** Assume values is already log-transformed
   pex <- max(abs(values))
-  pFDRneglog <- 1.3010
-  pFDRposlog <- 1.3010
-  hexcolrs <- rev(RColorBrewer::brewer.pal(11, cmap_name))
-  hexcolrs[6] <- "#FFFFFF"
+  pFDRneglog <-  1*log10(0.05)
+  pFDRposlog <- -1*log10(0.05)
   N <- 256
   if (pex < -1*log10(0.05)) {
     pex <- -1*log10(0.05)*1.001
-    lut <- rep("#FFFFFF", 256)
-    fnmap <-
-      colorRamp(colorRampPalette(c("#FFFFFC", "#FFFFFF"))(256))
+    lut <- get_color_palette('white', N)
   }
   else {
-
     totlen <- 2*pex
-
-    if ( pFDRneglog < totlen/256) {
-      pFDRneglog <- sign(pFDRneglog)*totlen/256
-    }
-
-    if ( pFDRposlog < totlen/256) {
-      pFDRposlog <- sign(pFDRposlog)*totlen/256
-    }
-
-    neglen <- pex - pFDRneglog
+    neglen <- pex - abs(pFDRneglog)
+    zerolen <- pFDRposlog - pFDRneglog
     poslen <- pex - pFDRposlog
-    midzero_len <- pFDRposlog + pFDRneglog
 
-
-    negcolors <- rev(hexcolrs[1:5]) # First 5 colors are negative
-    poscolors <- rev(hexcolrs[7:11]) # Last 5 colors are positive
-
-    negcolor_range <- colorRampPalette(negcolors)(round(neglen/(1.001*totlen)*256))
-    midzero_color_range <- colorRampPalette(hexcolrs[6])(round(midzero_len/totlen*256))
-    poscolor_range <- colorRampPalette(poscolors)(round(poslen/(1.001*totlen)*256))
-
-    lut <- c(negcolor_range, midzero_color_range, poscolor_range)
-    fnmap <- colorRamp(lut)
+    negcolors <- get_color_palette('rev_winter', round(neglen*N/(1.001*totlen)))
+    zerocolors <- get_color_palette('white', round(zerolen*N/(1.001*totlen)))
+    poscolors <- get_color_palette('spring', round(poslen*N/(1.001*totlen)))
+    lut <- c(negcolors, zerocolors, poscolors)
   }
-
-  values_0_to_1 <- (values + pex ) / (2*pex)
+  lut <- colorRampPalette(lut)(256) # Set the length of the lut to 256
+  fnmap <- colorRamp(lut)
+  values_0_to_1 <- (values + pex ) / (2*pex + .Machine$double.eps)
   rgbcolors <- fnmap(values_0_to_1)/255
+
   return(list("rgbcolors"=rgbcolors, "lut"=lut, "vmin"=-1*pex, "vmax"=pex))
 }
 

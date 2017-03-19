@@ -9,6 +9,8 @@ BssModel <- setClass(
     covariates = "character",
     model_type = "character",
     fullmodel = "character",
+    fullvars = "character",
+    nullvars = "character",
     nullmodel = "character",
     X_design_full = "matrix",
     X_design_null = "matrix",
@@ -56,9 +58,9 @@ setMethod("initialize", valueClass = "BssModel", signature = "BssModel",
             .Object@Npfull <- length(unlist(strsplit(.Object@fullmodel, '\\+')))
             .Object@Npnull <- length(unlist(strsplit(.Object@nullmodel, '\\+')))
 
-            fullvars <- unlist(lapply(unlist(strsplit(.Object@fullmodel, '\\+')), function (x) {gsub("\\s+", '', x)}))
-            nullvars <- unlist(lapply(unlist(strsplit(.Object@nullmodel, '\\+')), function (x) {gsub("\\s+", '', x)}))
-            .Object@unique <- setdiff(fullvars, nullvars)
+            .Object@fullvars <- unlist(lapply(unlist(strsplit(.Object@fullmodel, '\\+')), function (x) {gsub("\\s+", '', x)}))
+            .Object@nullvars <- unlist(lapply(unlist(strsplit(.Object@nullmodel, '\\+')), function (x) {gsub("\\s+", '', x)}))
+            .Object@unique <- setdiff(.Object@fullvars, .Object@nullvars)
             .Object@mspec_file <- mspec_file
 
             return(.Object)
@@ -84,15 +86,14 @@ setMethod("run", signature = "BssModel", function(bss_model, bss_data) {
 
   N <- nrow(bss_data@data_array)
   Fstat <- (RSS_null - RSS_full)/RSS_full * (N - bss_model@Npfull - 1)/(bss_model@Npfull - bss_model@Npnull)  # F statistic
-  # model_unique_idx = X_design_full.design_info.term_names.index(model.unique)
-  bss_model@X_design_full[,bss_model@unique]
+  model_unique_idx <- which(bss_model@unique %in% bss_model@fullvars) + 1    # Add 1, because the first column in the design matrix is the intercept
+
   se_full_unique <- sqrt(diag(solve(t(bss_model@X_design_full) %*% bss_model@X_design_full)))
 
-  se_full_unique <- sqrt(diag(solve(t(bss_model@X_design_full) %*% bss_model@X_design_full)))[bss_model@unique] *
+  se_full_unique <- sqrt(diag(solve(t(bss_model@X_design_full) %*% bss_model@X_design_full)))[model_unique_idx] *
     sqrt(RSS_full / (N - bss_model@Npfull - 1))
 
-  model_unique_idx <- grep(bss_model@unique, colnames(bss_model@X_design_full))
-  tvalue_sign <- (beta_full[model_unique_idx, ] + + .Machine$double.eps)/(abs(beta_full[model_unique_idx, ]) + + .Machine$double.eps)
+  tvalue_sign <- (beta_full[model_unique_idx, ] + .Machine$double.eps)/(abs(beta_full[model_unique_idx, ]) + .Machine$double.eps)
 
   pvalues <- 1 - pf(Fstat, bss_model@Npfull - bss_model@Npnull, N - bss_model@Npfull - 1)
 

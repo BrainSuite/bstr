@@ -147,7 +147,7 @@ writedfs <- function(filename, s1) {
   }
 
   dfs_fid <- file(filename, "wb")
-  writeChar(ftype_header, dfs_fid, 12)
+  writeChar(ftype_header, dfs_fid, 12, eos = NULL)
   writeBin(hdrsize, dfs_fid)
   writeBin(mdoffset, dfs_fid)
   writeBin(pdoffset, dfs_fid)

@@ -181,14 +181,146 @@ read_modelspec <- function(modelspec) {
   }
 }
 
-check_files_exist <- function(filename, raise=FALSE) {
+check_file_exists <- function(filename, raise_error=FALSE, errmesg=NULL) {
+  errmesg <- if (is.null(errmesg)) sprintf('File %s does not exist.', filename)
   if ( file.exists(filename) )
     return(TRUE)
   else {
-    if (raise)
-      stop(sprintf('File %s does not exist', filename))
+    if (raise_error)
+      stop(errmesg, call. = FALSE)
     else
       return(FALSE)
   }
 }
+
+check_modelspec_validity <- function(modelspecfile) {
+
+  check_files_exist(modelspecfile, raise_error = TRUE)
+
+  mspec <- ini::read.ini(modelspecfile)
+  mspec$mspec_file <- modelspecfile
+
+  if (is.null(mspec$subject))
+    stop(sprintf('The modelspec file %s does not contain a [subject] section.', modelspec), call. = FALSE)
+
+  if (is.null(mspec$stats))
+    stop(sprintf('The modelspec file %s does not contain a [stats] section.', modelspec), call. = FALSE)
+
+  # Check for existence of [subject] sub-fields
+  if (is.null(mspec$subject$subjdir))
+    stop('Section subjdir under [subject] not found. It should point to the top level directory that contains individual subjects.', call. = FALSE)
+
+  if (is.null(mspec$subject$demographics))
+    stop('Section demographics under [subject] not found. It should point to the csv/xls demographics file.', call. = FALSE)
+
+  if (!is.null(mspec$subject$smooth)) {
+    if ( is.na(suppressWarnings(as.numeric(mspec$subject$smooth))) )
+      stop('Smoothing level is not numeric.', call. = FALSE)
+    message(sprintf('Using smoothing level %2.1f.', mspec$smooth))
+  }
+  else
+    message('Using no smoothing.')
+
+  valid_stats_fields <- c("type", "main_effect", "covariates", "corr_var")
+  stats_fields <- names(mspec$stats)
+  if ( !all(stats_fields %in% valid_stats_fields) )
+    stop(sprintf('[stats] contains invalid subsection(s). Valid subsections are %s.',
+                 paste(valid_stats_fields, collapse = ', ')), call. = FALSE)
+
+  # Check for existence of [stats] fields
+  if (is.null(mspec$stats$type))
+    stop('Section type under [stats] not found. It should be either cbm, tbm or croi.', call. = FALSE)
+  else {
+    # Check if type is cbm, tbm or roi
+    if (! (identical(mspec$stats$type, 'tbm') || identical(mspec$stats$type, 'cbm') || identical(mspec$stats$type, 'croi')))
+      stop('Section type under [stats] should be either cbm, tbm or croi.', call. = FALSE)
+  }
+
+  # Check if main_effect, covariates, and/or corr_var are present
+  main_effect_present <- !is.null(mspec$stats$main_effect)
+  covariates_present <- !is.null(mspec$stats$covariates)
+  corr_var_present <- !is.null(mspec$stats$corr_var)
+
+  # Either main_effect and covariates or corr_var must be present
+  condition1 <- main_effect_present & covariates_present & !corr_var_present
+  condition2 <- !main_effect_present & !covariates_present & corr_var_present
+  if ( !(condition1 || condition2) )
+    stop('Either both main_effect and covariates *or* only corr_var must be present.
+         All three cannot be specified at this time. If you include the main_effect, you also need to include covariates.', call. = FALSE)
+
+  return (TRUE)
+}
+
+get_cbm_atlas_files <- function(mspec, bs_atlas_path) {
+
+  lh_atlas_file <- file.path(dirname(bs_atlas_path), bs_file_formats$surf_atlas_left)
+  rh_atlas_file <- file.path(dirname(bs_atlas_path), bs_file_formats$surf_atlas_right)
+
+  if ( file.exists(lh_atlas_file) &&  file.exists(rh_atlas_file)) {
+    mspec$lh_surf_atlas <- lh_atlas_file
+    mspec$rh_surf_atlas <- rh_atlas_file
+  }
+  else {
+    message(sprintf('Atlas file %s or %s in the log file %s do not exist. Will try atlas in the modelspec file.',
+                    lh_atlas_file, rh_atlas_file, svreg_log_file))
+    if (is.null(mspec$subject$lh_atlas) || is.null(mspec$subject$rh_atlas))
+      stop('One or more atlas files are not specified in the modelspec file.', call. = FALSE)
+    else {
+      if (file.exists(mspec$subject$lh_atlas) && file.exists(mspec$subject$rh_atlas)) {
+        message(sprintf('Using atlas files %s and %s for left and right hemispheres.', mspec$subject$lh_atlas, mspec$subject$rh_atlas))
+        mspec$lh_surf_atlas <- mspec$subject$lh_atlas
+        mspec$rh_surf_atlas <- mspec$subject$rh_atlas
+      }
+      else
+        stop(sprintf('Atlas files %s or %s do not exist', mspec$subject$lh_atlas, mspec$subject$rh_atlas), call. = FALSE)
+    }
+  }
+  return(mspec)
+
+}
+
+get_tbm_atlas_files <- function(mspec, bs_atlas_path) {
+
+  atlas_file <- file.path(dirname(bs_atlas_path), bs_file_formats$nii_atlas)
+  if ( file.exists(atlas_file) )
+    mspec$nii_atlas <- atlas_file
+  else {
+    message(sprintf('Atlas file %s in the log file %s does not exist. Will try atlas in the modelspec file...',
+                    atlas_file, svreg_log_file))
+    if (is.null(mspec$subject$atlas))
+      stop('Atlas file is not specified in the modelspec file. It needs to be either obtained from svreg.log or specified explicitly in the modelspec.ini.', call. = FALSE)
+    else {
+      if (file.exists(mspec$subject$atlas))
+        mspec$nii_atlas <- mspec$subject$atlas
+      else
+        stop(sprintf('Atlas file %s does not exist.', mspec$subject$atlas), call. = FALSE)
+    }
+  }
+
+  if (is.null(mspec$subject$maskfile)) {
+    message('Mask file not specified in the modelspec file. Will try the atlas directory to get the maskfile path.')
+    maskfile <- file.path(dirname(bs_atlas_path), bs_file_formats$nii_maskfile)
+    if (file.exists(maskfile)) {
+      mspec$maskfile <- maskfile
+      message(sprintf('Using maskfile %s.', maskfile))
+    }
+    else {
+      mspec$maskfile <- NULL
+      message(sprintf('Could not find mask file %s. Will skip masking the voxels for statistical analysis.', maskfile))
+    }
+  } else {
+    if (file.exists(mspec$subject$maskfile))
+      mspec$maskfile <- mspec$subject$maskfile
+    else {
+      mspec$maskfile <- NULL
+      message(sprintf('Could not find mask file %s. Will skip masking the voxels for statistical analysis.', mspec$subject$maskfile))
+    }
+  }
+  return(mspec)
+
+}
+
+
+# mspec$nii_atlas <- if (check_files_exist(
+#   mspec$subject$atlas, errmesg=sprintf('Atlas file %s does not exist.', mspec$subject$atlas)) ) mspec$subject$atlas
 

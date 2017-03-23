@@ -8,7 +8,7 @@ bss_cbm <- function(subjdir, csv, lh_surf_atlas, rh_surf_atlas, sigma_smooth, ma
   bss_cbm_data <- new("BssCBMData", subjdir, csv)
   bss_cbm_data <- load_data(bss_cbm_data, atlas_filename = lh_surf_atlas,
                             hemi = 'left', smooth=sigma_smooth)
-  bss_model <- new("BssModel", model_type="anova", main_effect = main_effect, covariates,
+  bss_model <- new("BssModel", model_type="bss_lm", main_effect = main_effect, covariates,
                    demographics = bss_cbm_data@demographics, mspec_file)
   bss_model <- run(bss_model, bss_cbm_data)
   bss_output <- new("BssCBMOutput", outdir)
@@ -19,7 +19,7 @@ bss_cbm <- function(subjdir, csv, lh_surf_atlas, rh_surf_atlas, sigma_smooth, ma
   # bss_cbm_data <- new("BssCBMData", subjdir, csv)
   bss_cbm_data <- load_data(bss_cbm_data, atlas_filename = rh_surf_atlas,
                             hemi = 'right', smooth=sigma_smooth)
-  bss_model <- new("BssModel", model_type="anova", main_effect = main_effect, covariates,
+  bss_model <- new("BssModel", model_type="bss_lm", main_effect = main_effect, covariates,
                    demographics = bss_cbm_data@demographics, mspec_file)
   bss_model <- run(bss_model, bss_cbm_data)
   bss_output <- save_out(bss_output, bss_cbm_data, bss_model)
@@ -31,7 +31,7 @@ bss_tbm <- function(subjdir, csv, atlas, maskfile, sigma_smooth, main_effect, co
 
   bss_tbm_data <- new("BssTBMData", subjdir, csv)
   bss_tbm_data <- load_data(bss_tbm_data, atlas_filename = atlas, maskfile = maskfile, smooth = sigma_smooth)
-  bss_model <- new("BssModel", model_type="anova", main_effect = main_effect, covariates,
+  bss_model <- new("BssModel", model_type="bss_lm", main_effect = main_effect, covariates,
                    demographics = bss_tbm_data@demographics, mspec_file)
   bss_model <- run(bss_model, bss_tbm_data)
   bss_output <- new("BssTBMOutput", outdir)

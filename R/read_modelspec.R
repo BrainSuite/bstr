@@ -28,18 +28,6 @@ read_modelspec <- function(modelspecfile) {
   return(mspec)
 }
 
-check_file_exists <- function(filename, raise_error=FALSE, errmesg=NULL) {
-  errmesg <- if (is.null(errmesg)) sprintf('File %s does not exist.', filename)
-  if ( file.exists(filename) )
-    return(TRUE)
-  else {
-    if (raise_error)
-      stop(errmesg, call. = FALSE)
-    else
-      return(FALSE)
-  }
-}
-
 check_modelspec_validity <- function(modelspecfile) {
 
   check_file_exists(modelspecfile, raise_error = TRUE)

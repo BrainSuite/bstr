@@ -9,7 +9,6 @@ License: GPLv2
 LazyData: true
 Encoding: UTF-8
 Imports:
-    Rcpp (>= 0.12.7),
     pander,
     rmarkdown,
     DT,
@@ -22,5 +21,4 @@ Imports:
     methods,
     ggplot2 (>= 2.2.1),
     xml2
-LinkingTo: Rcpp
 RoxygenNote: 5.0.1

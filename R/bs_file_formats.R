@@ -64,7 +64,7 @@ get_roi_file_list <- function(bss_data) {
   return(roi_filelist)
 }
 
-get_cbm_file_list <- function(bss_data, hemi, smooth = NULL) {
+get_cbm_file_list <- function(bss_data, hemi, smooth = 0.0) {
 
   if (!is.null(smooth)) {
     if (identical(hemi, 'left')) {
@@ -118,5 +118,89 @@ get_brainsuite_atlas_path_from_logfile <- function(logfile) {
   bs_atlas_path <- unlist(strsplit(log_lines[2], ' ', fixed = TRUE))[3]
   close(fid)
   return(bs_atlas_path)
+}
+
+# This function reads the BrainSuite atlas identifier from the svreg log file.
+# Valid atlases are BrainSuiteAtlas1 or BCI-DNI_brain_atlas
+#' @export
+get_brainsuite_atlas_id_from_logfile <- function(logfile) {
+  fid = file(logfile, "rt")
+  log_lines <- readLines(fid, n=2)
+  close(fid)
+  if (grepl("/BrainSuiteAtlas1/", log_lines[2], fixed = TRUE))
+    return("BrainSuiteAtlas1")
+  else if (grepl("/BCI-DNI_brain_atlas/", log_lines[2], fixed = TRUE))
+    return("BCI-DNI_brain_atlas")
+  else
+    stop(paste("Could not determine the BrainSuite atlas used for registration.\n",
+               "Please check the log file ", logfile, ", and check if the subject directory is valid.", sep = ""), call. = FALSE)
+}
+
+get_brainsuite_logfilename <- function(subjdir, csv) {
+  # Open the svreg.log file and get the atlas file name
+  if ( identical(tools::file_ext(csv), 'csv') ) {
+    demo <- read.csv(csv)
+  }
+  # The first column has to contain subject IDs which are same as subject directories
+  first_subjid <- demo[[1]][1]
+  # Get atlas names from log files.
+  svreg_log_file <- file.path(subjdir, first_subjid, sprintf('%s.svreg.log', first_subjid))
+  if (check_file_exists(svreg_log_file, raise_error = TRUE,
+                    errmesg = sprintf('Could not find svreg.log in the subject directory %s/%s. Please check if the subject directory is valid.', subjdir, first_subjid)))
+    return(tools::file_path_as_absolute(svreg_log_file))
+}
+
+get_cbm_atlas <- function(brainsuite_atlas_id, hemi) {
+
+  if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
+    stop('Valid values for hemi are BrainSuiteAtlas1 or BCI-DNI_brain_atlas.', call. = FALSE)
+
+  if (! hemi %in% c("left", "right"))
+    stop('Valid values for hemi are left or right.', call. = FALSE)
+
+  brainsuite_install_path <- get_brainsuite_install_path()
+  if (brainsuite_atlas_id == "BrainSuiteAtlas1") {
+    if (hemi == "left") {
+      lh_surf_atlas <- file.path(brainsuite_install_path, bs_atlas_files$lh_atlas_BS1_cbm)
+      check_file_exists(lh_surf_atlas, raise_error = TRUE)
+      return(lh_surf_atlas)
+    }
+    else if (hemi == "right") {
+      rh_surf_atlas <- file.path(brainsuite_install_path, bs_atlas_files$rh_atlas_BS1_cbm)
+      check_file_exists(rh_surf_atlas, raise_error = TRUE)
+      return(rh_surf_atlas)
+    }
+  }
+
+  if (brainsuite_atlas_id == "BCI-DNI_brain_atlas") {
+    if (hemi == "left") {
+      lh_surf_atlas <- file.path(brainsuite_install_path, bs_atlas_files$lh_atlas_BCIDNI_cbm)
+      check_file_exists(lh_surf_atlas, raise_error = TRUE)
+      return(lh_surf_atlas)
+    }
+    else if (hemi == "right") {
+      rh_surf_atlas <- file.path(brainsuite_install_path, bs_atlas_files$rh_atlas_BCIDNI_cbm)
+      check_file_exists(rh_surf_atlas, raise_error = TRUE)
+      return(rh_surf_atlas)
+    }
+  }
+}
+
+get_tbm_atlas_and_mask <- function(brainsuite_atlas_id) {
+
+  if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
+    stop('Valid values for hemi are BrainSuiteAtlas1 or BCI-DNI_brain_atlas.', call. = FALSE)
+  brainsuite_install_path <- get_brainsuite_install_path()
+  if (brainsuite_atlas_id == "BrainSuiteAtlas1") {
+    nii_atlas <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BS1_tbm)
+    nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BS1_mask_tbm)
+  }
+  if (brainsuite_atlas_id == "BCI-DNI_brain_atlas") {
+    nii_atlas <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_tbm)
+    nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_mask_tbm)
+  }
+  check_file_exists(nii_atlas, raise_error = TRUE)
+  check_file_exists(nii_atlas_mask, raise_error = TRUE)
+  return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
 }
 

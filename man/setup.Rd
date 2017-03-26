@@ -2,13 +2,13 @@
 % Please edit documentation in R/bss_setup.R
 \name{setup}
 \alias{setup}
-\title{script for reading/writing setup configuration files for bss
+\title{script for reading/writing setup configuration file (bssr.ini) for bss
 Usually this should be executed by the user immediately after installing bssr}
 \usage{
 setup(brainsuite_path = NULL, quiet = FALSE, raise_error = TRUE)
 }
 \description{
-script for reading/writing setup configuration files for bss
+script for reading/writing setup configuration file (bssr.ini) for bss
 Usually this should be executed by the user immediately after installing bssr
 }
 

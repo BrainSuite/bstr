@@ -201,3 +201,18 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
   }
 )
 
+#' @export
+save_bss_out <- function(bss_data, bss_model, outdir="") {
+
+  valid_types <- c("cbm", "tbm", "roi")
+  if (! bss_data@data_type %in% valid_types)
+    stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
+
+  switch(bss_data@data_type,
+         cbm = { bss_out <- new("BssCBMOutput", outdir)},
+         tbm = { bss_out <- new("BssTBMOutput", outdir) },
+         roi = { bss_out <- new("BssROIOutput", outdir) }
+  )
+  bss_out <- save_out(bss_out, bss_data, bss_model)
+  invisible(bss_out)
+}

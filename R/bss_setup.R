@@ -12,12 +12,13 @@ setup <- function(brainsuite_path = NULL, quiet = FALSE, raise_error = TRUE) {
     brainsuite_path <- get_brainsuite_install_path()
   }
 
-  # Check if BrainSuite atlas files are present in th user specified location
+  # Check if BrainSuite atlas files are present in the user specified location
   if (check_bs_atlas_exists(brainsuite_path, quiet = quiet, raise_error = raise_error)) {
     # At this point, a valid brainsuite_path should exist
     # Write it to the bssr.ini file
     bs_settings$path$brainsuite_path <- brainsuite_path
-    ini::write.ini(bs_settings, system.file("extdata", "bssr.ini", package = 'bssr'))
+    message(bssr_ini_file, appendLF = TRUE)
+    ini::write.ini(bs_settings, bssr_ini_file)
     message('bssr setup is complete.', appendLF = TRUE)
   }
   else

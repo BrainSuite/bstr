@@ -12,10 +12,13 @@ check_files <- function(object){
   }
 }
 
+#' @export
 BssData <- setClass(
   "BssData",
   slots = list(
     data_array = "matrix",
+    data_array_lh = "matrix",
+    data_array_rh = "matrix",
     data_type = "character",
     demographics = "data.frame",
     subjdir = "character",
@@ -61,7 +64,7 @@ setMethod("initialize", valueClass = "BssData", signature = "BssData", function(
 })
 
 #' @export
-setGeneric("load_data", valueClass = "BssData", function(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = NULL, smooth = NULL, roiid = NULL, roimeas = NULL) {
+setGeneric("load_data", valueClass = "BssData", function(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = "left", smooth = 0.0, roiid = NULL, roimeas = NULL) {
   standardGeneric("load_data")
 })
 
@@ -81,6 +84,7 @@ setMethod("load_data", signature = "BssCBMData", function(bss_data, atlas_filena
   attrib_siz <- bss_data@atlas_surface$hdr$nVertices
   bss_data@data_array <- read_dfs_attributes_for_all_subjects(cbm_filelist, attrib_siz)
   bss_data@filelist <- cbm_filelist
+  bss_data@data_type <- "cbm"
   return(bss_data)
 })
 
@@ -102,6 +106,7 @@ setMethod("load_data", signature = "BssTBMData", function(bss_data, atlas_filena
     bss_data@mask_idx = 1:attrib_siz
 
   bss_data@data_array <- read_nii_images_for_all_subjects(bss_data@filelist, attrib_siz, bss_data@mask_idx)
+  bss_data@data_type <- "tbm"
   return(bss_data)
 })
 
@@ -157,3 +162,43 @@ setMethod ("load_demographics", "BssData", function(object) {
 #             print("hi")
 #             }
 #           )
+
+#' @export
+load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left", smooth=0.0, roiid=0, roimeas="gmthickness") {
+
+  valid_types <- c("cbm", "tbm", "roi")
+  if (! type %in% valid_types)
+    stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
+
+  switch(type,
+         cbm = { bss_data <- load_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth) },
+         tbm = { bss_data <- load_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth) },
+         roi = { bss_data <- load_roi_data(subjdir, csv, roiid, roimeas) }
+  )
+  return(bss_data)
+}
+
+
+load_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0) {
+
+  bss_cbm_data <- new("BssCBMData", subjdir, csv)
+  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+  cbm_surf_atlas <- get_cbm_atlas(brainsuite_atlas_id, hemi)
+  bss_cbm_data <- load_data(bss_cbm_data, atlas_filename = cbm_surf_atlas, hemi = hemi, smooth=smooth)
+  return(bss_cbm_data)
+}
+
+load_tbm_data <- function(subjdir="", csv="", smooth=0.0) {
+
+  bss_tbm_data <- new("BssTBMData", subjdir, csv)
+  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+  tbm_atlas_and_mask <- get_tbm_atlas_and_mask(brainsuite_atlas_id)
+  bss_tbm_data <- load_data(bss_tbm_data, atlas_filename = tbm_atlas_and_mask$nii_atlas, maskfile = tbm_atlas_and_mask$nii_atlas_mask, smooth=smooth)
+  return(bss_tbm_data)
+}
+
+load_roi_data <- function(subjdir="", csv="", roiid="", roimeas="") {
+  bss_roi_data <- new("BssROIData", subjdir, csv)
+  bss_roi_data <- load_data(bss_roi_data, roiid = roiid, roimeas = roimeas)
+  return(bss_roi_data)
+}

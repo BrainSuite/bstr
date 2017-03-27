@@ -7,6 +7,7 @@ BssModel <- setClass(
     mspec_file = "character",
     main_effect = "character",
     covariates = "character",
+    corr_var = "character",
     model_type = "character",
     fullmodel = "character",
     fullvars = "character",
@@ -24,47 +25,91 @@ BssModel <- setClass(
   )
 )
 
-parse_model <- function(main_effect, covariates, demographics) {
+parse_model <- function(main_effect="", covariates="", corr_var="", demographics) {
 
-  if (grepl("\\+", main_effect)) {
-    stop(sprintf("Main effect should only contain a single variable. You specified it as %s.\n", main_effect))
+  main_effect_present <- !(main_effect == "")
+  covariates_present <- !(covariates == "")
+  corr_var_present <- !(corr_var == "")
+
+  if (main_effect_present & covariates_present & corr_var_present)
+    stop('Only the main effect and covariates or corr_var should be specified separately.', call. = FALSE)
+
+  if ( (main_effect_present & !covariates_present) | (covariates_present & !main_effect_present) )
+    stop('main_effect and covariates should be specified together.', call. = FALSE)
+
+  if (!main_effect_present & !covariates_present & !corr_var_present)
+    stop('Either the main effect and covariates or corr_var should be specified.', call. = FALSE)
+
+  if (main_effect_present & covariates_present) {
+    if (!is.null(main_effect)) {
+      if (grepl("\\+", main_effect)) {
+        stop(sprintf("Main effect should only contain a single variable. You specified it as %s.\n", main_effect))
+      }
+    }
+
+    if (!is.null(main_effect) && !is.null(covariates)) {
+      if (grepl(main_effect, covariates)) {
+        stop(sprintf("Main effect *%s* also occurs in the list of covariates *%s*.\nMain effect and covariates should be disjoint. %s.\n",
+                     main_effect, covariates), call. = FALSE)
+      }
+    }
+
+    if (!main_effect %in% colnames(demographics)) {
+      stop(sprintf("Main effect *%s* doesn't occur in the demographics csv file.\n", main_effect), call. = FALSE)
+    }
+    return(list("main_effect_present"=TRUE, "covariates_present"=TRUE, "corr_var_present"=FALSE))
   }
 
-  if (grepl(main_effect, covariates)) {
-    stop(sprintf("Main effect *%s* also occurs in the list of covariates *%s*.
-                 Main effect and covariates should be disjoint. %s.\n", main_effect, covariates))
-  }
-
-  if (!main_effect %in% colnames(demographics)) {
-    stop(sprintf("Main effect *%s* doesn't occur in the demographics csv file.\n", main_effect))
+  if (!corr_var == "") {
+    if(!corr_var %in% colnames(demographics)) {
+      stop(sprintf("corr_var *%s* doesn't occur in the demographics csv file.\n", corr_var), call. = FALSE)
+    }
+    return(list("main_effect_present"=FALSE, "covariates_present"=FALSE, "corr_var_present"=TRUE))
   }
 
   # TODO: Validate covariates
-  }
+}
 
 # TODO: Call read_modelspec from within initialize
 setMethod("initialize", valueClass = "BssModel", signature = "BssModel",
-          function(.Object, model_type, main_effect, covariates, demographics, mspec_file) {
-            parse_model(main_effect, covariates, demographics)
-            .Object@main_effect <- main_effect
-            .Object@covariates <- covariates
-            .Object@model_type <- model_type
-            .Object@fullmodel <- paste(main_effect, '+', covariates)
-            .Object@nullmodel <- paste(covariates)
-            # Design matrix for full model
-            .Object@X_design_full <- model.matrix(formula(sprintf('~ %s', .Object@fullmodel)), data = demographics)
-            # Design matrix for null model
-            .Object@X_design_null <- model.matrix(formula(sprintf('~ %s', .Object@nullmodel)), data = demographics)
-            .Object@Npfull <- length(unlist(strsplit(.Object@fullmodel, '\\+')))
-            .Object@Npnull <- length(unlist(strsplit(.Object@nullmodel, '\\+')))
+          function(.Object, model_type, main_effect="", covariates="", corr_var="", demographics, mspec_file) {
 
-            .Object@fullvars <- unlist(lapply(unlist(strsplit(.Object@fullmodel, '\\+')), function (x) {gsub("\\s+", '', x)}))
-            .Object@nullvars <- unlist(lapply(unlist(strsplit(.Object@nullmodel, '\\+')), function (x) {gsub("\\s+", '', x)}))
-            .Object@unique <- setdiff(.Object@fullvars, .Object@nullvars)
-            .Object@mspec_file <- mspec_file
+          parse_model_result <- parse_model(main_effect, covariates, corr_var, demographics)
+          .Object@main_effect <- main_effect
+          .Object@covariates <- covariates
+          .Object@corr_var <- corr_var
+          .Object@model_type <- model_type
 
-            return(.Object)
-          })
+          if (parse_model_result$main_effect_present & parse_model_result$covariates_present) {
+            .Object <- initialize_lm(.Object, main_effect, covariates, demographics)
+            return (.Object)
+          }
+
+          .Object@mspec_file <- mspec_file
+          return(.Object)
+})
+
+
+setGeneric("initialize_lm", valueClass = "BssModel", function(.Object, main_effect, covariates, demographics) {
+  standardGeneric("initialize_lm")
+})
+
+
+setMethod("initialize_lm", signature("BssModel", "character", "character", "data.frame"), function(.Object, main_effect, covariates, demographics) {
+  .Object@fullmodel <- paste(main_effect, '+', covariates)
+  .Object@nullmodel <- paste(covariates)
+  # Design matrix for full model
+  .Object@X_design_full <- model.matrix(formula(sprintf('~ %s', .Object@fullmodel)), data = demographics)
+  # Design matrix for null model
+  .Object@X_design_null <- model.matrix(formula(sprintf('~ %s', .Object@nullmodel)), data = demographics)
+  .Object@Npfull <- length(unlist(strsplit(.Object@fullmodel, '\\+')))
+  .Object@Npnull <- length(unlist(strsplit(.Object@nullmodel, '\\+')))
+
+  .Object@fullvars <- unlist(lapply(unlist(strsplit(.Object@fullmodel, '\\+')), function (x) {gsub("\\s+", '', x)}))
+  .Object@nullvars <- unlist(lapply(unlist(strsplit(.Object@nullmodel, '\\+')), function (x) {gsub("\\s+", '', x)}))
+  .Object@unique <- setdiff(.Object@fullvars, .Object@nullvars)
+  return(.Object)
+})
 
 setGeneric("run", valueClass = "BssModel", function(bss_model, bss_data) {
   standardGeneric("run")
@@ -102,59 +147,8 @@ setGeneric("dispatch", valueClass = "BssModel", function(bss_model, bss_data) {
 setMethod("dispatch", signature = "BssModel", function(bss_model, bss_data) {
   # Check the model type and call the appropriate method
   switch(bss_model@model_type,
-         bss_lm = { bss_model <- bss_lm(bss_model, bss_data) },
-         bss_corr = { bss_model <- bss_corr(bss_model, bss_data) }
+         bss_lm = { bss_model <- bss_lm(bss_model@main_effect, bss_model@covariates, bss_data) }
+         # bss_corr = { bss_model <- bss_corr(bss_model, bss_data) }
   )
   return(bss_model)
-})
-
-
-setGeneric("bss_lm", valueClass = "BssModel", function(bss_model, bss_data) {
-  standardGeneric("bss_lm")
-})
-
-setMethod("bss_lm", signature = "BssModel", function(bss_model, bss_data) {
-  # Check the model type and call the appropriate method
-  message('Running the statistical model. This may take a while...', appendLF = FALSE)
-  Xtemp <- solve(t(bss_model@X_design_full) %*% bss_model@X_design_full) %*% t(bss_model@X_design_full) # Pre Hat matrix
-  beta_full <- Xtemp %*% bss_data@data_array  # beta coefficients
-  y_full <- bss_model@X_design_full %*% beta_full  # Predicted response
-  RSS_full <- colSums((bss_data@data_array - y_full)^2)
-
-  Xtemp <- solve(t(bss_model@X_design_null) %*% bss_model@X_design_null) %*% t(bss_model@X_design_null) # Pre Hat matrix
-  beta_null <- Xtemp %*% bss_data@data_array  # beta coefficients
-  y_null <- bss_model@X_design_null %*% beta_null  # Predicted response
-  RSS_null <- colSums((bss_data@data_array - y_null)^2)
-
-  N <- nrow(bss_data@data_array)
-  Fstat <- (RSS_null - RSS_full)/RSS_full * (N - bss_model@Npfull - 1)/(bss_model@Npfull - bss_model@Npnull)  # F statistic
-  model_unique_idx <- which(bss_model@unique %in% bss_model@fullvars) + 1    # Add 1, because the first column in the design matrix is the intercept
-
-  se_full_unique <- sqrt(diag(solve(t(bss_model@X_design_full) %*% bss_model@X_design_full)))
-
-  se_full_unique <- sqrt(diag(solve(t(bss_model@X_design_full) %*% bss_model@X_design_full)))[model_unique_idx] *
-    sqrt(RSS_full / (N - bss_model@Npfull - 1))
-
-  tvalue_sign <- (beta_full[model_unique_idx, ] + .Machine$double.eps)/(abs(beta_full[model_unique_idx, ]) + .Machine$double.eps)
-
-  pvalues <- 1 - pf(Fstat, bss_model@Npfull - bss_model@Npnull, N - bss_model@Npfull - 1)
-
-  pvalues[is.nan(pvalues)] <- 1
-
-  pvalues <- pvalues*tvalue_sign
-  tvalues <- beta_full[model_unique_idx, ]/(se_full_unique + .Machine$double.eps)
-  bss_model@pvalues <- pvalues
-  bss_model@tvalues <- tvalues
-  bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
-  message('Done.')
-  return(bss_model)
-})
-
-setGeneric("bss_corr", valueClass = "BssModel", function(bss_model, bss_data) {
-  standardGeneric("bss_corr")
-})
-
-setMethod("bss_corr", signature = "BssModel", function(bss_model, bss_data) {
-  return(bss_model)
-
 })

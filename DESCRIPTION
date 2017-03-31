@@ -1,11 +1,18 @@
 Package: bssr
 Type: Package
-Title: R interface for BrainSuite Statistics toolbox
+Title: BrainSuite Statistics toolbox
 Version: 0.1.0
 Author: Shantanu H. Joshi
-Maintainer: Shantanu H. Joshi <s.joshi@g.ucla.edu>
-Description: BrainSuite Statistics toolbox
-License: GPLv2
+Authors@R: c(person("Shantanu","Joshi", role=c("cre","aut"), email="shjoshi@ieee.org"),
+             person("Yeun", "Kim", role="aut"),
+             person("David", "Shattuck", role="ctb")
+             )
+Description: The BrainSuite Statistics toolbox allows the application of advanced 
+  statistical models to volumetric image, cortical surface and sulcal curve based 
+  outputs generated from BrainSuite. This enables population or group analysis of 
+  cortical surface based data, volumetric deformation fields (tensors) or sulcal 
+  morphology. 
+License: GPL-2
 LazyData: true
 Encoding: UTF-8
 Imports:
@@ -22,3 +29,5 @@ Imports:
     ggplot2 (>= 2.2.1),
     xml2
 RoxygenNote: 5.0.1
+Encoding: UTF-8
+URL: http://brainsuite.org/bss

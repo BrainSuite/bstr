@@ -8,6 +8,7 @@ BssModel <- setClass(
     main_effect = "character",
     covariates = "character",
     corr_var = "character",
+    corr_values = "numeric",
     model_type = "character",
     fullmodel = "character",
     fullvars = "character",

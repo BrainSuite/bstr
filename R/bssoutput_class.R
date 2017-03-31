@@ -37,11 +37,6 @@ setGeneric("save_out", valueClass = "BssOutput", function(bss_out, bss_data, bss
   standardGeneric("save_out")
 })
 
-#' @export
-setMethod("save_out", valueClass = "BssOutput", signature = "BssOutput", function(bss_out, bss_data, bss_model) {
-  print("in save")
-})
-
 BssCBMOutput <- setClass(
   "BssCBMOutput",
   contains = "BssOutput"
@@ -59,44 +54,32 @@ BssROIOutput <- setClass(
 
 setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", function(bss_out, bss_data, bss_model) {
 
-  s1 <- bss_data@atlas_surface
   log_pvalues <- log10_transform(bss_model@pvalues)
-  s1$attributes <- log_pvalues
-  bss_cmap <- new("BssColormap", "log_pvalues", "RdYlBu", log_pvalues)
-  s1$vColor <- bss_cmap@rgbcolors
-  s1$vColor <- matrix(s1$vColor, nrow=3, ncol=s1$hdr$nVertices, byrow = TRUE)
-  outprefix <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.dfs', sep = '')
-  writedfs(file.path(bss_out@outdir, outprefix), s1)
-  cbar_filename <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
-  save_colorbar(file.path(bss_out@outdir,cbar_filename), bss_cmap@lut, bss_cmap@vmin, bss_cmap@vmax, "p-values")
-
+  outdir <- bss_out@outdir
   log_pvalues_adjusted <- log10_transform(sign(bss_model@pvalues) * p.adjust(abs(bss_model@pvalues),
                                                                              method = 'BY'))
-  s1$attributes <- log_pvalues_adjusted
-  bss_cmap <- new("BssColormap", "log_pvalues_adjusted", "RdYlBu", log_pvalues_adjusted)
-  s1$vColor <- bss_cmap@rgbcolors
-  s1$vColor <- matrix(s1$vColor, nrow=3, ncol=s1$hdr$nVertices, byrow = TRUE)
-  outprefix <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.dfs', sep = '')
-  writedfs(file.path(bss_out@outdir, outprefix), s1)
-  cbar_filename <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
-  save_colorbar(file.path(bss_out@outdir,cbar_filename), bss_cmap@lut, bss_cmap@vmin, bss_cmap@vmax, "p-values")
-
   bss_model@tvalues[abs(log_pvalues) <= -1*log10(0.05)] <- 0
-  bss_cmap <- new("BssColormap", "tvalues", "RdYlBu", bss_model@tvalues)
-  s1$attributes <- bss_model@tvalues
-  s1$vColor <- bss_cmap@rgbcolors
-  #s1$vColor <- get_colors(bss_cmap)
-  s1$vColor <- matrix(s1$vColor, nrow=3, ncol=s1$hdr$nVertices, byrow = TRUE)
-  outprefix <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.dfs', sep = '')
-  writedfs(file.path(bss_out@outdir, outprefix), s1)
-  cbar_filename <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
-  save_colorbar(file.path(bss_out@outdir,cbar_filename), bss_cmap@lut, bss_cmap@vmin, bss_cmap@vmax, "t-values")
+
+  switch(bss_model@model_type,
+         bss_lm = {
+           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@main_effect, "log_pvalues", bss_data, bss_model, outdir)
+           save_bss_out_surface(log_pvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@main_effect, "log_pvalues_adjusted", bss_data, bss_model, outdir)
+           save_bss_out_surface(log_pvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(bss_model@tvalues, bss_model@main_effect, "tvalues", bss_data, bss_model, outdir)
+           save_bss_out_surface(bss_model@tvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
+
+           },
+         bss_corr = {
+           bss_model@corr_values[abs(log_pvalues) <= -1*log10(0.05)] <- 0
+           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@corr_var, "log_pvalues", bss_data, bss_model, outdir)
+           save_bss_out_surface(log_pvalues, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@corr_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
+           save_bss_out_surface(log_pvalues_adjusted, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(bss_model@corr_values, bss_model@corr_var, "corr_values", bss_data, bss_model, outdir)
+           save_bss_out_surface(bss_model@corr_values, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
+           }
+         )
 
   # Copy modelspec file to the output directory
   file.copy(bss_model@mspec_file, bss_out@outdir)
@@ -109,52 +92,45 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
   log_pvalues <- rep(1, length(bss_data@atlas_image))
   log_pvalues[bss_data@mask_idx] <- log10_transform(bss_model@pvalues)
   dim(log_pvalues) <- dim(bss_data@atlas_image)
-  bss_cmap <- new("BssColormap", "log_pvalues", "RdYlBu", as.numeric(log_pvalues))
 
-  outprefix <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.nii.gz', sep = '')
-  RNifti::writeNifti(log_pvalues, file.path(bss_out@outdir, outprefix), template = bss_data@atlas_image)
-  cbar_filename <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
-  save_colorbar(file.path(bss_out@outdir,cbar_filename), bss_cmap@lut, bss_cmap@vmin, bss_cmap@vmax, "p-values")
-  # save_BrainSuiteLUT
-  lut_fileprefix <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.lut', sep = '')
-  save_BrainSuiteLUT(file.path(bss_out@outdir, lut_fileprefix), bss_cmap@lut)
+  log_pvalues_adjusted <- rep(1, length(bss_data@atlas_image))
+  log_pvalues_adjusted[bss_data@mask_idx] <- log10_transform(sign(bss_model@pvalues) * p.adjust(abs(bss_model@pvalues), method = 'BY'))
+  dim(log_pvalues_adjusted) <- dim(bss_data@atlas_image)
+  outdir <- bss_out@outdir
 
-  log_pvalues_adjusted <- log10_transform(sign(bss_model@pvalues) * p.adjust(abs(bss_model@pvalues), method = 'BY'))
-  bss_cmap <- new("BssColormap", "log_pvalues_adjusted", "RdYlBu", as.numeric(log_pvalues_adjusted))
-  outprefix <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.nii.gz', sep = '')
-  RNifti::writeNifti(as.matrix(log_pvalues_adjusted), file.path(bss_out@outdir, outprefix), template = bss_data@atlas_image)
-  cbar_filename <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
-  save_colorbar(file.path(bss_out@outdir,cbar_filename), bss_cmap@lut, bss_cmap@vmin, bss_cmap@vmax, "p-values")
-  # save_BrainSuiteLUT
-  lut_fileprefix <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.lut', sep = '')
-  save_BrainSuiteLUT(file.path(bss_out@outdir, lut_fileprefix), bss_cmap@lut)
+  tvalues <- rep(0, length(bss_data@atlas_image))
+  tvalues[bss_data@mask_idx] <- bss_model@tvalues
+  dim(tvalues) <- dim(bss_data@atlas_image)
 
-  # TODO: Save t-values
-  # browser()
-  # bss_model@tvalues[abs(as.numeric(log_pvalues)) <= -1*log10(0.05)] <- 0
-  # bss_cmap <- new("BssColormap", "tvalues", "RdYlBu", as.numeric(bss_model@tvalues))
-  # outprefix <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(
-  #   basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.nii.gz', sep = '')
-  # RNifti::writeNifti(as.matrix(log_pvalues_adjusted), file.path(bss_out@outdir, outprefix), template = bss_data@atlas_image)
-  # cbar_filename <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(
-  #   basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
-  # save_colorbar(file.path(bss_out@outdir,cbar_filename), bss_cmap@lut, bss_cmap@vmin, bss_cmap@vmax, "t-values")
-  # # save_BrainSuiteLUT
-  # lut_fileprefix <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(
-  #   basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.lut', sep = '')
-  # save_BrainSuiteLUT(file.path(bss_out@outdir, lut_fileprefix), bss_cmap@lut)
+  if (bss_model@model_type == "bss_corr") {
+    corr_values <- rep(0, length(bss_data@atlas_image))
+    corr_values[bss_data@mask_idx] <- bss_model@corr_values
+    dim(corr_values) <- dim(bss_data@atlas_image)
+  }
 
+  switch(bss_model@model_type,
+         bss_lm = {
+           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@main_effect, "log_pvalues", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(log_pvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@main_effect, "log_pvalues_adjusted", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(tvalues, bss_model@main_effect, "tvalues", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(tvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
 
+         },
+         bss_corr = {
+           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@corr_var, "log_pvalues", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(log_pvalues, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@corr_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(corr_values, bss_model@corr_var, "corr_values", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(corr_values, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
+         }
+  )
 
     # Copy modelspec file to the output directory
   file.copy(bss_model@mspec_file, bss_out@outdir)
-  return(bss_out)
+  invisible(bss_out)
   }
 )
 
@@ -205,14 +181,48 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
 save_bss_out <- function(bss_data, bss_model, outdir="") {
 
   valid_types <- c("cbm", "tbm", "roi")
-  if (! bss_data@data_type %in% valid_types)
+  if (! bss_data@analysis_type %in% valid_types)
     stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
 
-  switch(bss_data@data_type,
+  switch(bss_data@analysis_type,
          cbm = { bss_out <- new("BssCBMOutput", outdir)},
          tbm = { bss_out <- new("BssTBMOutput", outdir) },
          roi = { bss_out <- new("BssROIOutput", outdir) }
   )
   bss_out <- save_out(bss_out, bss_data, bss_model)
   invisible(bss_out)
+}
+
+save_bss_color_files <- function(measure, var_name, cmap_title, bss_data, bss_model, outdir) {
+
+  measure <- as.numeric(measure)
+  bss_cmap <- new("BssColormap", cmap_title, "RdYlBu", measure)
+  cbar_filename <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
+    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
+  save_colorbar(file.path(outdir,cbar_filename), bss_cmap@lut, bss_cmap@vmin, bss_cmap@vmax, cmap_title)
+
+  # save the color LUT
+  lut_fileprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
+    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.lut', sep = '')
+  save_BrainSuiteLUT(file.path(outdir, lut_fileprefix), bss_cmap@lut)
+
+  return(bss_cmap)
+}
+
+save_bss_out_surface <- function(measure, var_name, bss_cmap, bss_data, bss_model, outdir) {
+
+  s1 <- bss_data@atlas_surface
+  s1$attributes <- measure
+  s1$vColor <- bss_cmap@rgbcolors
+  s1$vColor <- matrix(s1$vColor, nrow=3, ncol=s1$hdr$nVertices, byrow = TRUE)
+  outprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
+    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), bss_data@data_type, sep = '')
+  writedfs(file.path(outdir, outprefix), s1)
+}
+
+save_bss_out_nifti_image <- function(measure, var_name, bss_cmap, bss_data, bss_model, outdir) {
+
+  outprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
+    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), bss_data@data_type, sep = '')
+  RNifti::writeNifti(measure, file.path(outdir, outprefix), template = bss_data@atlas_image)
 }

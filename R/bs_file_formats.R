@@ -40,6 +40,11 @@ analysis_type_list <- list(
   nca = 'nca'
 )
 
+bs_data_types <- list(
+  surface = '.dfs',
+  nifti_image = '.nii.gz'
+)
+
 get_bs_file_list <- function(analysis_type) {
   valid_analysis_types <- unlist(analysis_type_list, use.names = FALSE)
   if (!(analysis_type %in% valid_analysis_types)) {

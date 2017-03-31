@@ -19,6 +19,7 @@ BssData <- setClass(
     data_array = "matrix",
     data_array_lh = "matrix",
     data_array_rh = "matrix",
+    analysis_type = "character",
     data_type = "character",
     demographics = "data.frame",
     subjdir = "character",
@@ -41,6 +42,8 @@ BssCBMData <- setClass(
                atlas_surface = 'list'),
   contains = "BssData"
 )
+
+setOldClass("niftiImage") #Declare niftiImage (RNifti) so the @slot atlas_image can be defined
 
 BssTBMData <- setClass(
   "BssTBMData",
@@ -84,7 +87,8 @@ setMethod("load_data", signature = "BssCBMData", function(bss_data, atlas_filena
   attrib_siz <- bss_data@atlas_surface$hdr$nVertices
   bss_data@data_array <- read_dfs_attributes_for_all_subjects(cbm_filelist, attrib_siz)
   bss_data@filelist <- cbm_filelist
-  bss_data@data_type <- "cbm"
+  bss_data@analysis_type <- "cbm"
+  bss_data@data_type <- bs_data_types$surface
   return(bss_data)
 })
 
@@ -106,7 +110,8 @@ setMethod("load_data", signature = "BssTBMData", function(bss_data, atlas_filena
     bss_data@mask_idx = 1:attrib_siz
 
   bss_data@data_array <- read_nii_images_for_all_subjects(bss_data@filelist, attrib_siz, bss_data@mask_idx)
-  bss_data@data_type <- "tbm"
+  bss_data@analysis_type <- "tbm"
+  bss_data@data_type <- bs_data_types$nifti_image
   return(bss_data)
 })
 
@@ -134,7 +139,7 @@ setMethod("load_data", signature = "BssROIData", function(bss_data, roiid = NULL
   # out_csv <- file.path(outdir, basename(csv))
   # write.csv(demographics, out_csv, row.names = FALSE)
   # object@
-  bss_data@data_type <- "roi"
+  bss_data@analysis_type <- "roi"
   bss_data@roiid <- roiid
   bss_data@roimeas <- roimeas
   bss_data@demographics <- demographics
@@ -185,6 +190,7 @@ load_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0) {
   brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
   cbm_surf_atlas <- get_cbm_atlas(brainsuite_atlas_id, hemi)
   bss_cbm_data <- load_data(bss_cbm_data, atlas_filename = cbm_surf_atlas, hemi = hemi, smooth=smooth)
+  bss_cbm_data@data_type <- bs_data_types$surface
   return(bss_cbm_data)
 }
 
@@ -194,6 +200,7 @@ load_tbm_data <- function(subjdir="", csv="", smooth=0.0) {
   brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
   tbm_atlas_and_mask <- get_tbm_atlas_and_mask(brainsuite_atlas_id)
   bss_tbm_data <- load_data(bss_tbm_data, atlas_filename = tbm_atlas_and_mask$nii_atlas, maskfile = tbm_atlas_and_mask$nii_atlas_mask, smooth=smooth)
+  bss_tbm_data@data_type <- bs_data_types$nifti_image
   return(bss_tbm_data)
 }
 

@@ -42,6 +42,7 @@ bss_lm <- function(main_effect="", covariates="", bss_data) {
   tvalues <- beta_full[model_unique_idx, ]/(se_full_unique + .Machine$double.eps)
   bss_model@pvalues <- pvalues
   bss_model@tvalues <- tvalues
+  bss_model@tvalues[abs(pvalues) >= 0.05] <- 0
   bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
   message('Done.')
   return(bss_model)
@@ -76,21 +77,23 @@ bss_roi_lm <- function(main_effect="", covariates="", bss_data=bss_data) {
 #' @export
 bss_corr <- function(corr_var, bss_data) {
 
+  message('Running correlations...', appendLF = FALSE)
   bss_model <- new("BssModel", model_type="bss_corr", corr_var = corr_var,
                    demographics = bss_data@demographics, mspec_file="")
   X <- sweep(bss_data@data_array, 2, colMeans(bss_data@data_array))
   Y <- bss_data@demographics[[corr_var]] - mean(bss_data@demographics[[corr_var]])
   corr_coeff  <- as.numeric((Y %*% X)/sqrt(colSums(X^2)*sum(Y^2)))
   num_subjects <- length(Y)
-  tvalues <- corr_coeff * sqrt((num_subjects-2)/(1-corr_coeff^2))
-
+  tvalues <- corr_coeff * sqrt((num_subjects-2)/(1-corr_coeff^2 + .Machine$double.eps))
+  bss_model@tvalues <- tvalues
   bss_model@pvalues <- 1 - pt(abs(tvalues), num_subjects-2)
 
-  bss_model@pvalues <- np.sign(corr_coeff)*bss_model@pvalues
-  bss_model@pvalues[]
-  statsresult.pvalues[np.isnan(corr_coeff)] = 1  # Set the p-values with the nan correlations to 1
-
+  bss_model@pvalues <- sign(corr_coeff)*bss_model@pvalues
+  bss_model@pvalues[is.na(bss_model@pvalues)] <- 1 # Set the p-values with the NA correlations to 1
+  bss_model@corr_values <- corr_coeff
   bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
+  bss_model@corr_values[abs(bss_model@pvalues) >= 0.05] <- 0
+  message('Done.')
   return(bss_model)
 }
 

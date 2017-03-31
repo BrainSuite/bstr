@@ -4,8 +4,25 @@
 \name{BssColormap-class}
 \alias{BssColormap}
 \alias{BssColormap-class}
-\title{Defines an S4 class for colormaps}
+\title{An S4 class for representing colormaps}
 \description{
-Defines an S4 class for colormaps
+An S4 class for representing colormaps
 }
+\section{Slots}{
+
+\describe{
+\item{\code{cmap_type}}{A character string for the type of colormap. Valid values are "corr_values", "tvalues", "log_pvalues", "log_pvalues_adjusted"}
+
+\item{\code{cmap_name}}{A character string for the title of the colormap. This string will be displayed on the colorbar.}
+
+\item{\code{values}}{A numeric vector containing the values or measures to be mapped.}
+
+\item{\code{cex}}{Maximum absolute value of the measure to be mapped.}
+
+\item{\code{rgbcolors}}{A matrix of RGB colors whose size is same as that of the values.}
+
+\item{\code{lut}}{Color look up table}
+
+\item{\code{vmin,vmax}}{Minimum and maximum values}
+}}
 

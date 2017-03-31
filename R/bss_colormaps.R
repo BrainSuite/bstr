@@ -1,6 +1,13 @@
-#' Defines an S4 class for colormaps
+#' An S4 class for representing colormaps
+#' @slot cmap_type A character string for the type of colormap. Valid values are "corr_values", "tvalues", "log_pvalues", "log_pvalues_adjusted"
+#' @slot cmap_name A character string for the title of the colormap. This string will be displayed on the colorbar.
+#' @slot values A numeric vector containing the values or measures to be mapped.
+#' @slot cex Maximum absolute value of the measure to be mapped.
+#' @slot rgbcolors A matrix of RGB colors whose size is same as that of the values.
+#' @slot lut Color look up table
+#' @slot vmin,vmax Minimum and maximum values
+#'
 #' @export
-
 BssColormap <- setClass(
   "BssColormap",
   slots = list(
@@ -25,12 +32,10 @@ setMethod("initialize", valueClass = "BssColormap", signature = "BssColormap",
             .Object@vmin <- 0
             .Object@vmax <- 0
             switch(.Object@cmap_type,
-                   tvalues = { cmap <- get_tvalue_colors(cmap_name, values)
-                   },
-                   log_pvalues = { cmap <- get_logpvalue_colors(cmap_name, values)
-                   },
-                   log_pvalues_adjusted = { cmap <- get_logpvalue_colors(cmap_name, values)
-                   }
+                   corr_values = { cmap <- get_tvalue_colors(cmap_name, values)}, # Use tvalue cmap for correlations
+                   tvalues = { cmap <- get_tvalue_colors(cmap_name, values)},
+                   log_pvalues = { cmap <- get_logpvalue_colors(cmap_name, values)},
+                   log_pvalues_adjusted = { cmap <- get_logpvalue_colors(cmap_name, values)}
             )
             .Object@lut <- cmap$lut
             .Object@rgbcolors <- cmap$rgbcolors
@@ -164,7 +169,7 @@ save_colorbar <- function(filename, lut, vmin, vmax, labeltxt) {
   )
 
   ggplot2::ggplot(df) +
-    ggplot2::geom_raster(ggplot2::aes(x = 0.5, y=y, fill = y)) + ggplot2::coord_fixed() +
+    ggplot2::geom_raster(ggplot2::aes(x = 0.5, y=y, fill = y)) +
     ggplot2::scale_fill_gradientn(colours = lut)   +  ggplot2::xlab('') + ggplot2::ylab('') +
     ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), axis.text.x = ggplot2::element_blank()) +
     ggplot2::guides(fill=FALSE) +

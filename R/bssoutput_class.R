@@ -68,7 +68,6 @@ setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", f
            save_bss_out_surface(log_pvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(bss_model@tvalues, bss_model@main_effect, "tvalues", bss_data, bss_model, outdir)
            save_bss_out_surface(bss_model@tvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-
            },
          bss_corr = {
            bss_model@corr_values[abs(log_pvalues) <= -1*log10(0.05)] <- 0
@@ -78,8 +77,24 @@ setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", f
            save_bss_out_surface(log_pvalues_adjusted, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(bss_model@corr_values, bss_model@corr_var, "corr_values", bss_data, bss_model, outdir)
            save_bss_out_surface(bss_model@corr_values, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
-           }
-         )
+           },
+         pairedttest = {
+           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@group_var, "log_pvalues", bss_data, bss_model, outdir)
+           save_bss_out_surface(log_pvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@group_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
+           save_bss_out_surface(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(bss_model@tvalues, bss_model@group_var, "tvalues", bss_data, bss_model, outdir)
+           save_bss_out_surface(bss_model@tvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+         },
+         unpairedttest = {
+           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@group_var, "log_pvalues", bss_data, bss_model, outdir)
+           save_bss_out_surface(log_pvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@group_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
+           save_bss_out_surface(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(bss_model@tvalues, bss_model@group_var, "tvalues", bss_data, bss_model, outdir)
+           save_bss_out_surface(bss_model@tvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+         }
+  )
 
   # Copy modelspec file to the output directory
   file.copy(bss_model@mspec_file, bss_out@outdir)
@@ -116,7 +131,6 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
            save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(tvalues, bss_model@main_effect, "tvalues", bss_data, bss_model, outdir)
            save_bss_out_nifti_image(tvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-
          },
          bss_corr = {
            bss_cmap <- save_bss_color_files(log_pvalues, bss_model@corr_var, "log_pvalues", bss_data, bss_model, outdir)
@@ -125,6 +139,22 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
            save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(corr_values, bss_model@corr_var, "corr_values", bss_data, bss_model, outdir)
            save_bss_out_nifti_image(corr_values, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
+         },
+         pairedttest = {
+           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@group_var, "log_pvalues", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(log_pvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@group_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(tvalues, bss_model@group_var, "tvalues", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(tvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+         },
+         unpairedttest = {
+           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@group_var, "log_pvalues", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(log_pvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@group_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(tvalues, bss_model@group_var, "tvalues", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(tvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
          }
   )
 
@@ -222,6 +252,7 @@ save_bss_out_surface <- function(measure, var_name, bss_cmap, bss_data, bss_mode
 
 save_bss_out_nifti_image <- function(measure, var_name, bss_cmap, bss_data, bss_model, outdir) {
 
+  browser()
   outprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
     basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), bss_data@data_type, sep = '')
   RNifti::writeNifti(measure, file.path(outdir, outprefix), template = bss_data@atlas_image)

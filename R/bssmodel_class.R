@@ -9,6 +9,7 @@ BssModel <- setClass(
     covariates = "character",
     corr_var = "character",
     corr_values = "numeric",
+    group_var = "character",
     model_type = "character",
     fullmodel = "character",
     fullvars = "character",
@@ -26,20 +27,25 @@ BssModel <- setClass(
   )
 )
 
-parse_model <- function(main_effect="", covariates="", corr_var="", demographics) {
+parse_model <- function(main_effect="", covariates="", corr_var="", group_var = "", model_type="", demographics) {
 
+  if (! model_type %in% model_type_list) {
+    stop(sprintf('model_type should be one of the following: %s',
+                 paste(unlist(model_type_list, use.names = FALSE), collapse = ', ')), call. = FALSE)
+  }
   main_effect_present <- !(main_effect == "")
   covariates_present <- !(covariates == "")
   corr_var_present <- !(corr_var == "")
+  group_var_present <- !(group_var == "")
 
-  if (main_effect_present & covariates_present & corr_var_present)
-    stop('Only the main effect and covariates or corr_var should be specified separately.', call. = FALSE)
+  if (main_effect_present & covariates_present & corr_var_present & group_var_present)
+    stop('Only the main effect and covariates or corr_var or group_var should be specified separately.', call. = FALSE)
 
   if ( (main_effect_present & !covariates_present) | (covariates_present & !main_effect_present) )
     stop('main_effect and covariates should be specified together.', call. = FALSE)
 
-  if (!main_effect_present & !covariates_present & !corr_var_present)
-    stop('Either the main effect and covariates or corr_var should be specified.', call. = FALSE)
+  if (!main_effect_present & !covariates_present & !corr_var_present & !group_var_present)
+    stop('Either the main effect and covariates or corr_var or group_var should be specified.', call. = FALSE)
 
   if (main_effect_present & covariates_present) {
     if (!is.null(main_effect)) {
@@ -68,17 +74,40 @@ parse_model <- function(main_effect="", covariates="", corr_var="", demographics
     return(list("main_effect_present"=FALSE, "covariates_present"=FALSE, "corr_var_present"=TRUE))
   }
 
+  if (!group_var == "") {
+    if(!group_var %in% colnames(demographics)) {
+      stop(sprintf("group_var *%s* doesn't occur in the demographics csv file.\n", group_var), call. = FALSE)
+    }
+    # Check if group_var is a factor having exactly 2 levels
+    if( nlevels(demographics[[group_var]]) != 2)
+      stop("group_var should be a factor having exactly 2 levels.\n", call. = FALSE)
+
+    # If model_type is pairedttest group_var should have is a factor having exactly 2 levels
+    if( model_type == "pairedttest") {
+      group1 <- levels(bss_data@demographics[[group_var]])[1]
+      group2 <- levels(bss_data@demographics[[group_var]])[2]
+      group1_elems <- bss_data@demographics[[group_var]][bss_data@demographics[[group_var]] == group1]
+      group2_elems <- bss_data@demographics[[group_var]][bss_data@demographics[[group_var]] == group2]
+      if (! length(group1_elems) == length(group2_elems))
+        stop(sprintf("For a paired design, there should be equal number of subjects for the two levels: %s. \nPlease check for missing or duplicate data.\n",
+                     paste(group1, group2, sep=', ')), call. = FALSE)
+    }
+
+    return(list("main_effect_present"=FALSE, "covariates_present"=FALSE, "corr_var_present"=FALSE, "group_var_present"=TRUE))
+  }
+
   # TODO: Validate covariates
 }
 
 # TODO: Call read_modelspec from within initialize
 setMethod("initialize", valueClass = "BssModel", signature = "BssModel",
-          function(.Object, model_type, main_effect="", covariates="", corr_var="", demographics, mspec_file) {
+          function(.Object, model_type, main_effect="", covariates="", corr_var="", group_var="", demographics, mspec_file) {
 
-          parse_model_result <- parse_model(main_effect, covariates, corr_var, demographics)
+          parse_model_result <- parse_model(main_effect, covariates, corr_var, group_var, model_type, demographics)
           .Object@main_effect <- main_effect
           .Object@covariates <- covariates
           .Object@corr_var <- corr_var
+          .Object@group_var <- group_var
           .Object@model_type <- model_type
 
           if (parse_model_result$main_effect_present & parse_model_result$covariates_present) {
@@ -153,3 +182,10 @@ setMethod("dispatch", signature = "BssModel", function(bss_model, bss_data) {
   )
   return(bss_model)
 })
+
+model_type_list <- list(
+  bss_lm = 'bss_lm',
+  bss_corr = 'bss_corr',
+  roi = 'pairedttest',
+  dbm = 'unpairedttest'
+)

@@ -29,5 +29,5 @@ Imports:
     ggplot2 (>= 2.2.1),
     xml2
 RoxygenNote: 5.0.1
-Encoding: UTF-8
 URL: http://brainsuite.org/bss
+Suggests: testthat

@@ -22,6 +22,7 @@ BssModel <- setClass(
     unique = "character",
     pvalues = "numeric",
     tvalues = "numeric",
+    beta_coeff = "matrix",
     pvalues_adjusted = "numeric",
     stats_commands = "vector"
   )

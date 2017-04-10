@@ -1,51 +1,159 @@
 #' Bss statistical functions for regression (lm), correlation etc.
 
+#' Performs ANOVA.
+#'
+#' @export
+bss_anova <- function(main_effect="", covariates="", bss_data) {
+
+  if (class(bss_data) == "BssROIData") {
+    return(bss_roi_anova(main_effect = main_effect, covariates = covariates, bss_data = bss_data))
+  }
+
+  message('Running the statistical model. This may take a while...', appendLF = FALSE)
+  bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
+  bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
+  bss_model <- anova_vec(bss_lm_full, bss_lm_null, bss_data)
+
+  bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+  bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+  bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+  bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
+  message('Done.')
+  return(bss_model)
+}
+
+#' Vectorized ANOVA
+#'
+#' @export
+anova_vec <- function(bss_lm_full, bss_lm_null, bss_data) {
+
+  N <- nrow(bss_data@data_array)
+  Fstat <- (bss_lm_null@rss - bss_lm_full@rss)/bss_lm_full@rss * (N - bss_lm_full@Npfull - 1)/(bss_lm_full@Npfull - bss_lm_null@Npnull)  # F statistic
+
+  model_unique_idx <- which(bss_lm_null@unique %in% bss_lm_null@fullvars) + 1    # Add 1, because the first column in the design matrix is the intercept
+
+  se_full_unique <- sqrt(diag(solve(t(bss_lm_full@X_design_full) %*% bss_lm_full@X_design_full)))[model_unique_idx] *
+    sqrt(bss_lm_full@rss / (N - bss_lm_full@Npfull - 1))
+
+  tvalues <- bss_lm_full@beta_coeff[model_unique_idx, ]/(se_full_unique + .Machine$double.eps)
+  pvalues <- 1 - pf(Fstat, bss_lm_full@Npfull - bss_lm_null@Npnull, N - bss_lm_full@Npfull - 1)
+  tvalues_sign <- (bss_lm_full@beta_coeff[model_unique_idx, ] + .Machine$double.eps)/(abs(bss_lm_full@beta_coeff[model_unique_idx, ]) + .Machine$double.eps)
+
+  bss_model <- new("BssModel", model_type="bss_anova", main_effect = bss_lm_full@main_effect, covariates = bss_lm_full@covariates,
+                   demographics = bss_data@demographics, mspec_file="")
+  bss_model@pvalues <- pvalues
+  bss_model@tvalues <- tvalues
+  bss_model@tvalues_sign <- tvalues_sign
+  bss_model@se <- se_full_unique
+  bss_model@Fstat <- Fstat
+  return(bss_model)
+}
+
 #' linear regression
 #'
 #' @export
 bss_lm <- function(main_effect="", covariates="", bss_data) {
 
-  if (class(bss_data) == "BssROIData") {
-    return(bss_roi_lm(main_effect = main_effect, covariates = covariates, bss_data = bss_data))
-  }
+  # if (class(bss_data) == "BssROIData") {
+  #   return(bss_roi_lm(main_effect = main_effect, covariates = covariates, bss_data = bss_data))
+  # }
+  #
+  # # Check the model type and call the appropriate method
+  # bss_model <- new("BssModel", model_type="bss_lm", main_effect = main_effect, covariates = covariates,
+  #                  demographics = bss_data@demographics, mspec_file="")
+  # message('Running the statistical model. This may take a while...', appendLF = FALSE)
+  # bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
+  # browser()
+  # bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
+  #
+  # Xtemp <- solve(t(bss_model@X_design_full) %*% bss_model@X_design_full) %*% t(bss_model@X_design_full) # Pre Hat matrix
+  # beta_full <- Xtemp %*% bss_data@data_array  # beta coefficients
+  # y_full <- bss_model@X_design_full %*% beta_full  # Predicted response
+  # RSS_full <- colSums((bss_data@data_array - y_full)^2)
+  #
+  # Xtemp <- solve(t(bss_model@X_design_null) %*% bss_model@X_design_null) %*% t(bss_model@X_design_null) # Pre Hat matrix
+  # beta_null <- Xtemp %*% bss_data@data_array  # beta coefficients
+  # y_null <- bss_model@X_design_null %*% beta_null  # Predicted response
+  # RSS_null <- colSums((bss_data@data_array - y_null)^2)
+  #
+  # N <- nrow(bss_data@data_array)
+  # Fstat <- (RSS_null - RSS_full)/RSS_full * (N - bss_model@Npfull - 1)/(bss_model@Npfull - bss_model@Npnull)  # F statistic
+  # model_unique_idx <- which(bss_model@unique %in% bss_model@fullvars) + 1    # Add 1, because the first column in the design matrix is the intercept
+  #
+  # se_full_unique <- sqrt(diag(solve(t(bss_model@X_design_full) %*% bss_model@X_design_full)))[model_unique_idx] *
+  #   sqrt(RSS_full / (N - bss_model@Npfull - 1))
+  #
+  # tvalue_sign <- (beta_full[model_unique_idx, ] + .Machine$double.eps)/(abs(beta_full[model_unique_idx, ]) + .Machine$double.eps)
+  #
+  # pvalues <- 1 - pf(Fstat, bss_model@Npfull - bss_model@Npnull, N - bss_model@Npfull - 1)
+  #
+  # pvalues[is.nan(pvalues)] <- 1
+  #
+  # pvalues <- pvalues*tvalue_sign
+  # tvalues <- beta_full[model_unique_idx, ]/(se_full_unique + .Machine$double.eps)
+  # bss_model@pvalues <- pvalues
+  # bss_model@tvalues <- tvalues
+  # bss_model@tvalues[abs(pvalues) >= 0.05] <- 0
+  # bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
+  # message('Done.')
+  # return(bss_model)
+}
 
+#' Vectorized linear regression
+lm_vec <- function(main_effect = "", covariates = "", bss_data) {
+
+  bss_model <- new("BssModel", model_type="bss_lm", main_effect = main_effect, covariates = covariates,
+                   demographics = bss_data@demographics, mspec_file="")
+
+  # lm_formula <- formula(sprintf('~ %s', paste(main_effect, '+', covariates)))
+  lm_formula <- bss_model@lm_formula
+
+  # Fit model
+  N <- dim(bss_data@data_array)[1]
+  Np <- length(unlist(strsplit(as.character(lm_formula)[2], '\\+')))
+
+  X <- model.matrix(lm_formula, data = bss_data@demographics)
+  X_hat <- solve(t(X) %*% X) %*% t(X) # pre hat matrix
+  beta_coeff <- X_hat %*% bss_data@data_array  # beta coefficients
+  Y <- X %*% beta_coeff  # predicted response
+  rss <- colSums((bss_data@data_array - Y)^2) # residual sum of squares
+
+  if (main_effect == "")
+    main_effect = "(Intercept)" # If main_effect is empty, return the parameters of the Intercept
+
+  se <- sqrt(diag(solve(t(X) %*% X)))[[main_effect]] * sqrt(rss / (N-Np-1)) # standard error
+  tvalues <- beta_coeff[[main_effect, 1]]/(se + .Machine$double.eps) # tvalue
+  pvalues <- 2*pt(abs(tvalues), N-Np-1, lower.tail = FALSE) # pvalue
+  bss_model@pvalues <- pvalues
+  bss_model@tvalues <- tvalues
+  bss_model@beta_coeff <- beta_coeff
+  bss_model@rss <- rss
+  return(bss_model)
+}
+
+bss_roi_anova <- function(main_effect="", covariates="", bss_data=bss_data) {
   # Check the model type and call the appropriate method
   bss_model <- new("BssModel", model_type="bss_lm", main_effect = main_effect, covariates = covariates,
                    demographics = bss_data@demographics, mspec_file="")
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
-  Xtemp <- solve(t(bss_model@X_design_full) %*% bss_model@X_design_full) %*% t(bss_model@X_design_full) # Pre Hat matrix
-  beta_full <- Xtemp %*% bss_data@data_array  # beta coefficients
-  y_full <- bss_model@X_design_full %*% beta_full  # Predicted response
-  RSS_full <- colSums((bss_data@data_array - y_full)^2)
 
-  Xtemp <- solve(t(bss_model@X_design_null) %*% bss_model@X_design_null) %*% t(bss_model@X_design_null) # Pre Hat matrix
-  beta_null <- Xtemp %*% bss_data@data_array  # beta coefficients
-  y_null <- bss_model@X_design_null %*% beta_null  # Predicted response
-  RSS_null <- colSums((bss_data@data_array - y_null)^2)
+  bss_data@demographics[paste('ROI_', as.character(bss_data@roiid), sep = '' )]
 
-  N <- nrow(bss_data@data_array)
-  Fstat <- (RSS_null - RSS_full)/RSS_full * (N - bss_model@Npfull - 1)/(bss_model@Npfull - bss_model@Npnull)  # F statistic
-  model_unique_idx <- which(bss_model@unique %in% bss_model@fullvars) + 1    # Add 1, because the first column in the design matrix is the intercept
+  cmd1 <- sprintf("lm_full <- lm(%s, data = bss_data@demographics)",
+                  paste('ROI_', as.character(bss_data@roiid), ' ~ ', bss_model@fullmodel, sep = ''))
+  cmd2 <- sprintf("lm_null <- lm(%s, data = bss_data@demographics)",
+                  paste('ROI_', as.character(bss_data@roiid), ' ~ ', bss_model@nullmodel, sep = ''))
+  cmd3 <- "pander::pander(anova(lm_full, lm_null))"
 
-  se_full_unique <- sqrt(diag(solve(t(bss_model@X_design_full) %*% bss_model@X_design_full)))
+  stats_commands <- c(cmd1, cmd2, cmd3)
 
-  se_full_unique <- sqrt(diag(solve(t(bss_model@X_design_full) %*% bss_model@X_design_full)))[model_unique_idx] *
-    sqrt(RSS_full / (N - bss_model@Npfull - 1))
+  for (cmd in stats_commands) {
+    eval(parse(text = cmd))
+  }
+  bss_model@stats_commands <- stats_commands
 
-  tvalue_sign <- (beta_full[model_unique_idx, ] + .Machine$double.eps)/(abs(beta_full[model_unique_idx, ]) + .Machine$double.eps)
-
-  pvalues <- 1 - pf(Fstat, bss_model@Npfull - bss_model@Npnull, N - bss_model@Npfull - 1)
-
-  pvalues[is.nan(pvalues)] <- 1
-
-  pvalues <- pvalues*tvalue_sign
-  tvalues <- beta_full[model_unique_idx, ]/(se_full_unique + .Machine$double.eps)
-  bss_model@pvalues <- pvalues
-  bss_model@tvalues <- tvalues
-  bss_model@tvalues[abs(pvalues) >= 0.05] <- 0
-  bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
-  message('Done.')
   return(bss_model)
+
 }
 
 bss_roi_lm <- function(main_effect="", covariates="", bss_data=bss_data) {

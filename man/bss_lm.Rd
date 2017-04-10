@@ -2,13 +2,11 @@
 % Please edit documentation in R/bss_stat_ops.R
 \name{bss_lm}
 \alias{bss_lm}
-\title{Bss statistical functions for regression (lm), correlation etc.
-linear regression}
+\title{linear regression}
 \usage{
 bss_lm(main_effect = "", covariates = "", bss_data)
 }
 \description{
-Bss statistical functions for regression (lm), correlation etc.
 linear regression
 }
 

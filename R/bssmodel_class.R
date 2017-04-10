@@ -15,6 +15,7 @@ BssModel <- setClass(
     fullvars = "character",
     nullvars = "character",
     nullmodel = "character",
+    lm_formula = "formula",
     X_design_full = "matrix",
     X_design_null = "matrix",
     Npfull = "integer",
@@ -22,11 +23,42 @@ BssModel <- setClass(
     unique = "character",
     pvalues = "numeric",
     tvalues = "numeric",
+    tvalues_sign = "numeric",
+    Fstat = "numeric",
     beta_coeff = "matrix",
+    rss = "numeric",
+    se = "numeric",
     pvalues_adjusted = "numeric",
     stats_commands = "vector"
   )
 )
+
+parse_lm <- function(main_effect="", covariates="", corr_var="", group_var = "", model_type="", demographics) {
+  main_effect_present <- !(main_effect == "")
+  covariates_present <- !(covariates == "")
+  if (!main_effect_present && !covariates_present)
+    stop('Either the main effect or the covariates should be specified.', call. = FALSE)
+
+  if (main_effect_present) {
+    if (grepl(main_effect, covariates)) {
+      stop(sprintf("Main effect *%s* also occurs in the list of covariates *%s*.\nMain effect and covariates should be disjoint. %s.\n",
+                     main_effect, covariates), call. = FALSE)
+    }
+  }
+
+  if (main_effect_present) {
+    if (!is.null(main_effect)) {
+      if (grepl("\\+", main_effect)) {
+        stop(sprintf("Main effect should only contain a single variable. You specified it as %s.\n", main_effect))
+      }
+    }
+  }
+  return(list("main_effect_present"=main_effect_present, "covariates_present"=covariates_present,
+              "corr_var_present"=FALSE, "group_var_present"=FALSE))
+
+}
+
+
 
 parse_model <- function(main_effect="", covariates="", corr_var="", group_var = "", model_type="", demographics) {
 
@@ -104,14 +136,18 @@ parse_model <- function(main_effect="", covariates="", corr_var="", group_var = 
 setMethod("initialize", valueClass = "BssModel", signature = "BssModel",
           function(.Object, model_type, main_effect="", covariates="", corr_var="", group_var="", demographics, mspec_file) {
 
-          parse_model_result <- parse_model(main_effect, covariates, corr_var, group_var, model_type, demographics)
+          if (model_type == "bss_lm" || model_type == "bss_anova")
+            parse_model_result <- parse_lm(main_effect, covariates, corr_var, group_var, model_type, demographics)
+          else
+            parse_model_result <- parse_model(main_effect, covariates, corr_var, group_var, model_type, demographics)
+
           .Object@main_effect <- main_effect
           .Object@covariates <- covariates
           .Object@corr_var <- corr_var
           .Object@group_var <- group_var
           .Object@model_type <- model_type
 
-          if (parse_model_result$main_effect_present & parse_model_result$covariates_present) {
+          if (parse_model_result$main_effect_present || parse_model_result$covariates_present) {
             .Object <- initialize_lm(.Object, main_effect, covariates, demographics)
             return (.Object)
           }
@@ -139,6 +175,11 @@ setMethod("initialize_lm", signature("BssModel", "character", "character", "data
   .Object@fullvars <- unlist(lapply(unlist(strsplit(.Object@fullmodel, '\\+')), function (x) {gsub("\\s+", '', x)}))
   .Object@nullvars <- unlist(lapply(unlist(strsplit(.Object@nullmodel, '\\+')), function (x) {gsub("\\s+", '', x)}))
   .Object@unique <- setdiff(.Object@fullvars, .Object@nullvars)
+  if (main_effect == "")
+    .Object@lm_formula <- formula(sprintf('~ %s', covariates))
+  else
+    .Object@lm_formula <- formula(sprintf('~ %s', paste(main_effect, '+', covariates)))
+
   return(.Object)
 })
 
@@ -185,6 +226,7 @@ setMethod("dispatch", signature = "BssModel", function(bss_model, bss_data) {
 })
 
 model_type_list <- list(
+  bss_anova = 'bss_anova',
   bss_lm = 'bss_lm',
   bss_corr = 'bss_corr',
   roi = 'pairedttest',

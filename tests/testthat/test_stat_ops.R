@@ -37,7 +37,57 @@ test_that("corr_vec is same as R cor.test", {
   expect_equal(corr_vec(X1, X2)$pvalues, cor.test(X1, X2)$p.value)
   expect_equal(corr_vec(X1, X2)$tvalues, cor.test(X1, X2)$statistic[["t"]])
   expect_equal(corr_vec(X1, X2)$corr_coeff, cor.test(X1, X2)$estimate[["cor"]])
+})
 
+test_that("lm_vec is same as R lm", {
+
+  data <- read.csv(system.file("extdata/testdata", "design.csv", package="bssr"))
+  main_effect <- "Age"
+  covariates <- "Sex + Height"
+
+  # Fit model using lm
+  lm_full <- lm(formula(sprintf('V1 ~ %s', paste(main_effect, '+', covariates))), data = data)
+
+  # Fit model using lm_vec
+  bss_data <- new("BssData", "", "")
+  bss_data@data_array <- as.matrix(data[, "V1"])
+  bss_data@demographics <- data
+  bss_model <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data)
+
+  # Test for equality of tvalue, beta coefficient, and pvalue
+  expect_equal(bss_model@tvalues, summary(lm_full)$coefficients[main_effect, "t value"])
+  expect_equal(bss_model@beta_coeff[[main_effect, 1]], summary(lm_full)$coefficients[main_effect, "Estimate"])
+  expect_equal(bss_model@pvalues, summary(lm_full)$coefficients[main_effect, "Pr(>|t|)"])
+})
+
+test_that("bss_anova is same as R model comparison using anova", {
+
+  data <- read.csv(system.file("extdata/testdata", "design.csv", package="bssr"))
+  main_effect <- "Age"
+  covariates <- "Sex + Height"
+
+  # Fit full model using R first
+  lm_full <- lm(formula(sprintf('V1 ~ %s', paste(main_effect, '+', covariates))), data = data)
+  # Fit null model using R first
+  lm_null <- lm(formula(sprintf('V1 ~ %s', covariates)), data = data)
+  # Compare full and null in R
+  R_model_cmp <- anova(lm_full, lm_null)
+
+  bss_data <- new("BssData", "", "")
+  bss_data@data_array <- as.matrix(data[, "V1"])
+  bss_data@demographics <- data
+  # Fit full model using bss first
+  bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
+  # Fit null model using bss first
+  bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
+  # Compare full and null in bss
+  bss_model <- anova_vec(bss_lm_full, bss_lm_null, bss_data)
+
+  # Test for equality of pvalue, Fstat, and RSS
+  expect_equal(bss_model@pvalues, R_model_cmp$`Pr(>F)`[2])
+  expect_equal(bss_model@Fstat, R_model_cmp$F[2])
+  expect_equal(bss_lm_full@rss, R_model_cmp$RSS[1])
+  expect_equal(bss_lm_null@rss, R_model_cmp$RSS[2])
 })
 
 

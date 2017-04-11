@@ -183,48 +183,6 @@ setMethod("initialize_lm", signature("BssModel", "character", "character", "data
   return(.Object)
 })
 
-setGeneric("run", valueClass = "BssModel", function(bss_model, bss_data) {
-  standardGeneric("run")
-})
-
-#' @export
-setMethod("run", signature = "BssModel", function(bss_model, bss_data) {
-  return(dispatch(bss_model, bss_data))
-})
-
-setMethod("run", signature = c("BssModel", "BssROIData"), function(bss_model, bss_data) {
-  message('Running the statistical model. This may take a while...', appendLF = FALSE)
-  bss_data@demographics[paste('ROI_', as.character(bss_data@roiid), sep = '' )]
-
-  cmd1 <- sprintf("lm_full <- lm(%s, data = bss_data@demographics)",
-                  paste('ROI_', as.character(bss_data@roiid), ' ~ ', bss_model@fullmodel, sep = ''))
-  cmd2 <- sprintf("lm_null <- lm(%s, data = bss_data@demographics)",
-                  paste('ROI_', as.character(bss_data@roiid), ' ~ ', bss_model@nullmodel, sep = ''))
-  cmd3 <- "pander::pander(anova(lm_full, lm_null))"
-
-  stats_commands <- c(cmd1, cmd2, cmd3)
-
-  for (cmd in stats_commands) {
-    eval(parse(text = cmd))
-  }
-  bss_model@stats_commands <- stats_commands
-
-  return(bss_model)
-})
-
-setGeneric("dispatch", valueClass = "BssModel", function(bss_model, bss_data) {
-  standardGeneric("dispatch")
-})
-
-setMethod("dispatch", signature = "BssModel", function(bss_model, bss_data) {
-  # Check the model type and call the appropriate method
-  switch(bss_model@model_type,
-         bss_lm = { bss_model <- bss_lm(bss_model@main_effect, bss_model@covariates, bss_data) }
-         # bss_corr = { bss_model <- bss_corr(bss_model, bss_data) }
-  )
-  return(bss_model)
-})
-
 model_type_list <- list(
   bss_anova = 'bss_anova',
   bss_lm = 'bss_lm',

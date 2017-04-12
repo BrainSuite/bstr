@@ -3,6 +3,8 @@
 #' @importFrom methods .valueClassTest new
 #' @importFrom stats formula model.matrix p.adjust pf pt
 #' @importFrom utils read.csv read.table write.csv
+#' @importFrom DT datatable
+#' @importFrom pander pander
 NULL
 
 .onLoad <- function(libname, pkgname) {

@@ -49,9 +49,9 @@ test_that("lm_vec is same as R lm", {
   lm_full <- lm(formula(sprintf('V1 ~ %s', paste(main_effect, '+', covariates))), data = data)
 
   # Fit model using lm_vec
-  bss_data <- new("BssData", "", "")
+  bss_data <- new("BssData", getwd(), system.file("extdata/testdata", "design.csv", package = 'bssr'))
+
   bss_data@data_array <- as.matrix(data[, "V1"])
-  bss_data@demographics <- data
   bss_model <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data)
 
   # Test for equality of tvalue, beta coefficient, and pvalue
@@ -73,9 +73,8 @@ test_that("bss_anova is same as R model comparison using anova", {
   # Compare full and null in R
   R_model_cmp <- anova(lm_full, lm_null)
 
-  bss_data <- new("BssData", "", "")
+  bss_data <- new("BssData", getwd(), system.file("extdata/testdata", "design.csv", package = 'bssr'))
   bss_data@data_array <- as.matrix(data[, "V1"])
-  bss_data@demographics <- data
   # Fit full model using bss first
   bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
   # Fit null model using bss first

@@ -4,8 +4,71 @@
 \name{BssModel-class}
 \alias{BssModel}
 \alias{BssModel-class}
-\title{Defines an S4 class for the statistical model}
+\title{S4 class for representing the statistical model}
 \description{
-Defines an S4 class for the statistical model
+S4 class for representing the statistical model
 }
+\section{Slots}{
+
+\describe{
+\item{\code{mspec_file}}{modelspec file}
+
+\item{\code{main_effect}}{character string containing an independent variable whose effect you want to measure.
+It could be disease status, age, gender etc. This should strictly be a single variable. This can be
+either a categorical or a continuous variable.}
+
+\item{\code{covariates}}{character string containing a set of other predictors (variables) in the model. If more than
+one covariates are included, they should be separated by a \code{+} operator similar to an R formula.}
+
+\item{\code{corr_var}}{character variable name. This should be present in the demographics csv file associated
+with \code{bss_data}.}
+
+\item{\code{corr_values}}{numeric vector to store correlation coefficients}
+
+\item{\code{group_var}}{Categorical variable name. This should be present in the demographics csv file associated
+with \code{bss_data}.}
+
+\item{\code{model_type}}{character string denoting the type of model. Should be one of \code{"bss_anova"},
+\code{"bss_corr"}, \code{"bss_corr"}, \code{"pairedttest"} or \code{"unpairedttest"}}
+
+\item{\code{fullmodel}}{character string like an R formula denoting the full model including both
+the main effect and covariates.}
+
+\item{\code{nullmodel}}{character string like an R formula denoting the null model including covariates
+only}
+
+\item{\code{fullvars}}{character list of individual variables in the full model}
+
+\item{\code{nullvars}}{character list of individual variables in the null model}
+
+\item{\code{lm_formula}}{R \code{\link{formula}}}
+
+\item{\code{X_design_full}}{a design matrix of the type \code{\link{model.matrix}} for the full model}
+
+\item{\code{X_design_null}}{a design matrix of the type \code{\link{model.matrix}} for the null model}
+
+\item{\code{Npfull}}{number of variables in the full model}
+
+\item{\code{Npnull}}{number of variables in the null model}
+
+\item{\code{unique}}{unique variable obtained as a \code{setdiff(fullvars, nullvars)}}
+
+\item{\code{pvalues}}{numeric vector storing the p-values}
+
+\item{\code{tvalues}}{numeric vector storing the t-statistics}
+
+\item{\code{tvalues_sign}}{numeric vector storing the sign of the t-statistics}
+
+\item{\code{Fstat}}{numeric vector storing the F-statistics}
+
+\item{\code{beta_coeff}}{numeric vector storing the beta coefficients}
+
+\item{\code{rss}}{numeric vector storing the residual sum of squares}
+
+\item{\code{se}}{numeric vector storing the standard error}
+
+\item{\code{pvalues_adjusted}}{numeric vector storing the adjusted p-values}
+
+\item{\code{stats_commands}}{list of R commands (primarily for ROI analysis)}
+}}
 

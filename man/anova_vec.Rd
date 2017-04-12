@@ -16,7 +16,7 @@ This is a null model including only the covariates.}
 \item{bss_data}{Object of type \code{\link{BssData}}}
 }
 \description{
-This function compares results of model fitting after \code{\link{bss_lm}}.
+This function compares results of model fitting after \code{\link{lm_vec}}.
 It accepts a full model and and a reduced model and compares them using an F-test.
 For most scenarios, the user does not need to call this function directly. This function
 will be called internally from \code{\link{bss_anova}}

@@ -1,7 +1,3 @@
-#' Bss output class
-#' Defines an S4 class for statistical outputs
-#' @export
-
 check_files <- function(object){
   if (!dir.exists(object@subjdir)) {
     stop(sprintf("Subjects directory %s does not exist.\n", object@subjdir), call. = FALSE)
@@ -12,6 +8,9 @@ check_files <- function(object){
   }
 }
 
+#' S4 class for saving results of statistical analysis
+#' @slot outdir output directory to save the results
+#'
 BssOutput <- setClass(
   "BssOutput",
   slots = list(
@@ -32,6 +31,15 @@ setMethod("initialize", valueClass = "BssOutput", signature = "BssOutput", funct
   return(.Object)
 })
 
+#' Generic save function for \code{BssOutput}
+#' @param bss_out object of type \code{BssOutput}
+#' @param bss_data object of type \code{BssData}
+#' @param bss_model object of type \code{BssModel}
+#' @details
+#' For the most part, the user will never have to call this function directly.
+#' Instead the user should call \code{\link{save_bss_out}}.
+#' @seealso \code{\link{save_bss_out}}
+#'
 #' @export
 setGeneric("save_out", valueClass = "BssOutput", function(bss_out, bss_data, bss_model) {
   standardGeneric("save_out")
@@ -52,6 +60,7 @@ BssROIOutput <- setClass(
   contains = "BssOutput"
 )
 
+#' @rdname save_out
 setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", function(bss_out, bss_data, bss_model) {
 
   log_pvalues <- log10_transform(bss_model@pvalues)
@@ -110,6 +119,7 @@ setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", f
   }
 )
 
+#' @rdname save_out
 setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", function(bss_out, bss_data, bss_model) {
 
   log_pvalues <- rep(1, length(bss_data@atlas_image))
@@ -181,6 +191,7 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
   }
 )
 
+#' @rdname save_out
 setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", function(bss_out, bss_data, bss_model) {
 
   # Get the absolute path of outdir
@@ -224,6 +235,10 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
   }
 )
 
+#' Save the statistical analysis output
+#' @param bss_data object of type \code{BssData}
+#' @param bss_model object of type \code{BssModel}
+#' @param outdir output directory to save the results
 #' @export
 save_bss_out <- function(bss_data, bss_model, outdir="") {
 

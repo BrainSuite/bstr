@@ -1,6 +1,40 @@
-#' Defines an S4 class for the statistical model
+#' S4 class for representing the statistical model
+#' @slot mspec_file modelspec file
+#' @slot main_effect character string containing an independent variable whose effect you want to measure.
+#' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
+#' either a categorical or a continuous variable.
+#' @slot covariates character string containing a set of other predictors (variables) in the model. If more than
+#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
+#' @slot corr_var character variable name. This should be present in the demographics csv file associated
+#' with \code{bss_data}.
+#' @slot corr_values numeric vector to store correlation coefficients
+#' @slot group_var Categorical variable name. This should be present in the demographics csv file associated
+#' with \code{bss_data}.
+#' @slot model_type character string denoting the type of model. Should be one of \code{"bss_anova"},
+#' \code{"bss_corr"}, \code{"bss_corr"}, \code{"pairedttest"} or \code{"unpairedttest"}
+#' @slot fullmodel character string like an R formula denoting the full model including both
+#' the main effect and covariates.
+#' @slot nullmodel character string like an R formula denoting the null model including covariates
+#' only
+#' @slot fullvars character list of individual variables in the full model
+#' @slot nullvars character list of individual variables in the null model
+#' @slot lm_formula R \code{\link{formula}}
+#' @slot X_design_full a design matrix of the type \code{\link{model.matrix}} for the full model
+#' @slot X_design_null a design matrix of the type \code{\link{model.matrix}} for the null model
+#' @slot Npfull number of variables in the full model
+#' @slot Npnull number of variables in the null model
+#' @slot unique unique variable obtained as a \code{setdiff(fullvars, nullvars)}
+#' @slot pvalues numeric vector storing the p-values
+#' @slot tvalues numeric vector storing the t-statistics
+#' @slot tvalues_sign numeric vector storing the sign of the t-statistics
+#' @slot Fstat numeric vector storing the F-statistics
+#' @slot beta_coeff numeric vector storing the beta coefficients
+#' @slot rss numeric vector storing the residual sum of squares
+#' @slot se numeric vector storing the standard error
+#' @slot pvalues_adjusted numeric vector storing the adjusted p-values
+#' @slot stats_commands list of R commands (primarily for ROI analysis)
+#'
 #' @export
-
 BssModel <- setClass(
   "BssModel",
   slots = list(
@@ -187,6 +221,6 @@ model_type_list <- list(
   bss_anova = 'bss_anova',
   bss_lm = 'bss_lm',
   bss_corr = 'bss_corr',
-  roi = 'pairedttest',
-  dbm = 'unpairedttest'
+  pairedttest = 'pairedttest',
+  unpairedttest = 'unpairedttest'
 )

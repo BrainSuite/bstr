@@ -186,6 +186,9 @@ save_colorbar <- function(filename, lut, vmin, vmax, labeltxt) {
 
 }
 
+#' Get a color palette (Hex color code list) for a colormap
+#' @param cmap_name name of the colormap
+#' @param N number of colors
 #' @export
 get_color_palette <- function(cmap_name, N) {
 

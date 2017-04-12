@@ -23,7 +23,7 @@ that only includes the \code{covariates}.
 }
 \details{
 Slightly different from the standard R anova function, \code{bss_anova} currently does not directly accept the
-results from \code{bss_lm}. This could be accomodated in the future versions.
+results from \code{lm_vec}. This could be accomodated in the future versions.
 }
 \seealso{
 \code{\link{lm_vec}} for linear regression, \code{\link{bss_ttest}} for independent sample and paired t-tests.

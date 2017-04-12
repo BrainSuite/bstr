@@ -61,7 +61,14 @@ setMethod("initialize", valueClass = "BssData", signature = "BssData", function(
 })
 
 #' A generic function to load data for statistical analysis.
-#'
+#' @param bss_data object of type \code{\link{BssData}}
+#' @param atlas_filename path name to the atlas
+#' @param maskfile path name to the mask file
+#' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
+#' @param smooth numeric value denoting the smoothing level.
+#' @param roiid numeric label identifier for the region of interest (ROI) type analysis.
+#' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
+#' @details
 #' For the most part, the user will never have to call this function directly.
 #' Instead the user should call \code{\link{load_bss_data}}.
 #' @seealso \code{\link{load_bss_data}}
@@ -75,10 +82,12 @@ setGeneric("load_demographics", valueClass = "BssData", function(object) {
   standardGeneric("load_demographics")
 })
 
+#' @rdname load_data
 setMethod("load_data", signature = "BssData", function(bss_data, roiid = NULL, roimeas = NULL) {
   return(bss_data)
 })
 
+#' @rdname load_data
 setMethod("load_data", signature = "BssCBMData", function(bss_data, atlas_filename, hemi, smooth) {
 
   bss_data@atlas_filename <- atlas_filename
@@ -92,6 +101,7 @@ setMethod("load_data", signature = "BssCBMData", function(bss_data, atlas_filena
   return(bss_data)
 })
 
+#' @rdname load_data
 setMethod("load_data", signature = "BssTBMData", function(bss_data, atlas_filename, maskfile = NULL, smooth) {
 
   bss_data@atlas_filename <- atlas_filename
@@ -115,6 +125,7 @@ setMethod("load_data", signature = "BssTBMData", function(bss_data, atlas_filena
   return(bss_data)
 })
 
+#' @rdname load_data
 setMethod("load_data", signature = "BssROIData", function(bss_data, roiid = NULL, roimeas = NULL) {
 
   # if (is.null(outdir)) {

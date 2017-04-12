@@ -1,6 +1,5 @@
 #' List of file formats used in BrainSuite
 #' @export
-
 ## TODO: use closures for this in the future
 bs_file_formats <- list(
   surf_left = 'atlas.pvc-thickness_0-6mm.left.mid.cortex.dfs',
@@ -18,6 +17,7 @@ bs_file_formats <- list(
   nii_file_smooth = '%s.svreg.inv.map.jacdet.smooth%2.1fmm.nii.gz'
 )
 
+#' List of atlas files used in BrainSuite
 #' @export
 bs_atlas_files <- list(
   atlas_BS1_tbm = 'svreg/BrainSuiteAtlas1/mri.bfc.nii.gz',
@@ -125,8 +125,9 @@ get_brainsuite_atlas_path_from_logfile <- function(logfile) {
   return(bs_atlas_path)
 }
 
-# This function reads the BrainSuite atlas identifier from the svreg log file.
-# Valid atlases are BrainSuiteAtlas1 or BCI-DNI_brain_atlas
+#' Read the BrainSuite atlas identifier from the svreg log file.
+#' @param logfile path to the svreg.log file present in an individual subject directory
+#' @details Valid atlases are BrainSuiteAtlas1 or BCI-DNI_brain_atlas
 #' @export
 get_brainsuite_atlas_id_from_logfile <- function(logfile) {
   fid = file(logfile, "rt")

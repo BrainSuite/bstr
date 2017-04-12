@@ -5,7 +5,7 @@
 #' that only includes the \code{covariates}.
 #'
 #' Slightly different from the standard R anova function, \code{bss_anova} currently does not directly accept the
-#' results from \code{bss_lm}. This could be accomodated in the future versions.
+#' results from \code{lm_vec}. This could be accomodated in the future versions.
 
 #' @param main_effect Character string containing an independent variable whose effect you want to measure.
 #' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
@@ -38,7 +38,7 @@ bss_anova <- function(main_effect="", covariates="", bss_data) {
 
 #' A vectorized version of analysis of variance (ANOVA).
 #'
-#' This function compares results of model fitting after \code{\link{bss_lm}}.
+#' This function compares results of model fitting after \code{\link{lm_vec}}.
 #' It accepts a full model and and a reduced model and compares them using an F-test.
 #' For most scenarios, the user does not need to call this function directly. This function
 #' will be called internally from \code{\link{bss_anova}}

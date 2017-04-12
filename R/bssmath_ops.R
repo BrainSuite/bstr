@@ -1,4 +1,6 @@
-# math ops for BSS
+#' log10 transform
+#' @param values numeric vector
+#' @return numeric vector containing the log10 transformed \code{values}
 #' @export
 log10_transform <- function(values) {
   eps <- .Machine$double.eps
@@ -7,7 +9,7 @@ log10_transform <- function(values) {
   return(logvalues)
 }
 
-#' @export
+# TBD
 image_to_shape <- function(imagefile, shapefile, outputshapefile, resample) {
 
 }

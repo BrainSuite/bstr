@@ -2,11 +2,11 @@
 % Please edit documentation in R/labeldesc_io.R
 \name{read_label_desc}
 \alias{read_label_desc}
-\title{LabelDesc I/O functions}
+\title{Read BrainSuite label description file}
 \usage{
 read_label_desc()
 }
 \description{
-LabelDesc I/O functions
+Read BrainSuite label description file
 }
 

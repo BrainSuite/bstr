@@ -1,4 +1,11 @@
-#' I/O for dfs files
+#' Load ROI data
+#'
+#' Loads the ROI measure for statistical analysis.
+#' @param subjects_dir character string for subject directory.
+#' @param csv filename of a comma separated (csv) file containing the subject demographic information.
+#' @param roiid numeric label identifier for the region of interest (ROI) type analysis.
+#' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
+#' @param outdir output directory name to save results for ROI analysis.
 #' @export
 #'
 bss_load_roi_data <- function(subjects_dir, csv, roiid, roimeas, outdir=NULL) {

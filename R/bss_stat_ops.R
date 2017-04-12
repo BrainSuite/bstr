@@ -1,6 +1,20 @@
-#' Bss statistical functions for regression (lm), correlation etc.
+#' Perform analysis of variance (ANOVA) for brain imaging data.
+#'
+#' This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and uses an
+#' F-test to compare the full model including the \code{main_effect + covariates} with the reduced (null) model
+#' that only includes the \code{covariates}.
+#'
+#' Slightly different from the standard R anova function, \code{bss_anova} currently does not directly accept the
+#' results from \code{bss_lm}. This could be accomodated in the future versions.
 
-#' Performs ANOVA.
+#' @param main_effect Character string containing an independent variable whose effect you want to measure.
+#' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
+#' either a categorical or a continuous variable.
+#' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
+#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
+#' @param  bss_data Object of type \code{\link{BssData}}
+#'
+#' @seealso \code{\link{lm_vec}} for linear regression, \code{\link{bss_ttest}} for independent sample and paired t-tests.
 #'
 #' @export
 bss_anova <- function(main_effect="", covariates="", bss_data) {
@@ -22,7 +36,21 @@ bss_anova <- function(main_effect="", covariates="", bss_data) {
   return(bss_model)
 }
 
-#' Vectorized ANOVA
+#' A vectorized version of analysis of variance (ANOVA).
+#'
+#' This function compares results of model fitting after \code{\link{bss_lm}}.
+#' It accepts a full model and and a reduced model and compares them using an F-test.
+#' For most scenarios, the user does not need to call this function directly. This function
+#' will be called internally from \code{\link{bss_anova}}
+#'
+#' @param bss_lm_full An object of type \code{\link{BssModel}} returned from \code{\link{lm_vec}}.
+#' This is a full model including both the main effect and covariates.
+#' @param bss_lm_null An object of type \code{\link{BssModel}} returned from \code{\link{lm_vec}}.
+#' This is a null model including only the covariates.
+#' @param  bss_data Object of type \code{\link{BssData}}
+#'
+#' @seealso \code{\link{bss_anova}} for most commonly used function for ANOVA, \code{\link{lm_vec}} for vectorized linear regression, \code{\link{ttest_vec}} for
+#' vectorized independent sample and paired t-tests.
 #'
 #' @export
 anova_vec <- function(bss_lm_full, bss_lm_null, bss_data) {
@@ -49,9 +77,7 @@ anova_vec <- function(bss_lm_full, bss_lm_null, bss_data) {
   return(bss_model)
 }
 
-#' linear regression
-#'
-#' @export
+# linear regression
 bss_lm <- function(main_effect="", covariates="", bss_data) {
 
   # if (class(bss_data) == "BssROIData") {
@@ -99,7 +125,23 @@ bss_lm <- function(main_effect="", covariates="", bss_data) {
   # return(bss_model)
 }
 
-#' Vectorized linear regression
+#' Vectorized linear regression for brain imaging phenotypes.
+#'
+#' This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and performs
+#' a linear regression including \code{main_effect + covariates}.
+#'
+#' Slightly different from the standard R \code{lm} function, \code{lm_vec} currently does not directly accept an R formula.
+#' This could be accomodated in the future versions.
+#' Also currently, this function returns the p-values and the t-statistics for the \code{main_effect}
+#' only. Returning the statistics for all variables could be accomodated in the future versions.
+#' @param main_effect Character string containing an independent variable whose effect you want to measure.
+#' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
+#' either a categorical or a continuous variable.
+#' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
+#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
+#' @param  bss_data Object of type \code{\link{BssData}}
+#'
+#' @export
 lm_vec <- function(main_effect = "", covariates = "", bss_data) {
 
   bss_model <- new("BssModel", model_type="bss_lm", main_effect = main_effect, covariates = covariates,
@@ -181,7 +223,17 @@ bss_roi_lm <- function(main_effect="", covariates="", bss_data=bss_data) {
 
 }
 
-#' Correlation
+#' Test for Correlation between a variable \code{corr_var} and a brain imaging phenotype.
+#'
+#' Test for correlation between a brain imaging phenotype (cortical thickness, determinant
+#' of the jacobian matrix) and \code{corr_var} using the Pearson's product moment correlation
+#' coefficient. The brain imaging phenotype is automatically selected from the type of \code{bss_data}.
+#' @param corr_var Character variable name. This should be present in the demographics csv file associated
+#' with \code{bss_data}.
+#' @param  bss_data Object of type \code{\link{BssData}}.
+#' @details
+#' \code{bss_data} can be of the type "cbm", "tbm", or "roi".
+#'
 #' @export
 bss_corr <- function(corr_var, bss_data) {
 
@@ -203,7 +255,13 @@ bss_corr <- function(corr_var, bss_data) {
   return(bss_model)
 }
 
-#' Vectorized correlation
+#' Vectorized correlation between a variable and brain imaging data.
+#'
+#' For most scenarios, the user does not need to call this function directly.
+#' Instead call \code{\link{bss_corr}} which calls this function internally.
+#' @param X matrix of dimensions (\eqn{N x T}), where \eqn{N} = number of subjects and \eqn{T} = number of vertices/voxels.
+#' @param Y vector of length \eqn{N}.
+#' @export
 corr_vec <- function(X, Y) {
 
   N <- length(Y)
@@ -215,7 +273,18 @@ corr_vec <- function(X, Y) {
   return(list("tvalues"=tvalues, "pvalues"=pvalues, "corr_coeff"=corr_coeff))
 }
 
-#' Welch's t-test
+#' T-test for for brain imaging phenotypes
+#'
+#' Perform independent sample and paired sample t-tests for differences between means of brain
+#' imaging phenotypes for a categorical variable.
+#' @param group_var Categorical variable name. This should be present in the demographics csv file associated
+#' with \code{bss_data}.
+#' @param  bss_data Object of type \code{\link{BssData}}.
+#' @param  paired logical; is TRUE if \code{group_var} contains matching (dependent) samples. The default value is \code{FALSE}.
+#' @details
+#' The degrees of freedom are calculated using the Welch–Satterthwaite approximation by default.
+#' \code{bss_data} can be of the type "cbm", "tbm", or "roi".
+#'
 #' @export
 bss_ttest <- function(group_var, bss_data, paired = FALSE) {
 
@@ -249,7 +318,22 @@ bss_ttest <- function(group_var, bss_data, paired = FALSE) {
   return(bss_model)
 }
 
-#' Vectorized Welch's t-test
+#' Vectorized t-test for for brain imaging phenotypes
+#'
+#' Perform independent sample and paired sample t-tests between two numerfor differences between means of brain
+#' imaging phenotypes for a categorical variable.
+#' For most scenarios, the user does not need to call this function directly. This function
+#' will be called internally from \code{\link{bss_ttest}}
+#' @param X1 matrix of dimensions (\eqn{N1 x T}), where \eqn{N1} = number of subjects and \eqn{T} = number of vertices/voxels.
+#' @param  X2 matrix of dimensions (\eqn{N2 x T}), where \eqn{N2} = number of subjects and \eqn{T} = number of vertices/voxels.
+#' @param  paired logical; is TRUE if \code{group_var} contains matching (dependent) samples. The default value is \code{FALSE}.
+#' @details
+#' For an independent samples t-test \eqn{N1} not equal to \eqn{N2}.
+#' For a dependent (paired) samples t-test, \eqn{N1 = N2}.
+#' The degrees of freedom are calculated using the Welch–Satterthwaite approximation by default.
+#' \code{bss_data} can be of the type "cbm", "tbm", or "roi".
+#'
+#' @export
 ttest_vec <- function(X1, X2, paired=FALSE) {
 
   n1 <- dim(X1)[1]

@@ -2,11 +2,19 @@
 % Please edit documentation in R/bss_utils.R
 \name{check_file_exists}
 \alias{check_file_exists}
-\title{Utility functions for bss}
+\title{Check if file exists}
 \usage{
 check_file_exists(filename, raise_error = FALSE, errmesg = NULL)
 }
+\arguments{
+\item{filename}{Name of file.}
+
+\item{raise_error}{logical; if \code{TRUE}, stops the execution if file does not exist. The default
+value is \code{FALSE}, in which case the function returns {FALSE} without stopping the execution.}
+
+\item{errmesg}{character string of optional error message}
+}
 \description{
-Utility functions for bss
+Check if file exists
 }
 

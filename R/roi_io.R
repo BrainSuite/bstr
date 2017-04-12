@@ -1,4 +1,10 @@
-#' ROI I/O functions
+#' Read ROI stats file
+#'
+#' Reads the BrainSuite ROI stats file saved for each subject after executing SVREG.
+#' @param roiwise_txt_filename filename for the ROIwise stats in the individual subject directory
+#' @param roiid numeric label identifier for the region of interest (ROI) type analysis.
+#' @param roimeas character string for the ROI measure. Should either be "gmthickness",
+#' "gmvolume", or "wmvolume".
 #' @export
 read_roistats_txt <- function(roiwise_txt_filename, roiid, roimeas = 'gmthickness') {
 

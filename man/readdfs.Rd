@@ -2,11 +2,17 @@
 % Please edit documentation in R/dfsio.R
 \name{readdfs}
 \alias{readdfs}
-\title{I/O for dfs files}
+\title{Read dfs file}
 \usage{
 readdfs(filename)
 }
+\arguments{
+\item{filename}{filename of the dfs surface file.}
+}
+\value{
+list object containing the dfs header, vertices, triangles, attributes etc.
+}
 \description{
-I/O for dfs files
+Reads the BrainSuite dfs file format specified at \url{http://brainsuite.org/formats/dfs/}
 }
 

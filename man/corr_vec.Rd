@@ -2,11 +2,17 @@
 % Please edit documentation in R/bss_stat_ops.R
 \name{corr_vec}
 \alias{corr_vec}
-\title{Vectorized correlation}
+\title{Vectorized correlation between a variable and brain imaging data.}
 \usage{
 corr_vec(X, Y)
 }
+\arguments{
+\item{X}{matrix of dimensions (\eqn{N x T}), where \eqn{N} = number of subjects and \eqn{T} = number of vertices/voxels.}
+
+\item{Y}{vector of length \eqn{N}.}
+}
 \description{
-Vectorized correlation
+For most scenarios, the user does not need to call this function directly.
+Instead call \code{\link{bss_corr}} which calls this function internally.
 }
 

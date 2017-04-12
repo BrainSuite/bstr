@@ -2,13 +2,21 @@
 % Please edit documentation in R/bss_setup.R
 \name{setup}
 \alias{setup}
-\title{script for reading/writing setup configuration file (bssr.ini) for bss
-Usually this should be executed by the user immediately after installing bssr}
+\title{Setup script for bssr}
 \usage{
 setup(brainsuite_path = NULL, quiet = FALSE, raise_error = TRUE)
 }
+\arguments{
+\item{brainsuite_path}{path to the BrainSuite installation}
+
+\item{quiet}{logical; if \code{FALSE} does not display messages to the user}
+
+\item{raise_error}{logical; if \code{TRUE}, stops the execution if file does not exist. The default
+value is \code{FALSE}, in which case the function returns {FALSE} without stopping the execution.}
+}
 \description{
-script for reading/writing setup configuration file (bssr.ini) for bss
-Usually this should be executed by the user immediately after installing bssr
+This script reads from and writes to the setup configuration file (bssr.ini) for bss
+Usually this will be called automatically when the package is installed and loaded
+for the first time. Optionally, it can be executed by the user immediately after installing bssr.
 }
 

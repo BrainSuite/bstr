@@ -1,6 +1,13 @@
-#' script for reading/writing setup configuration file (bssr.ini) for bss
-#' Usually this should be executed by the user immediately after installing bssr
+#' Setup script for bssr
 #'
+#' This script reads from and writes to the setup configuration file (bssr.ini) for bss
+#' Usually this will be called automatically when the package is installed and loaded
+#' for the first time. Optionally, it can be executed by the user immediately after installing bssr.
+#'
+#' @param brainsuite_path path to the BrainSuite installation
+#' @param quiet logical; if \code{FALSE} does not display messages to the user
+#' @param raise_error logical; if \code{TRUE}, stops the execution if file does not exist. The default
+#' value is \code{FALSE}, in which case the function returns {FALSE} without stopping the execution.
 #' @export
 setup <- function(brainsuite_path = NULL, quiet = FALSE, raise_error = TRUE) {
   bssr_ini_file <- get_bssr_ini_path()
@@ -90,9 +97,12 @@ check_bs_atlas_exists <- function(brainsuite_path, quiet=FALSE, raise_error = TR
 }
 
 
-#' Check if the BrainSuite installation is valid.
-#' This function is called from .onLoad() when the package is loaded.
-#' Opens bssr.ini and checks if all the paths are valid.
+#' Check if BrainSuite is installed.
+#'
+#' Check if the BrainSuite installation is valid by verifying if the appropriate
+#' atlas files and data exist. This function is called from \code{\link{.onLoad}}
+#' when the package is loaded. It opens \code{bssr.ini} and checks if all the
+#' paths are valid.
 #'
 #' @export
 is_brainsute_installed <- function() {
@@ -137,6 +147,7 @@ get_brainsuite_path_from_bssr_ini <- function() {
 
 #' Check if a given BrainSuite path is valid
 #'
+#' @param brainsuite_path path to the BrainSuite installation
 #' @export
 is_valid_brainsute_install_path <- function(brainsuite_path="") {
   return(check_bs_atlas_exists(brainsuite_path, quiet = TRUE, raise_error = FALSE))

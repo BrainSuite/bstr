@@ -2,13 +2,30 @@
 % Please edit documentation in R/bss_stat_ops.R
 \name{bss_anova}
 \alias{bss_anova}
-\title{Bss statistical functions for regression (lm), correlation etc.
-Performs ANOVA.}
+\title{Perform analysis of variance (ANOVA) for brain imaging data.}
 \usage{
 bss_anova(main_effect = "", covariates = "", bss_data)
 }
+\arguments{
+\item{main_effect}{Character string containing an independent variable whose effect you want to measure.
+It could be disease status, age, gender etc. This should strictly be a single variable. This can be
+either a categorical or a continuous variable.}
+
+\item{covariates}{Character string containing a set of other predictors (variables) in the model. If more than
+one covariates are included, they should be separated by a \code{+} operator similar to an R formula.}
+
+\item{bss_data}{Object of type \code{\link{BssData}}}
+}
 \description{
-Bss statistical functions for regression (lm), correlation etc.
-Performs ANOVA.
+This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and uses an
+F-test to compare the full model including the \code{main_effect + covariates} with the reduced (null) model
+that only includes the \code{covariates}.
+}
+\details{
+Slightly different from the standard R anova function, \code{bss_anova} currently does not directly accept the
+results from \code{bss_lm}. This could be accomodated in the future versions.
+}
+\seealso{
+\code{\link{lm_vec}} for linear regression, \code{\link{bss_ttest}} for independent sample and paired t-tests.
 }
 

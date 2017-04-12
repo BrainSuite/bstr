@@ -2,11 +2,27 @@
 % Please edit documentation in R/bss_stat_ops.R
 \name{ttest_vec}
 \alias{ttest_vec}
-\title{Vectorized Welch's t-test}
+\title{Vectorized t-test for for brain imaging phenotypes}
 \usage{
 ttest_vec(X1, X2, paired = FALSE)
 }
+\arguments{
+\item{X1}{matrix of dimensions (\eqn{N1 x T}), where \eqn{N1} = number of subjects and \eqn{T} = number of vertices/voxels.}
+
+\item{X2}{matrix of dimensions (\eqn{N2 x T}), where \eqn{N2} = number of subjects and \eqn{T} = number of vertices/voxels.}
+
+\item{paired}{logical; is TRUE if \code{group_var} contains matching (dependent) samples. The default value is \code{FALSE}.}
+}
 \description{
-Vectorized Welch's t-test
+Perform independent sample and paired sample t-tests between two numerfor differences between means of brain
+imaging phenotypes for a categorical variable.
+For most scenarios, the user does not need to call this function directly. This function
+will be called internally from \code{\link{bss_ttest}}
+}
+\details{
+For an independent samples t-test \eqn{N1} not equal to \eqn{N2}.
+For a dependent (paired) samples t-test, \eqn{N1 = N2}.
+The degrees of freedom are calculated using the Welch–Satterthwaite approximation by default.
+\code{bss_data} can be of the type "cbm", "tbm", or "roi".
 }
 

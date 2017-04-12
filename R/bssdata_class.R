@@ -1,17 +1,14 @@
-#' Load BrainSuite processed data for statistical analysis
-#' Defines an S4 class for storing/loading data
-#' @export
-
-check_files <- function(object){
-  if (!dir.exists(object@subjdir)) {
-    stop(sprintf("Subjects directory %s does not exist.\n", object@subjdir), call. = FALSE)
-  }
-
-  if (!file.exists(object@csv)) {
-    stop(sprintf("Demographics csv file %s does not exist.\n", object@csv), call. = FALSE)
-  }
-}
-
+#' S4 class for storing data for statistical analysis
+#' @slot data_array matrix containing data of dimensions (N x T), where N = number of subjects and T = number of vertices/voxels.
+#' @slot data_array_lh matrix containing data for left hemisphere.
+#' @slot data_array_rh atrix containing data for right hemisphere.
+#' @slot analysis_type character string denoting the type of analysis. Valid types are "cbm", "tbm" or "roi".
+#' @slot data_type character string denoting the type of data. Valid types are "surface" or "nifti_image".
+#' @slot demographics data.frame containing the demographic information. Usually loaded from a csv file.
+#' @slot subjdir character string for subject directory.
+#' @slot csv filename of a comma separated (csv) file containing the subject demographic information.
+#' @slot filelist list of files belonging to N subjects.
+#'
 #' @export
 BssData <- setClass(
   "BssData",
@@ -25,8 +22,7 @@ BssData <- setClass(
     subjdir = "character",
     csv = "character",
     filelist = "character"
-  ),
-  validity = check_files
+  )
 )
 
 BssROIData <- setClass(
@@ -55,17 +51,21 @@ BssTBMData <- setClass(
 )
 
 setMethod("initialize", valueClass = "BssData", signature = "BssData", function(.Object, subjdir, csv) {
-  if (dir.exists(subjdir)) {
-    .Object@subjdir = subjdir
-  }
 
-  if (file.exists(csv)) {
-    .Object@csv <- csv
-    .Object@demographics <- read.csv(csv)
-  }
+  check_file_exists(subjdir, raise_error = TRUE)
+  check_file_exists(csv, raise_error = TRUE)
+  .Object@subjdir = subjdir
+  .Object@csv <- csv
+  .Object@demographics <- read.csv(csv)
   return(.Object)
 })
 
+#' A generic function to load data for statistical analysis.
+#'
+#' For the most part, the user will never have to call this function directly.
+#' Instead the user should call \code{\link{load_bss_data}}.
+#' @seealso \code{\link{load_bss_data}}
+#'
 #' @export
 setGeneric("load_data", valueClass = "BssData", function(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = "left", smooth = 0.0, roiid = NULL, roimeas = NULL) {
   standardGeneric("load_data")
@@ -168,6 +168,34 @@ setMethod ("load_demographics", "BssData", function(object) {
 #             }
 #           )
 
+#' Load data for statistical analysis.
+#'
+#' Loading data is usually the first step before running any statistical analysis.
+#' Prior to using this function, BrainSuite and svreg should be run on all subjects.
+#' If required, smoothing should be performed on cortical surface or volumetric image based measures.
+#' A csv file containing subject demographic information should exist. The first column of this csv file
+#' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
+#' and should be exactly equal to the individual subject directory name.
+#'
+#' @param type character string denoting type of analysis. Should be cbm, tbm, or roi.
+#' @param subjdir subject directory containing BrainSuite processed data.
+#' @param csv filename of a comma separated (csv) file containing the subject demographic information.
+#' The first column of this csv file
+#' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
+#' and should be exactly equal to the individual subject directory name.
+#' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
+#' @param smooth numeric value denoting the smoothing level.
+#' @param roiid numeric label identifier for the region of interest (ROI) type analysis.
+#' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
+#' @examples
+#' \dontrun{
+#' my_cbm_data <- load_bss_data(type="cbm", subjdir = "/path/to/my/subjectdirectory",
+#' csv = "/path/to/my/demographics.csv", hemi = "left", smooth = 2.5)
+#'
+#' my_roi_data <- load_bss_data(type="roi", subjdir = "/path/to/my/subjectdirectory",
+#' csv="/path/to/my/demographics.csv", roiid=501, roimeas="gmthickness")
+#' }
+#'
 #' @export
 load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left", smooth=0.0, roiid=0, roimeas="gmthickness") {
 
@@ -208,4 +236,14 @@ load_roi_data <- function(subjdir="", csv="", roiid="", roimeas="") {
   bss_roi_data <- new("BssROIData", subjdir, csv)
   bss_roi_data <- load_data(bss_roi_data, roiid = roiid, roimeas = roimeas)
   return(bss_roi_data)
+}
+
+check_files <- function(object){
+  if (!dir.exists(object@subjdir)) {
+    stop(sprintf("Subjects directory %s does not exist.\n", object@subjdir), call. = FALSE)
+  }
+
+  if (!file.exists(object@csv)) {
+    stop(sprintf("Demographics csv file %s does not exist.\n", object@csv), call. = FALSE)
+  }
 }

@@ -2,15 +2,14 @@
 % Please edit documentation in R/bss_setup.R
 \name{is_brainsute_installed}
 \alias{is_brainsute_installed}
-\title{Check if the BrainSuite installation is valid.
-This function is called from .onLoad() when the package is loaded.
-Opens bssr.ini and checks if all the paths are valid.}
+\title{Check if BrainSuite is installed.}
 \usage{
 is_brainsute_installed()
 }
 \description{
-Check if the BrainSuite installation is valid.
-This function is called from .onLoad() when the package is loaded.
-Opens bssr.ini and checks if all the paths are valid.
+Check if the BrainSuite installation is valid by verifying if the appropriate
+atlas files and data exist. This function is called from \code{\link{.onLoad}}
+when the package is loaded. It opens \code{bssr.ini} and checks if all the
+paths are valid.
 }
 

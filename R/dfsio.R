@@ -1,4 +1,8 @@
-#' I/O for dfs files
+#' Read dfs file
+#'
+#' Reads the BrainSuite dfs file format specified at \url{http://brainsuite.org/formats/dfs/}
+#' @param filename filename of the dfs surface file.
+#' @return list object containing the dfs header, vertices, triangles, attributes etc.
 #' @export
 
 readdfs <- function(filename) {
@@ -64,6 +68,12 @@ readdfs <- function(filename) {
   return(dfs)
 }
 
+#' Read dfs file attributes only
+#'
+#' Reads the BrainSuite dfs file attributes (\url{http://brainsuite.org/formats/dfs/}).
+#' @param filename filename of the dfs surface file.
+#' @return numeric vector of length \eqn{T}, where \eqn{T} is the number of attributes
+#' (same as number of vertices) stored in the dfs file.
 #' @export
 readdfsattributes <- function(filename) {
   dfs_fid = file(filename, "rb")
@@ -104,6 +114,12 @@ read_dfs_attributes_for_all_subjects <- function(dfs_filelist, attrib_siz) {
   return(t(data_matrix))
 }
 
+#' Write dfs file
+#'
+#' Save surface geometry to a dfs file (\url{http://brainsuite.org/formats/dfs/})
+#' @param filename filename of the dfs surface file.
+#' @param s1 object (R list) containing surface geometry including
+#' vertices, triangles, attributes etc.
 #' @export
 writedfs <- function(filename, s1) {
 

@@ -2,11 +2,27 @@
 % Please edit documentation in R/bss_stat_ops.R
 \name{anova_vec}
 \alias{anova_vec}
-\title{Vectorized ANOVA}
+\title{A vectorized version of analysis of variance (ANOVA).}
 \usage{
 anova_vec(bss_lm_full, bss_lm_null, bss_data)
 }
+\arguments{
+\item{bss_lm_full}{An object of type \code{\link{BssModel}} returned from \code{\link{lm_vec}}.
+This is a full model including both the main effect and covariates.}
+
+\item{bss_lm_null}{An object of type \code{\link{BssModel}} returned from \code{\link{lm_vec}}.
+This is a null model including only the covariates.}
+
+\item{bss_data}{Object of type \code{\link{BssData}}}
+}
 \description{
-Vectorized ANOVA
+This function compares results of model fitting after \code{\link{bss_lm}}.
+It accepts a full model and and a reduced model and compares them using an F-test.
+For most scenarios, the user does not need to call this function directly. This function
+will be called internally from \code{\link{bss_anova}}
+}
+\seealso{
+\code{\link{bss_anova}} for most commonly used function for ANOVA, \code{\link{lm_vec}} for vectorized linear regression, \code{\link{ttest_vec}} for
+vectorized independent sample and paired t-tests.
 }
 

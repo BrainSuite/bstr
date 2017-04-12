@@ -1,5 +1,11 @@
 #' Read modelspec.ini file
-
+#'
+#' The modelspec file specifies the subject directory, paths to the atlas files,
+#' the model specification, whether linear regerssion, correlation etc.
+#' The modelspec file was used in the previous versions of bssr.
+#' Currently, the user does not have to create this explicitly.
+#' This functionality is still kept in case a future need arises to generate these automatically.
+#' @param modelspecfile path to the modelspec file
 #' @export
 read_modelspec <- function(modelspecfile) {
 
@@ -36,10 +42,10 @@ check_modelspec_validity <- function(modelspecfile) {
   mspec$mspec_file <- modelspecfile
 
   if (is.null(mspec$subject))
-    stop(sprintf('The modelspec file %s does not contain a [subject] section.', modelspec), call. = FALSE)
+    stop(sprintf('The modelspec file %s does not contain a [subject] section.', modelspecfile), call. = FALSE)
 
   if (is.null(mspec$stats))
-    stop(sprintf('The modelspec file %s does not contain a [stats] section.', modelspec), call. = FALSE)
+    stop(sprintf('The modelspec file %s does not contain a [stats] section.', modelspecfile), call. = FALSE)
 
   # Check for existence of [subject] sub-fields
   if (is.null(mspec$subject$subjdir))

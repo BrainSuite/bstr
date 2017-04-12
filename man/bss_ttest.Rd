@@ -2,11 +2,24 @@
 % Please edit documentation in R/bss_stat_ops.R
 \name{bss_ttest}
 \alias{bss_ttest}
-\title{Welch's t-test}
+\title{T-test for for brain imaging phenotypes}
 \usage{
 bss_ttest(group_var, bss_data, paired = FALSE)
 }
+\arguments{
+\item{group_var}{Categorical variable name. This should be present in the demographics csv file associated
+with \code{bss_data}.}
+
+\item{bss_data}{Object of type \code{\link{BssData}}.}
+
+\item{paired}{logical; is TRUE if \code{group_var} contains matching (dependent) samples. The default value is \code{FALSE}.}
+}
 \description{
-Welch's t-test
+Perform independent sample and paired sample t-tests for differences between means of brain
+imaging phenotypes for a categorical variable.
+}
+\details{
+The degrees of freedom are calculated using the Welch–Satterthwaite approximation by default.
+\code{bss_data} can be of the type "cbm", "tbm", or "roi".
 }
 

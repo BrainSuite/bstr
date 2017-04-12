@@ -2,11 +2,22 @@
 % Please edit documentation in R/bss_load_roi_data.R
 \name{bss_load_roi_data}
 \alias{bss_load_roi_data}
-\title{I/O for dfs files}
+\title{Load ROI data}
 \usage{
 bss_load_roi_data(subjects_dir, csv, roiid, roimeas, outdir = NULL)
 }
+\arguments{
+\item{subjects_dir}{character string for subject directory.}
+
+\item{csv}{filename of a comma separated (csv) file containing the subject demographic information.}
+
+\item{roiid}{numeric label identifier for the region of interest (ROI) type analysis.}
+
+\item{roimeas}{character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".}
+
+\item{outdir}{output directory name to save results for ROI analysis.}
+}
 \description{
-I/O for dfs files
+Loads the ROI measure for statistical analysis.
 }
 

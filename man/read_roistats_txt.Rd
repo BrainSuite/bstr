@@ -2,11 +2,19 @@
 % Please edit documentation in R/roi_io.R
 \name{read_roistats_txt}
 \alias{read_roistats_txt}
-\title{ROI I/O functions}
+\title{Read ROI stats file}
 \usage{
 read_roistats_txt(roiwise_txt_filename, roiid, roimeas = "gmthickness")
 }
+\arguments{
+\item{roiwise_txt_filename}{filename for the ROIwise stats in the individual subject directory}
+
+\item{roiid}{numeric label identifier for the region of interest (ROI) type analysis.}
+
+\item{roimeas}{character string for the ROI measure. Should either be "gmthickness",
+"gmvolume", or "wmvolume".}
+}
 \description{
-ROI I/O functions
+Reads the BrainSuite ROI stats file saved for each subject after executing SVREG.
 }
 

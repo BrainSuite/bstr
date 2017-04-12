@@ -117,10 +117,10 @@ parse_model <- function(main_effect="", covariates="", corr_var="", group_var = 
 
     # If model_type is pairedttest group_var should have is a factor having exactly 2 levels
     if( model_type == "pairedttest") {
-      group1 <- levels(bss_data@demographics[[group_var]])[1]
-      group2 <- levels(bss_data@demographics[[group_var]])[2]
-      group1_elems <- bss_data@demographics[[group_var]][bss_data@demographics[[group_var]] == group1]
-      group2_elems <- bss_data@demographics[[group_var]][bss_data@demographics[[group_var]] == group2]
+      group1 <- levels(demographics[[group_var]])[1]
+      group2 <- levels(demographics[[group_var]])[2]
+      group1_elems <- demographics[[group_var]][demographics[[group_var]] == group1]
+      group2_elems <- demographics[[group_var]][demographics[[group_var]] == group2]
       if (! length(group1_elems) == length(group2_elems))
         stop(sprintf("For a paired design, there should be equal number of subjects for the two levels: %s. \nPlease check for missing or duplicate data.\n",
                      paste(group1, group2, sep=', ')), call. = FALSE)

@@ -169,7 +169,7 @@ save_colorbar <- function(filename, lut, vmin, vmax, labeltxt) {
   )
 
   ggplot2::ggplot(df) +
-    ggplot2::geom_raster(ggplot2::aes(x = 0.5, y=y, fill = y)) +
+    ggplot2::geom_raster(ggplot2::aes(x = 0.5, y=df$y, fill = df$y)) +
     ggplot2::scale_fill_gradientn(colours = lut)   +  ggplot2::xlab('') + ggplot2::ylab('') +
     ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), axis.text.x = ggplot2::element_blank()) +
     ggplot2::guides(fill=FALSE) +

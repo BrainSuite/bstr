@@ -17,4 +17,3 @@ value is \code{FALSE}, in which case the function returns {FALSE} without stoppi
 \description{
 Check if file exists
 }
-

@@ -9,4 +9,3 @@ get_bssr_ini_path()
 \description{
 Retrieve bssr.ini path in the package
 }
-

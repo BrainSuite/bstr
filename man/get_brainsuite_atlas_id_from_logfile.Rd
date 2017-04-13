@@ -15,4 +15,3 @@ Read the BrainSuite atlas identifier from the svreg log file.
 \details{
 Valid atlases are BrainSuiteAtlas1 or BCI-DNI_brain_atlas
 }
-

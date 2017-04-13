@@ -16,4 +16,3 @@ save_bss_out(bss_data, bss_model, outdir = "")
 \description{
 Save the statistical analysis output
 }
-

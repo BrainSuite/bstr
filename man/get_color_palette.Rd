@@ -14,4 +14,3 @@ get_color_palette(cmap_name, N)
 \description{
 Get a color palette (Hex color code list) for a colormap
 }
-

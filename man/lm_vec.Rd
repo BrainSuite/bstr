@@ -26,4 +26,3 @@ This could be accomodated in the future versions.
 Also currently, this function returns the p-values and the t-statistics for the \code{main_effect}
 only. Returning the statistics for all variables could be accomodated in the future versions.
 }
-

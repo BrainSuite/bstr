@@ -4,8 +4,8 @@
 \name{save_out}
 \alias{save_out}
 \alias{save_out,BssCBMOutput-method}
-\alias{save_out,BssROIOutput-method}
 \alias{save_out,BssTBMOutput-method}
+\alias{save_out,BssROIOutput-method}
 \title{Generic save function for \code{BssOutput}}
 \usage{
 save_out(bss_out, bss_data, bss_model)
@@ -33,4 +33,3 @@ Instead the user should call \code{\link{save_bss_out}}.
 \seealso{
 \code{\link{save_bss_out}}
 }
-

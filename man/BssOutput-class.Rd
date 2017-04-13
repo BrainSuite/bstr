@@ -2,8 +2,8 @@
 % Please edit documentation in R/bssoutput_class.R
 \docType{class}
 \name{BssOutput-class}
-\alias{BssOutput}
 \alias{BssOutput-class}
+\alias{BssOutput}
 \title{S4 class for saving results of statistical analysis}
 \description{
 S4 class for saving results of statistical analysis

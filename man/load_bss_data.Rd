@@ -43,4 +43,3 @@ csv="/path/to/my/demographics.csv", roiid=501, roimeas="gmthickness")
 }
 
 }
-

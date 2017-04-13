@@ -25,4 +25,3 @@ will be called internally from \code{\link{bss_anova}}
 \code{\link{bss_anova}} for most commonly used function for ANOVA, \code{\link{lm_vec}} for vectorized linear regression, \code{\link{ttest_vec}} for
 vectorized independent sample and paired t-tests.
 }
-

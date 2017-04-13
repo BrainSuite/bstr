@@ -2,8 +2,8 @@
 % Please edit documentation in R/bssmodel_class.R
 \docType{class}
 \name{BssModel-class}
-\alias{BssModel}
 \alias{BssModel-class}
+\alias{BssModel}
 \title{S4 class for representing the statistical model}
 \description{
 S4 class for representing the statistical model

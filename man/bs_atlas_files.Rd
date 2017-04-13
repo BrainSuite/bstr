@@ -12,4 +12,3 @@ bs_atlas_files
 List of atlas files used in BrainSuite
 }
 \keyword{datasets}
-

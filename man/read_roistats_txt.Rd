@@ -17,4 +17,3 @@ read_roistats_txt(roiwise_txt_filename, roiid, roimeas = "gmthickness")
 \description{
 Reads the BrainSuite ROI stats file saved for each subject after executing SVREG.
 }
-

@@ -19,4 +19,3 @@ This script reads from and writes to the setup configuration file (bssr.ini) for
 Usually this will be called automatically when the package is installed and loaded
 for the first time. Optionally, it can be executed by the user immediately after installing bssr.
 }
-

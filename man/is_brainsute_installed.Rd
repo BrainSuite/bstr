@@ -12,4 +12,3 @@ atlas files and data exist. This function is called from \code{\link{.onLoad}}
 when the package is loaded. It opens \code{bssr.ini} and checks if all the
 paths are valid.
 }
-

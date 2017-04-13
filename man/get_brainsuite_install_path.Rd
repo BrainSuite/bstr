@@ -9,4 +9,3 @@ get_brainsuite_install_path()
 \description{
 Retrieve BrainSuite installation path
 }
-

@@ -27,6 +27,6 @@ Imports:
     ggplot2 (>= 2.2.1),
     xml2,
     scales
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 URL: http://brainsuite.org/bss
 Suggests: testthat

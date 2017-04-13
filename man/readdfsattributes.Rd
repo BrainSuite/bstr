@@ -16,4 +16,3 @@ numeric vector of length \eqn{T}, where \eqn{T} is the number of attributes
 \description{
 Reads the BrainSuite dfs file attributes (\url{http://brainsuite.org/formats/dfs/}).
 }
-

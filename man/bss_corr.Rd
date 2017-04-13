@@ -20,4 +20,3 @@ coefficient. The brain imaging phenotype is automatically selected from the type
 \details{
 \code{bss_data} can be of the type "cbm", "tbm", or "roi".
 }
-

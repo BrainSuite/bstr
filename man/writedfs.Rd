@@ -15,4 +15,3 @@ vertices, triangles, attributes etc.}
 \description{
 Save surface geometry to a dfs file (\url{http://brainsuite.org/formats/dfs/})
 }
-

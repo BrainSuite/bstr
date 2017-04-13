@@ -16,4 +16,3 @@ The modelspec file was used in the previous versions of bssr.
 Currently, the user does not have to create this explicitly.
 This functionality is still kept in case a future need arises to generate these automatically.
 }
-

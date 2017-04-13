@@ -16,4 +16,3 @@ General linear model
 ANOVA
 Paired and Independent samples t-test
 }
-

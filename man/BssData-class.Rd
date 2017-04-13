@@ -2,8 +2,8 @@
 % Please edit documentation in R/bssdata_class.R
 \docType{class}
 \name{BssData-class}
-\alias{BssData}
 \alias{BssData-class}
+\alias{BssData}
 \title{S4 class for storing data for statistical analysis}
 \description{
 S4 class for storing data for statistical analysis

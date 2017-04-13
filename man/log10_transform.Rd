@@ -15,4 +15,3 @@ numeric vector containing the log10 transformed \code{values}
 \description{
 log10 transform
 }
-

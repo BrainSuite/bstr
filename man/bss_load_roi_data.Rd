@@ -20,4 +20,3 @@ bss_load_roi_data(subjects_dir, csv, roiid, roimeas, outdir = NULL)
 \description{
 Loads the ROI measure for statistical analysis.
 }
-

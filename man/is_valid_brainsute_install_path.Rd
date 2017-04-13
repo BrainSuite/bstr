@@ -12,4 +12,3 @@ is_valid_brainsute_install_path(brainsuite_path = "")
 \description{
 Check if a given BrainSuite path is valid
 }
-

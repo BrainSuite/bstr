@@ -22,4 +22,3 @@ imaging phenotypes for a categorical variable.
 The degrees of freedom are calculated using the Welch–Satterthwaite approximation by default.
 \code{bss_data} can be of the type "cbm", "tbm", or "roi".
 }
-

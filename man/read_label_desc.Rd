@@ -9,4 +9,3 @@ read_label_desc()
 \description{
 Read BrainSuite label description file
 }
-

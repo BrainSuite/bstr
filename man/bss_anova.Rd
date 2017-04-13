@@ -28,4 +28,3 @@ results from \code{lm_vec}. This could be accomodated in the future versions.
 \seealso{
 \code{\link{lm_vec}} for linear regression, \code{\link{bss_ttest}} for independent sample and paired t-tests.
 }
-

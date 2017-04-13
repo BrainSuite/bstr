@@ -3,10 +3,10 @@
 \docType{methods}
 \name{load_data}
 \alias{load_data}
-\alias{load_data,BssCBMData-method}
 \alias{load_data,BssData-method}
-\alias{load_data,BssROIData-method}
+\alias{load_data,BssCBMData-method}
 \alias{load_data,BssTBMData-method}
+\alias{load_data,BssROIData-method}
 \title{A generic function to load data for statistical analysis.}
 \usage{
 load_data(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = "left",
@@ -46,4 +46,3 @@ Instead the user should call \code{\link{load_bss_data}}.
 \seealso{
 \code{\link{load_bss_data}}
 }
-

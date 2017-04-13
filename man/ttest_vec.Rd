@@ -25,4 +25,3 @@ For a dependent (paired) samples t-test, \eqn{N1 = N2}.
 The degrees of freedom are calculated using the Welch–Satterthwaite approximation by default.
 \code{bss_data} can be of the type "cbm", "tbm", or "roi".
 }
-

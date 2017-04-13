@@ -12,4 +12,3 @@ bs_file_formats
 List of file formats used in BrainSuite
 }
 \keyword{datasets}
-

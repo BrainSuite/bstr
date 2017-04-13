@@ -2,8 +2,8 @@
 % Please edit documentation in R/bss_colormaps.R
 \docType{class}
 \name{BssColormap-class}
-\alias{BssColormap}
 \alias{BssColormap-class}
+\alias{BssColormap}
 \title{An S4 class for representing colormaps}
 \description{
 An S4 class for representing colormaps

@@ -15,4 +15,3 @@ list object containing the dfs header, vertices, triangles, attributes etc.
 \description{
 Reads the BrainSuite dfs file format specified at \url{http://brainsuite.org/formats/dfs/}
 }
-

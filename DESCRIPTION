@@ -12,7 +12,7 @@ Description: The BrainSuite Statistics toolbox allows the application of advance
   outputs generated from BrainSuite. This enables population or group analysis of 
   cortical surface based data, volumetric deformation fields (tensors) or sulcal 
   morphology. 
-License: GPL-2
+License: GPL-2 | file LICENSE
 LazyData: true
 Encoding: UTF-8
 Imports:

@@ -21,6 +21,7 @@ Imports:
     DT (>= 0.2.0),
     ini,
     tools,
+    RColorBrewer,
     RNifti,
     methods,
     ggplot2 (>= 2.2.1),

@@ -77,8 +77,13 @@ get_brainsuite_path_on_unix <- function() {
 
 get_brainsuite_path_on_windows <- function() {
 
-  message('get_brainsuite_path_on_windows not implemented.', appendLF = TRUE)
-
+  bs_paths <- sort(list.files('C:/Program Files', 'BrainSuite', full.names = TRUE), decreasing = TRUE)[1]
+  if (!is.na(bs_paths[1])) {
+    # Check if the required files exist
+    if (check_bs_atlas_exists(bs_paths[1], quiet = TRUE, raise_error = FALSE)) return(bs_paths[1]) else return("")
+  }
+  else
+    return("")
 }
 
 check_bs_atlas_exists <- function(brainsuite_path, quiet=FALSE, raise_error = TRUE) {

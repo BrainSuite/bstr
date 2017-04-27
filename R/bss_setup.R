@@ -67,7 +67,7 @@ get_brainsuite_path_on_unix <- function() {
     bs_paths <- sort(list.files(path.expand('~'), 'BrainSuite', full.names = TRUE), decreasing = TRUE)[1]
     if (!is.na(bs_paths[1])) {
       # Check if the required files exist
-
+      if (check_bs_atlas_exists(bs_paths[1], quiet = TRUE, raise_error = FALSE)) return(bs_paths[1]) else return("")
     }
     else
       return(NULL)

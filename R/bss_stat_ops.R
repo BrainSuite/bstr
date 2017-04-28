@@ -13,11 +13,11 @@
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
 #' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
 #' @param  bss_data Object of type \code{\link{BssData}}
-#'
+#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.
 #' @seealso \code{\link{lm_vec}} for linear regression, \code{\link{bss_ttest}} for independent sample and paired t-tests.
 #'
 #' @export
-bss_anova <- function(main_effect="", covariates="", bss_data) {
+bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr") {
 
   if (class(bss_data) == "BssROIData") {
     return(bss_roi_anova(main_effect = main_effect, covariates = covariates, bss_data = bss_data))
@@ -31,7 +31,8 @@ bss_anova <- function(main_effect="", covariates="", bss_data) {
   bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
   bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
   bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
-  bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
+  bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
+  # bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
   message('Done.')
   return(bss_model)
 }
@@ -231,11 +232,12 @@ bss_roi_lm <- function(main_effect="", covariates="", bss_data=bss_data) {
 #' @param corr_var Character variable name. This should be present in the demographics csv file associated
 #' with \code{bss_data}.
 #' @param  bss_data Object of type \code{\link{BssData}}.
+#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.
 #' @details
 #' \code{bss_data} can be of the type "cbm", "tbm", or "roi".
 #'
 #' @export
-bss_corr <- function(corr_var, bss_data) {
+bss_corr <- function(corr_var, bss_data, mult_comp="fdr") {
 
   message('Running correlations...', appendLF = FALSE)
   bss_model <- new("BssModel", model_type="bss_corr", corr_var = corr_var,
@@ -249,7 +251,8 @@ bss_corr <- function(corr_var, bss_data) {
   bss_model@pvalues <- sign(corr_coeff)*bss_model@pvalues
   bss_model@pvalues[is.na(bss_model@pvalues)] <- 1 # Set the p-values with the NA correlations to 1
   bss_model@corr_values <- corr_coeff
-  bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
+  bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
+  # bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
   bss_model@corr_values[abs(bss_model@pvalues) >= 0.05] <- 0
   message('Done.')
   return(bss_model)
@@ -281,12 +284,13 @@ corr_vec <- function(X, Y) {
 #' with \code{bss_data}.
 #' @param  bss_data Object of type \code{\link{BssData}}.
 #' @param  paired logical; is TRUE if \code{group_var} contains matching (dependent) samples. The default value is \code{FALSE}.
+#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.
 #' @details
 #' The degrees of freedom are calculated using the Welch–Satterthwaite approximation by default.
 #' \code{bss_data} can be of the type "cbm", "tbm", or "roi".
 #'
 #' @export
-bss_ttest <- function(group_var, bss_data, paired = FALSE) {
+bss_ttest <- function(group_var, bss_data, paired = FALSE, mult_comp="fdr") {
 
   if (paired == FALSE)
     bss_model <- new("BssModel", model_type="unpairedttest", group_var = group_var,
@@ -312,7 +316,8 @@ bss_ttest <- function(group_var, bss_data, paired = FALSE) {
   bss_model@pvalues <- pvalues
   bss_model@tvalues <- tvalues
   bss_model@tvalues[abs(pvalues) >= 0.05] <- 0
-  bss_model@pvalues_adjusted <- p.adjust(abs(bss_model@pvalues), 'BH')
+  bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
+  # bss_model@pvalues_adjusted <- p.adjust(abs(bss_model@pvalues), 'BH')
 
   message('Done.')
   return(bss_model)
@@ -367,4 +372,27 @@ ttest_vec <- function(X1, X2, paired=FALSE) {
     pvalues <- 2*pt(abs(tvalues), deg, lower.tail = FALSE)
   }
   return(list("tvalues"=tvalues, "pvalues"=pvalues))
+}
+
+#' Adjust p-values for multiple comparisons testing
+#'
+#' Perform multiple comparisons correction for mass univariate tests.
+#' @param pvalues numeric vector of p values.
+#' @param method character string specifying the method for correction. The default method is 'fdr'. Supported methods are
+#' all types given in \code{\link{p.adjust.methods}}
+#'
+#' @export
+bss_p_adjust <- function(pvalues, method='fdr') {
+
+  valid_methods <- c(p.adjust.methods, "perm")
+  if ( !(method  %in% valid_methods) ) {
+    warning(sprintf("%s is not a valid multiple comparisons method. Using no correction.", method), call. = FALSE)
+    return (pvalues)
+  }
+
+  if (method %in% p.adjust.methods) {
+    return (p.adjust(abs(pvalues), method))
+  }
+
+
 }

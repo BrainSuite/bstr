@@ -4,7 +4,7 @@
 \alias{bss_anova}
 \title{Perform analysis of variance (ANOVA) for brain imaging data.}
 \usage{
-bss_anova(main_effect = "", covariates = "", bss_data)
+bss_anova(main_effect = "", covariates = "", bss_data, mult_comp = "fdr")
 }
 \arguments{
 \item{main_effect}{Character string containing an independent variable whose effect you want to measure.
@@ -15,6 +15,8 @@ either a categorical or a continuous variable.}
 one covariates are included, they should be separated by a \code{+} operator similar to an R formula.}
 
 \item{bss_data}{Object of type \code{\link{BssData}}}
+
+\item{mult_comp}{method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.}
 }
 \description{
 This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and uses an

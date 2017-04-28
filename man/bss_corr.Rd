@@ -4,13 +4,15 @@
 \alias{bss_corr}
 \title{Test for Correlation between a variable \code{corr_var} and a brain imaging phenotype.}
 \usage{
-bss_corr(corr_var, bss_data)
+bss_corr(corr_var, bss_data, mult_comp = "fdr")
 }
 \arguments{
 \item{corr_var}{Character variable name. This should be present in the demographics csv file associated
 with \code{bss_data}.}
 
 \item{bss_data}{Object of type \code{\link{BssData}}.}
+
+\item{mult_comp}{method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.}
 }
 \description{
 Test for correlation between a brain imaging phenotype (cortical thickness, determinant

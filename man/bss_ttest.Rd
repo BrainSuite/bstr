@@ -4,7 +4,7 @@
 \alias{bss_ttest}
 \title{T-test for for brain imaging phenotypes}
 \usage{
-bss_ttest(group_var, bss_data, paired = FALSE)
+bss_ttest(group_var, bss_data, paired = FALSE, mult_comp = "fdr")
 }
 \arguments{
 \item{group_var}{Categorical variable name. This should be present in the demographics csv file associated
@@ -13,6 +13,8 @@ with \code{bss_data}.}
 \item{bss_data}{Object of type \code{\link{BssData}}.}
 
 \item{paired}{logical; is TRUE if \code{group_var} contains matching (dependent) samples. The default value is \code{FALSE}.}
+
+\item{mult_comp}{method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.}
 }
 \description{
 Perform independent sample and paired sample t-tests for differences between means of brain

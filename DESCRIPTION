@@ -3,6 +3,7 @@ Type: Package
 Title: BrainSuite Statistics toolbox
 Version: 0.1.1
 Author: Shantanu H. Joshi
+Maintainer: Shantanu H. Joshi <shjoshi@ieee.org>
 Authors@R: c(person("Shantanu","Joshi", role=c("cre","aut"), email="shjoshi@ieee.org"),
              person("Yeun", "Kim", role="aut"),
              person("David", "Shattuck", role="ctb")
@@ -13,6 +14,7 @@ Description: The BrainSuite Statistics toolbox allows the application of advance
   cortical surface based data, volumetric deformation fields (tensors) or sulcal 
   morphology. 
 License: GPL-2 | file LICENSE
+Copyright: The Regents of the University of California.
 LazyData: true
 Encoding: UTF-8
 Imports:
@@ -27,5 +29,5 @@ Imports:
     ggplot2 (>= 2.2.1),
     scales (>= 0.4.1)
 RoxygenNote: 6.0.1
-URL: http://brainsuite.org/bss
+URL: http://brainsuite.org/bssr
 Suggests: testthat

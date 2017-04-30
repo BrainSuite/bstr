@@ -1,10 +1,11 @@
 #' @importFrom grDevices col2rgb colorRamp colorRampPalette dev.new
 #' @importFrom graphics axis plot rect
 #' @importFrom methods .valueClassTest new
-#' @importFrom stats formula model.matrix p.adjust pf pt
+#' @importFrom stats formula model.matrix p.adjust pf pt p.adjust.methods
 #' @importFrom utils read.csv read.table write.csv
 #' @importFrom DT datatable
 #' @importFrom pander pander
+#'
 NULL
 
 .onLoad <- function(libname, pkgname) {

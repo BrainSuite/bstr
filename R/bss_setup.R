@@ -136,6 +136,9 @@ get_bssr_ini_path <- function() {
 #'
 #' @export
 get_brainsuite_install_path <- function() {
+  brainsuite_path_bssr_ini <- get_brainsuite_path_from_bssr_ini()
+  if (is_valid_brainsute_install_path(brainsuite_path_bssr_ini))
+    return(brainsuite_path_bssr_ini)
   switch(get_os(),
          macOS = {brainsuite_path <- get_brainsuite_path_on_macOS()},
          unix = {brainsuite_path <- get_brainsuite_path_on_unix()},
@@ -144,6 +147,9 @@ get_brainsuite_install_path <- function() {
   return(brainsuite_path)
 }
 
+#' Retrieve BrainSuite installation path from bssr.ini
+#'
+#' @export
 get_brainsuite_path_from_bssr_ini <- function() {
   bssr_ini_file <- get_bssr_ini_path()
   bs_settings <- ini::read.ini(bssr_ini_file)

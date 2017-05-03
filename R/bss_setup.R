@@ -69,8 +69,13 @@ get_brainsuite_path_on_unix <- function() {
   	bs_path <- grep(bs, c(bs_opt_paths, bs_home_paths), value=TRUE)
   	return(bs_path) 
   	}
-  if (check_bs_atlas_exists(bs_opt_paths[1], quiet = TRUE, raise_error = FALSE)) return(bs_opt_paths[1]) else return("")
-  if (check_bs_atlas_exists(bs_home_paths[1], quiet = TRUE, raise_error = FALSE)) return(bs_home_paths[1]) else return("")
+  if (check_bs_atlas_exists(bs_opt_paths[1], quiet = TRUE, raise_error = FALSE)) {
+  	return(bs_opt_paths[1]) 
+  	}
+  else if (check_bs_atlas_exists(bs_home_paths[1], quiet = TRUE, raise_error = FALSE)){
+  	return(bs_home_paths[1])
+  	}
+  else return("")
   
 }
 

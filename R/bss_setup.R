@@ -63,20 +63,17 @@ get_brainsuite_path_on_unix <- function() {
   # Search /opt first
   bs_opt_paths <- sort(list.files('/opt', 'BrainSuite', full.names = TRUE), decreasing = TRUE)[1]
   bs_home_paths <- sort(list.files(path.expand('~'), 'BrainSuite', full.names = TRUE), decreasing = TRUE)[1]
-  
+
   if (check_bs_atlas_exists(bs_opt_paths[1], quiet = TRUE, raise_error = FALSE) && check_bs_atlas_exists(bs_home_paths[1], quiet = TRUE, raise_error = FALSE)) {
-  	bs <- sort(c(basename(bs_opt_paths), basename(bs_home_paths)), decreasing=TRUE)[1]
-  	bs_path <- grep(bs, c(bs_opt_paths, bs_home_paths), value=TRUE)
-  	return(bs_path) 
-  	}
-  if (check_bs_atlas_exists(bs_opt_paths[1], quiet = TRUE, raise_error = FALSE)) {
-  	return(bs_opt_paths[1]) 
-  	}
-  else if (check_bs_atlas_exists(bs_home_paths[1], quiet = TRUE, raise_error = FALSE)){
-  	return(bs_home_paths[1])
-  	}
-  else return("")
-  
+    bs <- sort(c(basename(bs_opt_paths), basename(bs_home_paths)), decreasing=TRUE)[1]
+    bs_path <- grep(bs, c(bs_opt_paths, bs_home_paths), value=TRUE)
+    return(bs_path[1])
+  }
+  if (check_bs_atlas_exists(bs_opt_paths[1], quiet = TRUE, raise_error = FALSE)) return(bs_opt_paths[1])
+  else if (check_bs_atlas_exists(bs_home_paths[1], quiet = TRUE, raise_error = FALSE)) return(bs_home_paths[1])
+  else
+    return("")
+
 }
 
 get_brainsuite_path_on_windows <- function() {

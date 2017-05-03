@@ -416,6 +416,10 @@ bss_maxTperm <- function(main_effect="", covariates="", bss_data, num_of_perm) {
   bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
   bss_model <- anova_vec(bss_lm_full, bss_lm_null, bss_data)
 
+  ## TODO: maybe give user option to set number of cores?
+  cl <- parallel::makeCluster(parallel::detectCores())
+  registerDoParallel(cl)
+
   null_distribution_t <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, num_of_perm)
   pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, null_distribution_t)
 
@@ -444,10 +448,6 @@ maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
   residuals_null <- bss_lm_null@residuals
 
   # (3) compute a set of permuted data Y
-  ## TODO: maybe give user option to set number of cores?
-  cl <- parallel::makeCluster(parallel::detectCores())
-  registerDoParallel(cl)
-
   tvalues_null <- foreach(j=1:num_of_perm, .export=c('N', 'residuals_null', 'bss_lm_null', 'gamma_hat','bss_data',
                                                              'main_effect', 'covariates', 'lm_vec'), .packages='Matrix') %dopar% {
                                                                set.seed(j)

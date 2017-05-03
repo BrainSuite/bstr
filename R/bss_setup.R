@@ -61,18 +61,19 @@ get_brainsuite_path_on_macOS <- function() {
 get_brainsuite_path_on_unix <- function() {
 
   # Search /opt first
-  bs_paths <- sort(list.files('/opt', 'BrainSuite', full.names = TRUE), decreasing = TRUE)[1]
-  if (is.na(bs_paths[1])) {
-    # Search home directory first
-    bs_paths <- sort(list.files(path.expand('~'), 'BrainSuite', full.names = TRUE), decreasing = TRUE)[1]
-    if (!is.na(bs_paths[1])) {
-      # Check if the required files exist
-      if (check_bs_atlas_exists(bs_paths[1], quiet = TRUE, raise_error = FALSE)) return(bs_paths[1]) else return("")
-    }
-    else
-      return(NULL)
+  bs_opt_paths <- sort(list.files('/opt', 'BrainSuite', full.names = TRUE), decreasing = TRUE)[1]
+  bs_home_paths <- sort(list.files(path.expand('~'), 'BrainSuite', full.names = TRUE), decreasing = TRUE)[1]
 
+  if (check_bs_atlas_exists(bs_opt_paths[1], quiet = TRUE, raise_error = FALSE) && check_bs_atlas_exists(bs_home_paths[1], quiet = TRUE, raise_error = FALSE)) {
+    bs <- sort(c(basename(bs_opt_paths), basename(bs_home_paths)), decreasing=TRUE)[1]
+    bs_path <- grep(bs, c(bs_opt_paths, bs_home_paths), value=TRUE)
+    return(bs_path[1])
   }
+  if (check_bs_atlas_exists(bs_opt_paths[1], quiet = TRUE, raise_error = FALSE)) return(bs_opt_paths[1])
+  else if (check_bs_atlas_exists(bs_home_paths[1], quiet = TRUE, raise_error = FALSE)) return(bs_home_paths[1])
+  else
+    return("")
+
 }
 
 get_brainsuite_path_on_windows <- function() {
@@ -136,6 +137,9 @@ get_bssr_ini_path <- function() {
 #'
 #' @export
 get_brainsuite_install_path <- function() {
+  brainsuite_path_bssr_ini <- get_brainsuite_path_from_bssr_ini()
+  if (is_valid_brainsute_install_path(brainsuite_path_bssr_ini))
+    return(brainsuite_path_bssr_ini)
   switch(get_os(),
          macOS = {brainsuite_path <- get_brainsuite_path_on_macOS()},
          unix = {brainsuite_path <- get_brainsuite_path_on_unix()},
@@ -144,6 +148,9 @@ get_brainsuite_install_path <- function() {
   return(brainsuite_path)
 }
 
+#' Retrieve BrainSuite installation path from bssr.ini
+#'
+#' @export
 get_brainsuite_path_from_bssr_ini <- function() {
   bssr_ini_file <- get_bssr_ini_path()
   bs_settings <- ini::read.ini(bssr_ini_file)

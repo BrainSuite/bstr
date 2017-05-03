@@ -61,6 +61,7 @@ BssModel <- setClass(
     Fstat = "numeric",
     beta_coeff = "matrix",
     rss = "numeric",
+    residuals = "matrix",
     se = "numeric",
     pvalues_adjusted = "numeric",
     stats_commands = "vector"

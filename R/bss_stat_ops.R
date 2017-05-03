@@ -167,10 +167,12 @@ lm_vec <- function(main_effect = "", covariates = "", bss_data) {
   se <- sqrt(diag(solve(t(X) %*% X)))[[main_effect]] * sqrt(rss / (N-Np-1)) # standard error
   tvalues <- beta_coeff[[main_effect, 1]]/(se + .Machine$double.eps) # tvalue
   pvalues <- 2*pt(abs(tvalues), N-Np-1, lower.tail = FALSE) # pvalue
+  residuals <- bss_data@data_array - Y
   bss_model@pvalues <- pvalues
   bss_model@tvalues <- tvalues
   bss_model@beta_coeff <- beta_coeff
   bss_model@rss <- rss
+  bss_model@residuals <- residuals
   return(bss_model)
 }
 
@@ -387,12 +389,55 @@ bss_p_adjust <- function(pvalues, method='fdr') {
   valid_methods <- c(p.adjust.methods, "perm")
   if ( !(method  %in% valid_methods) ) {
     warning(sprintf("%s is not a valid multiple comparisons method. Using no correction.", method), call. = FALSE)
-    return (pvalues)
+    return(pvalues)
   }
 
-  if (method %in% p.adjust.methods) {
-    return (p.adjust(abs(pvalues), method))
+  if (method %in% p.adjust.methods && method != "perm") {
+    return(p.adjust(abs(pvalues), method))
+  }
+
+  if (method == "perm") {
+    #TODO: implement bss_perm function and svoxel_threshold
   }
 
 
 }
+
+
+bss_perm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
+
+  N <- dim(bss_data@data_array)[1]
+
+  bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
+  bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
+
+  # (1) compute full model t-statistic
+  T0 <- bss_lm_full@tvalues
+
+  # (2) compute estimated gamma_hat and estimated residuals from reduced model
+  gamma_hat <- bss_lm_null@beta_coeff
+  residuals_null <- bss_lm_null@residuals
+
+  # (3) compute a set of permuted data Y
+  ## TODO: maybe give user option to set number of cores?
+  cl <- parallel::makeCluster(parallel::detectCores())
+  registerDoParallel(cl)
+  tvalues_null <- foreach(j=1:length(num_of_perm), .export=c('N', 'residuals_null', 'bss_lm_null', 'gamma_hat','bss_data',
+                                                             'main_effect', 'covariates')) %dopar% {
+                                                               set.seed(j)
+                                                               pmatrix <- as(sample(N), "pMatrix")
+                                                               Y_j <- (pmatrix %*% residuals_null) + (bss_lm_null@X_design_null %*% gamma_hat)
+
+                                                               # (4) regress permuted data Y_j against the full model
+                                                               bss_data_cp <- bss_data
+                                                               bss_data_cp@data_array <- Y_j
+                                                               bss_lm_full_perm <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data_cp )
+
+                                                               tvalue_j <- max(bss_lm_full_perm@tvalues)
+
+                                                             }
+  tvalues_null <- unlist(tvalues_null)
+  return(tvalues_null)
+}
+
+

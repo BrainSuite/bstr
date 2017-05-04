@@ -1,4 +1,4 @@
-#' bss: BrainSuite Statistics toolbox
+#' bssr: BrainSuite Statistics toolbox
 #'
 #' The BrainSuite Statistics toolbox allows the application of advanced
 #' statistical models to volumetric image, cortical surface and sulcal
@@ -12,5 +12,5 @@
 #'
 #'
 #' @docType package
-#' @name bss
+#' @name bssr
 NULL

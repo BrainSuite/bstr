@@ -31,7 +31,17 @@ bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr") 
   bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
   bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
   bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
-  bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
+  if (mult_comp[1] == "perm"){
+    cl <- parallel::makeCluster(parallel::detectCores())
+    registerDoParallel(cl)
+    options(warn=-1)
+    null_distribution_t <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, mult_comp[2])
+    bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, null_distribution_t)
+    options(warn=0)
+    stopCluster(cl)
+  }
+  else
+    bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp[1])
   # bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
   message('Done.')
   return(bss_model)
@@ -405,32 +415,33 @@ bss_p_adjust <- function(pvalues, method='fdr') {
 
 
 
-bss_maxTperm <- function(main_effect="", covariates="", bss_data, num_of_perm) {
-
-  if (class(bss_data) == "BssROIData") {
-    return(bss_roi_anova(main_effect = main_effect, covariates = covariates, bss_data = bss_data))
-  }
-
-  message('Running the statistical model and permutation tests. This may take a while...', appendLF = FALSE)
-  bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
-  bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
-  bss_model <- anova_vec(bss_lm_full, bss_lm_null, bss_data)
-
-  ## TODO: maybe give user option to set number of cores?
-  cl <- parallel::makeCluster(parallel::detectCores())
-  registerDoParallel(cl)
-
-  null_distribution_t <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, num_of_perm)
-  pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, null_distribution_t)
-
-  bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
-  bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
-  bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
-  bss_model@pvalues_adjusted <- pvalues_adjusted
-  # bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
-  message('Done.')
-  return(bss_model)
-}
+# bss_maxTperm <- function(main_effect="", covariates="", bss_data, num_of_perm) {
+# 
+#   if (class(bss_data) == "BssROIData") {
+#     return(bss_roi_anova(main_effect = main_effect, covariates = covariates, bss_data = bss_data))
+#   }
+# 
+#   message('Running the statistical model and permutation tests. This may take a while...', appendLF = FALSE)
+#   bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
+#   bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
+#   bss_model <- anova_vec(bss_lm_full, bss_lm_null, bss_data)
+# 
+#   ## TODO: maybe give user option to set number of cores?
+#   cl <- parallel::makeCluster(parallel::detectCores())
+#   registerDoParallel(cl)
+# 
+#   null_distribution_t <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, num_of_perm)
+#   pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, null_distribution_t)
+# 
+#   #TODO: add stopCluster(cl)
+#   bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+#   bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+#   bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+#   bss_model@pvalues_adjusted <- pvalues_adjusted
+#   # bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
+#   message('Done.')
+#   return(bss_model)
+# }
 
 
 maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
@@ -465,8 +476,6 @@ maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
   tvalues_null <- unlist(tvalues_null)
   return(tvalues_null)
 
-  # bss_lm_full@pvalues_adjusted <- pvalues_adjusted
-  # return(bss_lm_full)
 }
 
 

@@ -445,37 +445,37 @@ bss_p_adjust <- function(pvalues, method='fdr') {
 
 
 maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
-
+  
   N <- dim(bss_data@data_array)[1]
-
+  
   bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
   bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
-
+  
   # (1) compute full model t-statistic
   # T0 <- bss_lm_full@tvalues
-
+  
   # (2) compute estimated gamma_hat and estimated residuals from reduced model
   gamma_hat <- bss_lm_null@beta_coeff
   residuals_null <- bss_lm_null@residuals
-
+  
   # (3) compute a set of permuted data Y
   tvalues_null <- foreach(j=1:num_of_perm, .export=c('N', 'residuals_null', 'bss_lm_null', 'gamma_hat','bss_data',
-                                                             'main_effect', 'covariates', 'lm_vec'), .packages='Matrix') %dopar% {
-                                                               set.seed(j)
-                                                               pmatrix <- as(sample(N), "pMatrix")
-                                                               Y_j <- (pmatrix %*% residuals_null) + (bss_lm_null@X_design_null %*% gamma_hat)
-
-                                                               # (4) regress permuted data Y_j against the full model
-                                                               bss_data_cp <- bss_data
-                                                               bss_data_cp@data_array <- Y_j
-                                                               bss_lm_full_perm <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data_cp )
-
-                                                               tvalue_j <- max(bss_lm_full_perm@tvalues)
-
-                                                             }
+                                                     'main_effect', 'covariates', 'lm_vec'), .packages='Matrix') %dopar% {
+                                                       set.seed(j)
+                                                       pmatrix <- as(sample(N), "pMatrix")
+                                                       Y_j <- (pmatrix %*% residuals_null) + (bss_lm_null@X_design_null %*% gamma_hat)
+                                                       
+                                                       # (4) regress permuted data Y_j against the full model
+                                                       bss_data_cp <- bss_data
+                                                       bss_data_cp@data_array <- Y_j
+                                                       bss_lm_full_perm <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data_cp )
+                                                       
+                                                       tvalue_j <- max(bss_lm_full_perm@tvalues)
+                                                       
+                                                     }
   tvalues_null <- unlist(tvalues_null)
   return(tvalues_null)
-
+  
 }
 
 

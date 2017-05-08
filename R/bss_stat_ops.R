@@ -452,7 +452,7 @@ maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
   bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
 
   # (1) compute full model t-statistic
-  T0 <- bss_lm_full@tvalues
+  # T0 <- bss_lm_full@tvalues
 
   # (2) compute estimated gamma_hat and estimated residuals from reduced model
   gamma_hat <- bss_lm_null@beta_coeff
@@ -485,7 +485,7 @@ perm_p_adjust <- function(main_effect = "", covariates = "", bss_data, tvalues_n
   tvalues <- bss_lm_full@tvalues
 
   pvalues <- foreach(i=1:length(tvalues), .export=c()) %dopar% {
-    p <- (sum(abs(tvalues_null) >= abs(tvalues[i])) + 1) / length(tvalues_null)
+    p <- (sum(abs(tvalues_null) >= abs(tvalues[i])) + 1) / (length(tvalues_null) + 1)
     pvalue_widx <- array(c(p,i), dim = c(1,2))
   }
 

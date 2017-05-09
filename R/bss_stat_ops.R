@@ -17,7 +17,7 @@
 #' @seealso \code{\link{lm_vec}} for linear regression, \code{\link{bss_ttest}} for independent sample and paired t-tests.
 #'
 #' @export
-bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr") {
+bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr", niter=5000) {
 
   if (class(bss_data) == "BssROIData") {
     return(bss_roi_anova(main_effect = main_effect, covariates = covariates, bss_data = bss_data))
@@ -31,17 +31,32 @@ bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr") 
   bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
   bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
   bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
-  if (mult_comp[1] == "perm"){
-    cl <- parallel::makeCluster(parallel::detectCores())
-    registerDoParallel(cl)
-    options(warn=-1)
-    null_distribution_t <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, mult_comp[2])
-    bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, null_distribution_t)
-    options(warn=0)
-    stopCluster(cl)
-  }
-  else
-    bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp[1])
+  
+  switch(mult_comp,
+    perm={
+      cl <- parallel::makeCluster(parallel::detectCores())
+      registerDoParallel(cl)
+      options(warn=-1)
+      null_distribution_t <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
+      bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, null_distribution_t)
+      options(warn=0)
+      stopCluster(cl)
+    },
+    fdr={
+      bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
+    }
+  )
+  # if (mult_comp == "perm"){
+  #   cl <- parallel::makeCluster(parallel::detectCores())
+  #   registerDoParallel(cl)
+  #   options(warn=-1)
+  #   null_distribution_t <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, mult_comp[2])
+  #   bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, null_distribution_t)
+  #   options(warn=0)
+  #   stopCluster(cl)
+  # }
+  # else
+  #   bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
   # bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
   message('Done.')
   return(bss_model)
@@ -452,28 +467,30 @@ maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
   bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
   
   # (1) compute full model t-statistic
-  # T0 <- bss_lm_full@tvalues
+  T0 <- bss_lm_full@tvalues
+  maxT0 <- T0[ which.max( abs(T0) ) ]
   
   # (2) compute estimated gamma_hat and estimated residuals from reduced model
   gamma_hat <- bss_lm_null@beta_coeff
   residuals_null <- bss_lm_null@residuals
   
   # (3) compute a set of permuted data Y
-  tvalues_null <- foreach(j=1:num_of_perm, .export=c('N', 'residuals_null', 'bss_lm_null', 'gamma_hat','bss_data',
+  bss_data_cp <- bss_data
+  tvalues_null <- foreach(j=1:(num_of_perm-1), .export=c('maxT0', 'N', 'residuals_null', 'bss_lm_null', 'gamma_hat','bss_data_cp',
                                                      'main_effect', 'covariates', 'lm_vec'), .packages='Matrix') %dopar% {
                                                        set.seed(j)
                                                        pmatrix <- as(sample(N), "pMatrix")
                                                        Y_j <- (pmatrix %*% residuals_null) + (bss_lm_null@X_design_null %*% gamma_hat)
                                                        
                                                        # (4) regress permuted data Y_j against the full model
-                                                       bss_data_cp <- bss_data
+                                                       # bss_data_cp <- bss_data
                                                        bss_data_cp@data_array <- Y_j
                                                        bss_lm_full_perm <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data_cp )
                                                        
-                                                       tvalue_j <- max(bss_lm_full_perm@tvalues)
+                                                       tvalue_j <- bss_lm_full_perm@tvalues[ which.max( abs(bss_lm_full_perm@tvalues) ) ]
                                                        
                                                      }
-  tvalues_null <- unlist(tvalues_null)
+  tvalues_null <- c(unlist(tvalues_null), maxT0)
   return(tvalues_null)
   
 }
@@ -485,7 +502,7 @@ perm_p_adjust <- function(main_effect = "", covariates = "", bss_data, tvalues_n
   tvalues <- bss_lm_full@tvalues
 
   pvalues <- foreach(i=1:length(tvalues), .export=c()) %dopar% {
-    p <- (sum(abs(tvalues_null) >= abs(tvalues[i])) + 1) / (length(tvalues_null) + 1)
+    p <- sum(abs(tvalues_null) >= abs(tvalues[i])) / (length(tvalues_null) + 1)
     pvalue_widx <- array(c(p,i), dim = c(1,2))
   }
 

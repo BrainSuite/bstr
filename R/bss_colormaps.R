@@ -1,3 +1,17 @@
+# BrainSuite Statistics Toolbox in R (bssr)
+# Copyright (C) 2017 The Regents of the University of California
+# Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
+#
+# This program is free software; you can redistribute it and/or modify it under the terms
+# of the GNU General Public License as published by the Free Software Foundation; version 2.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License version 2 for more details.
+#
+# You should have received a copy of the GNU General Public License along with this program;
+# if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
 #' An S4 class for representing colormaps
 #' @slot cmap_type A character string for the type of colormap. Valid values are "corr_values", "tvalues", "log_pvalues", "log_pvalues_adjusted"
 #' @slot cmap_name A character string for the title of the colormap. This string will be displayed on the colorbar.

@@ -28,21 +28,22 @@ bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr", 
   bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
   bss_model <- anova_vec(bss_lm_full, bss_lm_null, bss_data)
 
-  bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
-  bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
-  bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
-  
   switch(mult_comp,
     perm={
       cl <- parallel::makeCluster(parallel::detectCores())
       registerDoParallel(cl)
       options(warn=-1)
-      null_distribution_t <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
-      bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, null_distribution_t)
+      pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
+      bss_model@pvalues <- do.call('rbind', pvalue_and_nulldist)[,1]
+      nulldist <- p_sort <- do.call('rbind', pvalue_and_nulldist)[,2]
+      bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
       options(warn=0)
       stopCluster(cl)
     },
     fdr={
+      bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+      bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+      bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
       bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
     }
   )
@@ -476,8 +477,9 @@ maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
   
   # (3) compute a set of permuted data Y
   bss_data_cp <- bss_data
-  tvalues_null <- foreach(j=1:(num_of_perm-1), .export=c('maxT0', 'N', 'residuals_null', 'bss_lm_null', 'gamma_hat','bss_data_cp',
-                                                     'main_effect', 'covariates', 'lm_vec'), .packages='Matrix') %dopar% {
+  
+  tvalues_all <- foreach(j=1:(num_of_perm-1), .export=c('T0', 'maxT0', 'N', 'residuals_null', 'bss_lm_null', 'gamma_hat','bss_data_cp',
+                                                     'main_effect', 'covariates', 'lm_vec'), .packages=c('Matrix', 'bit')) %dopar% {
                                                        set.seed(j)
                                                        pmatrix <- as(sample(N), "pMatrix")
                                                        Y_j <- (pmatrix %*% residuals_null) + (bss_lm_null@X_design_null %*% gamma_hat)
@@ -487,11 +489,31 @@ maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
                                                        bss_data_cp@data_array <- Y_j
                                                        bss_lm_full_perm <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data_cp )
                                                        
+                                                       ## binarize vector after comparing permuted T and observed T
+                                                       idx <- which( abs(T0) >= abs(bss_lm_full_perm@tvalues) )
+                                                       
+                                                       t_bin <- as.bit(rep(FALSE, dim(bss_data_cp@data_array)[2]))
+                                                       t_bin[idx] <- TRUE
+                                                       
                                                        tvalue_j <- bss_lm_full_perm@tvalues[ which.max( abs(bss_lm_full_perm@tvalues) ) ]
                                                        
+                                                       return(list(t_bin, tvalue_j))
+                                                       
                                                      }
-  tvalues_null <- c(unlist(tvalues_null), maxT0)
-  return(tvalues_null)
+  tvalues_all[[num_of_perm]] <- list(as.bit(rep(TRUE, dim(bss_data@data_array)[2])), maxT0)
+  
+  pvalues <- foreach(n=1:dim(bss_data@data_array)[2], .export=c('tvalues_all', 'num_of_perm')) %dopar% {
+    count <- sum(sapply( seq(1, num_of_perm), function(x) (tvalues_all[[x]][[1]][n])) == TRUE)
+    pvalue <- count/num_of_perm
+    pvalue_widx <- array(c(pvalue, n), dim=c(1,2))
+  }
+  
+  p_sort <- do.call('rbind', pvalues)
+  pvalues_sort <- p_sort[order(p_sort[,2]), ]
+  
+  tvalues_null <- sapply( seq(1, num_of_perm), function(x) tvalues_all[[x]][[2]])
+  
+  return(list(pvalues_sort[,1], tvalues_null))
   
 }
 
@@ -502,7 +524,7 @@ perm_p_adjust <- function(main_effect = "", covariates = "", bss_data, tvalues_n
   tvalues <- bss_lm_full@tvalues
 
   pvalues <- foreach(i=1:length(tvalues), .export=c()) %dopar% {
-    p <- sum(abs(tvalues_null) >= abs(tvalues[i])) / (length(tvalues_null) + 1)
+    p <- sum(abs(tvalues_null) >= abs(tvalues[i])) / length(tvalues_null)
     pvalue_widx <- array(c(p,i), dim = c(1,2))
   }
 

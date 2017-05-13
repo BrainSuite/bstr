@@ -1,10 +1,8 @@
 Package: bssr
 Type: Package
-Title: BrainSuite Statistics toolbox
+Title: BrainSuite Statistics Toolbox
 Version: 0.1.1
-Author: Shantanu H. Joshi
-Maintainer: Shantanu H. Joshi <shjoshi@ieee.org>
-Authors@R: c(person("Shantanu","Joshi", role=c("cre","aut"), email="shjoshi@ieee.org"),
+Authors@R: c(person(given="Shantanu", family="Joshi", middle = "H.", role=c("cre","aut"), email="shjoshi@ieee.org"),
              person("Yeun", "Kim", role="aut"),
              person("David", "Shattuck", role="ctb")
              )

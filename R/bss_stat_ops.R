@@ -179,7 +179,7 @@ lm_vec <- function(main_effect = "", covariates = "", bss_data) {
     main_effect = "(Intercept)" # If main_effect is empty, return the parameters of the Intercept
 
   se <- sqrt(diag(solve(t(X) %*% X)))[[main_effect]] * sqrt(rss / (N-Np-1)) # standard error
-  tvalues <- beta_coeff[[main_effect, 1]]/(se + .Machine$double.eps) # tvalue
+  tvalues <- as.numeric(beta_coeff[main_effect, ]/(se + .Machine$double.eps)) # tvalue
   pvalues <- 2*pt(abs(tvalues), N-Np-1, lower.tail = FALSE) # pvalue
   bss_model@pvalues <- pvalues
   bss_model@tvalues <- tvalues

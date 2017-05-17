@@ -43,7 +43,7 @@ setup <- function(brainsuite_path = NULL, quiet = FALSE, raise_error = TRUE) {
     message('bssr setup is complete.', appendLF = TRUE)
   }
   else
-    message(paste('Warning: bssr setup is not complete.\n',
+    message(paste('bssr setup is not complete.\n',
                   'After making sure BrainSuite is installed, please run bssr::setup("/path/to/brainsuite/") manually.', sep = ""), appendLF = TRUE)
 }
 

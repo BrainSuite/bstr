@@ -34,8 +34,11 @@ bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr", 
       registerDoParallel(cl)
       options(warn=-1)
       pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
-      bss_model@pvalues <- do.call('rbind', pvalue_and_nulldist)[,1]
-      nulldist <- p_sort <- do.call('rbind', pvalue_and_nulldist)[,2]
+      bss_model@pvalues <- pvalue_and_nulldist[[1]]
+      bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+      bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+      bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+      nulldist <- pvalue_and_nulldist[[2]]
       bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
       options(warn=0)
       stopCluster(cl)
@@ -47,18 +50,7 @@ bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr", 
       bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
     }
   )
-  # if (mult_comp == "perm"){
-  #   cl <- parallel::makeCluster(parallel::detectCores())
-  #   registerDoParallel(cl)
-  #   options(warn=-1)
-  #   null_distribution_t <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, mult_comp[2])
-  #   bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, null_distribution_t)
-  #   options(warn=0)
-  #   stopCluster(cl)
-  # }
-  # else
-  #   bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
-  # bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
+
   message('Done.')
   return(bss_model)
 }
@@ -191,7 +183,7 @@ lm_vec <- function(main_effect = "", covariates = "", bss_data) {
     main_effect = "(Intercept)" # If main_effect is empty, return the parameters of the Intercept
 
   se <- sqrt(diag(solve(t(X) %*% X)))[[main_effect]] * sqrt(rss / (N-Np-1)) # standard error
-  tvalues <- beta_coeff[[main_effect, 1]]/(se + .Machine$double.eps) # tvalue
+  tvalues <- as.numeric(beta_coeff[main_effect, ]/(se + .Machine$double.eps)) # tvalue
   pvalues <- 2*pt(abs(tvalues), N-Np-1, lower.tail = FALSE) # pvalue
   residuals <- bss_data@data_array - Y
   bss_model@pvalues <- pvalues
@@ -490,7 +482,7 @@ maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
                                                        bss_lm_full_perm <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data_cp )
                                                        
                                                        ## binarize vector after comparing permuted T and observed T
-                                                       idx <- which( abs(T0) >= abs(bss_lm_full_perm@tvalues) )
+                                                       idx <- which( abs(T0) <= abs(bss_lm_full_perm@tvalues) )
                                                        
                                                        t_bin <- as.bit(rep(FALSE, dim(bss_data_cp@data_array)[2]))
                                                        t_bin[idx] <- TRUE
@@ -504,8 +496,9 @@ maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
   
   pvalues <- foreach(n=1:dim(bss_data@data_array)[2], .export=c('tvalues_all', 'num_of_perm')) %dopar% {
     count <- sum(sapply( seq(1, num_of_perm), function(x) (tvalues_all[[x]][[1]][n])) == TRUE)
-    pvalue <- count/num_of_perm
+    pvalue <- as.double(count/num_of_perm)
     pvalue_widx <- array(c(pvalue, n), dim=c(1,2))
+    # pvalue_widx <- list(pvalue, n)
   }
   
   p_sort <- do.call('rbind', pvalues)

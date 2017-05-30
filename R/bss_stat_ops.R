@@ -40,8 +40,8 @@ bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr", 
       bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
       nulldist <- pvalue_and_nulldist[[2]]
       bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
-      options(warn=0)
       stopCluster(cl)
+      options(warn=0)
     },
     fdr={
       bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
@@ -421,37 +421,22 @@ bss_p_adjust <- function(pvalues, method='fdr') {
 
 }
 
-
-
-# bss_maxTperm <- function(main_effect="", covariates="", bss_data, num_of_perm) {
-# 
-#   if (class(bss_data) == "BssROIData") {
-#     return(bss_roi_anova(main_effect = main_effect, covariates = covariates, bss_data = bss_data))
-#   }
-# 
-#   message('Running the statistical model and permutation tests. This may take a while...', appendLF = FALSE)
-#   bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
-#   bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
-#   bss_model <- anova_vec(bss_lm_full, bss_lm_null, bss_data)
-# 
-#   ## TODO: maybe give user option to set number of cores?
-#   cl <- parallel::makeCluster(parallel::detectCores())
-#   registerDoParallel(cl)
-# 
-#   null_distribution_t <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, num_of_perm)
-#   pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, null_distribution_t)
-# 
-#   #TODO: add stopCluster(cl)
-#   bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
-#   bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
-#   bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
-#   bss_model@pvalues_adjusted <- pvalues_adjusted
-#   # bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
-#   message('Done.')
-#   return(bss_model)
-# }
-
-
+#' Calculate p-values for vanilla permutation test and determine null distribution for max-t permutation test.
+#' 
+#' Perform permutation tests using Freedman-Lane method. 
+#' @param main_effect Character string containing an independent variable whose effect you want to measure.
+#' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
+#' either a categorical or a continuous variable.
+#' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
+#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
+#' @param bss_data Object of type \code{\link{BssData}}
+#' @param num_of_perm Number of iterations/shuffles for permutation test. 
+#' @details
+#' The permutation test handles the exchangeability assumption with Freedman-Lane Method. This function also
+#' utilizes multiprocessing to reduce computing time.
+#' \code{bss_data} can be of the type "cbm", "tbm", or "roi".
+#'
+#' @export
 maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
   
   N <- dim(bss_data@data_array)[1]
@@ -464,20 +449,19 @@ maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
   maxT0 <- T0[ which.max( abs(T0) ) ]
   
   # (2) compute estimated gamma_hat and estimated residuals from reduced model
-  gamma_hat <- bss_lm_null@beta_coeff
-  residuals_null <- bss_lm_null@residuals
+  # gamma_hat <- bss_lm_null@beta_coeff
+  # residuals_null <- bss_lm_null@residuals
   
   # (3) compute a set of permuted data Y
   bss_data_cp <- bss_data
   
-  tvalues_all <- foreach(j=1:(num_of_perm-1), .export=c('T0', 'maxT0', 'N', 'residuals_null', 'bss_lm_null', 'gamma_hat','bss_data_cp',
+  tvalues_all <- foreach(j=1:(num_of_perm-1), .export=c('T0', 'maxT0', 'N', 'bss_lm_null','bss_data_cp',
                                                      'main_effect', 'covariates', 'lm_vec'), .packages=c('Matrix', 'bit')) %dopar% {
                                                        set.seed(j)
                                                        pmatrix <- as(sample(N), "pMatrix")
-                                                       Y_j <- (pmatrix %*% residuals_null) + (bss_lm_null@X_design_null %*% gamma_hat)
+                                                       Y_j <- (pmatrix %*% bss_lm_null@residuals) + (bss_lm_null@X_design_null %*% bss_lm_null@beta_coeff)
                                                        
                                                        # (4) regress permuted data Y_j against the full model
-                                                       # bss_data_cp <- bss_data
                                                        bss_data_cp@data_array <- Y_j
                                                        bss_lm_full_perm <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data_cp )
                                                        
@@ -511,12 +495,25 @@ maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
 }
 
 
+#' Adjust p-values for multiple comparisons testing
+#'
+#' Perform multiple comparisons correction for mass univariate tests using the max-t method.
+#' @param main_effect Character string containing an independent variable whose effect you want to measure.
+#' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
+#' either a categorical or a continuous variable.
+#' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
+#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
+#' @param bss_data Object of type \code{\link{BssData}}
+#' @param tvalues_null Null distribution output from \code{\link{maxTperm}}. Statistics drawn from each
+#' shuffle are the maximum t-statistic within ROI.
+#'
+#' @export
 perm_p_adjust <- function(main_effect = "", covariates = "", bss_data, tvalues_null){
   bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
 
   tvalues <- bss_lm_full@tvalues
 
-  pvalues <- foreach(i=1:length(tvalues), .export=c()) %dopar% {
+  pvalues <- foreach(i=1:length(tvalues), .export=c('tvalues_null', 'tvalues')) %dopar% {
     p <- sum(abs(tvalues_null) >= abs(tvalues[i])) / length(tvalues_null)
     pvalue_widx <- array(c(p,i), dim = c(1,2))
   }

@@ -150,7 +150,12 @@ get_brainsuite_logfilename <- function(subjdir, csv) {
   # The first column has to contain subject IDs which are same as subject directories
   first_subjid <- demo[[1]][1]
   # Get atlas names from log files.
-  svreg_log_file <- file.path(subjdir, first_subjid, sprintf('%s.svreg.log', first_subjid))
+  svreg_log_file <- Sys.glob(file.path(subjdir, first_subjid, "*", '*.svreg.log'))
+  
+  if (length(svreg_log_file) == 0){
+    svreg_log_file <- Sys.glob(file.path(subjdir, first_subjid, '*.svreg.log'))
+  } 
+  # svreg_log_file <- file.path(subjdir, first_subjid, sprintf('%s.svreg.log', first_subjid))
   if (check_file_exists(svreg_log_file, raise_error = TRUE,
                     errmesg = sprintf('Could not find svreg.log in the subject directory %s/%s. Please check if the subject directory is valid.', subjdir, first_subjid)))
     return(tools::file_path_as_absolute(svreg_log_file))

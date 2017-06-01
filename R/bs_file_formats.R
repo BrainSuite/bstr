@@ -86,7 +86,13 @@ get_roi_file_list <- function(bss_data) {
 get_cbm_file_list <- function(bss_data, hemi, smooth = NULL) {
 
   # if (!is.null(smooth)) {
-  if (missing(smooth) | smooth == 0 | smooth == 0.0 | !is.null(smooth)){
+  if (missing(smooth) | smooth == 0 | smooth == 0.0 | is.null(smooth)){
+    if (identical(hemi, 'left'))
+      cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_file_formats$surf_left)
+    else
+      cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_file_formats$surf_right)
+  }
+  else {
     if (identical(hemi, 'left')) {
       # Replace '*' in surf_left_smooth by smoothing value
       surf_left_smooth <- gsub("\\*", sprintf('smooth%2.1f', smooth), bs_file_formats$surf_left_smooth )
@@ -97,12 +103,7 @@ get_cbm_file_list <- function(bss_data, hemi, smooth = NULL) {
       cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, surf_right_smooth)
     }
   }
-  else {
-    if (identical(hemi, 'left'))
-      cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_file_formats$surf_left)
-    else
-      cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_file_formats$surf_right)
-  }
+}
   # Check if all subjects have dfs files
   if ( !all(file.exists(cbm_filelist)) ) {
     message('Following subjects have missing dfs files')

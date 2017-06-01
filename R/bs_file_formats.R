@@ -103,7 +103,7 @@ get_cbm_file_list <- function(bss_data, hemi, smooth = NULL) {
       cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, surf_right_smooth)
     }
   }
-}
+
   # Check if all subjects have dfs files
   if ( !all(file.exists(cbm_filelist)) ) {
     message('Following subjects have missing dfs files')

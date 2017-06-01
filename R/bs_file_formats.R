@@ -26,9 +26,9 @@ bs_file_formats <- list(
   surf_atlas_left = 'mri.left.mid.cortex.dfs',
   surf_atlas_right = 'mri.right.mid.cortex.dfs',
   nii_atlas = 'mri.bfc.nii.gz',
-  nii_file = '%s.svreg.inv.map.jacdet.nii.gz',
+  nii_file = '%s.svreg.inv.jacobian.nii.gz',
   nii_maskfile = 'mri.cerebrum.mask.nii.gz',
-  nii_file_smooth = '%s.svreg.inv.map.jacdet.smooth%2.1fmm.nii.gz'
+  nii_file_smooth = '%s.svreg.inv.jacobian.smooth%2.1fmm.nii.gz'
 )
 
 #' List of atlas files used in BrainSuite
@@ -83,9 +83,10 @@ get_roi_file_list <- function(bss_data) {
   return(roi_filelist)
 }
 
-get_cbm_file_list <- function(bss_data, hemi, smooth = 0.0) {
+get_cbm_file_list <- function(bss_data, hemi, smooth = NULL) {
 
-  if (!is.null(smooth)) {
+  # if (!is.null(smooth)) {
+  if (missing(smooth) | smooth == 0 | smooth == 0.0 | !is.null(smooth)){
     if (identical(hemi, 'left')) {
       # Replace '*' in surf_left_smooth by smoothing value
       surf_left_smooth <- gsub("\\*", sprintf('smooth%2.1f', smooth), bs_file_formats$surf_left_smooth )
@@ -114,8 +115,9 @@ get_cbm_file_list <- function(bss_data, hemi, smooth = 0.0) {
 
 get_tbm_file_list <- function(bss_data, smooth = NULL) {
 
-  if (is.null(smooth)) {
-    tbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_file_formats$nii_file)
+  # if (is.null(smooth)) {
+  if (missing(smooth) | smooth == 0 | smooth == 0.0 | is.null(smooth)){
+    tbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$nii_file, bss_data@demographics$subjID))
   }
   else {
     nii_smooth <- sprintf(bs_file_formats$nii_file_smooth, bss_data@demographics$subjID, smooth)
@@ -126,7 +128,7 @@ get_tbm_file_list <- function(bss_data, smooth = NULL) {
   if ( !all(file.exists(tbm_filelist)) ) {
     message('Following subjects have missing nii.gz files')
     print(tbm_filelist[which(!file.exists(tbm_filelist))], row.names = FALSE)
-    stop('\nCheck if svreg was run succesfully and if jacdet* files exist for all the subjects.\nAlso check if smoothing was performed.', call. = FALSE)
+    stop('\nCheck if svreg was run succesfully and if jacobian* files exist for all the subjects.\nAlso check if smoothing was performed.', call. = FALSE)
   }
   return(tbm_filelist)
 }

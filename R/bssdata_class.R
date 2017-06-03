@@ -70,7 +70,7 @@ setMethod("initialize", valueClass = "BssData", signature = "BssData", function(
   check_file_exists(csv, raise_error = TRUE)
   .Object@subjdir = subjdir
   .Object@csv <- csv
-  .Object@demographics <- read.csv(csv)
+  .Object@demographics <- read_demographics(csv)
   return(.Object)
 })
 
@@ -178,7 +178,7 @@ setMethod("load_data", signature = "BssROIData", function(bss_data, roiid = NULL
 
 
 setMethod ("load_demographics", "BssData", function(object) {
-  object@demographics <- read.csv(object@csv)
+  object@demographics <- read_demographics(object@csv)
   return(object)
 })
 
@@ -199,8 +199,8 @@ setMethod ("load_demographics", "BssData", function(object) {
 #' Prior to using this function, BrainSuite and svreg should be run on all subjects.
 #' If required, smoothing should be performed on cortical surface or volumetric image based measures.
 #' A csv file containing subject demographic information should exist. The first column of this csv file
-#' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
-#' and should be exactly equal to the individual subject directory name.
+#' should have the subject identifiers. Subject identifiers can be alphanumeric
+#' and should be exactly equal to the individual subject directory names.
 #'
 #' @param type character string denoting type of analysis. Should be cbm, tbm, or roi.
 #' @param subjdir subject directory containing BrainSuite processed data.
@@ -272,3 +272,4 @@ check_files <- function(object){
     stop(sprintf("Demographics csv file %s does not exist.\n", object@csv), call. = FALSE)
   }
 }
+

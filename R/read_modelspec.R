@@ -27,7 +27,7 @@ read_modelspec <- function(modelspecfile) {
 
   # Open the svreg.log file and get the atlas file name
   if ( identical(tools::file_ext(mspec$csv), 'csv') ) {
-    demo <- read.csv(mspec$csv)
+    demo <- read_demographics(mspec$csv)
   }
   # The first column has to contain subject IDs which are same as subject directories
   first_subjid <- demo[[1]][1]

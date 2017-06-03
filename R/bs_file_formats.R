@@ -162,16 +162,16 @@ get_brainsuite_atlas_id_from_logfile <- function(logfile) {
 get_brainsuite_logfilename <- function(subjdir, csv) {
   # Open the svreg.log file and get the atlas file name
   if ( identical(tools::file_ext(csv), 'csv') ) {
-    demo <- read.csv(csv)
+    demo <- read_demographics(csv)
   }
   # The first column has to contain subject IDs which are same as subject directories
   first_subjid <- demo[[1]][1]
   # Get atlas names from log files.
   svreg_log_file <- Sys.glob(file.path(subjdir, first_subjid, "*", '*.svreg.log'))
-  
+
   if (length(svreg_log_file) == 0){
     svreg_log_file <- Sys.glob(file.path(subjdir, first_subjid, '*.svreg.log'))
-  } 
+  }
   # svreg_log_file <- file.path(subjdir, first_subjid, sprintf('%s.svreg.log', first_subjid))
   if (check_file_exists(svreg_log_file, raise_error = TRUE,
                     errmesg = sprintf('Could not find svreg.log in the subject directory %s/%s. Please check if the subject directory is valid.', subjdir, first_subjid)))
@@ -230,5 +230,12 @@ get_tbm_atlas_and_mask <- function(brainsuite_atlas_id) {
   check_file_exists(nii_atlas, raise_error = TRUE)
   check_file_exists(nii_atlas_mask, raise_error = TRUE)
   return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
+}
+
+read_demographics <- function(csvfile) {
+
+  demo <- read.csv(csvfile)
+  colnames(demo)[1] <- "subjID"
+  return(demo)
 }
 

@@ -18,12 +18,21 @@
 #' @export
 log10_transform <- function(values) {
   eps <- .Machine$double.eps
-  sgn <- (values + eps)/abs(values + eps)
-  logvalues <- - 1*sgn*log10(abs(values + eps))
+  sgn <- sign(values)
+  sgn[sgn == 0] <- 1
+  values[abs(values) < eps] <- eps
+  logvalues <- - 1*sgn*log10(abs(values))
   return(logvalues)
 }
 
 # TBD
 image_to_shape <- function(imagefile, shapefile, outputshapefile, resample) {
 
+}
+
+#' This function calculates the sign of t values. Differently from the sign() function, sign_tvalues(0) = 1
+sign_tvalues <- function(tvalues) {
+  tvalues_sign <- sign(tvalues)
+  tvalues_sign[tvalues_sign == 0] <- 1
+  return(tvalues_sign)
 }

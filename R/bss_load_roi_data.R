@@ -34,8 +34,7 @@ bss_load_roi_data <- function(subjects_dir, csv, roiid, roimeas, outdir=NULL) {
   else {
     dir.create(file.path(outdir), showWarnings = FALSE)
   }
-
-  demographics <- read.csv(csv)
+  demographics <- read_demographics(csv)
   if("File_roi" %in% colnames(demographics)){
     warning(sprintf("The file %s already contains a File_roi column.\nWill overwrite this column.\n", csv), call.=FALSE)
   }

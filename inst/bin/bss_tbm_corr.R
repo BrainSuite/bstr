@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 # BrainSuite Statistics Toolbox in R (bssr)
 # Copyright (C) 2017 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
@@ -11,29 +12,24 @@
 #
 # You should have received a copy of the GNU General Public License along with this program;
 # if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+library(methods)
+library(bssr)
 
-#' log10 transform
-#' @param values numeric vector
-#' @return numeric vector containing the log10 transformed \code{values}
-#' @export
-log10_transform <- function(values) {
-  eps <- .Machine$double.eps
-  sgn <- sign(values)
-  sgn[sgn == 0] <- 1
-  values[abs(values) < eps] <- eps
-  logvalues <- - 1*sgn*log10(abs(values))
-  return(logvalues)
-}
+"usage:
+bss_tbm_corr.R --subjdir=<subjdir> --csv=<csv> --corr_var=<corr_var> --odir=<odir> [--smooth=<smooth>]
+-h --help   show this help message and exit
+options:
+--subjdir subjdir subject directory
+--csv csv demographics csv
+--corr_var corr_var variable from the demographcis csv whose correlation needs to be computed
+--odir odir output directory
+--smooth smooth smoothing level
 
-# TBD
-image_to_shape <- function(imagefile, shapefile, outputshapefile, resample) {
+" -> doc
 
-}
+opt <- docopt::docopt(doc)
 
-#' This function calculates the sign of t values. Differently from the sign() function, sign_tvalues(0) = 1
-#' @param tvalues numeric vector
-sign_tvalues <- function(tvalues) {
-  tvalues_sign <- sign(tvalues)
-  tvalues_sign[tvalues_sign == 0] <- 1
-  return(tvalues_sign)
-}
+bss_data <- load_bss_data(type="tbm", subjdir = opt$subjdir,
+                          csv = opt$csv, smooth = as.numeric(opt$smooth))
+bss_model <- bss_corr(corr_var = opt$corr_var, bss_data = bss_data)
+save_bss_out(bss_data, bss_model, outdir=opt$odir)

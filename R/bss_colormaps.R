@@ -64,9 +64,8 @@ setGeneric("get_colors", valueClass = "matrix",function(bss_cmap) {
 
 get_logpvalue_colormap <- function(cmap_name, values) {
   hexcolrs <- RColorBrewer::brewer.pal(11, cmap_name)
-  hexcolrs[6] <- "#FFFFFF"
-  whitecolr <-  "#FFFFFF"
-  colfunc <- colorRampPalette(c("white"))
+  hexcolrs[6] <- hexcolrstr$gray
+  colfunc <- colorRampPalette(c("gray"))
   colfunc(10)
   # First 5 colors are negative
   # Last 5 colors are positive
@@ -111,7 +110,7 @@ get_logpvalue_colors <- function(cmap_name, values) {
   N <- 256
   if (pex < -1*log10(0.05)) {
     pex <- -1*log10(0.05)*1.001
-    lut <- get_color_palette('white', N)
+    lut <- get_color_palette('gray', N)
   }
   else {
     totlen <- 2*pex
@@ -120,7 +119,7 @@ get_logpvalue_colors <- function(cmap_name, values) {
     poslen <- pex - pFDRposlog
 
     negcolors <- get_color_palette('rev_winter', round(neglen*N/(1.001*totlen)))
-    zerocolors <- get_color_palette('white', round(zerolen*N/(1.001*totlen)))
+    zerocolors <- get_color_palette('gray', round(zerolen*N/(1.001*totlen)))
     poscolors <- get_color_palette('spring', round(poslen*N/(1.001*totlen)))
     lut <- c(negcolors, zerocolors, poscolors)
   }
@@ -149,11 +148,11 @@ get_tvalue_colors <- function(cmap_name, values) {
   neglen <- abs(tnegmax) - abs(tnegmin)
 
   if ( all(totlen == 0) ) {
-    lut <- get_color_palette('white', N)
+    lut <- get_color_palette('gray', N)
   }
   else {
     negcolors <- get_color_palette('rev_winter', round(neglen/(1.001*totlen)*N))
-    zerocolors <- get_color_palette('white', round(zerolen/(1.001*totlen)*N))
+    zerocolors <- get_color_palette('gray', round(zerolen/(1.001*totlen)*N))
     poscolors <- get_color_palette('spring', round(poslen/(1.001*totlen)*N))
     lut <- c(negcolors, zerocolors, poscolors)
   }
@@ -220,11 +219,19 @@ get_color_palette <- function(cmap_name, N) {
            return ( colorRampPalette(c("#0000FF", "#00FF80"))(ceiling(N)) )
          },
          white = {
-           return ( colorRampPalette(c("#FFFFFF"))(ceiling(N)) )
+           return ( colorRampPalette(c(hexcolrstr$white))(ceiling(N)) )
+         },
+         gray = {
+           return ( colorRampPalette(c(hexcolrstr$gray))(ceiling(N)) )
          }
-         )
+        )
 }
 
 save_BrainSuiteLUT <- function(filename, lut) {
   write(col2rgb(lut)/255, file=filename, sep = " ", ncolumns = 3)
 }
+
+hexcolrstr <- list(
+  white = "#FFFFFF",
+  gray = "#CCCCCC"
+)

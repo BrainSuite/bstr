@@ -29,8 +29,18 @@ bs_file_formats <- list(
   nii_file = '%s.svreg.inv.jacobian.nii.gz',
   nii_maskfile = 'mri.cerebrum.mask.nii.gz',
   nii_file_smooth = '%s.svreg.inv.jacobian.smooth%2.1fmm.nii.gz',
-  fa_file = '%s.atlas.FA.nii.gz',
-  fa_file_smooth = '%s.atlas.FA.smooth%2.1fmm.nii.gz'
+  fa_file = '%s.dwi.RAS.correct.atlas.FA.nii.gz',
+  fa_file_smooth = '%s.dwi.RAS.correct.atlas.FA.smooth%2.1fmm.nii.gz',
+  md_file = '%s.dwi.RAS.correct.atlas.MD.nii.gz',
+  md_file_smooth = '%s.dwi.RAS.correct.atlas.MD.smooth%2.1fmm.nii.gz',
+  ax_file = '%s.dwi.RAS.correct.atlas.axial.nii.gz',
+  ax_file_smooth = '%s.dwi.RAS.correct.atlas.axial.smooth%2.1fmm.nii.gz',
+  rad_file = '%s.dwi.RAS.correct.atlas.radial.nii.gz',
+  rad_file_smooth = '%s.dwi.RAS.correct.atlas.radial.smooth%2.1fmm.nii.gz',
+  ADC_file = '%s.dwi.RAS.correct.atlas.mADC.nii.gz',
+  ADC_file_smooth = '%s.dwi.RAS.correct.atlas.mADC.smooth%2.1fmm.nii.gz',
+  GFA_file = '%s.dwi.RAS.correct.atlas.FRT_GFA.nii.gz',
+  GFA_file_smooth = '%s.dwi.RAS.correct.atlas.FRT_GFA.smooth%2.1fmm.nii.gz'
 )
 
 #' List of atlas files used in BrainSuite
@@ -136,21 +146,41 @@ get_tbm_file_list <- function(bss_data, smooth = NULL) {
   return(tbm_filelist)
 }
 
-get_dbm_file_list <- function(bss_data, smooth = NULL) {
+get_dbm_file_list <- function(bss_data, measure, smooth = NULL) {
+  
+  valid_types <- c('FA', 'MD', 'AD', 'RD', 'ADC', 'GFA')
+  if (!(measure %in% valid_types)) {
+    stop(sprintf('Valid DTI measures are %s', paste(unlist(valid_types), collapse = ', ')),
+         call. = FALSE)
+  }
   
   # if (is.null(smooth)) {
   if (missing(smooth) | smooth == 0 | smooth == 0.0 | is.null(smooth)){
-    dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$fa_file, bss_data@demographics$subjID))
+    switch(measure,
+           FA = {dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$fa_file, bss_data@demographics$subjID))},
+           MD = {dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$md_file, bss_data@demographics$subjID))},
+           AD = {dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$ax_file, bss_data@demographics$subjID))},
+           RD = {dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$rad_file, bss_data@demographics$subjID))},
+           ADC = {dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$ADC_file, bss_data@demographics$subjID))},
+           GFA = {dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$GFA_file, bss_data@demographics$subjID))}
+           )
   }
   else {
-    nii_smooth <- sprintf(bs_file_formats$fa_file_smooth, bss_data@demographics$subjID, smooth)
+    switch(measure,
+           FA = {nii_smooth <- sprintf(bs_file_formats$fa_file_smooth, bss_data@demographics$subjID, smooth)},
+           MD = {nii_smooth <- sprintf(bs_file_formats$md_file_smooth, bss_data@demographics$subjID, smooth)},
+           AD = {nii_smooth <- sprintf(bs_file_formats$ad_file_smooth, bss_data@demographics$subjID, smooth)},
+           RD = {nii_smooth <- sprintf(bs_file_formats$rad_file_smooth, bss_data@demographics$subjID, smooth)},
+           ADC = {nii_smooth <- sprintf(bs_file_formats$ADC_file_smooth, bss_data@demographics$subjID, smooth)},
+           GFA = {nii_smooth <- sprintf(bs_file_formats$GFA_file_smooth, bss_data@demographics$subjID, smooth)}
+           )
     dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, nii_smooth)
   }
   # Check if all subjects have nii.gz files
   if ( !all(file.exists(dbm_filelist)) ) {
     message('Following subjects have missing nii.gz files')
     print(dbm_filelist[which(!file.exists(dbm_filelist))], row.names = FALSE)
-    stop('\nCheck if svreg_apply_map was run succesfully and if the *FA.T1_coord.nii.gz files exist for all the subjects.\nAlso check if smoothing was performed.', call. = FALSE)
+    stop('\nCheck if svreg_apply_map was run succesfully and if the *.T1_coord.nii.gz files exist for all the subjects.\nAlso check if smoothing was performed.', call. = FALSE)
   }
   return(dbm_filelist)
 }

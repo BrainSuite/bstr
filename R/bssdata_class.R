@@ -64,6 +64,15 @@ BssTBMData <- setClass(
   contains = "BssData"
 )
 
+BssDBMData <- setClass(
+  "BssDBMData",
+  slots = list(atlas_filename = "character",
+               atlas_image = 'niftiImage',
+               maskfile = 'character',
+               mask_idx = 'vector'),
+  contains = "BssData"
+)
+
 setMethod("initialize", valueClass = "BssData", signature = "BssData", function(.Object, subjdir, csv) {
 
   check_file_exists(subjdir, raise_error = TRUE)
@@ -135,6 +144,30 @@ setMethod("load_data", signature = "BssTBMData", function(bss_data, atlas_filena
 
   bss_data@data_array <- read_nii_images_for_all_subjects(bss_data@filelist, attrib_siz, bss_data@mask_idx)
   bss_data@analysis_type <- "tbm"
+  bss_data@data_type <- bs_data_types$nifti_image
+  return(bss_data)
+})
+
+#' @rdname load_data
+setMethod("load_data", signature = "BssDBMData", function(bss_data, atlas_filename, maskfile = NULL, smooth) {
+  
+  bss_data@atlas_filename <- atlas_filename
+  bss_data@atlas_image <- RNifti::readNifti(atlas_filename)
+  bss_data@filelist <- get_dbm_file_list(bss_data, smooth)
+  attrib_siz <- length(bss_data@atlas_image)
+  if ( !is.null(maskfile) ) {
+    bss_data@maskfile <- maskfile
+    mask_image <- as.vector(RNifti::readNifti(maskfile))
+    if ( length(mask_image) != attrib_siz) {
+      stop(sprintf('Dimensions of atlas file %s and maskfile %s do not match', atlas_filename, maskfile), call. = FALSE)
+    }
+    bss_data@mask_idx <- which(mask_image > 0)
+  }
+  else
+    bss_data@mask_idx = 1:attrib_siz
+  
+  bss_data@data_array <- read_nii_images_for_all_subjects(bss_data@filelist, attrib_siz, bss_data@mask_idx)
+  bss_data@analysis_type <- "dbm"
   bss_data@data_type <- bs_data_types$nifti_image
   return(bss_data)
 })
@@ -224,13 +257,14 @@ setMethod ("load_demographics", "BssData", function(object) {
 #' @export
 load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left", smooth=0.0, roiid=0, roimeas="gmthickness") {
 
-  valid_types <- c("cbm", "tbm", "roi")
+  valid_types <- c("cbm", "tbm", "roi","dbm","nca")
   if (! type %in% valid_types)
     stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
 
   switch(type,
          cbm = { bss_data <- load_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth) },
          tbm = { bss_data <- load_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth) },
+         dbm = { bss_data <- load_dbm_data(subjdir=subjdir, csv=csv, smooth=smooth) },
          roi = { bss_data <- load_roi_data(subjdir, csv, roiid, roimeas) }
   )
   return(bss_data)
@@ -256,6 +290,17 @@ load_tbm_data <- function(subjdir="", csv="", smooth=0.0) {
   bss_tbm_data@data_type <- bs_data_types$nifti_image
   return(bss_tbm_data)
 }
+
+load_dbm_data <- function(subjdir="", csv="", smooth=0.0) {
+  
+  bss_dbm_data <- new("BssDBMData", subjdir, csv)
+  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+  tbm_atlas_and_mask <- get_tbm_atlas_and_mask(brainsuite_atlas_id)
+  bss_dbm_data <- load_data(bss_dbm_data, atlas_filename = tbm_atlas_and_mask$nii_atlas, maskfile = tbm_atlas_and_mask$nii_atlas_mask, smooth=smooth)
+  bss_dbm_data@data_type <- bs_data_types$nifti_image
+  return(bss_dbm_data)
+}
+
 
 load_roi_data <- function(subjdir="", csv="", roiid="", roimeas="") {
   bss_roi_data <- new("BssROIData", subjdir, csv)

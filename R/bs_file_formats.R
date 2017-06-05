@@ -28,7 +28,9 @@ bs_file_formats <- list(
   nii_atlas = 'mri.bfc.nii.gz',
   nii_file = '%s.svreg.inv.jacobian.nii.gz',
   nii_maskfile = 'mri.cerebrum.mask.nii.gz',
-  nii_file_smooth = '%s.svreg.inv.jacobian.smooth%2.1fmm.nii.gz'
+  nii_file_smooth = '%s.svreg.inv.jacobian.smooth%2.1fmm.nii.gz',
+  fa_file = '%s.atlas.FA.nii.gz',
+  fa_file_smooth = '%s.atlas.FA.smooth%2.1fmm.nii.gz'
 )
 
 #' List of atlas files used in BrainSuite
@@ -132,6 +134,25 @@ get_tbm_file_list <- function(bss_data, smooth = NULL) {
     stop('\nCheck if svreg was run succesfully and if jacobian* files exist for all the subjects.\nAlso check if smoothing was performed.', call. = FALSE)
   }
   return(tbm_filelist)
+}
+
+get_dbm_file_list <- function(bss_data, smooth = NULL) {
+  
+  # if (is.null(smooth)) {
+  if (missing(smooth) | smooth == 0 | smooth == 0.0 | is.null(smooth)){
+    dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$fa_file, bss_data@demographics$subjID))
+  }
+  else {
+    nii_smooth <- sprintf(bs_file_formats$fa_file_smooth, bss_data@demographics$subjID, smooth)
+    dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, nii_smooth)
+  }
+  # Check if all subjects have nii.gz files
+  if ( !all(file.exists(dbm_filelist)) ) {
+    message('Following subjects have missing nii.gz files')
+    print(dbm_filelist[which(!file.exists(dbm_filelist))], row.names = FALSE)
+    stop('\nCheck if svreg_apply_map was run succesfully and if the *FA.T1_coord.nii.gz files exist for all the subjects.\nAlso check if smoothing was performed.', call. = FALSE)
+  }
+  return(dbm_filelist)
 }
 
 get_brainsuite_atlas_path_from_logfile <- function(logfile) {

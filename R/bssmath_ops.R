@@ -31,6 +31,7 @@ image_to_shape <- function(imagefile, shapefile, outputshapefile, resample) {
 }
 
 #' This function calculates the sign of t values. Differently from the sign() function, sign_tvalues(0) = 1
+#' @param tvalues numeric vector
 sign_tvalues <- function(tvalues) {
   tvalues_sign <- sign(tvalues)
   tvalues_sign[tvalues_sign == 0] <- 1

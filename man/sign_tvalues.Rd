@@ -6,6 +6,9 @@
 \usage{
 sign_tvalues(tvalues)
 }
+\arguments{
+\item{tvalues}{numeric vector}
+}
 \description{
 This function calculates the sign of t values. Differently from the sign() function, sign_tvalues(0) = 1
 }

@@ -1,3 +1,17 @@
+# BrainSuite Statistics Toolbox in R (bssr)
+# Copyright (C) 2017 The Regents of the University of California
+# Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
+#
+# This program is free software; you can redistribute it and/or modify it under the terms
+# of the GNU General Public License as published by the Free Software Foundation; version 2.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License version 2 for more details.
+#
+# You should have received a copy of the GNU General Public License along with this program;
+# if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
 #' Read modelspec.ini file
 #'
 #' The modelspec file specifies the subject directory, paths to the atlas files,
@@ -13,7 +27,7 @@ read_modelspec <- function(modelspecfile) {
 
   # Open the svreg.log file and get the atlas file name
   if ( identical(tools::file_ext(mspec$csv), 'csv') ) {
-    demo <- read.csv(mspec$csv)
+    demo <- read_demographics(mspec$csv)
   }
   # The first column has to contain subject IDs which are same as subject directories
   first_subjid <- demo[[1]][1]

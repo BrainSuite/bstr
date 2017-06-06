@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 # BrainSuite Statistics Toolbox in R (bssr)
 # Copyright (C) 2017 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
@@ -11,29 +12,24 @@
 #
 # You should have received a copy of the GNU General Public License along with this program;
 # if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+library(methods)
+library(bssr)
 
-#' Check if file exists
-#'
-#'
-#' @param filename Name of file.
-#' @param raise_error logical; if \code{TRUE}, stops the execution if file does not exist. The default
-#' value is \code{FALSE}, in which case the function returns {FALSE} without stopping the execution.
-#' @param errmesg character string of optional error message
-#'
-#' @export
-check_file_exists <- function(filename, raise_error=FALSE, errmesg=NULL) {
-  errmesg <- if (is.null(errmesg)) sprintf('File %s does not exist.', filename) else errmesg
-  if (!identical(filename, character(0))) {
-    if ( file.exists(filename) )
-      return(TRUE)
-    else {
-      if (raise_error)
-        stop(errmesg, call. = FALSE)
-      return(FALSE)
-    }
-  }
-  else {
-    return(FALSE)
-  }
-}
+"usage:
+bss_tbm_corr.R --subjdir=<subjdir> --csv=<csv> --corr_var=<corr_var> --odir=<odir> [--smooth=<smooth>]
+-h --help   show this help message and exit
+options:
+--subjdir subjdir subject directory
+--csv csv demographics csv
+--corr_var corr_var variable from the demographcis csv whose correlation needs to be computed
+--odir odir output directory
+--smooth smooth smoothing level
 
+" -> doc
+
+opt <- docopt::docopt(doc)
+
+bss_data <- load_bss_data(type="tbm", subjdir = opt$subjdir,
+                          csv = opt$csv, smooth = as.numeric(opt$smooth))
+bss_model <- bss_corr(corr_var = opt$corr_var, bss_data = bss_data)
+save_bss_out(bss_data, bss_model, outdir=opt$odir)

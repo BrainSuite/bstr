@@ -1,3 +1,17 @@
+# BrainSuite Statistics Toolbox in R (bssr)
+# Copyright (C) 2017 The Regents of the University of California
+# Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
+#
+# This program is free software; you can redistribute it and/or modify it under the terms
+# of the GNU General Public License as published by the Free Software Foundation; version 2.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License version 2 for more details.
+#
+# You should have received a copy of the GNU General Public License along with this program;
+# if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
 #' List of file formats used in BrainSuite
 #' @export
 ## TODO: use closures for this in the future
@@ -12,9 +26,9 @@ bs_file_formats <- list(
   surf_atlas_left = 'mri.left.mid.cortex.dfs',
   surf_atlas_right = 'mri.right.mid.cortex.dfs',
   nii_atlas = 'mri.bfc.nii.gz',
-  nii_file = '%s.svreg.inv.map.jacdet.nii.gz',
+  nii_file = '%s.svreg.inv.jacobian.nii.gz',
   nii_maskfile = 'mri.cerebrum.mask.nii.gz',
-  nii_file_smooth = '%s.svreg.inv.map.jacdet.smooth%2.1fmm.nii.gz'
+  nii_file_smooth = '%s.svreg.inv.jacobian.smooth%2.1fmm.nii.gz'
 )
 
 #' List of atlas files used in BrainSuite
@@ -69,9 +83,16 @@ get_roi_file_list <- function(bss_data) {
   return(roi_filelist)
 }
 
-get_cbm_file_list <- function(bss_data, hemi, smooth = 0.0) {
+get_cbm_file_list <- function(bss_data, hemi, smooth = NULL) {
 
-  if (!is.null(smooth)) {
+  # if (!is.null(smooth)) {
+  if (missing(smooth) | smooth == 0 | smooth == 0.0 | is.null(smooth)){
+    if (identical(hemi, 'left'))
+      cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_file_formats$surf_left)
+    else
+      cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_file_formats$surf_right)
+  }
+  else {
     if (identical(hemi, 'left')) {
       # Replace '*' in surf_left_smooth by smoothing value
       surf_left_smooth <- gsub("\\*", sprintf('smooth%2.1f', smooth), bs_file_formats$surf_left_smooth )
@@ -82,12 +103,7 @@ get_cbm_file_list <- function(bss_data, hemi, smooth = 0.0) {
       cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, surf_right_smooth)
     }
   }
-  else {
-    if (identical(hemi, 'left'))
-      cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_file_formats$surf_left)
-    else
-      cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_file_formats$surf_right)
-  }
+
   # Check if all subjects have dfs files
   if ( !all(file.exists(cbm_filelist)) ) {
     message('Following subjects have missing dfs files')
@@ -100,8 +116,9 @@ get_cbm_file_list <- function(bss_data, hemi, smooth = 0.0) {
 
 get_tbm_file_list <- function(bss_data, smooth = NULL) {
 
-  if (is.null(smooth)) {
-    tbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_file_formats$nii_file)
+  # if (is.null(smooth)) {
+  if (missing(smooth) | smooth == 0 | smooth == 0.0 | is.null(smooth)){
+    tbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$nii_file, bss_data@demographics$subjID))
   }
   else {
     nii_smooth <- sprintf(bs_file_formats$nii_file_smooth, bss_data@demographics$subjID, smooth)
@@ -112,7 +129,7 @@ get_tbm_file_list <- function(bss_data, smooth = NULL) {
   if ( !all(file.exists(tbm_filelist)) ) {
     message('Following subjects have missing nii.gz files')
     print(tbm_filelist[which(!file.exists(tbm_filelist))], row.names = FALSE)
-    stop('\nCheck if svreg was run succesfully and if jacdet* files exist for all the subjects.\nAlso check if smoothing was performed.', call. = FALSE)
+    stop('\nCheck if svreg was run succesfully and if jacobian* files exist for all the subjects.\nAlso check if smoothing was performed.', call. = FALSE)
   }
   return(tbm_filelist)
 }
@@ -145,12 +162,17 @@ get_brainsuite_atlas_id_from_logfile <- function(logfile) {
 get_brainsuite_logfilename <- function(subjdir, csv) {
   # Open the svreg.log file and get the atlas file name
   if ( identical(tools::file_ext(csv), 'csv') ) {
-    demo <- read.csv(csv)
+    demo <- read_demographics(csv)
   }
   # The first column has to contain subject IDs which are same as subject directories
   first_subjid <- demo[[1]][1]
   # Get atlas names from log files.
-  svreg_log_file <- file.path(subjdir, first_subjid, sprintf('%s.svreg.log', first_subjid))
+  svreg_log_file <- Sys.glob(file.path(subjdir, first_subjid, "*", '*.svreg.log'))
+
+  if (length(svreg_log_file) == 0){
+    svreg_log_file <- Sys.glob(file.path(subjdir, first_subjid, '*.svreg.log'))
+  }
+  # svreg_log_file <- file.path(subjdir, first_subjid, sprintf('%s.svreg.log', first_subjid))
   if (check_file_exists(svreg_log_file, raise_error = TRUE,
                     errmesg = sprintf('Could not find svreg.log in the subject directory %s/%s. Please check if the subject directory is valid.', subjdir, first_subjid)))
     return(tools::file_path_as_absolute(svreg_log_file))
@@ -208,5 +230,12 @@ get_tbm_atlas_and_mask <- function(brainsuite_atlas_id) {
   check_file_exists(nii_atlas, raise_error = TRUE)
   check_file_exists(nii_atlas_mask, raise_error = TRUE)
   return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
+}
+
+read_demographics <- function(csvfile) {
+
+  demo <- read.csv(csvfile)
+  colnames(demo)[1] <- "subjID"
+  return(demo)
 }
 

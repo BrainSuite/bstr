@@ -30,8 +30,8 @@ Loading data is usually the first step before running any statistical analysis.
 Prior to using this function, BrainSuite and svreg should be run on all subjects.
 If required, smoothing should be performed on cortical surface or volumetric image based measures.
 A csv file containing subject demographic information should exist. The first column of this csv file
-should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
-and should be exactly equal to the individual subject directory name.
+should have the subject identifiers. Subject identifiers can be alphanumeric
+and should be exactly equal to the individual subject directory names.
 }
 \examples{
 \dontrun{

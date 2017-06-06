@@ -1,3 +1,17 @@
+# BrainSuite Statistics Toolbox in R (bssr)
+# Copyright (C) 2017 The Regents of the University of California
+# Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
+#
+# This program is free software; you can redistribute it and/or modify it under the terms
+# of the GNU General Public License as published by the Free Software Foundation; version 2.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License version 2 for more details.
+#
+# You should have received a copy of the GNU General Public License along with this program;
+# if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
 #' Perform analysis of variance (ANOVA) for brain imaging data.
 #'
 #' This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and uses an
@@ -84,7 +98,8 @@ anova_vec <- function(bss_lm_full, bss_lm_null, bss_data) {
 
   tvalues <- bss_lm_full@beta_coeff[model_unique_idx, ]/(se_full_unique + .Machine$double.eps)
   pvalues <- 1 - pf(Fstat, bss_lm_full@Npfull - bss_lm_null@Npnull, N - bss_lm_full@Npfull - 1)
-  tvalues_sign <- (bss_lm_full@beta_coeff[model_unique_idx, ] + .Machine$double.eps)/(abs(bss_lm_full@beta_coeff[model_unique_idx, ]) + .Machine$double.eps)
+  pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
+  tvalues_sign <- sign_tvalues(tvalues)
 
   bss_model <- new("BssModel", model_type="bss_anova", main_effect = bss_lm_full@main_effect, covariates = bss_lm_full@covariates,
                    demographics = bss_data@demographics, mspec_file="")
@@ -184,8 +199,9 @@ lm_vec <- function(main_effect = "", covariates = "", bss_data) {
 
   se <- sqrt(diag(solve(t(X) %*% X)))[[main_effect]] * sqrt(rss / (N-Np-1)) # standard error
   tvalues <- as.numeric(beta_coeff[main_effect, ]/(se + .Machine$double.eps)) # tvalue
-  pvalues <- 2*pt(abs(tvalues), N-Np-1, lower.tail = FALSE) # pvalue
+  pvalues <- 2*pt(abs(tvalues), N-Np-1, lower.tail = FALSE) # pvalu
   residuals <- bss_data@data_array - Y
+  pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
   bss_model@pvalues <- pvalues
   bss_model@tvalues <- tvalues
   bss_model@beta_coeff <- beta_coeff
@@ -269,6 +285,7 @@ bss_corr <- function(corr_var, bss_data, mult_comp="fdr") {
   bss_model@pvalues <- corr_result$pvalues
 
   bss_model@pvalues <- sign(corr_coeff)*bss_model@pvalues
+  bss_model@pvalues[abs(bss_model@pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
   bss_model@pvalues[is.na(bss_model@pvalues)] <- 1 # Set the p-values with the NA correlations to 1
   bss_model@corr_values <- corr_coeff
   bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
@@ -293,6 +310,7 @@ corr_vec <- function(X, Y) {
   corr_coeff <- as.numeric((Y_dev %*% X_dev)/sqrt(colSums(X_dev^2)*sum(Y_dev^2)))
   tvalues <- corr_coeff * sqrt((N-2)/(1-corr_coeff^2 + .Machine$double.eps))
   pvalues <- 2*pt(abs(tvalues), N-2, lower.tail = FALSE)
+  pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
   return(list("tvalues"=tvalues, "pvalues"=pvalues, "corr_coeff"=corr_coeff))
 }
 
@@ -332,7 +350,8 @@ bss_ttest <- function(group_var, bss_data, paired = FALSE, mult_comp="fdr") {
   tvalues <- test_result$tvalues
 
   pvalues[is.na(pvalues)] <- 1
-  pvalues <- pvalues*sign(tvalues)
+  pvalues <- pvalues*sign_tvalues(tvalues)
+  pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
   bss_model@pvalues <- pvalues
   bss_model@tvalues <- tvalues
   bss_model@tvalues[abs(pvalues) >= 0.05] <- 0
@@ -371,6 +390,7 @@ ttest_vec <- function(X1, X2, paired=FALSE) {
     s1 <- sqrt(colSums(D_dev^2)/(n1-1))
     tvalues <- D_mean/(s1/sqrt(n1))
     pvalues <- 2*pt(abs(tvalues),n1-1, lower.tail = FALSE)
+    pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
   }
   else {
     X1_mean <- colMeans(X1)
@@ -386,10 +406,11 @@ ttest_vec <- function(X1, X2, paired=FALSE) {
     s2_sq <- SS2/(n2-1)
 
     se_diff <- sqrt(s1_sq/n1 + s2_sq/n2)
-    tvalues <- (X1_mean - X2_mean + .Machine$double.eps)/(se_diff + .Machine$double.eps)
+    tvalues <- (X1_mean - X2_mean)/(se_diff + .Machine$double.eps)
     # Calculate the degrees of freedom using the Welch–Satterthwaite approximation
     deg <- (s1_sq/n1 + s2_sq/n2)^2/(s1_sq^2/(n1^2*(n1-1)) + s2_sq^2/(n2^2*(n2-1)))
     pvalues <- 2*pt(abs(tvalues), deg, lower.tail = FALSE)
+    pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
   }
   return(list("tvalues"=tvalues, "pvalues"=pvalues))
 }

@@ -1,3 +1,17 @@
+# BrainSuite Statistics Toolbox in R (bssr)
+# Copyright (C) 2017 The Regents of the University of California
+# Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
+#
+# This program is free software; you can redistribute it and/or modify it under the terms
+# of the GNU General Public License as published by the Free Software Foundation; version 2.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License version 2 for more details.
+#
+# You should have received a copy of the GNU General Public License along with this program;
+# if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
 context("Test statistical vectorized operations")
 
 test_that("unpaired ttest_vec is same as R t.test", {
@@ -46,12 +60,12 @@ test_that("lm_vec is same as R lm", {
   covariates <- "Sex + Height"
 
   # Fit model using lm
-  lm_full <- lm(formula(sprintf('V1 ~ %s', paste(main_effect, '+', covariates))), data = data)
+  lm_full <- lm(formula(sprintf('V1000 ~ %s', paste(main_effect, '+', covariates))), data = data)
 
   # Fit model using lm_vec
   bss_data <- new("BssData", getwd(), system.file("extdata/testdata", "design.csv", package = 'bssr'))
 
-  bss_data@data_array <- as.matrix(data[, "V1"])
+  bss_data@data_array <- as.matrix(data[, "V1000"])
   bss_model <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data)
 
   # Test for equality of tvalue, beta coefficient, and pvalue
@@ -67,14 +81,14 @@ test_that("bss_anova is same as R model comparison using anova", {
   covariates <- "Sex + Height"
 
   # Fit full model using R first
-  lm_full <- lm(formula(sprintf('V1 ~ %s', paste(main_effect, '+', covariates))), data = data)
+  lm_full <- lm(formula(sprintf('V1000 ~ %s', paste(main_effect, '+', covariates))), data = data)
   # Fit null model using R first
-  lm_null <- lm(formula(sprintf('V1 ~ %s', covariates)), data = data)
+  lm_null <- lm(formula(sprintf('V1000 ~ %s', covariates)), data = data)
   # Compare full and null in R
   R_model_cmp <- anova(lm_full, lm_null)
 
   bss_data <- new("BssData", getwd(), system.file("extdata/testdata", "design.csv", package = 'bssr'))
-  bss_data@data_array <- as.matrix(data[, "V1"])
+  bss_data@data_array <- as.matrix(data[, "V1000"])
   # Fit full model using bss first
   bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
   # Fit null model using bss first

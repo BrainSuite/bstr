@@ -27,7 +27,11 @@ Imports:
     RNifti,
     methods,
     ggplot2 (>= 2.2.1),
-    scales (>= 0.4.1)
+    scales (>= 0.4.1),
+    doParallel,
+    foreach,
+    bit,
+    Matrix
 RoxygenNote: 6.0.1
 URL: http://brainsuite.org/bssr
 Suggests: testthat

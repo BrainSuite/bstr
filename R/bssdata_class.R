@@ -295,8 +295,8 @@ load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0) {
   
   bss_dbm_data <- new("BssDBMData", subjdir, csv)
   brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
-  tbm_atlas_and_mask <- get_tbm_atlas_and_mask(brainsuite_atlas_id)
-  bss_dbm_data <- load_data(bss_dbm_data, atlas_filename = tbm_atlas_and_mask$nii_atlas, maskfile = tbm_atlas_and_mask$nii_atlas_mask, measure=measure, smooth=smooth)
+  dbm_atlas_and_mask <- get_dbm_atlas_and_mask(brainsuite_atlas_id)
+  bss_dbm_data <- load_data(bss_dbm_data, atlas_filename = dbm_atlas_and_mask$nii_atlas, maskfile = dbm_atlas_and_mask$nii_atlas_mask, measure=measure, smooth=smooth)
   bss_dbm_data@data_type <- bs_data_types$nifti_image
   return(bss_dbm_data)
 }

@@ -48,11 +48,13 @@ bs_file_formats <- list(
 bs_atlas_files <- list(
   atlas_BS1_tbm = 'svreg/BrainSuiteAtlas1/mri.bfc.nii.gz',
   atlas_BS1_mask_tbm = 'svreg/BrainSuiteAtlas1/mri.mask.nii.gz',
+  atlas_BS1_mask_dbm = 'svreg/BrainSuiteAtlas1/bsa1_wm_labels.mask.nii.gz',
   lh_atlas_BS1_cbm = 'svreg/BrainSuiteAtlas1/mri.left.mid.cortex.dfs',
   rh_atlas_BS1_cbm = 'svreg/BrainSuiteAtlas1/mri.right.mid.cortex.dfs',
 
   atlas_BCIDNI_tbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.bfc.nii.gz',
   atlas_BCIDNI_mask_tbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.mask.nii.gz',
+  atlas_BCIDNI_mask_dbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.wm_mask.nii.gz',
   lh_atlas_BCIDNI_cbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.left.mid.cortex.dfs',
   rh_atlas_BCIDNI_cbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.right.mid.cortex.dfs'
 )
@@ -290,3 +292,27 @@ read_demographics <- function(csvfile) {
   return(demo)
 }
 
+get_dbm_atlas_and_mask <- function(brainsuite_atlas_id) {
+  
+  if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
+    stop('Valid values for hemi are BrainSuiteAtlas1 or BCI-DNI_brain_atlas.', call. = FALSE)
+  brainsuite_install_path <- get_brainsuite_install_path()
+  if (brainsuite_atlas_id == "BrainSuiteAtlas1") {
+    nii_atlas <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BS1_tbm)
+    nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BS1_mask_dbm)
+  }
+  if (brainsuite_atlas_id == "BCI-DNI_brain_atlas") {
+    nii_atlas <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_tbm)
+    nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_mask_dbm)
+  }
+  check_file_exists(nii_atlas, raise_error = TRUE)
+  check_file_exists(nii_atlas_mask, raise_error = TRUE)
+  return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
+}
+
+read_demographics <- function(csvfile) {
+  
+  demo <- read.csv(csvfile)
+  colnames(demo)[1] <- "subjID"
+  return(demo)
+}

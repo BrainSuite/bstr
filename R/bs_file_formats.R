@@ -214,7 +214,7 @@ get_brainsuite_atlas_id_from_logfile <- function(logfile) {
 
 get_brainsuite_logfilename <- function(subjdir, csv) {
   # Open the svreg.log file and get the atlas file name
-  if ( identical(tools::file_ext(csv), 'tsv') ) {
+  if ( identical(tools::file_ext(csv), 'tsv') | identical(tools::file_ext(csv), 'csv')  ) {
     demo <- read_demographics(csv)
   }
   # The first column has to contain subject IDs which are same as subject directories
@@ -312,8 +312,10 @@ get_dbm_atlas_and_mask <- function(brainsuite_atlas_id) {
 
 read_demographics <- function(csvfile) {
   
+  switch(tools::file_ext(csvfile),
+         "tsv" = {demo <- read.table(file = csvfile, sep = "\t", header = T)},
+         "csv" = {demo <- demo <- read.csv(csvfile)})
   # demo <- read.csv(csvfile)
-  demo <- read.table(file = csvfile, sep = "\t", header = T)
   colnames(demo)[1] <- "subjID"
   return(demo)
 }

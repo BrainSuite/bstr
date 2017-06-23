@@ -28,6 +28,7 @@
 #' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
 #' @param  bss_data Object of type \code{\link{BssData}}
 #' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.
+#' @param  niter numeric variable for the number of iterations for permutations test. Will be ignored if mult_comp="fdr"
 #' @seealso \code{\link{lm_vec}} for linear regression, \code{\link{bss_ttest}} for independent sample and paired t-tests.
 #'
 #' @export
@@ -443,15 +444,15 @@ bss_p_adjust <- function(pvalues, method='fdr') {
 }
 
 #' Calculate p-values for vanilla permutation test and determine null distribution for max-t permutation test.
-#' 
-#' Perform permutation tests using Freedman-Lane method. 
+#'
+#' Perform permutation tests using Freedman-Lane method.
 #' @param main_effect Character string containing an independent variable whose effect you want to measure.
 #' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
 #' either a categorical or a continuous variable.
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
 #' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
 #' @param bss_data Object of type \code{\link{BssData}}
-#' @param num_of_perm Number of iterations/shuffles for permutation test. 
+#' @param num_of_perm Number of iterations/shuffles for permutation test.
 #' @details
 #' The permutation test handles the exchangeability assumption with Freedman-Lane Method. This function also
 #' utilizes multiprocessing to reduce computing time.
@@ -459,60 +460,62 @@ bss_p_adjust <- function(pvalues, method='fdr') {
 #'
 #' @export
 maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
-  
+
   N <- dim(bss_data@data_array)[1]
-  
+
   bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
   bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
-  
+
   # (1) compute full model t-statistic
   T0 <- bss_lm_full@tvalues
   maxT0 <- T0[ which.max( abs(T0) ) ]
-  
+
   # (2) compute estimated gamma_hat and estimated residuals from reduced model
   # gamma_hat <- bss_lm_null@beta_coeff
   # residuals_null <- bss_lm_null@residuals
-  
+
   # (3) compute a set of permuted data Y
   bss_data_cp <- bss_data
-  
+
+  j <- 1 # Initialize j to avoid "no visible binding" warning
   tvalues_all <- foreach(j=1:(num_of_perm-1), .export=c('T0', 'maxT0', 'N', 'bss_lm_null','bss_data_cp',
                                                      'main_effect', 'covariates', 'lm_vec'), .packages=c('Matrix', 'bit')) %dopar% {
                                                        set.seed(j)
                                                        pmatrix <- as(sample(N), "pMatrix")
                                                        Y_j <- (pmatrix %*% bss_lm_null@residuals) + (bss_lm_null@X_design_null %*% bss_lm_null@beta_coeff)
-                                                       
+
                                                        # (4) regress permuted data Y_j against the full model
                                                        bss_data_cp@data_array <- Y_j
                                                        bss_lm_full_perm <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data_cp )
-                                                       
+
                                                        ## binarize vector after comparing permuted T and observed T
                                                        idx <- which( abs(T0) <= abs(bss_lm_full_perm@tvalues) )
-                                                       
+
                                                        t_bin <- as.bit(rep(FALSE, dim(bss_data_cp@data_array)[2]))
                                                        t_bin[idx] <- TRUE
-                                                       
+
                                                        tvalue_j <- bss_lm_full_perm@tvalues[ which.max( abs(bss_lm_full_perm@tvalues) ) ]
-                                                       
+
                                                        return(list(t_bin, tvalue_j))
-                                                       
+
                                                      }
   tvalues_all[[num_of_perm]] <- list(as.bit(rep(TRUE, dim(bss_data@data_array)[2])), maxT0)
-  
+
+  n <- 1# Initialize i to avoid "no visible binding" warning
   pvalues <- foreach(n=1:dim(bss_data@data_array)[2], .export=c('tvalues_all', 'num_of_perm')) %dopar% {
     count <- sum(sapply( seq(1, num_of_perm), function(x) (tvalues_all[[x]][[1]][n])) == TRUE)
     pvalue <- as.double(count/num_of_perm)
     pvalue_widx <- array(c(pvalue, n), dim=c(1,2))
     # pvalue_widx <- list(pvalue, n)
   }
-  
+
   p_sort <- do.call('rbind', pvalues)
   pvalues_sort <- p_sort[order(p_sort[,2]), ]
-  
+
   tvalues_null <- sapply( seq(1, num_of_perm), function(x) tvalues_all[[x]][[2]])
-  
+
   return(list(pvalues_sort[,1], tvalues_null))
-  
+
 }
 
 
@@ -534,6 +537,7 @@ perm_p_adjust <- function(main_effect = "", covariates = "", bss_data, tvalues_n
 
   tvalues <- bss_lm_full@tvalues
 
+  i <- 1  # Initialize i to avoid "no visible binding" warning
   pvalues <- foreach(i=1:length(tvalues), .export=c('tvalues_null', 'tvalues')) %dopar% {
     p <- sum(abs(tvalues_null) >= abs(tvalues[i])) / length(tvalues_null)
     pvalue_widx <- array(c(p,i), dim = c(1,2))

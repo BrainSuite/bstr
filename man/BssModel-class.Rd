@@ -65,6 +65,8 @@ only}
 
 \item{\code{rss}}{numeric vector storing the residual sum of squares}
 
+\item{\code{residuals}}{numeric vector storing residuals # TODO: Check if this variable can be eliminated}
+
 \item{\code{se}}{numeric vector storing the standard error}
 
 \item{\code{pvalues_adjusted}}{numeric vector storing the adjusted p-values}

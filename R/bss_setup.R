@@ -123,6 +123,8 @@ check_bs_atlas_exists <- function(brainsuite_path, quiet=FALSE, raise_error = TR
 #' atlas files and data exist. This function is called from \code{\link{.onLoad}}
 #' when the package is loaded. It opens \code{bssr.ini} and checks if all the
 #' paths are valid.
+#' @param  quiet boolean specifying whether warnings/messages should be displayed
+#' @param  raise_error boolean specifying whether an exception should be raised
 #'
 #' @export
 is_brainsute_installed <- function(quiet = FALSE, raise_error = FALSE) {
@@ -148,6 +150,8 @@ get_bssr_ini_path <- function() {
 
 
 #' Retrieve BrainSuite installation path
+#' @param  quiet boolean specifying whether warnings/messages should be displayed
+#' @param  raise_error boolean specifying whether an exception should be raised
 #'
 #' @export
 get_brainsuite_install_path <- function(quiet = TRUE, raise_error = FALSE) {

@@ -45,6 +45,7 @@
 #' @slot Fstat numeric vector storing the F-statistics
 #' @slot beta_coeff numeric vector storing the beta coefficients
 #' @slot rss numeric vector storing the residual sum of squares
+#' @slot residuals numeric vector storing residuals # TODO: Check if this variable can be eliminated
 #' @slot se numeric vector storing the standard error
 #' @slot pvalues_adjusted numeric vector storing the adjusted p-values
 #' @slot stats_commands list of R commands (primarily for ROI analysis)

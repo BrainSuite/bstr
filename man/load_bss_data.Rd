@@ -5,7 +5,7 @@
 \title{Load data for statistical analysis.}
 \usage{
 load_bss_data(type = "cbm", subjdir = "", csv = "", hemi = "left",
-  smooth = 0, roiid = 0, roimeas = "gmthickness")
+  smooth = 0, roiid = 0, roimeas = "gmthickness", measure = "")
 }
 \arguments{
 \item{type}{character string denoting type of analysis. Should be cbm, tbm, or roi.}
@@ -24,6 +24,8 @@ and should be exactly equal to the individual subject directory name.}
 \item{roiid}{numeric label identifier for the region of interest (ROI) type analysis.}
 
 \item{roimeas}{character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".}
+
+\item{measure}{character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".}
 }
 \description{
 Loading data is usually the first step before running any statistical analysis.

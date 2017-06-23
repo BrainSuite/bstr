@@ -4,7 +4,12 @@
 \alias{is_brainsute_installed}
 \title{Check if BrainSuite is installed.}
 \usage{
-is_brainsute_installed()
+is_brainsute_installed(quiet = FALSE, raise_error = FALSE)
+}
+\arguments{
+\item{quiet}{boolean specifying whether warnings/messages should be displayed}
+
+\item{raise_error}{boolean specifying whether an exception should be raised}
 }
 \description{
 Check if the BrainSuite installation is valid by verifying if the appropriate

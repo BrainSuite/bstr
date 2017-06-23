@@ -5,6 +5,7 @@
 \alias{save_out}
 \alias{save_out,BssCBMOutput-method}
 \alias{save_out,BssTBMOutput-method}
+\alias{save_out,BssDBMOutput-method}
 \alias{save_out,BssROIOutput-method}
 \title{Generic save function for \code{BssOutput}}
 \usage{
@@ -13,6 +14,8 @@ save_out(bss_out, bss_data, bss_model)
 \S4method{save_out}{BssCBMOutput}(bss_out, bss_data, bss_model)
 
 \S4method{save_out}{BssTBMOutput}(bss_out, bss_data, bss_model)
+
+\S4method{save_out}{BssDBMOutput}(bss_out, bss_data, bss_model)
 
 \S4method{save_out}{BssROIOutput}(bss_out, bss_data, bss_model)
 }

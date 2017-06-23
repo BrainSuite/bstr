@@ -88,6 +88,7 @@ setMethod("initialize", valueClass = "BssData", signature = "BssData", function(
 #' @param atlas_filename path name to the atlas
 #' @param maskfile path name to the mask file
 #' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
+#' @param measure character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".
 #' @param smooth numeric value denoting the smoothing level.
 #' @param roiid numeric label identifier for the region of interest (ROI) type analysis.
 #' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
@@ -150,7 +151,7 @@ setMethod("load_data", signature = "BssTBMData", function(bss_data, atlas_filena
 
 #' @rdname load_data
 setMethod("load_data", signature = "BssDBMData", function(bss_data, atlas_filename, maskfile = NULL, measure, smooth) {
-  
+
   bss_data@atlas_filename <- atlas_filename
   bss_data@atlas_image <- RNifti::readNifti(atlas_filename)
   bss_data@filelist <- get_dbm_file_list(bss_data, measure, smooth)
@@ -165,7 +166,7 @@ setMethod("load_data", signature = "BssDBMData", function(bss_data, atlas_filena
   }
   else
     bss_data@mask_idx = 1:attrib_siz
-  
+
   bss_data@data_array <- read_nii_images_for_all_subjects(bss_data@filelist, attrib_siz, bss_data@mask_idx)
   bss_data@analysis_type <- "dbm"
   bss_data@data_type <- bs_data_types$nifti_image
@@ -245,6 +246,7 @@ setMethod ("load_demographics", "BssData", function(object) {
 #' @param smooth numeric value denoting the smoothing level.
 #' @param roiid numeric label identifier for the region of interest (ROI) type analysis.
 #' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
+#' @param measure character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".
 #' @examples
 #' \dontrun{
 #' my_cbm_data <- load_bss_data(type="cbm", subjdir = "/path/to/my/subjectdirectory",
@@ -292,7 +294,7 @@ load_tbm_data <- function(subjdir="", csv="", smooth=0.0) {
 }
 
 load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0) {
-  
+
   bss_dbm_data <- new("BssDBMData", subjdir, csv)
   brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
   dbm_atlas_and_mask <- get_dbm_atlas_and_mask(brainsuite_atlas_id)

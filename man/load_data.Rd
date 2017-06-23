@@ -6,11 +6,12 @@
 \alias{load_data,BssData-method}
 \alias{load_data,BssCBMData-method}
 \alias{load_data,BssTBMData-method}
+\alias{load_data,BssDBMData-method}
 \alias{load_data,BssROIData-method}
 \title{A generic function to load data for statistical analysis.}
 \usage{
 load_data(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = "left",
-  smooth = 0, roiid = NULL, roimeas = NULL)
+  measure = "", smooth = 0, roiid = NULL, roimeas = NULL)
 
 \S4method{load_data}{BssData}(bss_data, roiid = NULL, roimeas = NULL)
 
@@ -18,6 +19,9 @@ load_data(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = "left",
 
 \S4method{load_data}{BssTBMData}(bss_data, atlas_filename, maskfile = NULL,
   smooth)
+
+\S4method{load_data}{BssDBMData}(bss_data, atlas_filename, maskfile = NULL,
+  measure, smooth)
 
 \S4method{load_data}{BssROIData}(bss_data, roiid = NULL, roimeas = NULL)
 }
@@ -29,6 +33,8 @@ load_data(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = "left",
 \item{maskfile}{path name to the mask file}
 
 \item{hemi}{chaaracter string denoting the brain hemisphere. Should either be "left" or "right".}
+
+\item{measure}{character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".}
 
 \item{smooth}{numeric value denoting the smoothing level.}
 

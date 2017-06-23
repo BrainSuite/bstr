@@ -4,7 +4,12 @@
 \alias{get_brainsuite_install_path}
 \title{Retrieve BrainSuite installation path}
 \usage{
-get_brainsuite_install_path()
+get_brainsuite_install_path(quiet = TRUE, raise_error = FALSE)
+}
+\arguments{
+\item{quiet}{boolean specifying whether warnings/messages should be displayed}
+
+\item{raise_error}{boolean specifying whether an exception should be raised}
 }
 \description{
 Retrieve BrainSuite installation path

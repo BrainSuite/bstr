@@ -24,7 +24,7 @@ NULL
 
 .onLoad <- function(libname, pkgname) {
 
-  if(!is_brainsute_installed()) {
+  if(!is_brainsute_installed(quiet = FALSE, raise_error = FALSE)) {
     setup(quiet = FALSE, raise_error = FALSE)
     invisible()
   }

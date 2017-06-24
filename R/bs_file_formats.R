@@ -48,13 +48,13 @@ bs_file_formats <- list(
 bs_atlas_files <- list(
   atlas_BS1_tbm = 'svreg/BrainSuiteAtlas1/mri.bfc.nii.gz',
   atlas_BS1_mask_tbm = 'svreg/BrainSuiteAtlas1/mri.mask.nii.gz',
-  atlas_BS1_mask_dbm = 'svreg/BrainSuiteAtlas1/bsa1_wm_labels.mask.nii.gz',
+  atlas_BS1_mask_dbm = 'svreg/BrainSuiteAtlas1/mri.wm.mask.nii.gz',
   lh_atlas_BS1_cbm = 'svreg/BrainSuiteAtlas1/mri.left.mid.cortex.dfs',
   rh_atlas_BS1_cbm = 'svreg/BrainSuiteAtlas1/mri.right.mid.cortex.dfs',
 
   atlas_BCIDNI_tbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.bfc.nii.gz',
   atlas_BCIDNI_mask_tbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.mask.nii.gz',
-  atlas_BCIDNI_mask_dbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.wm_mask.nii.gz',
+  atlas_BCIDNI_mask_dbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.wm.mask.nii.gz',
   lh_atlas_BCIDNI_cbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.left.mid.cortex.dfs',
   rh_atlas_BCIDNI_cbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.right.mid.cortex.dfs'
 )
@@ -149,13 +149,13 @@ get_tbm_file_list <- function(bss_data, smooth = NULL) {
 }
 
 get_dbm_file_list <- function(bss_data, measure, smooth = NULL) {
-  
+
   valid_types <- c('FA', 'MD', 'AD', 'RD', 'ADC', 'GFA')
   if (!(measure %in% valid_types)) {
     stop(sprintf('Valid DTI measures are %s', paste(unlist(valid_types), collapse = ', ')),
          call. = FALSE)
   }
-  
+
   # if (is.null(smooth)) {
   if (missing(smooth) | smooth == 0 | smooth == 0.0 | is.null(smooth)){
     switch(measure,
@@ -293,7 +293,7 @@ read_demographics <- function(csvfile) {
 }
 
 get_dbm_atlas_and_mask <- function(brainsuite_atlas_id) {
-  
+
   if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
     stop('Valid values for hemi are BrainSuiteAtlas1 or BCI-DNI_brain_atlas.', call. = FALSE)
   brainsuite_install_path <- get_brainsuite_install_path()
@@ -311,7 +311,7 @@ get_dbm_atlas_and_mask <- function(brainsuite_atlas_id) {
 }
 
 read_demographics <- function(csvfile) {
-  
+
   switch(tools::file_ext(csvfile),
          "tsv" = {demo <- read.table(file = csvfile, sep = "\t", header = T)},
          "csv" = {demo <- demo <- read.csv(csvfile)})

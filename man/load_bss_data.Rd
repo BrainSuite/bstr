@@ -5,7 +5,8 @@
 \title{Load data for statistical analysis.}
 \usage{
 load_bss_data(type = "cbm", subjdir = "", csv = "", hemi = "left",
-  smooth = 0, roiid = 0, roimeas = "gmthickness", measure = "")
+  smooth = 0, roiid = 0, roimeas = "gmthickness", measure = "",
+  atlas = "", eddy = TRUE)
 }
 \arguments{
 \item{type}{character string denoting type of analysis. Should be cbm, tbm, or roi.}
@@ -26,6 +27,11 @@ and should be exactly equal to the individual subject directory name.}
 \item{roimeas}{character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".}
 
 \item{measure}{character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".}
+
+\item{atlas}{character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
+Otherwise, for example, if the atlas for tensor based morphometry is located at /path/to/atlas/myatlas.mri.bfc.nii.gz, then specify atlas="/path/to/atlas/myatlas".}
+
+\item{eddy}{boolean for specifying if the diffusion images were eddy-current corrected or not.}
 }
 \description{
 Loading data is usually the first step before running any statistical analysis.

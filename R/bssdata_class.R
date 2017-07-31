@@ -90,6 +90,7 @@ setMethod("initialize", valueClass = "BssData", signature = "BssData", function(
 #' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
 #' @param measure character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".
 #' @param smooth numeric value denoting the smoothing level.
+#' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
 #' @param roiid numeric label identifier for the region of interest (ROI) type analysis.
 #' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
 #' @details
@@ -98,7 +99,7 @@ setMethod("initialize", valueClass = "BssData", signature = "BssData", function(
 #' @seealso \code{\link{load_bss_data}}
 #'
 #' @export
-setGeneric("load_data", valueClass = "BssData", function(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = "left", measure = "", smooth = 0.0, roiid = NULL, roimeas = NULL) {
+setGeneric("load_data", valueClass = "BssData", function(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = "left", measure = "", smooth = 0.0, eddy = TRUE, roiid = NULL, roimeas = NULL) {
   standardGeneric("load_data")
 })
 
@@ -150,11 +151,11 @@ setMethod("load_data", signature = "BssTBMData", function(bss_data, atlas_filena
 })
 
 #' @rdname load_data
-setMethod("load_data", signature = "BssDBMData", function(bss_data, atlas_filename, maskfile = NULL, measure, smooth) {
+setMethod("load_data", signature = "BssDBMData", function(bss_data, atlas_filename, maskfile = NULL, measure, smooth, eddy) {
 
   bss_data@atlas_filename <- atlas_filename
   bss_data@atlas_image <- RNifti::readNifti(atlas_filename)
-  bss_data@filelist <- get_dbm_file_list(bss_data, measure, smooth)
+  bss_data@filelist <- get_dbm_file_list(bss_data, measure, smooth, eddy)
   attrib_siz <- length(bss_data@atlas_image)
   if ( !is.null(maskfile) ) {
     bss_data@maskfile <- maskfile
@@ -247,6 +248,9 @@ setMethod ("load_demographics", "BssData", function(object) {
 #' @param roiid numeric label identifier for the region of interest (ROI) type analysis.
 #' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
 #' @param measure character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".
+#' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
+#' Otherwise, for example, if the atlas for tensor based morphometry is located at /path/to/atlas/myatlas.mri.bfc.nii.gz, then specify atlas="/path/to/atlas/myatlas".
+#' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
 #' @examples
 #' \dontrun{
 #' my_cbm_data <- load_bss_data(type="cbm", subjdir = "/path/to/my/subjectdirectory",
@@ -257,7 +261,8 @@ setMethod ("load_demographics", "BssData", function(object) {
 #' }
 #'
 #' @export
-load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left", smooth=0.0, roiid=0, roimeas="gmthickness", measure="") {
+load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left",
+                          smooth=0.0, roiid=0, roimeas="gmthickness", measure="", atlas="", eddy=TRUE) {
 
   valid_types <- c("cbm", "tbm", "roi","dbm","nca")
   if (! type %in% valid_types)
@@ -265,8 +270,8 @@ load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left", smooth=0.
 
   switch(type,
          cbm = { bss_data <- load_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth) },
-         tbm = { bss_data <- load_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth) },
-         dbm = { bss_data <- load_dbm_data(subjdir=subjdir, csv=csv, measure=measure, smooth=smooth) },
+         tbm = { bss_data <- load_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth, atlas=atlas) },
+         dbm = { bss_data <- load_dbm_data(subjdir=subjdir, csv=csv, measure=measure, smooth=smooth, atlas=atlas, eddy=eddy) },
          roi = { bss_data <- load_roi_data(subjdir, csv, roiid, roimeas) }
   )
   return(bss_data)
@@ -283,21 +288,30 @@ load_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0) {
   return(bss_cbm_data)
 }
 
-load_tbm_data <- function(subjdir="", csv="", smooth=0.0) {
+load_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas="") {
 
   bss_tbm_data <- new("BssTBMData", subjdir, csv)
-  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
-  tbm_atlas_and_mask <- get_tbm_atlas_and_mask(brainsuite_atlas_id)
+  if (atlas == "") {
+    brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+    tbm_atlas_and_mask <- get_tbm_atlas_and_mask(brainsuite_atlas_id)
+  }
+  else
+    tbm_atlas_and_mask <- get_custom_tbm_atlas_and_mask(atlas)
+
   bss_tbm_data <- load_data(bss_tbm_data, atlas_filename = tbm_atlas_and_mask$nii_atlas, maskfile = tbm_atlas_and_mask$nii_atlas_mask, smooth=smooth)
   bss_tbm_data@data_type <- bs_data_types$nifti_image
   return(bss_tbm_data)
 }
 
-load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0) {
+load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0, atlas="", eddy=TRUE) {
 
   bss_dbm_data <- new("BssDBMData", subjdir, csv)
-  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
-  dbm_atlas_and_mask <- get_dbm_atlas_and_mask(brainsuite_atlas_id)
+  if (atlas == "") {
+    brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+    dbm_atlas_and_mask <- get_dbm_atlas_and_mask(brainsuite_atlas_id)
+  }
+  else
+    dbm_atlas_and_mask <- get_custom_tbm_atlas_and_mask(atlas)
   bss_dbm_data <- load_data(bss_dbm_data, atlas_filename = dbm_atlas_and_mask$nii_atlas, maskfile = dbm_atlas_and_mask$nii_atlas_mask, measure=measure, smooth=smooth)
   bss_dbm_data@data_type <- bs_data_types$nifti_image
   return(bss_dbm_data)

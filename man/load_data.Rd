@@ -11,7 +11,7 @@
 \title{A generic function to load data for statistical analysis.}
 \usage{
 load_data(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = "left",
-  measure = "", smooth = 0, roiid = NULL, roimeas = NULL)
+  measure = "", smooth = 0, eddy = TRUE, roiid = NULL, roimeas = NULL)
 
 \S4method{load_data}{BssData}(bss_data, roiid = NULL, roimeas = NULL)
 
@@ -21,7 +21,7 @@ load_data(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = "left",
   smooth)
 
 \S4method{load_data}{BssDBMData}(bss_data, atlas_filename, maskfile = NULL,
-  measure, smooth)
+  measure, smooth, eddy)
 
 \S4method{load_data}{BssROIData}(bss_data, roiid = NULL, roimeas = NULL)
 }
@@ -37,6 +37,8 @@ load_data(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = "left",
 \item{measure}{character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".}
 
 \item{smooth}{numeric value denoting the smoothing level.}
+
+\item{eddy}{boolean for specifying if the diffusion images were eddy-current corrected or not.}
 
 \item{roiid}{numeric label identifier for the region of interest (ROI) type analysis.}
 

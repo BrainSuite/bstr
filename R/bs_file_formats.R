@@ -16,31 +16,13 @@
 #' @export
 ## TODO: use closures for this in the future
 bs_file_formats <- list(
-  surf_left = 'atlas.pvc-thickness_0-6mm.left.mid.cortex.dfs',
-  surf_right = 'atlas.pvc-thickness_0-6mm.right.mid.cortex.dfs',
-  surf_left_smooth = 'atlas.pvc-thickness_0-6mm.*mm.left.mid.cortex.dfs',
-  surf_right_smooth = 'atlas.pvc-thickness_0-6mm.*mm.right.mid.cortex.dfs',
   jacdet = '*.svreg.inv.map.jacdet.*.nii.gz',
   roi_txt = '.roiwise.stats.txt',
   svreg_log = '*.svreg.log',
   surf_atlas_left = 'mri.left.mid.cortex.dfs',
   surf_atlas_right = 'mri.right.mid.cortex.dfs',
   nii_atlas = 'mri.bfc.nii.gz',
-  nii_file = '%s.svreg.inv.jacobian.nii.gz',
-  nii_maskfile = 'mri.cerebrum.mask.nii.gz',
-  nii_file_smooth = '%s.svreg.inv.jacobian.smooth%2.1fmm.nii.gz',
-  fa_file = '%s.dwi.RAS.correct.atlas.FA.nii.gz',
-  fa_file_smooth = '%s.dwi.RAS.correct.atlas.FA.smooth%2.1fmm.nii.gz',
-  md_file = '%s.dwi.RAS.correct.atlas.MD.nii.gz',
-  md_file_smooth = '%s.dwi.RAS.correct.atlas.MD.smooth%2.1fmm.nii.gz',
-  ax_file = '%s.dwi.RAS.correct.atlas.axial.nii.gz',
-  ax_file_smooth = '%s.dwi.RAS.correct.atlas.axial.smooth%2.1fmm.nii.gz',
-  rad_file = '%s.dwi.RAS.correct.atlas.radial.nii.gz',
-  rad_file_smooth = '%s.dwi.RAS.correct.atlas.radial.smooth%2.1fmm.nii.gz',
-  ADC_file = '%s.dwi.RAS.correct.atlas.mADC.nii.gz',
-  ADC_file_smooth = '%s.dwi.RAS.correct.atlas.mADC.smooth%2.1fmm.nii.gz',
-  GFA_file = '%s.dwi.RAS.correct.atlas.FRT_GFA.nii.gz',
-  GFA_file_smooth = '%s.dwi.RAS.correct.atlas.FRT_GFA.smooth%2.1fmm.nii.gz'
+  nii_maskfile = 'mri.cerebrum.mask.nii.gz'
 )
 
 #' List of atlas files used in BrainSuite
@@ -59,6 +41,14 @@ bs_atlas_files <- list(
   rh_atlas_BCIDNI_cbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.right.mid.cortex.dfs'
 )
 
+#' List of suffixes for atlas files used in BrainSuite
+bs_atlas_files_suffix <- list(
+
+  atlas_custom_suffix_tbm = 'bfc.nii.gz',
+  atlas_custom_mask_suffix_tbm = 'mask.nii.gz',
+  atlas_custom_suffix_dbm = 'bfc.nii.gz',
+  atlas_custom_mask_suffix_dbm = 'wm.mask.nii.gz'
+)
 
 analysis_type_list <- list(
   cbm = 'cbm',
@@ -72,6 +62,38 @@ bs_data_types <- list(
   surface = '.dfs',
   nifti_image = '.nii.gz'
 )
+
+bs_surface_file_string <- function(hemi="left", smooth = 0) {
+
+  if (smooth != 0)
+    return(paste('atlas.pvc-thickness_0-6mm.', sprintf('smooth%2.1fmm.', smooth), hemi, '.mid.cortex.dfs', sep = ''))
+  else
+    return(paste('atlas.pvc-thickness_0-6mm.', hemi, '.mid.cortex.dfs', sep = ''))
+}
+
+bs_volume_jacobian_file_string <- function(smooth = 0) {
+
+  if (smooth != 0)
+    return(paste('%s.svreg.inv.jacobian.', sprintf('smooth%2.1fmm.nii.gz', smooth), sep = ''))
+  else
+    return('%s.svreg.inv.jacobian.nii.gz')
+}
+
+bs_diffusion_file_string <- function(measure = "FA", smooth = 0, eddy = TRUE) {
+
+  valid_diffusion_measures <- c('FA', 'MD', 'AD', 'RD', 'ADC', 'GFA')
+  if (! measure %in% valid_diffusion_measures)
+    stop(sprintf('Invalid diffusion measure: %s. Valid measures are %s.', measure, paste(valid_diffusion_measures, collapse = ', ')))
+
+  if (eddy == TRUE && smooth != 0)
+    return(paste('%s.dwi.RAS.correct.atlas.', measure, sprintf('.smooth%2.1fmm.nii.gz', smooth), sep = ''))
+  if (eddy == FALSE && smooth != 0)
+    return(paste('%s.dwi.RAS.atlas.', measure, sprintf('.smooth%2.1fmm.nii.gz', smooth), sep = ''))
+  if (eddy == TRUE && smooth == 0)
+    return(paste('%s.dwi.RAS.correct.atlas.', measure, '.nii.gz', sep = ''))
+  if (eddy == FALSE && smooth == 0)
+    return(paste('%s.dwi.RAS.atlas.', measure, '.nii.gz', sep = ''))
+}
 
 get_bs_file_list <- function(analysis_type) {
   valid_analysis_types <- unlist(analysis_type_list, use.names = FALSE)
@@ -97,27 +119,9 @@ get_roi_file_list <- function(bss_data) {
   return(roi_filelist)
 }
 
-get_cbm_file_list <- function(bss_data, hemi, smooth = NULL) {
+get_cbm_file_list <- function(bss_data, hemi, smooth = 0) {
 
-  # if (!is.null(smooth)) {
-  if (missing(smooth) | smooth == 0 | smooth == 0.0 | is.null(smooth)){
-    if (identical(hemi, 'left'))
-      cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_file_formats$surf_left)
-    else
-      cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_file_formats$surf_right)
-  }
-  else {
-    if (identical(hemi, 'left')) {
-      # Replace '*' in surf_left_smooth by smoothing value
-      surf_left_smooth <- gsub("\\*", sprintf('smooth%2.1f', smooth), bs_file_formats$surf_left_smooth )
-      cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, surf_left_smooth)
-    }
-    else {
-      surf_right_smooth <- gsub("\\*", sprintf('smooth%2.1f', smooth), bs_file_formats$surf_right_smooth )
-      cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, surf_right_smooth)
-    }
-  }
-
+  cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_surface_file_string(hemi, smooth))
   # Check if all subjects have dfs files
   if ( !all(file.exists(cbm_filelist)) ) {
     message('Following subjects have missing dfs files')
@@ -128,17 +132,9 @@ get_cbm_file_list <- function(bss_data, hemi, smooth = NULL) {
   return(cbm_filelist)
 }
 
-get_tbm_file_list <- function(bss_data, smooth = NULL) {
+get_tbm_file_list <- function(bss_data, smooth = 0) {
 
-  # if (is.null(smooth)) {
-  if (missing(smooth) | smooth == 0 | smooth == 0.0 | is.null(smooth)){
-    tbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$nii_file, bss_data@demographics$subjID))
-  }
-  else {
-    nii_smooth <- sprintf(bs_file_formats$nii_file_smooth, bss_data@demographics$subjID, smooth)
-    tbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, nii_smooth)
-    # tbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_file_formats$nii_file_smooth)
-  }
+  tbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_volume_jacobian_file_string(smooth), bss_data@demographics$subjID))
   # Check if all subjects have nii.gz files
   if ( !all(file.exists(tbm_filelist)) ) {
     message('Following subjects have missing nii.gz files')
@@ -148,43 +144,34 @@ get_tbm_file_list <- function(bss_data, smooth = NULL) {
   return(tbm_filelist)
 }
 
-get_dbm_file_list <- function(bss_data, measure, smooth = NULL) {
+get_dbm_file_list <- function(bss_data, measure, smooth = 0, eddy = TRUE) {
 
-  valid_types <- c('FA', 'MD', 'AD', 'RD', 'ADC', 'GFA')
-  if (!(measure %in% valid_types)) {
-    stop(sprintf('Valid DTI measures are %s', paste(unlist(valid_types), collapse = ', ')),
-         call. = FALSE)
-  }
-
-  # if (is.null(smooth)) {
-  if (missing(smooth) | smooth == 0 | smooth == 0.0 | is.null(smooth)){
-    switch(measure,
-           FA = {dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$fa_file, bss_data@demographics$subjID))},
-           MD = {dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$md_file, bss_data@demographics$subjID))},
-           AD = {dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$ax_file, bss_data@demographics$subjID))},
-           RD = {dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$rad_file, bss_data@demographics$subjID))},
-           ADC = {dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$ADC_file, bss_data@demographics$subjID))},
-           GFA = {dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_file_formats$GFA_file, bss_data@demographics$subjID))}
-           )
-  }
-  else {
-    switch(measure,
-           FA = {nii_smooth <- sprintf(bs_file_formats$fa_file_smooth, bss_data@demographics$subjID, smooth)},
-           MD = {nii_smooth <- sprintf(bs_file_formats$md_file_smooth, bss_data@demographics$subjID, smooth)},
-           AD = {nii_smooth <- sprintf(bs_file_formats$ad_file_smooth, bss_data@demographics$subjID, smooth)},
-           RD = {nii_smooth <- sprintf(bs_file_formats$rad_file_smooth, bss_data@demographics$subjID, smooth)},
-           ADC = {nii_smooth <- sprintf(bs_file_formats$ADC_file_smooth, bss_data@demographics$subjID, smooth)},
-           GFA = {nii_smooth <- sprintf(bs_file_formats$GFA_file_smooth, bss_data@demographics$subjID, smooth)}
-           )
-    dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, nii_smooth)
-  }
+  dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_diffusion_file_string(measure, smooth, eddy), bss_data@demographics$subjID))
   # Check if all subjects have nii.gz files
   if ( !all(file.exists(dbm_filelist)) ) {
     message('Following subjects have missing nii.gz files')
     print(dbm_filelist[which(!file.exists(dbm_filelist))], row.names = FALSE)
-    stop('\nCheck if svreg_apply_map was run succesfully and if the *.T1_coord.nii.gz files exist for all the subjects.\nAlso check if smoothing was performed.', call. = FALSE)
+    stop('\nCheck if svreg_apply_map was run succesfully and if the *.dwi.*.atlas.*.nii.gz files exist for all the subjects.\nAlso check if smoothing was performed.', call. = FALSE)
   }
   return(dbm_filelist)
+}
+
+get_brainsute_custom_volume_atlas_prefix <- function(atlas) {
+
+  # Check if the parent directory exists for the atlas
+  check_file_exists(dirname(atlas), raise_error = TRUE)
+
+  # If atlas points to a nifti image, return the prefix of the atlas (everything until the bfc.nii.gz)
+  if (substr(atlas, nchar(atlas) - 9, nchar(atlas)) == bs_atlas_files_suffix$atlas_custom_suffix_tbm)
+    return(substr(atlas, 1, nchar(atlas) - 11))
+
+  # If atlas points to a valid prefix, return atlas
+  if (!identical(Sys.glob(file.path(paste(atlas, "*", bs_atlas_files_suffix$atlas_custom_suffix_tbm, sep = ""))), character(0)))
+    return(atlas)
+
+  # Otherwise raise an exception
+  stop(sprintf('Invalid custom atlas prefix/path: %s', atlas), call. = FALSE)
+
 }
 
 get_brainsuite_atlas_path_from_logfile <- function(logfile) {
@@ -209,7 +196,7 @@ get_brainsuite_atlas_id_from_logfile <- function(logfile) {
     return("BCI-DNI_brain_atlas")
   else
     stop(paste("Could not determine the BrainSuite atlas used for registration.\n",
-               "Please check the log file ", logfile, ", and check if the subject directory is valid.", sep = ""), call. = FALSE)
+               "Please check the log file ", logfile, ", and check if the subject directory is valid. If using a custom atlas, supply the path in the atlas= argument.", sep = ""), call. = FALSE)
 }
 
 get_brainsuite_logfilename <- function(subjdir, csv) {
@@ -270,7 +257,7 @@ get_cbm_atlas <- function(brainsuite_atlas_id, hemi) {
 get_tbm_atlas_and_mask <- function(brainsuite_atlas_id) {
 
   if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
-    stop('Valid values for hemi are BrainSuiteAtlas1 or BCI-DNI_brain_atlas.', call. = FALSE)
+    stop('Valid values for atlas are BrainSuiteAtlas1 or BCI-DNI_brain_atlas.', call. = FALSE)
   brainsuite_install_path <- get_brainsuite_install_path()
   if (brainsuite_atlas_id == "BrainSuiteAtlas1") {
     nii_atlas <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BS1_tbm)
@@ -280,6 +267,16 @@ get_tbm_atlas_and_mask <- function(brainsuite_atlas_id) {
     nii_atlas <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_tbm)
     nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_mask_tbm)
   }
+  check_file_exists(nii_atlas, raise_error = TRUE)
+  check_file_exists(nii_atlas_mask, raise_error = TRUE)
+  return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
+}
+
+get_custom_tbm_atlas_and_mask <- function(brainsuite_custom_atlas_prefix) {
+
+  brainsuite_custom_atlas_prefix <- get_brainsute_custom_volume_atlas_prefix(brainsuite_custom_atlas_prefix)
+  nii_atlas <- paste(brainsuite_custom_atlas_prefix, ".", bs_atlas_files_suffix$atlas_custom_suffix_tbm, sep="")
+  nii_atlas_mask <- paste(brainsuite_custom_atlas_prefix, ".", bs_atlas_files_suffix$atlas_custom_mask_suffix_tbm, sep="")
   check_file_exists(nii_atlas, raise_error = TRUE)
   check_file_exists(nii_atlas_mask, raise_error = TRUE)
   return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
@@ -295,7 +292,7 @@ read_demographics <- function(csvfile) {
 get_dbm_atlas_and_mask <- function(brainsuite_atlas_id) {
 
   if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
-    stop('Valid values for hemi are BrainSuiteAtlas1 or BCI-DNI_brain_atlas.', call. = FALSE)
+    stop('Valid values for atlas are BrainSuiteAtlas1 or BCI-DNI_brain_atlas.', call. = FALSE)
   brainsuite_install_path <- get_brainsuite_install_path()
   if (brainsuite_atlas_id == "BrainSuiteAtlas1") {
     nii_atlas <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BS1_tbm)
@@ -305,6 +302,16 @@ get_dbm_atlas_and_mask <- function(brainsuite_atlas_id) {
     nii_atlas <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_tbm)
     nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_mask_dbm)
   }
+  check_file_exists(nii_atlas, raise_error = TRUE)
+  check_file_exists(nii_atlas_mask, raise_error = TRUE)
+  return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
+}
+
+get_custom_dbm_atlas_and_mask <- function(brainsuite_custom_atlas_prefix) {
+
+  brainsuite_custom_atlas_prefix <- get_brainsute_custom_volume_atlas_prefix(brainsuite_custom_atlas_prefix)
+  nii_atlas <- paste(brainsuite_custom_atlas_prefix, ".", bs_atlas_files_suffix$atlas_custom_suffix_dbm, sep = "")
+  nii_atlas_mask <- paste(brainsuite_custom_atlas_prefix, ".", bs_atlas_files_suffix$atlas_custom_mask_suffix_dbm, sep = "")
   check_file_exists(nii_atlas, raise_error = TRUE)
   check_file_exists(nii_atlas_mask, raise_error = TRUE)
   return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))

@@ -355,20 +355,27 @@ check_files <- function(object){
 #' @param measure character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".
 #' @export
 package_data <- function(type="cbm", subjdir="", csv="", hemi="left",
-                         smooth=0.0, roiid=0, roimeas="gmthickness", measure="", atlas="", eddy=TRUE, outdir="") {
+                         smooth=0.0, measure="FA", atlas="", eddy=TRUE, outdir="") {
 
-  valid_types <- c("cbm", "tbm", "roi","dbm","nca")
+  valid_types <- c("cbm", "tbm", "roi","dbm","nca", "all")
   if (! type %in% valid_types)
     stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
 
   switch(type,
-         cbm = { bss_data <- copy_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth, outdir=outdir) },
-         tbm = { bss_data <- copy_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth, atlas=atlas, outdir=outdir) },
-         dbm = { bss_data <- copy_dbm_data(subjdir=subjdir, csv=csv, measure=measure,
+         cbm = { copy_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth, outdir=outdir) },
+         tbm = { copy_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth, atlas=atlas, outdir=outdir) },
+         dbm = { copy_dbm_data(subjdir=subjdir, csv=csv, measure=measure,
                                            smooth=smooth, atlas=atlas, eddy=eddy, outdir=outdir) },
-         roi = { bss_data <- copy_roi_data(subjdir, csv, roiid, roimeas, outdir=outdir) }
+         roi = { copy_roi_data(subjdir, csv, outdir=outdir) },
+         all = {
+           copy_cbm_data(subjdir=subjdir, csv=csv, hemi="left", smooth = smooth, outdir=outdir)
+           copy_cbm_data(subjdir=subjdir, csv=csv, hemi="right", smooth = smooth, outdir=outdir)
+           copy_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth, atlas=atlas, outdir=outdir)
+           copy_dbm_data(subjdir=subjdir, csv=csv, measure=measure,
+                         smooth=smooth, atlas=atlas, eddy=eddy, outdir=outdir)
+           copy_roi_data(subjdir, csv, outdir=outdir)
+         }
   )
-
 }
 
 copy_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, outdir) {
@@ -432,7 +439,7 @@ copy_dbm_data <- function(subjdir="", csv="", measure="FA", atlas="", eddy=TRUE,
   file.copy(src_filelist, dest_filelist)
 }
 
-copy_roi_data <- function(subjdir="", csv="", roiid=NULL, roimeas="gmthickness", outdir) {
+copy_roi_data <- function(subjdir="", csv="", outdir) {
 
   bss_data <- new("BssROIData", subjdir, csv)
   roiwise_file_list <- get_roi_file_list(bss_data)

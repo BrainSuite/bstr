@@ -232,7 +232,7 @@ get_brainsuite_logfilename_for_all_subjects <- function(subjdir, csv) {
     svreg_log_files <- Sys.glob(file.path(subjdir, demo[[1]], '*.svreg.log'))
   }
   # svreg_log_file <- file.path(subjdir, first_subjid, sprintf('%s.svreg.log', first_subjid))
-  if (check_files_exists(svreg_log_files, errmesg = 'Could not find svreg.log in a few subject directories.')) {
+  if (check_multiple_files_exists(svreg_log_files, errmesg = 'Could not find svreg.log in a few subject directories.')) {
     return(svreg_log_files)
   }
 }

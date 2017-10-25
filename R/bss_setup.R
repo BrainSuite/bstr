@@ -14,7 +14,7 @@
 
 #' Setup script for bssr
 #'
-#' This script reads from and writes to the setup configuration file (bssr.ini) for bss
+#' This script reads from and writes to the setup configuration file (bssr.ini) for bss.
 #' Usually this will be called automatically when the package is installed and loaded
 #' for the first time. Optionally, it can be executed by the user immediately after installing bssr.
 #'
@@ -109,7 +109,7 @@ get_brainsuite_path_on_windows <- function(quiet = TRUE, raise_error = FALSE) {
   # Search C:/Program Files
   bs_paths <- dir('C:/Program Files', 'BrainSuite', full.names = TRUE)
   bs_paths <- bs_paths[dir.exists(bs_paths)]
-  bs_paths <- sort(bs_opt_paths, decreasing = TRUE)
+  bs_paths <- sort(bs_paths, decreasing = TRUE)
 
   # Test bs_paths for valid installations
   valid_bs_path = ""

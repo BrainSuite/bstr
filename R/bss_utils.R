@@ -42,15 +42,14 @@ check_file_exists <- function(filename, raise_error=FALSE, errmesg=NULL) {
 
 #' Check if multiple files exists all at once
 #'
-#' @param filename Name of file.
+#' @param filelist Name of file.
 #' @param errmesg character string of optional error message
 #'
 #' @export
 check_multiple_files_exists <- function(filelist, errmesg=NULL) {
-  errmesg <- if (is.null(errmesg)) sprintf('File or path %s does not exist.', filename) else errmesg
   if ( !all(file.exists(filelist)) ) {
     message('Following subjects have missing files')
-    print(cbm_filelist[which(!file.exists(filelist))], row.names = FALSE)
+    print(filelist[which(!file.exists(filelist))], row.names = FALSE)
     stop('\nCheck if svreg was run succesfully on all the subjects.',
          call. = FALSE)
   }

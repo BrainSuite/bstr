@@ -23,7 +23,6 @@
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach foreach %dopar%
 #' @importFrom bit as.bit
-#' @importFrom Matrix pMatrix-class
 #'
 NULL
 

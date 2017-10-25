@@ -15,7 +15,7 @@ setup(brainsuite_path = NULL, quiet = FALSE, raise_error = TRUE)
 value is \code{FALSE}, in which case the function returns {FALSE} without stopping the execution.}
 }
 \description{
-This script reads from and writes to the setup configuration file (bssr.ini) for bss
+This script reads from and writes to the setup configuration file (bssr.ini) for bss.
 Usually this will be called automatically when the package is installed and loaded
 for the first time. Optionally, it can be executed by the user immediately after installing bssr.
 }

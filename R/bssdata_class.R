@@ -351,9 +351,11 @@ check_files <- function(object){
 #' and should be exactly equal to the individual subject directory name.
 #' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
 #' @param smooth numeric value denoting the smoothing level.
-#' @param roiid numeric label identifier for the region of interest (ROI) type analysis.
-#' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
 #' @param measure character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".
+#' @param atlas path name to the atlas
+#' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
+#' @param outdir output directory that will contain the copied data
+#'
 #' @export
 package_data <- function(type="cbm", subjdir="", csv="", hemi="left",
                          smooth=0.0, measure="FA", atlas="", eddy=TRUE, outdir="") {

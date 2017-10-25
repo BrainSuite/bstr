@@ -335,6 +335,7 @@ check_files <- function(object){
 }
 
 #' Package data for reproducible statistical analysis.
+#'
 #' Takes same parameters as \code{\link{load_bss_data}} and copies the data to a new directory specified by outdir. You can repeatedly call this function to copy data of different types (tbm -- nii.gz, cbm -- .dfs files etc.) to the same output directory.
 #' Prior to using this function, BrainSuite and svreg should be run on all subjects.
 #' If required, smoothing should be performed on cortical surface or volumetric image based measures.

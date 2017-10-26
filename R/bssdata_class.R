@@ -455,3 +455,22 @@ copy_roi_data <- function(subjdir="", csv="", outdir) {
   # Copy files
   file.copy(roiwise_file_list, dest_filelist)
 }
+
+file_copy <- function(src_filelist, dest_filelist, progress = TRUE) {
+
+  if (length(src_filelist) != length(dest_filelist))
+    stop(sprintf('The lengths of the source and the destination files do not match.'), call. = FALSE)
+
+  # If progress == TRUE, then display progressbar
+  if (progress == TRUE) {
+    pb <- txtProgressBar(max = length(src_filelist), style = 3)
+    for (i in 1:length(src_filelist)) {
+      file.copy(src_filelist[i], dest_filelist[i])
+      setTxtProgressBar(pb, pb$getVal()+1)
+    }
+    close(pb)
+  }
+  else
+    file.copy(src_filelist, dest_filelist)
+}
+

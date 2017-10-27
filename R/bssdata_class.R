@@ -397,7 +397,7 @@ copy_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, outdir) {
   dest_filelist <- c(dest_filelist, file.path(outdir, bss_data@demographics$subjID, basename(logfilenames)),
                      file.path(outdir, basename(cbm_atlas_filename)))
   # Copy files
-  file.copy(src_filelist, dest_filelist)
+  file_copy(src_filelist, dest_filelist)
 }
 
 copy_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas, outdir) {
@@ -418,7 +418,7 @@ copy_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas, outdir) {
                      file.path(outdir, basename(tbm_atlas_mask_filename$nii_atlas_mask))
                      )
   # Copy files
-  file.copy(src_filelist, dest_filelist)
+  file_copy(src_filelist, dest_filelist)
 }
 
 copy_dbm_data <- function(subjdir="", csv="", measure="FA", atlas="", eddy=TRUE, smooth=0.0, outdir) {
@@ -439,7 +439,7 @@ copy_dbm_data <- function(subjdir="", csv="", measure="FA", atlas="", eddy=TRUE,
                      file.path(outdir, basename(dbm_atlas_mask_filename$nii_atlas_mask))
   )
   # Copy files
-  file.copy(src_filelist, dest_filelist)
+  file_copy(src_filelist, dest_filelist)
 }
 
 copy_roi_data <- function(subjdir="", csv="", outdir) {
@@ -453,7 +453,7 @@ copy_roi_data <- function(subjdir="", csv="", outdir) {
   Vectorize(dir.create)(file.path(outdir, bss_data@demographics$subjID), showWarnings = FALSE)
 
   # Copy files
-  file.copy(roiwise_file_list, dest_filelist)
+  file_copy(roiwise_file_list, dest_filelist)
 }
 
 file_copy <- function(src_filelist, dest_filelist, progress = TRUE) {

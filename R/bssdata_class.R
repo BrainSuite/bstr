@@ -379,6 +379,8 @@ package_data <- function(type="cbm", subjdir="", csv="", hemi="left",
            copy_roi_data(subjdir, csv, outdir=outdir)
          }
   )
+  # Copy the spreadsheet
+  file.copy(csv, file.path(outdir, basename(csv)))
 }
 
 copy_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, outdir) {

@@ -4,8 +4,10 @@ output: html_notebook
 ---
 ______________________________
 ______________________________
-### Function to Retrieve Commmand Line slices in R
+
+### Function to Retrieve Commmand Line slices in R TEST
 ```{r results='hide'}
+
 img_out <- function(coord,filePath,overlay1,newFile) {
   intern = FALSE
   ignore.stdout = FALSE
@@ -104,18 +106,14 @@ shinyUI(fluidPage(
   titlePanel("Overlay"),
   
   navlistPanel(
-    "P-Values",
-    tabPanel("Overlay P-Values", img(src='./Pview1.png', align="left", width = "45%"),img(src='./Pview3.png', align="left", width = "37.5%"),img(src='./Pview2.png', align="bottom", width = "45%")),
-    tabPanel("Colormap P"),
-       "Adjusted P-values",
+    tabPanel("P-Values", img(src='./Pview1.png', align="left", width = "45%"),img(src='./Pview3.png', align="left", width = "37.5%"),img(src='./Pview2.png', align="bottom", width = "45%")),
     tabPanel("Adjusted P-values", img(src='./AdjPvalue1.png', align="left", width = "45%"),img(src='./AdjPvalue3.png', align="left", width = "37.5%"),img(src='./AdjPvalue2.png', align="bottom", width = "45%"), img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf')),
-    tabPanel("Colormap Adj P"),
-    "T-Values",
-    tabPanel("Overlay T-Values", img(src='./Tvalue1.png', align="left", width = "45%"),img(src='./Tvalue3.png', align="left", width = "37.5%"),img(src='./Tvalue2.png', align="bottom", width = "45%")),
-    tabPanel("Colormap T")
+    tabPanel("T-Values", img(src='./Tvalue1.png', align="left", width = "45%"),img(src='./Tvalue3.png', align="left", width = "37.5%"),img(src='./Tvalue2.png', align="bottom", width = "45%"))
   )
 ))
 ```
+
+
 
 ####Return to table: [here](#test1)
 ______________________________
@@ -185,6 +183,79 @@ ______________________________
 
 \pagebreak
 
+
+
+```{r}
+library(shiny)
+library(shinyjs)
+
+
+  shinyUI(fluidPage(
+    useShinyjs(),
+    tabsetPanel(
+      id = "navbar",
+      tabPanel(title = "Cluster 1",
+              checkboxGroupInput("variable", "Variables to show:",
+                     c("P-Values" = "p",
+                       "Adjusted P-val" = "adp",
+                       "T-Values" = "t",
+                       "Atlas" = "at"), inline=T, selected = c("p","adp","t","at")),
+  tableOutput("data"),
+               value = c("Cluster 1"),
+               h1("Tab 1"),
+              img(src='./Pview1.png', align="left", width = "30%"),
+               img(src='./Pview3.png', align="left", width = "25%"),
+               img(src='./Pview2.png', align="left", width = "36%"),
+  img(src='./AdjPvalue1.png', align="left", width = "30%"),
+  img(src='./AdjPvalue3.png', align="left", width = "25%"),
+  img(src='./AdjPvalue2.png', align="bottom", width = "36%"), knitr::include_graphics('/Users/sarapesavento/Desktop/tbm_anova/bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf', auto_pdf=TRUE)),
+      tabPanel(title = "Cluster 2",
+               value = "tab2",
+               h1("Tab 2")
+
+      ),
+      tabPanel(title = "Cluster 3",
+               value = "tab3",
+               h1("Tab 3")
+      )
+    )
+  )  )
+```
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel("hi"),
+    mainPanel("main")
+  )
+)
+
+  shinyUI(fluidPage(
+    tabsetPanel(
+      id = "navbar",
+      tabPanel(title = "tab1",
+               value = "tab1",
+               navlistPanel(
+    "P-Values",
+    widths = c(4,8),
+    tabPanel("Overlay P-Values", img(src='./Pview1.png', align="left", width = "45%"),img(src='./Pview3.png', align="left", width = "37.5%"),img(src='./Pview2.png', align="bottom", width = "45%")))),
+            
+      tabPanel(title = "tab2",
+               value = "tab2",
+               h1("Tab 2")
+
+      ),
+      tabPanel(title = "tab3",
+               value = "tab3",
+               h1("Tab 3")
+      )
+    )
+  )  )
+```
+
+
 #test 2 {#test2}
 ```{r eval=TRUE}
 
@@ -216,3 +287,32 @@ shinyUI(fluidPage(
 ```
 
 ####Return to table: [here](#test1)
+
+
+```{r}
+ui <- fluidPage(
+  textOutput("txt")
+)
+
+shinyUI(fluidPage(
+
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "bootstrap.css")
+  ),
+
+  headerPanel(radioButtons("radio_year_select","Year", c("1999" = "1999", "2001" = "2001", "303430432=303430432", "948139483914"="948139483914"), inline=T)),
+  
+  sidebarPanel(
+    radioButtons("radio_year_select","Year", c("1999" = "1999", "2001" = "2001", "948139483914"="948139483914"), inline=T)
+  ),
+  
+  mainPanel(plotOutput("distPlot"))
+))
+```
+
+
+
+
+
+
+

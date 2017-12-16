@@ -357,12 +357,24 @@ check_files <- function(object){
 #' @param outdir output directory that will contain the copied data
 #'
 #' @export
-package_data <- function(type="cbm", subjdir="", csv="", hemi="left",
-                         smooth=0.0, measure="FA", atlas="", eddy=TRUE, outdir="") {
+package_data <- function(type="cbm", subjdir=NULL, csv="", hemi="left",
+                         smooth=0.0, measure="FA", atlas="", eddy=TRUE, outdir=NULL) {
 
   valid_types <- c("cbm", "tbm", "roi","dbm","nca", "all")
   if (! type %in% valid_types)
     stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
+
+  if (is.null(subjdir))
+    stop(sprintf("Subject directory is not specified."), call. = FALSE)
+
+  if (is.null(outdir))
+    stop(sprintf("Output directory is not specified."), call. = FALSE)
+
+  if (outdir == "") {
+    stop("Output directory is an empty string.", call.=FALSE)
+  }
+  if (dir.exists(outdir))
+    stop("Output directory exists. Please specify a new output directory that does not exist.", call.=FALSE)
 
   switch(type,
          cbm = { copy_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth, outdir=outdir) },

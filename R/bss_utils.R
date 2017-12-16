@@ -40,3 +40,18 @@ check_file_exists <- function(filename, raise_error=FALSE, errmesg=NULL) {
   }
 }
 
+#' Check if multiple files exists all at once
+#'
+#' @param filelist Name of file.
+#' @param errmesg character string of optional error message
+#'
+#' @export
+check_multiple_files_exists <- function(filelist, errmesg=NULL) {
+  if ( !all(file.exists(filelist)) ) {
+    message('Following subjects have missing files')
+    print(filelist[which(!file.exists(filelist))], row.names = FALSE)
+    stop('\nCheck if svreg was run succesfully on all the subjects.',
+         call. = FALSE)
+  }
+  return (TRUE)
+}

@@ -14,7 +14,7 @@
 
 #' Setup script for bssr
 #'
-#' This script reads from and writes to the setup configuration file (bssr.ini) for bss
+#' This script reads from and writes to the setup configuration file (bssr.ini) for bss.
 #' Usually this will be called automatically when the package is installed and loaded
 #' for the first time. Optionally, it can be executed by the user immediately after installing bssr.
 #'
@@ -63,42 +63,63 @@ get_os <- function() {
 }
 
 get_brainsuite_path_on_macOS <- function(quiet = TRUE, raise_error = FALSE) {
-  bs_paths <- sort(list.files('/Applications', 'BrainSuite', full.names = TRUE), decreasing = TRUE)[1]
-  if (!is.na(bs_paths[1])) {
-    # Check if the required files exist
-    if (check_bs_atlas_exists(bs_paths[1], quiet = quiet, raise_error = raise_error)) return(bs_paths[1]) else return("")
+
+  # Search /Applications first
+  bs_opt_paths <- dir('/Applications', 'BrainSuite', full.names = TRUE)
+  bs_opt_paths <- bs_opt_paths[dir.exists(bs_opt_paths)]
+  # Search ~ next
+  bs_home_paths <- dir('~', 'BrainSuite', full.names = TRUE)
+  bs_home_paths <- bs_home_paths[dir.exists(bs_home_paths)]
+  bs_paths <- sort(c(bs_opt_paths, bs_home_paths), decreasing = TRUE)
+
+  # Test bs_paths for valid installations
+  valid_bs_path = ""
+  for (path in bs_paths) {
+    if (check_bs_atlas_exists(path, quiet = FALSE, raise_error = FALSE)) {
+      valid_bs_path = path
+      break
+    }
   }
-  else
-    return("")
+  return(valid_bs_path)
 }
 
 get_brainsuite_path_on_unix <- function(quiet = TRUE, raise_error = FALSE) {
 
   # Search /opt first
-  bs_opt_paths <- sort(list.files('/opt', 'BrainSuite', full.names = TRUE), decreasing = TRUE)[1]
-  bs_home_paths <- sort(list.files(path.expand('~'), 'BrainSuite', full.names = TRUE), decreasing = TRUE)[1]
+  bs_opt_paths <- dir('/opt', 'BrainSuite', full.names = TRUE)
+  bs_opt_paths <- bs_opt_paths[dir.exists(bs_opt_paths)]
+  # Search ~ next
+  bs_home_paths <- dir('~', 'BrainSuite', full.names = TRUE)
+  bs_home_paths <- bs_home_paths[dir.exists(bs_home_paths)]
+  bs_paths <- sort(c(bs_opt_paths, bs_home_paths), decreasing = TRUE)
 
-  if (check_bs_atlas_exists(bs_opt_paths[1], quiet = quiet, raise_error = raise_error) && check_bs_atlas_exists(bs_home_paths[1], quiet = quiet, raise_error = raise_error)) {
-    bs <- sort(c(basename(bs_opt_paths), basename(bs_home_paths)), decreasing=TRUE)[1]
-    bs_path <- grep(bs, c(bs_opt_paths, bs_home_paths), value=TRUE)
-    return(bs_path[1])
+  # Test bs_paths for valid installations
+  valid_bs_path = ""
+  for (path in bs_paths) {
+    if (check_bs_atlas_exists(path, quiet = FALSE, raise_error = FALSE)) {
+      valid_bs_path = path
+      break
+    }
   }
-  if (check_bs_atlas_exists(bs_opt_paths[1], quiet = quiet, raise_error = raise_error)) return(bs_opt_paths[1])
-  else if (check_bs_atlas_exists(bs_home_paths[1], quiet = quiet, raise_error = raise_error)) return(bs_home_paths[1])
-  else
-    return("")
-
+  return(valid_bs_path)
 }
 
 get_brainsuite_path_on_windows <- function(quiet = TRUE, raise_error = FALSE) {
 
-  bs_paths <- sort(list.files('C:/Program Files', 'BrainSuite', full.names = TRUE), decreasing = TRUE)[1]
-  if (!is.na(bs_paths[1])) {
-    # Check if the required files exist
-    if (check_bs_atlas_exists(bs_paths[1], quiet = quiet, raise_error = raise_error)) return(bs_paths[1]) else return("")
+  # Search C:/Program Files
+  bs_paths <- dir('C:/Program Files', 'BrainSuite', full.names = TRUE)
+  bs_paths <- bs_paths[dir.exists(bs_paths)]
+  bs_paths <- sort(bs_paths, decreasing = TRUE)
+
+  # Test bs_paths for valid installations
+  valid_bs_path = ""
+  for (path in bs_paths) {
+    if (check_bs_atlas_exists(path, quiet = FALSE, raise_error = FALSE)) {
+      valid_bs_path = path
+      break
+    }
   }
-  else
-    return("")
+  return(valid_bs_path)
 }
 
 check_bs_atlas_exists <- function(brainsuite_path, quiet=FALSE, raise_error = TRUE) {
@@ -112,7 +133,7 @@ check_bs_atlas_exists <- function(brainsuite_path, quiet=FALSE, raise_error = TR
       return(FALSE)
     }
   }
-  if (!quiet) message('Done.', appendLF = TRUE)
+  if (!quiet) message(sprintf('Done. Valid BrainSuite installation found at %s', brainsuite_path), appendLF = TRUE)
   return(TRUE)
 }
 

@@ -86,13 +86,13 @@ bs_diffusion_file_string <- function(measure = "FA", smooth = 0, eddy = TRUE) {
     stop(sprintf('Invalid diffusion measure: %s. Valid measures are %s.', measure, paste(valid_diffusion_measures, collapse = ', ')))
 
   if (eddy == TRUE && smooth != 0)
-    return(paste('%s.dwi.RAS.correct.atlas.', measure, sprintf('.smooth%2.1fmm.nii.gz', smooth), sep = ''))
+    return(paste('%s.dwi.RAS.correct.', measure, sprintf('.atlas.smooth%2.1fmm.nii.gz', smooth), sep = ''))
   if (eddy == FALSE && smooth != 0)
-    return(paste('%s.dwi.RAS.atlas.', measure, sprintf('.smooth%2.1fmm.nii.gz', smooth), sep = ''))
+    return(paste('%s.dwi.RAS.', measure, sprintf('.atlas.smooth%2.1fmm.nii.gz', smooth), sep = ''))
   if (eddy == TRUE && smooth == 0)
-    return(paste('%s.dwi.RAS.correct.atlas.', measure, '.nii.gz', sep = ''))
+    return(paste('%s.dwi.RAS.correct.', measure, '.atlas.nii.gz', sep = ''))
   if (eddy == FALSE && smooth == 0)
-    return(paste('%s.dwi.RAS.atlas.', measure, '.nii.gz', sep = ''))
+    return(paste('%s.dwi.RAS.', measure, '.atlas.nii.gz', sep = ''))
 }
 
 get_bs_file_list <- function(analysis_type) {

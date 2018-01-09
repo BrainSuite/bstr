@@ -1,0 +1,103 @@
+---
+title: "R6class_tbm"
+output: html_document
+---
+
+```{r}
+BssRmdVolumeOutput <-
+  R6::R6Class("BssRmdSurfaceOutput",
+              inherit = BssRmdOutput,
+              public = list(
+                initialize = function(outdir = NULL) {
+                  super$initialize(outdir)
+                },
+                save_out = function(bss_data, bss_model, MNIcoord=NULL) {
+                  
+                }
+              ),
+              private = list(
+                #overlay choices: pvalues, adjpvalues, tvalues, atlas
+                render_overlay = function(MNIcoord, atlas = bss_data@atlas_filename, overlay="pvalues", outdir) {
+                  intern = FALSE
+                  ignore.stdout = FALSE
+                  ignore.stderr = FALSE
+                  wait = TRUE
+                  input = NULL
+                  
+                  view1 <- paste0("volblend -r ",atlas," --view 1 --slice ",MNIcoord," --flop -o atlas.",MNIcoord,".p.png -c jet -i ",overlay," -o ",outdir, overlay,"1.png")
+                  view2 <- paste0("volblend -r ",atlas," --view 2 --slice ",MNIcoord," --flop -o atlas.",MNIcoord,".p.png -c jet -i ",overlay," -o ",outdir, overlay,"2.png")
+                  view3 <- paste0("volblend -r ",atlas," --view 3 --slice ",MNIcoord," --flop -o atlas.",MNIcoord,".p.png -c jet -i ",overlay," -o ",outdir, overlay,"3.png")
+                  
+                  return(c(system(view1, intern, ignore.stdout, ignore.stderr, wait, input), system(view2, intern, ignore.stdout, ignore.stderr, wait, input), system(view3, intern, ignore.stdout, ignore.stderr, wait, input)))
+                },
+                render_atlas = function(MNIcoord, atlas = bss_data@atlas_filename, overlay="atlas", outdir) {
+                  intern = FALSE
+                  ignore.stdout = FALSE
+                  ignore.stderr = FALSE
+                  wait = TRUE
+                  input = NULL
+                  
+                  view1 <- paste0("volblend -i ",atlas," --view 1 --slice ",MNIcoord," --flop -o ", outdir, overlay,"1.png")
+                  view2 <- paste0("volblend -i ",atlas," --view 2 --slice ",MNIcoord," --flop -o ", outdir, overlay,"2.png")
+                  view3 <- paste0("volblend -i ",atlas," --view 3 --slice ",MNIcoord," --flop -o ", outdir, overlay,"3.png")
+                  
+                  return(c(system(view1, intern, ignore.stdout, ignore.stderr, wait, input), system(view2, intern, ignore.stdout, ignore.stderr, wait, input), system(view3, intern, ignore.stdout, ignore.stderr, wait, input)))
+                  
+                },
+                render_table = function() {
+                  library(knitr)
+                  table <- data.frame(Cluster = 1:5, Vol_Size = c(33,22.3, 21, 25, 30), MNI_coord = c(3,3,4,5,3), T_val =c(8,7.2,6,9.8,7.8))
+                  table$Cluster <- paste0("[", table$Cluster, "](", t, ")")
+                  kable(table[1:4], align=c(rep('l', 4)))
+                },
+                render_html = function() {
+                  library(shiny)
+  library(shinyjs)
+  shinyUI(fluidPage(
+    useShinyjs(),
+    tabsetPanel(
+      id = "navbar",
+      tabPanel(title = "Cluster 1",
+               checkboxGroupInput("variable", "Variables to show:",
+                                  c("P-Values" = "p",
+                                    "Adjusted P-val" = "adp",
+                                    "T-Values" = "t",
+                                    "Atlas" = "at"), inline=T, selected = c("p","adp","t","at")),
+               tableOutput("data"),
+               value = c("Cluster 1"),
+               h1("Cluster 1"),
+               img(src='./pvalues1.png', align="left", width = "28.8%"),
+               img(src='./pvalues3.png', align="left", width = "24%"),
+               img(src='./pvalues2.png', align="left", width = "34.5%"),
+               img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf', align="left", width = "11%"),
+               img(src='./adjpvalues2.png', align="left",width = "28.8%"),
+               img(src='./adjpvalues1.png', align="left", width = "24%"),
+               img(src='./adjpvalues3.png', align="left", width = "34.5%"),
+               img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.pdf', align="left", width = "11%"),
+               img(src='./tvalues2.png', align="left",width = "28.8%"),
+               img(src='./tvalues1.png', align="left",width = "24%"),
+               img(src='./tvalues3.png', align="left",width = "34.5%"),
+               img(src='./bss_anova_age_mri.bfc.nii_tvalues_cbar.pdf', align="left", width = "11%"),
+               img(src='./atlas2.png', align="left",width = "28.8%"),
+               img(src='./atlas1.png', align="left",width = "24%"),
+               img(src='./atlas3.png', align="left",width = "34.5%")),
+      tabPanel(title = "Cluster 2",
+               
+               value = "tab2",
+               h1("Cluster 2")
+      ),
+      tabPanel(title = "Cluster 3",
+               value = "tab3",
+               h1("Cluster 3:"),
+              mainPanel("hi")
+              
+               )
+      )
+    )
+  )  
+                  
+                }
+              )
+  )
+```
+

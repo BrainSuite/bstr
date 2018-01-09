@@ -86,13 +86,13 @@ bs_diffusion_file_string <- function(measure = "FA", smooth = 0, eddy = TRUE) {
     stop(sprintf('Invalid diffusion measure: %s. Valid measures are %s.', measure, paste(valid_diffusion_measures, collapse = ', ')))
 
   if (eddy == TRUE && smooth != 0)
-    return(paste('%s.dwi.RAS.correct.atlas.', measure, sprintf('.smooth%2.1fmm.nii.gz', smooth), sep = ''))
+    return(paste('%s.dwi.RAS.correct.', measure, sprintf('.atlas.smooth%2.1fmm.nii.gz', smooth), sep = ''))
   if (eddy == FALSE && smooth != 0)
-    return(paste('%s.dwi.RAS.atlas.', measure, sprintf('.smooth%2.1fmm.nii.gz', smooth), sep = ''))
+    return(paste('%s.dwi.RAS.', measure, sprintf('.atlas.smooth%2.1fmm.nii.gz', smooth), sep = ''))
   if (eddy == TRUE && smooth == 0)
-    return(paste('%s.dwi.RAS.correct.atlas.', measure, '.nii.gz', sep = ''))
+    return(paste('%s.dwi.RAS.correct.', measure, '.atlas.nii.gz', sep = ''))
   if (eddy == FALSE && smooth == 0)
-    return(paste('%s.dwi.RAS.atlas.', measure, '.nii.gz', sep = ''))
+    return(paste('%s.dwi.RAS.', measure, '.atlas.nii.gz', sep = ''))
 }
 
 get_bs_file_list <- function(analysis_type) {
@@ -218,6 +218,25 @@ get_brainsuite_logfilename <- function(subjdir, csv) {
     return(tools::file_path_as_absolute(svreg_log_file))
 }
 
+get_brainsuite_logfilename_for_all_subjects <- function(subjdir, csv) {
+  # Open the svreg.log file and get the atlas file name
+  if ( identical(tools::file_ext(csv), 'tsv') | identical(tools::file_ext(csv), 'csv')  ) {
+    demo <- read_demographics(csv)
+  }
+  # The first column has to contain subject IDs which are same as subject directories
+  first_subjid <- demo[[1]][1]
+  # Get atlas names from log files.
+  svreg_log_files <- Sys.glob(file.path(subjdir, demo[[1]], "*", '*.svreg.log'))
+
+  if (length(svreg_log_files) == 0){
+    svreg_log_files <- Sys.glob(file.path(subjdir, demo[[1]], '*.svreg.log'))
+  }
+  # svreg_log_file <- file.path(subjdir, first_subjid, sprintf('%s.svreg.log', first_subjid))
+  if (check_multiple_files_exists(svreg_log_files, errmesg = 'Could not find svreg.log in a few subject directories.')) {
+    return(svreg_log_files)
+  }
+}
+
 get_cbm_atlas <- function(brainsuite_atlas_id, hemi) {
 
   if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
@@ -280,13 +299,6 @@ get_custom_tbm_atlas_and_mask <- function(brainsuite_custom_atlas_prefix) {
   check_file_exists(nii_atlas, raise_error = TRUE)
   check_file_exists(nii_atlas_mask, raise_error = TRUE)
   return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
-}
-
-read_demographics <- function(csvfile) {
-
-  demo <- read.csv(csvfile)
-  colnames(demo)[1] <- "subjID"
-  return(demo)
 }
 
 get_dbm_atlas_and_mask <- function(brainsuite_atlas_id) {

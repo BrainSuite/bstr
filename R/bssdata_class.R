@@ -334,3 +334,157 @@ check_files <- function(object){
   }
 }
 
+#' Package data for reproducible statistical analysis.
+#'
+#' Takes same parameters as \code{\link{load_bss_data}} and copies the data to a new directory specified by outdir. You can repeatedly call this function to copy data of different types (tbm -- nii.gz, cbm -- .dfs files etc.) to the same output directory.
+#' Prior to using this function, BrainSuite and svreg should be run on all subjects.
+#' If required, smoothing should be performed on cortical surface or volumetric image based measures.
+#' A csv file containing subject demographic information should exist. The first column of this csv file
+#' should have the subject identifiers. Subject identifiers can be alphanumeric
+#' and should be exactly equal to the individual subject directory names.
+#'
+#' @param type character string denoting type of analysis. Should be cbm, tbm, or roi.
+#' @param subjdir subject directory containing BrainSuite processed data.
+#' @param csv filename of a comma separated (csv) file containing the subject demographic information.
+#' The first column of this csv file
+#' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
+#' and should be exactly equal to the individual subject directory name.
+#' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
+#' @param smooth numeric value denoting the smoothing level.
+#' @param measure character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".
+#' @param atlas path name to the atlas
+#' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
+#' @param outdir output directory that will contain the copied data
+#'
+#' @export
+package_data <- function(type="cbm", subjdir=NULL, csv="", hemi="left",
+                         smooth=0.0, measure="FA", atlas="", eddy=TRUE, outdir=NULL) {
+
+  valid_types <- c("cbm", "tbm", "roi","dbm","nca", "all")
+  if (! type %in% valid_types)
+    stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
+
+  if (is.null(subjdir))
+    stop(sprintf("Subject directory is not specified."), call. = FALSE)
+
+  if (is.null(outdir))
+    stop(sprintf("Output directory is not specified."), call. = FALSE)
+
+  if (outdir == "") {
+    stop("Output directory is an empty string.", call.=FALSE)
+  }
+  if (dir.exists(outdir))
+    stop("Output directory exists. Please specify a new output directory that does not exist.", call.=FALSE)
+
+  switch(type,
+         cbm = { copy_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth, outdir=outdir) },
+         tbm = { copy_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth, atlas=atlas, outdir=outdir) },
+         dbm = { copy_dbm_data(subjdir=subjdir, csv=csv, measure=measure,
+                                           smooth=smooth, atlas=atlas, eddy=eddy, outdir=outdir) },
+         roi = { copy_roi_data(subjdir, csv, outdir=outdir) },
+         all = {
+           copy_cbm_data(subjdir=subjdir, csv=csv, hemi="left", smooth = smooth, outdir=outdir)
+           copy_cbm_data(subjdir=subjdir, csv=csv, hemi="right", smooth = smooth, outdir=outdir)
+           copy_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth, atlas=atlas, outdir=outdir)
+           copy_dbm_data(subjdir=subjdir, csv=csv, measure=measure,
+                         smooth=smooth, atlas=atlas, eddy=eddy, outdir=outdir)
+           copy_roi_data(subjdir, csv, outdir=outdir)
+         }
+  )
+  # Copy the spreadsheet
+  file.copy(csv, file.path(outdir, basename(csv)))
+}
+
+copy_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, outdir) {
+
+  bss_data <- new("BssCBMData", subjdir, csv)
+  logfilenames <- get_brainsuite_logfilename_for_all_subjects(subjdir, csv)
+  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+  cbm_atlas_filename <- get_cbm_atlas(brainsuite_atlas_id, hemi)
+  cbm_filelist <- get_cbm_file_list(bss_data, hemi, smooth)
+  src_filelist <- c(cbm_filelist, logfilenames, cbm_atlas_filename)
+
+  # Create subdirectories for subject IDs in outdir
+  dir.create(file.path(outdir), showWarnings = FALSE)
+  Vectorize(dir.create)(file.path(outdir, bss_data@demographics$subjID), showWarnings = FALSE)
+  dest_filelist <- file.path(outdir, bss_data@demographics$subjID, basename(cbm_filelist))
+  dest_filelist <- c(dest_filelist, file.path(outdir, bss_data@demographics$subjID, basename(logfilenames)),
+                     file.path(outdir, basename(cbm_atlas_filename)))
+  # Copy files
+  file_copy(src_filelist, dest_filelist)
+}
+
+copy_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas, outdir) {
+
+  bss_data <- new("BssTBMData", subjdir, csv)
+  logfilenames <- get_brainsuite_logfilename_for_all_subjects(subjdir, csv)
+  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+  tbm_atlas_mask_filename <- get_tbm_atlas_and_mask(brainsuite_atlas_id)
+  tbm_filelist <- get_tbm_file_list(bss_data, smooth)
+  src_filelist <- c(tbm_filelist, logfilenames, tbm_atlas_mask_filename$nii_atlas, tbm_atlas_mask_filename$nii_atlas_mask)
+
+  # Create subdirectories for subject IDs in outdir
+  dir.create(file.path(outdir), showWarnings = FALSE)
+  Vectorize(dir.create)(file.path(outdir, bss_data@demographics$subjID), showWarnings = FALSE)
+  dest_filelist <- file.path(outdir, bss_data@demographics$subjID, basename(tbm_filelist))
+  dest_filelist <- c(dest_filelist, file.path(outdir, bss_data@demographics$subjID, basename(logfilenames)),
+                     file.path(outdir, basename(tbm_atlas_mask_filename$nii_atlas)),
+                     file.path(outdir, basename(tbm_atlas_mask_filename$nii_atlas_mask))
+                     )
+  # Copy files
+  file_copy(src_filelist, dest_filelist)
+}
+
+copy_dbm_data <- function(subjdir="", csv="", measure="FA", atlas="", eddy=TRUE, smooth=0.0, outdir) {
+
+  bss_data <- new("BssDBMData", subjdir, csv)
+  logfilenames <- get_brainsuite_logfilename_for_all_subjects(subjdir, csv)
+  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+  dbm_atlas_mask_filename <- get_dbm_atlas_and_mask(brainsuite_atlas_id)
+  dbm_filelist <- get_dbm_file_list(bss_data, measure=measure, smooth = smooth, eddy = TRUE)
+  src_filelist <- c(dbm_filelist, logfilenames, dbm_atlas_mask_filename$nii_atlas, dbm_atlas_mask_filename$nii_atlas_mask)
+
+  # Create subdirectories for subject IDs in outdir
+  dir.create(file.path(outdir), showWarnings = FALSE)
+  Vectorize(dir.create)(file.path(outdir, bss_data@demographics$subjID), showWarnings = FALSE)
+  dest_filelist <- file.path(outdir, bss_data@demographics$subjID, basename(dbm_filelist))
+  dest_filelist <- c(dest_filelist, file.path(outdir, bss_data@demographics$subjID, basename(logfilenames)),
+                     file.path(outdir, basename(dbm_atlas_mask_filename$nii_atlas)),
+                     file.path(outdir, basename(dbm_atlas_mask_filename$nii_atlas_mask))
+  )
+  # Copy files
+  file_copy(src_filelist, dest_filelist)
+}
+
+copy_roi_data <- function(subjdir="", csv="", outdir) {
+
+  bss_data <- new("BssROIData", subjdir, csv)
+  roiwise_file_list <- get_roi_file_list(bss_data)
+  dest_filelist <- file.path(outdir, bss_data@demographics$subjID, basename(roiwise_file_list))
+
+  # Create subdirectories for subject IDs in outdir
+  dir.create(file.path(outdir), showWarnings = FALSE)
+  Vectorize(dir.create)(file.path(outdir, bss_data@demographics$subjID), showWarnings = FALSE)
+
+  # Copy files
+  file_copy(roiwise_file_list, dest_filelist)
+}
+
+file_copy <- function(src_filelist, dest_filelist, progress = TRUE) {
+
+  if (length(src_filelist) != length(dest_filelist))
+    stop(sprintf('The lengths of the source and the destination files do not match.'), call. = FALSE)
+
+  # If progress == TRUE, then display progressbar
+  if (progress == TRUE) {
+    pb <- txtProgressBar(max = length(src_filelist), style = 3)
+    for (i in 1:length(src_filelist)) {
+      file.copy(src_filelist[i], dest_filelist[i])
+      setTxtProgressBar(pb, pb$getVal()+1)
+    }
+    close(pb)
+  }
+  else
+    file.copy(src_filelist, dest_filelist)
+}
+

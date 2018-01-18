@@ -5,6 +5,7 @@ output: html_document
 
 ```{r}
 BssRmdVolumeOutput <-
+  
   R6::R6Class("BssRmdSurfaceOutput",
               inherit = BssRmdOutput,
               public = list(
@@ -45,57 +46,93 @@ BssRmdVolumeOutput <-
                   
                 },
                 render_table = function() {
-                  library(knitr)
                   table <- data.frame(Cluster = 1:5, Vol_Size = c(33,22.3, 21, 25, 30), MNI_coord = c(3,3,4,5,3), T_val =c(8,7.2,6,9.8,7.8))
                   table$Cluster <- paste0("[", table$Cluster, "](", t, ")")
-                  kable(table[1:4], align=c(rep('l', 4)))
+                  knitr::kable(table[1:4], align=c(rep('l', 4)))
                 },
-                render_html = function() {
-                  library(shiny)
-  library(shinyjs)
-  shinyUI(fluidPage(
-    useShinyjs(),
-    tabsetPanel(
+                render_vol = function() {
+
+  shiny::shinyUI(
+  shiny::fluidPage(
+    shinyjs::useShinyjs(),
+    shiny::h3("Choose a cluster and an overlay below"),
+    shiny::tabsetPanel(
       id = "navbar",
-      tabPanel(title = "Cluster 1",
-               checkboxGroupInput("variable", "Variables to show:",
-                                  c("P-Values" = "p",
-                                    "Adjusted P-val" = "adp",
-                                    "T-Values" = "t",
-                                    "Atlas" = "at"), inline=T, selected = c("p","adp","t","at")),
-               tableOutput("data"),
-               value = c("Cluster 1"),
-               h1("Cluster 1"),
-               img(src='./pvalues1.png', align="left", width = "28.8%"),
-               img(src='./pvalues3.png', align="left", width = "24%"),
-               img(src='./pvalues2.png', align="left", width = "34.5%"),
-               img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf', align="left", width = "11%"),
-               img(src='./adjpvalues2.png', align="left",width = "28.8%"),
-               img(src='./adjpvalues1.png', align="left", width = "24%"),
-               img(src='./adjpvalues3.png', align="left", width = "34.5%"),
-               img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.pdf', align="left", width = "11%"),
-               img(src='./tvalues2.png', align="left",width = "28.8%"),
-               img(src='./tvalues1.png', align="left",width = "24%"),
-               img(src='./tvalues3.png', align="left",width = "34.5%"),
-               img(src='./bss_anova_age_mri.bfc.nii_tvalues_cbar.pdf', align="left", width = "11%"),
-               img(src='./atlas2.png', align="left",width = "28.8%"),
-               img(src='./atlas1.png', align="left",width = "24%"),
-               img(src='./atlas3.png', align="left",width = "34.5%")),
-      tabPanel(title = "Cluster 2",
-               
-               value = "tab2",
-               h1("Cluster 2")
+      type = "tabs",
+      shiny::tabPanel(title = shiny::h4("Cluster 1"),
+                shiny::tableOutput("data"),
+                      
+                shiny::tabsetPanel(
+                  id = "navbar",
+                  
+                   type = "pills",
+                shiny::tabPanel(title_0 = "All",
+                                
+                                value = c("All"),
+                                 shiny::p("All"),
+                                        
+                                  # P-values
+                        shiny::img(src='./Pview1.png', align="left", width = "28.8%"),
+                        shiny::img(src='./Pview3.png', align="left", width = "24%"),
+                        shiny::img(src='./Pview2.png', align="left", width = "34.5%"),
+                        shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf', align="left", width = "11%"),
+                                 # Adj P-values 
+                        shiny::img(src='./AdjPvalue1.png', align="left",width = "28.8%"),
+                        shiny::img(src='./AdjPvalue3.png', align="left", width = "24%"),
+                        shiny::img(src='./AdjPvalue2.png', align="left", width = "34.5%"),
+                            shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.pdf', align="left", width = "11.5%"),
+                             # T-values
+                        shiny::img(src='./Tvalue1.png', align="left",width = "28.8%"),
+                        shiny::img(src='./Tvalue3.png', align="left",width = "24%"),
+                        shiny::img(src='./Tvalue2.png', align="left",width = "34.5%"),
+                        shiny::img(src='./bss_anova_age_mri.bfc.nii_tvalues_cbar.pdf', align="left", width = "11%"),
+                            # Atlas
+                        shiny::img(src='./atlas.107.png', align="left",width = "28.8%"),
+                        shiny::img(src='./atlas.106.png', align="left",width = "24%"),
+                        shiny::img(src='./atlas.108.png', align="left",width = "34.5%")),
+                        shiny::tabPanel(title_0 = "P-Values",
+                                        value = c("P-Values"),
+                                        shiny::p("P-Values"),
+                             # P-values
+                        shiny::img(src='./Pview1.png', align="left", width = "28.8%"),
+                        shiny::img(src='./Pview3.png', align="left", width = "24%"),
+                        shiny::img(src='./Pview2.png', align="left", width = "34.5%"),
+                                 shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf', align="left", width = "11%")),
+                        shiny::tabPanel(title_0 = "Adjusted P-Values",
+                                        value = c("Adjusted P-Values"),
+                                        shiny::p("Adjusted P-Values"),
+                        shiny::img(src='./AdjPvalue1.png', align="left",width = "28.8%"),
+                        shiny::img(src='./AdjPvalue3.png', align="left", width = "24%"),
+                        shiny::img(src='./AdjPvalue2.png', align="left", width = "34.5%"),
+                             shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.pdf', align="left", width = "11.5%")),
+                        shiny::tabPanel(title_0 = "T-Values",
+                                        value = c("T-Values"),
+                                        shiny::p("T-Values"),
+                        shiny::img(src='./Tvalue1.png', align="left",width = "28.8%"),
+                        shiny::img(src='./Tvalue3.png', align="left",width = "24%"),
+                        shiny::img(src='./Tvalue2.png', align="left",width = "34.5%"),
+                        shiny::img(src='./bss_anova_age_mri.bfc.nii_tvalues_cbar.pdf', align="left", width = "11%")),
+                        shiny::tabPanel(title_0 = "Atlas",
+                                        value = c("Atlas"),
+                                        shiny::p("Atlas"),
+                        shiny::img(src='./atlas.107.png', align="left",width = "28.8%"),
+                        shiny::img(src='./atlas.106.png', align="left",width = "24%"),
+                        shiny::img(src='./atlas.108.png', align="left",width = "34.5%")))),
+      shiny::tabPanel(title = shiny::h4("Cluster 2"),
+                      
+                      value = "tab2",
+                      shiny::h2("Cluster 2")
       ),
-      tabPanel(title = "Cluster 3",
-               value = "tab3",
-               h1("Cluster 3:"),
-              mainPanel("hi")
-              
-               )
+      shiny::tabPanel(title = shiny::h4("Cluster 3"),
+                      value = "tab3",
+                      shiny::h2("Cluster 3:"),
+                      shiny::mainPanel("hi")
+                      
       )
     )
-  )  
-                  
+  )
+)
+
                 }
               )
   )

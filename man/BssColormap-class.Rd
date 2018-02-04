@@ -24,5 +24,13 @@ An S4 class for representing colormaps
 \item{\code{lut}}{Color look up table}
 
 \item{\code{vmin,vmax}}{Minimum and maximum values}
+
+\item{\code{cnegmin}}{Minimum negative value}
+
+\item{\code{cnegmax}}{Maximum negative value}
+
+\item{\code{cposmin}}{Minimum positive value}
+
+\item{\code{cposmax}}{Maximum positive value}
 }}
 

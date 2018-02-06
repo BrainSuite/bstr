@@ -22,7 +22,7 @@
 #' @param outdir output directory name to save results for ROI analysis.
 #' @export
 #'
-bss_load_roi_data <- function(subjects_dir, csv, roiid, roimeas, outdir=NULL) {
+bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas, outdir=NULL) {
 
   if (!dir.exists(subjects_dir)) {
     stop(sprintf("Subjects directory %s does not exist.\n", subjects_dir), call. = FALSE)
@@ -52,16 +52,19 @@ bss_load_roi_data <- function(subjects_dir, csv, roiid, roimeas, outdir=NULL) {
 
   demographics$File_roi <- unlist(roiwise_file_list)
 
-  roi_data <- read_roi_data_for_all_subjects(demographics$File_roi, roiid, roimeas)
-  roi_columnname <- paste("ROI_", as.character(roiid), sep = "")
-  demographics[[roi_columnname]] <- roi_data
-  out_csv <- file.path(outdir, basename(csv))
-  write.csv(demographics, out_csv, row.names = FALSE)
+  roi_data_frame <- read_roi_data_for_all_subjects(demographics$File_roi, roiids, roimeas)
 
-  bss_data <- list(df=demographics, outdir=outdir, roiid=roiid, roimeas=roimeas, csv=out_csv)
+
+  #Put outputted data frame together with demographics data frame
+  combined_roi_data_and_demographics <- cbind(roi_data_frame,demographics$age,demographics$sex,demographics$handedness)
+  out_csv <- file.path(outdir, basename(csv))
+  write.csv(combined_roi_data_and_demographics, out_csv, row.names = FALSE)
+
+  bss_data <- list(df=combined_roi_data_and_demographics, outdir=outdir, roiids=roiids, roimeas=roimeas, csv=out_csv)
 
   # Finally also include the command to load the data
-  bss_data$load_data_command <- sprintf("bss_data <- bss_load_roi_data('%s', '%s', %d, '%s', outdir = '%s') ", subjects_dir, csv, roiid, roimeas, outdir)
+  pasted_roiids <- paste(roiids,collapse = ", ")
+  bss_data$load_data_command <- sprintf("bss_data <- bss_load_roi_data( '%s', '%s', c( %s), '%s', outdir = '%s') ", subjects_dir, csv, pasted_roiids, roimeas, outdir)
 
   return(bss_data)
 }

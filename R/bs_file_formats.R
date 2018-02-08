@@ -63,6 +63,14 @@ bs_data_types <- list(
   nifti_image = '.nii.gz'
 )
 
+#' List of statistical and other overlay types used in BrainSuite
+bs_stat_overlays <- list(
+  log_pvalues <- "log_pvalues",
+  log_pvalues_adjusted <- "log_pvalues_adjusted",
+  tvalues <- "tvalues",
+  pvalues <- "pvalues"
+)
+
 bs_surface_file_string <- function(hemi="left", smooth = 0) {
 
   if (smooth != 0)

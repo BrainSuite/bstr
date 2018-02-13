@@ -20,6 +20,10 @@
 #' @slot rgbcolors A matrix of RGB colors whose size is same as that of the values.
 #' @slot lut Color look up table
 #' @slot vmin,vmax Minimum and maximum values
+#' @slot cnegmin Minimum negative value
+#' @slot cnegmax Maximum negative value
+#' @slot cposmin Minimum positive value
+#' @slot cposmax Maximum positive value
 #'
 #' @export
 BssColormap <- setClass(
@@ -32,7 +36,11 @@ BssColormap <- setClass(
     rgbcolors = "matrix",
     lut = "character",
     vmin = "numeric",
-    vmax = "numeric"
+    vmax = "numeric",
+    cnegmin = "numeric",
+    cnegmax = "numeric",
+    cposmin = "numeric",
+    cposmax = "numeric"
   )
 )
 
@@ -45,6 +53,11 @@ setMethod("initialize", valueClass = "BssColormap", signature = "BssColormap",
             .Object@lut <- ""
             .Object@vmin <- 0
             .Object@vmax <- 0
+            .Object@cnegmin <- 0
+            .Object@cnegmax <- 0
+            .Object@cposmin <- 0
+            .Object@cposmax <- 0
+
             switch(.Object@cmap_type,
                    corr_values = { cmap <- get_tvalue_colors(cmap_name, values)}, # Use tvalue cmap for correlations
                    tvalues = { cmap <- get_tvalue_colors(cmap_name, values)},
@@ -55,6 +68,11 @@ setMethod("initialize", valueClass = "BssColormap", signature = "BssColormap",
             .Object@rgbcolors <- cmap$rgbcolors
             .Object@vmin <- cmap$vmin
             .Object@vmax <- cmap$vmax
+            .Object@cnegmin <- cmap$cnegmin
+            .Object@cnegmax <- cmap$cnegmax
+            .Object@cposmin <- cmap$cposmin
+            .Object@cposmax <- cmap$cposmax
+
             return(.Object)
           })
 
@@ -128,7 +146,13 @@ get_logpvalue_colors <- function(cmap_name, values) {
   values_0_to_1 <- (values + pex ) / (2*pex + .Machine$double.eps)
   rgbcolors <- fnmap(values_0_to_1)/255
 
-  return(list("rgbcolors"=rgbcolors, "lut"=lut, "vmin"=-1*pex, "vmax"=pex))
+  cnegmin <- pFDRneglog
+  cnegmax <- -pex
+  cposmin <- pFDRposlog
+  cposmax <- pex
+
+  return(list("rgbcolors"=rgbcolors, "lut"=lut, "vmin"=-1*pex, "vmax"=pex,
+              "cnegmin"=cnegmin, "cnegmax"=cnegmax, "cposmin"=cposmin, "cposmax"=cposmax))
 }
 
 get_tvalue_colors <- function(cmap_name, values) {
@@ -161,7 +185,9 @@ get_tvalue_colors <- function(cmap_name, values) {
   values_0_to_1 <- (values - tnegmax ) / (tposmax - tnegmax + .Machine$double.eps)
   rgbcolors <- fnmap(values_0_to_1)/255
 
-  return(list("rgbcolors"=rgbcolors, "lut"=lut, "vmin"=tnegmax, "vmax"=tposmax))
+
+  return(list("rgbcolors"=rgbcolors, "lut"=lut, "vmin"=tnegmax, "vmax"=tposmax,
+              "cnegmin"=tnegmin, "cnegmax"=tnegmax, "cposmin"=tposmin, "cposmax"=tposmax))
 }
 
 colorbar <- function(lut, min, max=-min, nticks=11, ticks=seq(min, max, len=nticks), title='') {
@@ -225,6 +251,17 @@ get_color_palette <- function(cmap_name, N) {
            return ( colorRampPalette(c(hexcolrstr$gray))(ceiling(N)) )
          }
         )
+}
+
+save_colormap_to_ini <- function(filename, bss_cmap) {
+  cmap_to_save <- list()
+  cmap_to_save[["colormap"]] <- list(cmap_type=bss_cmap@cmap_type,
+                                     cmap_name = bss_cmap@cmap_name,
+                                     cnegmin = bss_cmap@cnegmin,
+                                     cnegmax = bss_cmap@cnegmax,
+                                     cposmin = bss_cmap@cposmin,
+                                     cposmax = bss_cmap@cposmax)
+  ini::write.ini(cmap_to_save, filename)
 }
 
 save_BrainSuiteLUT <- function(filename, lut) {

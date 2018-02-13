@@ -223,26 +223,26 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
 
 #' @rdname save_out
 setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", function(bss_out, bss_data, bss_model) {
-  
+
   log_pvalues <- rep(1, length(bss_data@atlas_image))
   log_pvalues[bss_data@mask_idx] <- log10_transform(bss_model@pvalues)
   dim(log_pvalues) <- dim(bss_data@atlas_image)
-  
+
   log_pvalues_adjusted <- rep(1, length(bss_data@atlas_image))
   log_pvalues_adjusted[bss_data@mask_idx] <- log10_transform(sign(bss_model@pvalues) * p.adjust(abs(bss_model@pvalues), method = 'BY'))
   dim(log_pvalues_adjusted) <- dim(bss_data@atlas_image)
   outdir <- bss_out@outdir
-  
+
   tvalues <- rep(0, length(bss_data@atlas_image))
   tvalues[bss_data@mask_idx] <- bss_model@tvalues
   dim(tvalues) <- dim(bss_data@atlas_image)
-  
+
   if (bss_model@model_type == "bss_corr") {
     corr_values <- rep(0, length(bss_data@atlas_image))
     corr_values[bss_data@mask_idx] <- bss_model@corr_values
     dim(corr_values) <- dim(bss_data@atlas_image)
   }
-  
+
   switch(bss_model@model_type,
          bss_anova = {
            bss_cmap <- save_bss_color_files(log_pvalues, bss_model@main_effect, "log_pvalues", bss_data, bss_model, outdir)
@@ -252,7 +252,7 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
            bss_cmap <- save_bss_color_files(tvalues, bss_model@main_effect, "tvalues", bss_data, bss_model, outdir)
            save_bss_out_nifti_image(tvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
          },
-         
+
          bss_lm = {
            bss_cmap <- save_bss_color_files(log_pvalues, bss_model@main_effect, "log_pvalues", bss_data, bss_model, outdir)
            save_bss_out_nifti_image(log_pvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
@@ -286,7 +286,7 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
            save_bss_out_nifti_image(tvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
          }
   )
-  
+
   # Copy modelspec file to the output directory
   file.copy(bss_model@mspec_file, bss_out@outdir)
   invisible(bss_out)
@@ -373,6 +373,10 @@ save_bss_color_files <- function(measure, var_name, cmap_title, bss_data, bss_mo
     basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.lut', sep = '')
   save_BrainSuiteLUT(file.path(outdir, lut_fileprefix), bss_cmap@lut)
 
+  # save ini colormap with ranges
+  ini_fileprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
+    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.ini', sep = '')
+  save_colormap_to_ini(file.path(outdir, ini_fileprefix), bss_cmap)
   return(bss_cmap)
 }
 

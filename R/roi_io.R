@@ -42,12 +42,12 @@ read_roistats_txt <- function(roiwise_txt_filename, roiids, roimeas = 'gmthickne
     stop(sprintf('The file %s is not a valid roiwise.stats.txt file.\n', roiwise_txt_filename), call. = FALSE)
   }
   roiwise_stats <- read.table(roiwise_txt_filename, header = TRUE, check.names = FALSE)
-  # rownames(roiwise_stats) <- roiwise_stats[,1]
-  #check if all the inputted roiids are in the file
+
+  # Check if all the inputted roiids are in the file
   roiids_not_in_file <- !(roiids %in% roiwise_stats$ROI_ID)
   if (any(roiids_not_in_file == TRUE)) {
     incorrect_roiids <- roiids[roiids_not_in_file]
-    stop(sprintf('ROI ID %d not found in the roiwise stats file %s.\nPlease check if %d is not a valid ROI.\n',
+    stop(sprintf('ROI ID %d not found in the roiwise stats file %s.\nPlease check if %d is a valid ROI.\n',
                  incorrect_roiids, roiwise_txt_filename, incorrect_roiids), call. = FALSE)
   }
 
@@ -72,7 +72,7 @@ read_roi_data_for_all_subjects <- function(roi_filelist, roiids, roimeas = 'gmth
     },roiid_column=roiids[x])
   }
 
-  #add file path column to data frame
+  # Add file path column to data frame
   roi_data_frame$ROI_filelist <- roi_filelist
 
   return(roi_data_frame)

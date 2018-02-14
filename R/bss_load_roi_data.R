@@ -55,7 +55,7 @@ bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas, outdir=NULL) {
   roi_data_frame <- read_roi_data_for_all_subjects(demographics$File_roi, roiids, roimeas)
 
 
-  #Put outputted data frame together with demographics data frame
+  # Put outputted data frame together with demographics data frame
   combined_roi_data_and_demographics <- cbind(roi_data_frame,demographics$age,demographics$sex,demographics$handedness)
   out_csv <- file.path(outdir, basename(csv))
   write.csv(combined_roi_data_and_demographics, out_csv, row.names = FALSE)

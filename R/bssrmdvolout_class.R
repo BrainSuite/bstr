@@ -26,7 +26,7 @@ BssRmdVolumeOutput <-
                 }
               ),
               private = list(
-                render_overlay <- function(voxelcoord,firstpath,ii,atlaspath,overlaypath,view, name,alpha) {
+                render_overlay = function(voxelcoord,firstpath,atlaspath,overlaypath,view, name,alpha) {
                   intern = FALSE
                   ignore.stdout = FALSE
                   ignore.stderr = FALSE
@@ -34,24 +34,24 @@ BssRmdVolumeOutput <-
                   input = NULL
 
                   #P VALUE
-                  view11 <- paste0("pstatmap --atlas ", firstpath, " -i ",overlaypath[1], " -o ",view[1],voxelcoord[1], "_",name[1], ".png --slice ", voxelcoord[1], " --", view[1], " -a ", alpha)
-                  view22 <- paste0("pstatmap --atlas ", firstpath, " -i ",overlaypath[1], " -o ",view[2],voxelcoord[1], "_",name[1], ".png --slice ", voxelcoord[1], " --", view[2], " -a ", alpha)
-                  view33 <- paste0("pstatmap --atlas ", firstpath, " -i ",overlaypath[1], " -o ",view[3],voxelcoord[1], "_",name[1], ".png --slice ", voxelcoord[1], " --", view[3], " -a ", alpha)
+                  view1 <- paste0("pstatmap --atlas ", firstpath, " -i ",overlaypath[1], " -o ",view[1],voxelcoord[1], "_",name[1], ".png --slice ", voxelcoord[1], " --", view[1], " -a ", alpha)
+                  view2 <- paste0("pstatmap --atlas ", firstpath, " -i ",overlaypath[1], " -o ",view[2],voxelcoord[1], "_",name[1], ".png --slice ", voxelcoord[1], " --", view[2], " -a ", alpha)
+                  view3 <- paste0("pstatmap --atlas ", firstpath, " -i ",overlaypath[1], " -o ",view[3],voxelcoord[1], "_",name[1], ".png --slice ", voxelcoord[1], " --", view[3], " -a ", alpha)
 
                   #ADJUSTED P
-                  view10 <- paste0("pstatmap --atlas ", firstpath, " -i ",overlaypath[2], " -o ",view[1],voxelcoord[1], "_",name[2], ".png --slice ", voxelcoord[1], " --", view[1], " -a ", alpha)
-                  view20 <- paste0("pstatmap --atlas ", firstpath, " -i ",overlaypath[2], " -o ",view[2],voxelcoord[1], "_",name[2], ".png --slice ", voxelcoord[1], " --", view[2], " -a ", alpha)
-                  view30 <- paste0("pstatmap --atlas ", firstpath, " -i ",overlaypath[2], " -o ",view[3],voxelcoord[1], "_",name[2], ".png --slice ", voxelcoord[1], " --", view[3], " -a ", alpha)
+                  view4 <- paste0("pstatmap --atlas ", firstpath, " -i ",overlaypath[2], " -o ",view[1],voxelcoord[1], "_",name[2], ".png --slice ", voxelcoord[1], " --", view[1], " -a ", alpha)
+                  view5 <- paste0("pstatmap --atlas ", firstpath, " -i ",overlaypath[2], " -o ",view[2],voxelcoord[1], "_",name[2], ".png --slice ", voxelcoord[1], " --", view[2], " -a ", alpha)
+                  view6 <- paste0("pstatmap --atlas ", firstpath, " -i ",overlaypath[2], " -o ",view[3],voxelcoord[1], "_",name[2], ".png --slice ", voxelcoord[1], " --", view[3], " -a ", alpha)
 
                   # T VALUE
-                  view1 <- paste0("pstatmap --atlas ", firstpath, " -i ",ii, " -o ",view[1],voxelcoord[1], "_",name[3], ".png -i ", overlaypath[3], " --slice ", voxelcoord[1], " --", view[1], " -a ", alpha)
-                  view2 <- paste0("pstatmap --atlas ", firstpath, " -i ",ii, " -o ",view[2],voxelcoord[1], "_",name[3], ".png -i ", overlaypath[3], " --slice ", voxelcoord[1], " --", view[2], " -a ", alpha)
-                  view3 <- paste0("pstatmap --atlas ", firstpath, " -i ",ii, " -o ",view[3],voxelcoord[1], "_",name[3], ".png -i ", overlaypath[3], " --slice ", voxelcoord[1], " --", view[3], " -a ", alpha)
+                  view7 <- paste0("pstatmap --atlas ", firstpath, " -i ",overlaypath[3], " -o ",view[1],voxelcoord[1], "_",name[3], ".png --slice ", voxelcoord[1], " --", view[1], " -a ", alpha)
+                  view8 <- paste0("pstatmap --atlas ", firstpath, " -i ",overlaypath[3], " -o ",view[2],voxelcoord[1], "_",name[3], ".png --slice ", voxelcoord[1], " --", view[2], " -a ", alpha)
+                  view9 <- paste0("pstatmap --atlas ", firstpath, " -i ",overlaypath[3], " -o ",view[3],voxelcoord[1], "_",name[3], ".png --slice ", voxelcoord[1], " --", view[3], " -a ", alpha)
 
-                  return(c(system(view10, intern, ignore.stdout, ignore.stderr, wait, input), system(view20, intern, ignore.stdout, ignore.stderr, wait, input), system(view30, intern, ignore.stdout, ignore.stderr, wait, input)))
+                  return(c(system(view1, intern, ignore.stdout, ignore.stderr, wait, input), system(view2, intern, ignore.stdout, ignore.stderr, wait, input), system(view3, intern, ignore.stdout, ignore.stderr, wait, input)))
 
                 },
-                render_atlas <- function(voxelcoord,filePath,folderPath,atlasName) {
+                render_atlas = function(voxelcoord,filePath,folderPath,atlasName) {
                   intern = FALSE
                   ignore.stdout = FALSE
                   ignore.stderr = FALSE
@@ -63,7 +63,7 @@ BssRmdVolumeOutput <-
                   view3 <- sprintf("volblend -i ",filePath," --view 3 --slice ",voxelcoord[1]," --flop -o ", folderPath, atlasName,"ax_3.png")
                   return(c(system(view1, intern, ignore.stdout, ignore.stderr, wait, input), system(view2, intern, ignore.stdout, ignore.stderr, wait, input), system(view3, intern, ignore.stdout, ignore.stderr, wait, input)))
                 },
-                render_table <- function() {
+                render_table = function() {
 
                   t <- c("#test1","#test2","#test3","#test4","#test5")
                   Cluster <- 1:5
@@ -72,7 +72,7 @@ BssRmdVolumeOutput <-
                   knitr::kable(table[1:4], align=c(rep('l', 4)))
 
                 },
-                render_html <- function() {
+                render_html = function() {
                   shiny::shinyUI(
                     shiny::fluidPage(
                       shinyjs::useShinyjs(),

@@ -28,8 +28,15 @@ bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas, outdir=NULL) {
     stop(sprintf("Subjects directory %s does not exist.\n", subjects_dir), call. = FALSE)
   }
   if (is.null(outdir)) {
-    cat(sprintf('Output directory is not specified. Using %s to save outputs.\n', subjects_dir))
-    outdir <- subjects_dir
+    # Outputted directory (if not specified) is of the same format (csv or tsv) as the inputted file
+    if (substr(csv,nchar(csv)-2,nchar(csv)) == "csv"){
+      outdir <- paste0(substr(csv,1,nchar(csv)-4), "_roidata.csv")
+      specific_separator = ','
+    } else if (substr(csv,nchar(csv)-2,nchar(csv)) == "tsv"){
+      outdir <- paste0(substr(csv,1,nchar(csv)-4), "_roidata.tsv")
+      specific_separator = '\t'
+    }
+    cat(sprintf('Output directory is not specified. Using %s to save outputs.\n', outdir))
   }
   else {
     dir.create(file.path(outdir), showWarnings = FALSE)
@@ -54,17 +61,16 @@ bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas, outdir=NULL) {
 
   roi_data_frame <- read_roi_data_for_all_subjects(demographics$File_roi, roiids, roimeas)
 
-
   # Put outputted data frame together with demographics data frame
-  combined_roi_data_and_demographics <- cbind(roi_data_frame,demographics$age,demographics$sex,demographics$handedness)
-  out_csv <- file.path(outdir, basename(csv))
-  write.csv(combined_roi_data_and_demographics, out_csv, row.names = FALSE)
+  combined_roidata_and_demographics <- cbind(demographics[,-which(names(demographics) == "File_roi")], roi_data_frame)
+  write.table(combined_roidata_and_demographics, outdir, sep = specific_separator,row.names = FALSE)
 
-  bss_data <- list(df=combined_roi_data_and_demographics, outdir=outdir, roiids=roiids, roimeas=roimeas, csv=out_csv)
+  bss_data <- list(df=combined_roidata_and_demographics, outdir=outdir, roiids=roiids, roimeas=roimeas, csv=outdir)
 
   # Finally also include the command to load the data
   pasted_roiids <- paste(roiids,collapse = ", ")
-  bss_data$load_data_command <- sprintf("bss_data <- bss_load_roi_data( '%s', '%s', c( %s), '%s', outdir = '%s') ", subjects_dir, csv, pasted_roiids, roimeas, outdir)
+  bss_data$load_data_command <- sprintf("bss_data <- bss_load_roi_data( '%s', '%s', c( %s), '%s', outdir = '%s') ",
+                                        subjects_dir, csv, pasted_roiids, roimeas, outdir)
 
   return(bss_data)
 }

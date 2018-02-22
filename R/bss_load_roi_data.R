@@ -29,12 +29,12 @@ bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas, outdir=NULL) {
   }
   if (is.null(outdir)) {
     # Outputted directory (if not specified) is of the same format (csv or tsv) as the inputted file
-    if (substr(csv,nchar(csv)-2,nchar(csv)) == "csv"){
-      outdir <- paste0(substr(csv,1,nchar(csv)-4), "_roidata.csv")
-      specific_separator = ','
-    } else if (substr(csv,nchar(csv)-2,nchar(csv)) == "tsv"){
-      outdir <- paste0(substr(csv,1,nchar(csv)-4), "_roidata.tsv")
-      specific_separator = '\t'
+    if (tools::file_ext(file.path(csv)) == "csv"){
+      outdir <- paste0(tools::file_path_sans_ext(csv), "_roidata.csv")
+      data_separator = ','
+    } else if (tools::file_ext(file.path(csv)) == "tsv"){
+      outdir <- paste0(tools::file_path_sans_ext(csv), "_roidata.tsv")
+      data_separator = '\t'
     }
     cat(sprintf('Output directory is not specified. Using %s to save outputs.\n', outdir))
   }
@@ -63,7 +63,7 @@ bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas, outdir=NULL) {
 
   # Put outputted data frame together with demographics data frame
   combined_roidata_and_demographics <- cbind(demographics[,-which(names(demographics) == "File_roi")], roi_data_frame)
-  write.table(combined_roidata_and_demographics, outdir, sep = specific_separator,row.names = FALSE)
+  write.table(combined_roidata_and_demographics, outdir, sep = data_separator,row.names = FALSE)
 
   bss_data <- list(df=combined_roidata_and_demographics, outdir=outdir, roiids=roiids, roimeas=roimeas, csv=outdir)
 

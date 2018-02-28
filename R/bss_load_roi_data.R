@@ -59,7 +59,7 @@ bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas, outdir=NULL) {
 
   demographics$File_roi <- unlist(roiwise_file_list)
 
-  roi_data_frame <- read_roi_data_for_all_subjects(demographics$File_roi, roiids, roimeas)
+  roi_data_frame <- read_roi_data_for_all_subjects(demographics$File_roi, demographics,roiids, roimeas)
 
   # Put outputted data frame together with demographics data frame
   combined_roidata_and_demographics <- cbind(demographics[,-which(names(demographics) == "File_roi")], roi_data_frame)

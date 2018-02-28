@@ -60,7 +60,7 @@ read_roistats_txt <- function(roiwise_txt_filename, roiids, roimeas = 'gmthickne
 }
 
 
-read_roi_data_for_all_subjects <- function(roi_filelist, roiids, roimeas = 'gmthickness') {
+read_roi_data_for_all_subjects <- function(roi_filelist, demographics,roiids, roimeas = 'gmthickness') {
 
   roi_data_frame <- data.frame(matrix(nrow=length(roi_filelist),ncol=length(roiids)))
   rownames(roi_data_frame) <- demographics$subjID

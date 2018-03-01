@@ -217,13 +217,13 @@ bss_roi_anova <- function(main_effect="", covariates="", bss_data=bss_data) {
                    demographics = bss_data@demographics, mspec_file="")
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
 
-  bss_data@demographics[paste('ROI_', as.character(bss_data@roiid), sep = '' )]
+  bss_data@demographics[,as.character(bss_data@roiids)]
 
-  cmd1 <- sprintf("lm_full <- lm(%s, data = bss_data@demographics)",
-                  paste('ROI_', as.character(bss_data@roiid), ' ~ ', bss_model@fullmodel, sep = ''))
-  cmd2 <- sprintf("lm_null <- lm(%s, data = bss_data@demographics)",
-                  paste('ROI_', as.character(bss_data@roiid), ' ~ ', bss_model@nullmodel, sep = ''))
-  cmd3 <- "pander::pander(anova(lm_full, lm_null))"
+  cmd1 <- sprintf("lm_full_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids),
+                  paste('`',as.character(bss_data@roiids),'`', ' ~ ', bss_model@fullmodel, sep = ''))
+  cmd2 <- sprintf("lm_null_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids),
+                  paste('`',as.character(bss_data@roiids),'`', ' ~ ', bss_model@nullmodel, sep = ''))
+  cmd3 <- sprintf("pander::pander(anova(lm_full_%s, lm_null_%s))",as.character(bss_data@roiids),as.character(bss_data@roiids))
 
   stats_commands <- c(cmd1, cmd2, cmd3)
 
@@ -242,13 +242,13 @@ bss_roi_lm <- function(main_effect="", covariates="", bss_data=bss_data) {
                    demographics = bss_data@demographics, mspec_file="")
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
 
-  bss_data@demographics[paste('ROI_', as.character(bss_data@roiid), sep = '' )]
+  bss_data@demographics[,as.character(bss_data@roiids)]
 
-  cmd1 <- sprintf("lm_full <- lm(%s, data = bss_data@demographics)",
-                  paste('ROI_', as.character(bss_data@roiid), ' ~ ', bss_model@fullmodel, sep = ''))
-  cmd2 <- sprintf("lm_null <- lm(%s, data = bss_data@demographics)",
-                  paste('ROI_', as.character(bss_data@roiid), ' ~ ', bss_model@nullmodel, sep = ''))
-  cmd3 <- "pander::pander(anova(lm_full, lm_null))"
+  cmd1 <- sprintf("lm_full_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids),
+                  paste('`',as.character(bss_data@roiids),'`', ' ~ ', bss_model@fullmodel, sep = ''))
+  cmd2 <- sprintf("lm_null_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids),
+                  paste('`',as.character(bss_data@roiids),'`', ' ~ ', bss_model@nullmodel, sep = ''))
+  cmd3 <- sprintf("pander::pander(anova(lm_full_%s, lm_null_%s))",as.character(bss_data@roiids),as.character(bss_data@roiids))
 
   stats_commands <- c(cmd1, cmd2, cmd3)
 

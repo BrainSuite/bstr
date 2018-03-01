@@ -316,14 +316,14 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
   nb_load_data <- paste(nb_load_data, "\n```\n", sep = "")
 
 
-  nb_commands <- "```{r warning=FALSE, run_command}\n"
+  nb_commands <- sprintf("```{r warning=FALSE, run_command_%s}\n",as.character(bss_data@roiids))
 
   for (i in bss_model@stats_commands) {
     nb_commands <- paste(nb_commands, i, "\n", sep = "")
   }
   nb_commands <- paste(nb_commands, "```\n", sep = "")
   nb_commands <- paste(nb_commands, sprintf("\n#### Main effect of %d %s on %s controlling for %s
-                                            ", bss_data@roiid, bss_data@roimeas, bss_model@main_effect,
+                                            ", bss_data@roiids, bss_data@roimeas, bss_model@main_effect,
                                             bss_model@covariates ), sep = "")
 
   rmdfileconn<-file(file.path(outdir, "report.Rmd"))

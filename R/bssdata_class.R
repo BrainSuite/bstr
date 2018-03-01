@@ -41,7 +41,7 @@ BssData <- setClass(
 
 BssROIData <- setClass(
   "BssROIData",
-  slots = list(roiid = "numeric",
+  slots = list(roiids = "numeric",
                roimeas = "character"),
   contains = "BssData"
 )
@@ -91,7 +91,7 @@ setMethod("initialize", valueClass = "BssData", signature = "BssData", function(
 #' @param measure character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".
 #' @param smooth numeric value denoting the smoothing level.
 #' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
-#' @param roiid numeric label identifier for the region of interest (ROI) type analysis.
+#' @param roiids numeric label identifier for the region of interest (ROI) type analysis.
 #' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
 #' @details
 #' For the most part, the user will never have to call this function directly.
@@ -99,7 +99,7 @@ setMethod("initialize", valueClass = "BssData", signature = "BssData", function(
 #' @seealso \code{\link{load_bss_data}}
 #'
 #' @export
-setGeneric("load_data", valueClass = "BssData", function(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = "left", measure = "", smooth = 0.0, eddy = TRUE, roiid = NULL, roimeas = NULL) {
+setGeneric("load_data", valueClass = "BssData", function(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = "left", measure = "", smooth = 0.0, eddy = TRUE, roiids = NULL, roimeas = NULL) {
   standardGeneric("load_data")
 })
 
@@ -108,7 +108,7 @@ setGeneric("load_demographics", valueClass = "BssData", function(object) {
 })
 
 #' @rdname load_data
-setMethod("load_data", signature = "BssData", function(bss_data, roiid = NULL, roimeas = NULL) {
+setMethod("load_data", signature = "BssData", function(bss_data, roiids = NULL, roimeas = NULL) {
   return(bss_data)
 })
 
@@ -175,37 +175,17 @@ setMethod("load_data", signature = "BssDBMData", function(bss_data, atlas_filena
 })
 
 #' @rdname load_data
-setMethod("load_data", signature = "BssROIData", function(bss_data, roiid = NULL, roimeas = NULL) {
+setMethod("load_data", signature = "BssROIData", function(bss_data, roiids = NULL, roimeas = NULL) {
 
-  # if (is.null(outdir)) {
-  #   cat(sprintf('Output directory is not specified. Using %s to save outputs.\n', subjects_dir))
-  #   outdir <- subjects_dir
-  # }
-  # else {
-  #   dir.create(file.path(outdir), showWarnings = FALSE)
-  # }
-  demographics <- bss_data@demographics
-  if("File_roi" %in% colnames(demographics)){
-    warning(sprintf("The file %s already contains a File_roi column.\nWill overwrite this column.\n", bss_data@csv), call.=FALSE)
-  }
-
-  demographics$subjID <- as.character(demographics$subjID)
-  roiwise_file_list <- get_roi_file_list(bss_data)
-  demographics$File_roi <- unlist(roiwise_file_list)
-
-  roi_data <- read_roi_data_for_all_subjects(demographics$File_roi, roiid, roimeas)
-  roi_columnname <- paste("ROI_", as.character(roiid), sep = "")
-  demographics[[roi_columnname]] <- roi_data
-  # out_csv <- file.path(outdir, basename(csv))
-  # write.csv(demographics, out_csv, row.names = FALSE)
-  # object@
   bss_data@analysis_type <- "roi"
-  bss_data@roiid <- roiid
+  bss_data@roiids <- roiids
   bss_data@roimeas <- roimeas
-  bss_data@demographics <- demographics
+  result <- bss_load_roi_data(subjects_dir = bss_data@subjdir,
+                    csv = bss_data@csv,
+                    roiids = bss_data@roiids,
+                    roimeas = bss_data@roimeas)
+  bss_data@demographics <- as.data.frame(result[[1]])
 
-  # Finally also include the command to load the data
-  # bss_data$load_data_command <- sprintf("bss_data <- bss_load_roi_data('%s', '%s', %d, '%s', outdir = '%s') ", subjects_dir, csv, roiid, roimeas, outdir)
 
   return(bss_data)
 
@@ -221,7 +201,7 @@ setMethod ("load_demographics", "BssData", function(object) {
 
 # signature(c(object = "BssData", csv = "character"))
 
-# setMethod("load_data", signature(object = "BssROIData", subjects_dir = "character", csv = "character", roiid = "numeric",
+# setMethod("load_data", signature(object = "BssROIData", subjects_dir = "character", csv = "character", roiids = "numeric",
 #                                  roimeas = "character", outdir = "character"),
 #           function(object, subjects_dir, csv, roiid, roimeas, outdir=NULL) {
 #             print("hi")
@@ -245,7 +225,7 @@ setMethod ("load_demographics", "BssData", function(object) {
 #' and should be exactly equal to the individual subject directory name.
 #' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
 #' @param smooth numeric value denoting the smoothing level.
-#' @param roiid numeric label identifier for the region of interest (ROI) type analysis.
+#' @param roiids numeric label identifier for the region of interest (ROI) type analysis.
 #' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
 #' @param measure character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".
 #' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
@@ -257,12 +237,12 @@ setMethod ("load_demographics", "BssData", function(object) {
 #' csv = "/path/to/my/demographics.csv", hemi = "left", smooth = 2.5)
 #'
 #' my_roi_data <- load_bss_data(type="roi", subjdir = "/path/to/my/subjectdirectory",
-#' csv="/path/to/my/demographics.csv", roiid=501, roimeas="gmthickness")
+#' csv="/path/to/my/demographics.csv", roiids=501, roimeas="gmthickness")
 #' }
 #'
 #' @export
 load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left",
-                          smooth=0.0, roiid=0, roimeas="gmthickness", measure="", atlas="", eddy=TRUE) {
+                          smooth=0.0, roiids=0, roimeas="gmthickness", measure="", atlas="", eddy=TRUE) {
 
   valid_types <- c("cbm", "tbm", "roi","dbm","nca")
   if (! type %in% valid_types)
@@ -272,7 +252,7 @@ load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left",
          cbm = { bss_data <- load_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth) },
          tbm = { bss_data <- load_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth, atlas=atlas) },
          dbm = { bss_data <- load_dbm_data(subjdir=subjdir, csv=csv, measure=measure, smooth=smooth, atlas=atlas, eddy=eddy) },
-         roi = { bss_data <- load_roi_data(subjdir, csv, roiid, roimeas) }
+         roi = { bss_data <- load_roi_data(subjdir, csv, roiids, roimeas) }
   )
   return(bss_data)
 }
@@ -318,9 +298,9 @@ load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0, atlas="", 
 }
 
 
-load_roi_data <- function(subjdir="", csv="", roiid="", roimeas="") {
+load_roi_data <- function(subjdir="", csv="", roiids="", roimeas="") {
   bss_roi_data <- new("BssROIData", subjdir, csv)
-  bss_roi_data <- load_data(bss_roi_data, roiid = roiid, roimeas = roimeas)
+  bss_roi_data <- load_data(bss_roi_data, roiids = roiids, roimeas = roimeas)
   return(bss_roi_data)
 }
 

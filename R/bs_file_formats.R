@@ -341,7 +341,7 @@ read_demographics <- function(csvfile) {
 
   switch(tools::file_ext(csvfile),
          "tsv" = {demo <- read.table(file = csvfile, sep = "\t", header = T)},
-         "csv" = {demo <- demo <- read.csv(csvfile)})
+         "csv" = {demo <- read.csv(csvfile)})
   # demo <- read.csv(csvfile)
   colnames(demo)[1] <- "subjID"
   return(demo)

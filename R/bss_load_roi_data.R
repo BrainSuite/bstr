@@ -63,6 +63,14 @@ bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas, outdir=NULL) {
 
   # Put outputted data frame together with demographics data frame
   combined_roidata_and_demographics <- cbind(demographics[,-which(names(demographics) == "File_roi")], roi_data_frame)
+  if (!is.null(outdir)) {
+    # Outputted directory (if not specified) is of the same format (csv or tsv) as the inputted file
+    if (tools::file_ext(file.path(outdir)) == "csv"){
+      data_separator = ','
+    } else if (tools::file_ext(file.path(outdir)) == "tsv"){
+      data_separator = '\t'
+    }
+  }
   write.table(combined_roidata_and_demographics, outdir, sep = data_separator,row.names = FALSE)
 
   bss_data <- list(df=combined_roidata_and_demographics, outdir=outdir, roiids=roiids, roimeas=roimeas, csv=outdir)

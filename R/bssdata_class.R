@@ -22,6 +22,7 @@
 #' @slot subjdir character string for subject directory.
 #' @slot csv filename of a comma separated (csv) file containing the subject demographic information.
 #' @slot filelist list of files belonging to N subjects.
+#' @slot load_data_command character string for the command used to load the data
 #'
 #' @export
 BssData <- setClass(
@@ -35,7 +36,8 @@ BssData <- setClass(
     demographics = "data.frame",
     subjdir = "character",
     csv = "character",
-    filelist = "character"
+    filelist = "character",
+    load_data_command = "character"
   )
 )
 
@@ -180,11 +182,13 @@ setMethod("load_data", signature = "BssROIData", function(bss_data, roiids = NUL
   bss_data@analysis_type <- "roi"
   bss_data@roiids <- roiids
   bss_data@roimeas <- roimeas
-  result <- bss_load_roi_data(subjects_dir = bss_data@subjdir,
+  all_subjects <- bss_load_roi_data(subjects_dir = bss_data@subjdir,
                     csv = bss_data@csv,
                     roiids = bss_data@roiids,
                     roimeas = bss_data@roimeas)
-  bss_data@demographics <- as.data.frame(result[[1]])
+  bss_data@demographics <- as.data.frame(all_subjects[[1]])
+  bss_data@load_data_command <- sprintf("bss_data <- load_bss_data(type= 'roi',subjdir = '%s',csv= '%s',roiids= c( %s), roimeas= '%s')",
+                                        bss_data@subjdir, bss_data@csv, paste(bss_data@roiids,collapse = ", "), bss_data@roimeas)
 
 
   return(bss_data)
@@ -225,7 +229,7 @@ setMethod ("load_demographics", "BssData", function(object) {
 #' and should be exactly equal to the individual subject directory name.
 #' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
 #' @param smooth numeric value denoting the smoothing level.
-#' @param roiids numeric label identifier for the region of interest (ROI) type analysis.
+#' @param roiids numeric label identifiers for the regions of interest (ROI) type analysis.
 #' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
 #' @param measure character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".
 #' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.

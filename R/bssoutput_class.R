@@ -310,24 +310,36 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
 #  library('bssr')
 #  ```"
 
+  # Add commands to load the data
+  nb_data_commands <- sprintf("```{r echo=FALSE, message=FALSE, warning=FALSE, results='hide', data_commands}\n")
+  nb_data_commands <- paste(nb_data_commands,"\n",
+                            bss_data@load_data_command,"\n",bss_model@load_data_command,"\n\n",
+                            "# The final command creates this document. Uncomment and run if necessary. \n\n# ",
+                            "save_bss_out(bss_data, bss_model,outdir = '", bss_out@outdir,"')\n",sep = "")
+  nb_data_commands <- paste(nb_data_commands, "\n```\n", sep = "")
+
+
+
   nb_load_data <- sprintf("```{r echo=FALSE, message=FALSE, warning=FALSE, load_data}\n")
   # nb_load_data <- paste(nb_load_data, bss_data@load_data_command, sep = "")
   nb_load_data <- paste(nb_load_data, "\nDT::datatable(bss_data@demographics)\n", sep = "")
   nb_load_data <- paste(nb_load_data, "\n```\n", sep = "")
 
 
-  nb_commands <- sprintf("```{r warning=FALSE, run_command_%s}\n",as.character(bss_data@roiids))
+  nb_commands <- lapply(as.character(bss_data@roiids),function(x){sprintf("```{r warning=FALSE, run_command_%s}\n",x)})
 
-  for (i in bss_model@stats_commands) {
-    nb_commands <- paste(nb_commands, i, "\n", sep = "")
+  for (m in 1:length(bss_data@roiids)){
+    for (i in 1:length(bss_model@stats_commands[[m]])) {
+      nb_commands[[m]] <- paste(nb_commands[[m]], bss_model@stats_commands[[m]][i], "\n", sep = "")
+    }
+    nb_commands[[m]] <- paste(nb_commands[[m]], "```\n", sep = "")
+    nb_commands[[m]] <- paste(nb_commands[[m]], sprintf("\n#### Main effect of %d %s on %s controlling for %s
+                                            ", bss_data@roiids[m], bss_data@roimeas, bss_model@main_effect,
+                                              bss_model@covariates ), sep = "")
   }
-  nb_commands <- paste(nb_commands, "```\n", sep = "")
-  nb_commands <- paste(nb_commands, sprintf("\n#### Main effect of %d %s on %s controlling for %s
-                                            ", bss_data@roiids, bss_data@roimeas, bss_model@main_effect,
-                                            bss_model@covariates ), sep = "")
 
   rmdfileconn<-file(file.path(outdir, "report.Rmd"))
-  writeLines(c(nb_header, nb_load_data, nb_commands), rmdfileconn)
+  writeLines(c(nb_header, nb_data_commands,nb_load_data, unlist(lapply(nb_commands, paste, collapse=" "))), rmdfileconn)
   close(rmdfileconn)
 
   # Render the markdown

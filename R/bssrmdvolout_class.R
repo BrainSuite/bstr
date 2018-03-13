@@ -24,15 +24,29 @@ BssRmdVolumeOutput <-
                 },
                 save_out = function(bss_data, bss_model, voxelcoord, outdir) {
 
+                  get_custom_tbm_overlays <- function(outdir) {
+                    p_overlay <- paste(outdir, "/bss_anova_age_mri.bfc.nii_",bs_stat_overlays$log_pvalues,bs_data_types$nifti_image, sep="") #log_pvalues.nii.gz
+                    adjp_overlay <- paste(outdir, "/bss_anova_age_mri.bfc.nii_",bs_stat_overlays$log_pvalues_adjusted,bs_data_types$nifti_image, sep="") #log_pvalues.nii.gz
+                    t_overlay <- paste(outdir, "/bss_anova_age_mri.bfc.nii_",bs_stat_overlays$tvalues,bs_data_types$nifti_image, sep="") #log_pvalues.nii.gz
+
+                    return(list("p_overlay" = p_overlay, "adjp_overlay" = adjp_overlay, "t_overlay" = t_overlay))
+                  }
+
                   #create a folder to store png images in
-                  dir.create("PNG_images")
+                  dir.create(paste0(outdir,"/PNG_images"))
 
                   for(out_iter in 1:length(voxelcoord)) {
+                    private$render_png_names(outdir,
+                                             view = c("cor","sag","ax"),
+                                             voxelcoord,
+                                             out_iter,
+                                             name = c("p","adjp","t"))
                     private$render_overlay(
                       out_iter,
                       voxelcoord,
                       atlaspath = bss_data@atlas_filename,
-                      overlaypath = c("/Users/sarapesavento/Desktop/tbm_anova/bss_anova_age_mri.bfc.nii_log_pvalues.nii.gz","/Users/sarapesavento/Desktop/tbm_anova/bss_anova_age_mri.bfc.nii_log_pvalues_adjusted.nii.gz","/Users/sarapesavento/Desktop/tbm_anova/bss_anova_age_mri.bfc.nii_tvalues.nii.gz"),
+                      overlaypath = c(get_custom_tbm_overlays(outdir)[[1]],get_custom_tbm_overlays(outdir)[[2]],get_custom_tbm_overlays(outdir)[[3]]),
+                      #stat_overlay
                       outdir,
                       view = c("cor","sag","ax"), name = c("p","adjp","t"), alpha = 120)
 
@@ -48,13 +62,30 @@ BssRmdVolumeOutput <-
                 }
               ),
               private = list(
+
+                  render_png_names = function(outdir, view, voxelcoord, out_iter, name) {
+                    r = 1:9
+                    png_names <- c()
+                    for (i in 1:3) {
+                      png_names[r[1]]<- paste0(outdir,"/PNG_images/",view[1],voxelcoord[[out_iter]][1], "_",name[i], ".png")
+                      png_names[r[2]] <- paste0(outdir,"/PNG_images/",view[2],voxelcoord[[out_iter]][2], "_",name[i], ".png")
+                      png_names[r[3]] <- paste0(outdir,"/PNG_images/",view[3],voxelcoord[[out_iter]][3], "_",name[i], ".png")
+                      r + 3
+                    }
+                    png_names[10] <- paste0(outdir,"/PNG_images/",view[3],voxelcoord[[out_iter]][1],"_atlas.png")
+                    png_names[11] <- paste0(outdir,"/PNG_images/",view[1],voxelcoord[[out_iter]][1],"_atlas.png")
+                    png_names[12] <- paste0(outdir,"/PNG_images/",view[2],voxelcoord[[out_iter]][1],"_atlas.png")
+
+                    paste(0)
+                  },
                 render_overlay = function(out_iter,voxelcoord,atlaspath,overlaypath,outdir,view,name,alpha) {
                   for (inner_iter in 1:3) {
                     #if (check error) { message, break}
                     #P VALUE
-                    view_ax <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[inner_iter], " -o ",outdir,"/PNG_images/",view[1],voxelcoord[[out_iter]][1], "_",name[inner_iter], ".png --slice ", voxelcoord[[out_iter]][1], " --", view[1], " -a ", alpha)
+                    view_ax <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[inner_iter], " -o ",outdir,"/PNG_images/",view[2],voxelcoord[[out_iter]][1], "_",name[inner_iter], ".png --slice ", voxelcoord[[out_iter]][1], " --", view[1], " -a ", alpha)
                     view_cor <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[inner_iter], " -o ",outdir,"/PNG_images/",view[2],voxelcoord[[out_iter]][2], "_",name[inner_iter], ".png --slice ", voxelcoord[[out_iter]][2], " --", view[2], " -a ", alpha)
                     view_sag <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[inner_iter], " -o ",outdir,"/PNG_images/",view[3],voxelcoord[[out_iter]][3], "_",name[inner_iter], ".png --slice ", voxelcoord[[out_iter]][3], " --", view[3], " -a ", alpha)
+
 
                     system(view_cor,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                     system(view_sag,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
@@ -65,9 +96,9 @@ BssRmdVolumeOutput <-
                 },
                 render_atlas = function(out_iter,voxelcoord,filePath,outdir,view) {
 
-                  view_at_ax <- paste0("volblend -i ",filePath," --view 1 --slice ",voxelcoord[[out_iter]][1]," --flop -o ", outdir,"/PNG_images/",view[3],voxelcoord[[out_iter]][1],"_atlas.png")
-                  view_at_cor <- paste0("volblend -i ",filePath," --view 2 --slice ",voxelcoord[[out_iter]][1]," --flop -o ", outdir,"/PNG_images/",view[1],voxelcoord[[out_iter]][1],"_atlas.png")
-                  view_at_sag <- paste0("volblend -i ",filePath," --view 3 --slice ",voxelcoord[[out_iter]][1]," --flop -o ", outdir,"/PNG_images/",view[2],voxelcoord[[out_iter]][1],"_atlas.png")
+                  view_at_ax <- paste0("/usr/local/bin/volblend -i ",filePath," --view 1 --slice ",voxelcoord[[out_iter]][1]," --flop -o ", outdir,"/PNG_images/",view[3],voxelcoord[[out_iter]][1],"_atlas.png")
+                  view_at_cor <- paste0("/usr/local/bin/volblend -i ",filePath," --view 2 --slice ",voxelcoord[[out_iter]][1]," --flop -o ", outdir,"/PNG_images/",view[1],voxelcoord[[out_iter]][1],"_atlas.png")
+                  view_at_sag <- paste0("/usr/local/bin/volblend -i ",filePath," --view 3 --slice ",voxelcoord[[out_iter]][1]," --flop -o ", outdir,"/PNG_images/",view[2],voxelcoord[[out_iter]][1],"_atlas.png")
 
                   system(view_at_cor,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                   system(view_at_sag,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
@@ -85,7 +116,7 @@ BssRmdVolumeOutput <-
                 },
                 ## another function will generate the names for the pngs
 
-                 render_html = function(outdir) {
+                 render_html = function(outdir, voxelcoord) {
                   store_png_names <- list.files(path = paste0(outdir,"/PNG_images"))
 
                   library(png)
@@ -111,7 +142,7 @@ BssRmdVolumeOutput <-
                                                           #automatically generate path like before, same function as before, can make seperate function
 
                                                           # P-values
-                                                          shiny::img(src=paste0('./PNG_images/',store_png_names[19]), align="left", width = "28.8%"),
+                                                          #shiny::img(src=paste0('./PNG_images/cor',voxelcoord[[1]][1],'p.png'), align="left", width = "28.8%"),
                                                           shiny::img(src=paste0('./PNG_images/',store_png_names[7]), align="left", width = "24%"),
                                                           shiny::img(src=paste0('./PNG_images/',store_png_names[31]), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf', align="left", width = "11%"),

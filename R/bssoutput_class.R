@@ -306,24 +306,36 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
   write.csv(bss_data@demographics, csvfilename)
 
   nb_header <- "### BrainSuite ROI statistical analysis report"
-#  nb_libraries <-"```{r librar_cmds, echo=FALSE}
-#  library('bssr')
-#  ```"
+
+  nb_libraries <-"```{r librar_cmds, echo=FALSE}\n"
+  nb_libraries <- paste(nb_libraries, "\nlibrary('bssr')\n", sep="")
+  nb_libraries <- paste(nb_libraries, "\n```\n", sep="")
+
+  nb_data_header_one <- "The following command loads the data."
 
   # Add commands to load the data
-  nb_data_commands <- sprintf("```{r echo=FALSE, message=FALSE, warning=FALSE, results='hide', data_commands}\n")
-  nb_data_commands <- paste(nb_data_commands,"\n",
-                            bss_data@load_data_command,"\n",bss_model@load_data_command,"\n\n",
-                            "# The final command creates this document. Uncomment and run if necessary. \n\n# ",
-                            "save_bss_out(bss_data, bss_model,outdir = '", bss_out@outdir,"')\n",sep = "")
-  nb_data_commands <- paste(nb_data_commands, "\n```\n", sep = "")
-
+  nb_data_command_one <- sprintf("\n```{r message=FALSE, warning=FALSE, results='hide', data_command_one}\n")
+  nb_data_command_one <- paste(nb_data_command_one,"\n",
+                            bss_data@load_data_command,sep = "")
+  nb_data_command_one <- paste(nb_data_command_one, "\n```\n", sep = "")
 
 
   nb_load_data <- sprintf("```{r echo=FALSE, message=FALSE, warning=FALSE, load_data}\n")
-  # nb_load_data <- paste(nb_load_data, bss_data@load_data_command, sep = "")
   nb_load_data <- paste(nb_load_data, "\nDT::datatable(bss_data@demographics)\n", sep = "")
   nb_load_data <- paste(nb_load_data, "\n```\n", sep = "")
+
+
+  nb_data_header_two <- "The following command creates the model used to analyze the data."
+
+  nb_data_command_two <- sprintf("\n```{r message=FALSE, warning=FALSE, results='hide', data_command_two}\n")
+  nb_data_command_two <- paste(nb_data_command_two, "\n",bss_model@load_data_command,"\n")
+  nb_data_command_two <- paste(nb_data_command_two, "\n```\n", sep = "")
+
+  nb_data_header_three <- "The final command (below) was used to render this document."
+
+  nb_data_command_three <-  sprintf("\n```{r eval=FALSE, message=FALSE, warning=FALSE, data_commands}\n")
+  nb_data_command_three <- paste(nb_data_command_three, "\nsave_bss_out(bss_data, bss_model,outdir = '", bss_out@outdir,"')\n")
+  nb_data_command_three <- paste(nb_data_command_three, "\n```\n", sep = "")
 
 
   nb_commands <- lapply(as.character(bss_data@roiids),function(x){sprintf("```{r warning=FALSE, run_command_%s}\n",x)})
@@ -333,13 +345,17 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
       nb_commands[[m]] <- paste(nb_commands[[m]], bss_model@stats_commands[[m]][i], "\n", sep = "")
     }
     nb_commands[[m]] <- paste(nb_commands[[m]], "```\n", sep = "")
-    nb_commands[[m]] <- paste(nb_commands[[m]], sprintf("\n#### Main effect of %d %s on %s controlling for %s
-                                            ", bss_data@roiids[m], bss_data@roimeas, bss_model@main_effect,
-                                              bss_model@covariates ), sep = "")
+    nb_commands[[m]] <- paste(sprintf("\n#### Main effect of %d %s on %s controlling for %s \n",
+                                      bss_data@roiids[m], bss_data@roimeas, bss_model@main_effect,
+                                      bss_model@covariates ),
+                              nb_commands[[m]], sep = "")
   }
 
   rmdfileconn<-file(file.path(outdir, "report.Rmd"))
-  writeLines(c(nb_header, nb_data_commands,nb_load_data, unlist(lapply(nb_commands, paste, collapse=" "))), rmdfileconn)
+  writeLines(c(nb_header, nb_libraries, nb_data_header_one, nb_data_command_one,
+               nb_load_data, nb_data_header_two, nb_data_command_two,
+               nb_data_header_three, nb_data_command_three,
+               unlist(lapply(nb_commands, paste, collapse=" "))), rmdfileconn)
   close(rmdfileconn)
 
   # Render the markdown

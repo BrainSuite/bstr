@@ -18,16 +18,19 @@ BssRmdVolumeOutput <-
   R6::R6Class("BssRmdVolumeOutput",
               #inherit = BssRmdOutput,
               public = list(
-                initialize = function(outdir ="/Users/sarapesavento/Desktop/tbm_anova") {
+                initialize = function(outdir = "./") {
                   #super$
                   initialize(outdir)
                 },
                 save_out = function(bss_data, bss_model, voxelcoord, outdir) {
 
                   get_custom_tbm_overlays = function(outdir) {
-                    p_overlay <- paste(outdir, "/bss_anova_age_mri.bfc.nii_",bs_stat_overlays$log_pvalues,bs_data_types$nifti_image, sep="") #log_pvalues.nii.gz
-                    adjp_overlay <- paste(outdir, "/bss_anova_age_mri.bfc.nii_",bs_stat_overlays$log_pvalues_adjusted,bs_data_types$nifti_image, sep="") #log_pvalues.nii.gz
-                    t_overlay <- paste(outdir, "/bss_anova_age_mri.bfc.nii_",bs_stat_overlays$tvalues,bs_data_types$nifti_image, sep="") #log_pvalues.nii.gz
+
+                    #instead use line 396 from save_bss_out_nifti_image in bsoutput_class
+                    #bss_cmap@cmap_type is bs_stat_overlays$log_pvalues double check
+                    p_overlay <- paste(outdir, "bss_anova_age_mri.bfc.nii_",bs_stat_overlays$log_pvalues,bs_data_types$nifti_image, sep="") #log_pvalues.nii.gz
+                    adjp_overlay <- paste(outdir, "bss_anova_age_mri.bfc.nii_",bs_stat_overlays$log_pvalues_adjusted,bs_data_types$nifti_image, sep="") #log_pvalues.nii.gz
+                    t_overlay <- paste(outdir, "bss_anova_age_mri.bfc.nii_",bs_stat_overlays$tvalues,bs_data_types$nifti_image, sep="") #log_pvalues.nii.gz
 
                     return(list("p_overlay" = p_overlay, "adjp_overlay" = adjp_overlay, "t_overlay" = t_overlay))
                   }
@@ -54,7 +57,7 @@ BssRmdVolumeOutput <-
                     private$render_table()    #these need to know previous names
                     private$render_image(view = c("ax", "cor", "sag"),
                                 cluster_iter,
-                                 inner_iter,
+                                inner = NA,
                                  voxelcoord,
                                  overlay_name = c(bs_stat_overlays$log_pvalues,bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues))
                     private$render_html(outdir,
@@ -102,8 +105,9 @@ BssRmdVolumeOutput <-
                 },
                 ## another function will generate the names for the pngs
 
-                render_image = function(view, cluster_iter, inner_iter, voxelcoord, overlay_name) {
-                  return(paste0("./PNG_images/",view, voxelcoord[[cluster_iter]][inner_iter],overlay_name,".png"))
+                render_image = function(view, cluster_iter, inner, voxelcoord, overlay_name) {
+                  inner
+                  return(paste0("./PNG_images/",view, voxelcoord[[cluster_iter]][inner],overlay_name,".png"))
 
                 },
                  render_html = function(outdir, voxelcoord, view, overlay_name) {
@@ -130,53 +134,53 @@ BssRmdVolumeOutput <-
                                                           ##CLUSTER 1, cluster_iter = 1, inner_iter = 1:3
                                                           #view = c("ax", "cor", "sag")
                                                           # P-values
-                                                          shiny::img(src=paste0(private$render_image(view[2],1,1,voxelcoord,overlay_name[[1]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],1,2,voxelcoord,overlay_name[[1]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],1,3,voxelcoord,overlay_name[[1]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],1,inner=1,voxelcoord,overlay_name[[1]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],1,inner=2,voxelcoord,overlay_name[[1]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],1,inner=3,voxelcoord,overlay_name[[1]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf', align="left", width = "11%"),
                                                           # Adj P-values
-                                                          shiny::img(src=paste0(private$render_image(view[2],1,1,voxelcoord,overlay_name[[2]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],1,2,voxelcoord,overlay_name[[2]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],1,3,voxelcoord,overlay_name[[2]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],1,inner=1,voxelcoord,overlay_name[[2]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],1,inner=2,voxelcoord,overlay_name[[2]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],1,inner=3,voxelcoord,overlay_name[[2]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.pdf', align="left", width = "11.2%"),
                                                           # T-values
-                                                          shiny::img(src=paste0(private$render_image(view[2],1,1,voxelcoord,overlay_name[[3]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],1,2,voxelcoord,overlay_name[[3]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],1,3,voxelcoord,overlay_name[[3]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],1,inner=1,voxelcoord,overlay_name[[3]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],1,inner=2,voxelcoord,overlay_name[[3]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],1,inner=3,voxelcoord,overlay_name[[3]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_tvalues_cbar.pdf', align="left", width = "11%"),
                                                           # Atlas
-                                                          shiny::img(src=paste0(private$render_image(view[2],1,1,voxelcoord,"atlas")), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],1,2,voxelcoord,"atlas")), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],1,3,voxelcoord,"atlas")), align="left", width = "34.5%")),
+                                                          shiny::img(src=paste0(private$render_image(view[2],1,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],1,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],1,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")),
 
                                           shiny::tabPanel(title_0 = "P-Values",
                                                           value = c("P-Values"),
                                                           shiny::p("P-Values"),
                                                           # P-values
-                                                          shiny::img(src=paste0(private$render_image(view[2],1,1,voxelcoord,overlay_name[[1]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],1,2,voxelcoord,overlay_name[[1]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],1,3,voxelcoord,overlay_name[[1]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],1,inner=1,voxelcoord,overlay_name[[1]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],1,inner=2,voxelcoord,overlay_name[[1]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],1,inner=3,voxelcoord,overlay_name[[1]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf', align="left", width = "11%")),
                                           shiny::tabPanel(title_0 = "Adjusted P-Values",
                                                           value = c("Adjusted P-Values"),
                                                           shiny::p("Adjusted P-Values"),
-                                                          shiny::img(src=paste0(private$render_image(view[2],1,1,voxelcoord,overlay_name[[2]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],1,2,voxelcoord,overlay_name[[2]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],1,3,voxelcoord,overlay_name[[2]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],1,inner=1,voxelcoord,overlay_name[[2]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],1,inner=2,voxelcoord,overlay_name[[2]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],1,inner=3,voxelcoord,overlay_name[[2]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.pdf', align="left", width = "11.5%")),
                                           shiny::tabPanel(title_0 = "T-Values",
                                                           value = c("T-Values"),
                                                           shiny::p("T-Values"),
-                                                          shiny::img(src=paste0(private$render_image(view[2],1,1,voxelcoord,overlay_name[[3]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],1,2,voxelcoord,overlay_name[[3]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],1,3,voxelcoord,overlay_name[[3]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],1,inner=1,voxelcoord,overlay_name[[3]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],1,inner=2,voxelcoord,overlay_name[[3]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],1,inner=3,voxelcoord,overlay_name[[3]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_tvalues_cbar.pdf', align="left", width = "11%")),
                                           shiny::tabPanel(title_0 = "Atlas",
                                                           value = c("Atlas"),
                                                           shiny::p("Atlas"),
-                                                          shiny::img(src=paste0(private$render_image(view[2],1,1,voxelcoord,"atlas")), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],1,2,voxelcoord,"atlas")), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],1,3,voxelcoord,"atlas")), align="left", width = "34.5%")))),
+                                                          shiny::img(src=paste0(private$render_image(view[2],1,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],1,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],1,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")))),
                         shiny::tabPanel(title = shiny::h4("Cluster 2"),
                                         shiny::tableOutput("data"),
 
@@ -189,53 +193,53 @@ BssRmdVolumeOutput <-
                                                           value = c("All"),
                                                           shiny::p("All"),
                                                           # P-values
-                                                          shiny::img(src=paste0(private$render_image(view[2],2,1,voxelcoord,overlay_name[[1]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],2,2,voxelcoord,overlay_name[[1]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],2,3,voxelcoord,overlay_name[[1]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],2,inner=1,voxelcoord,overlay_name[[1]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],2,inner=2,voxelcoord,overlay_name[[1]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],2,inner=3,voxelcoord,overlay_name[[1]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf', align="left", width = "11%"),
                                                           # Adj P-values
-                                                          shiny::img(src=paste0(private$render_image(view[2],2,1,voxelcoord,overlay_name[[2]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],2,2,voxelcoord,overlay_name[[2]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],2,3,voxelcoord,overlay_name[[2]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],2,inner=1,voxelcoord,overlay_name[[2]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],2,inner=2,voxelcoord,overlay_name[[2]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],2,inner=3,voxelcoord,overlay_name[[2]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.pdf', align="left", width = "11.2%"),
                                                           # T-values
-                                                          shiny::img(src=paste0(private$render_image(view[2],2,1,voxelcoord,overlay_name[[3]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],2,2,voxelcoord,overlay_name[[3]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],2,3,voxelcoord,overlay_name[[3]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],2,inner=1,voxelcoord,overlay_name[[3]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],2,inner=2,voxelcoord,overlay_name[[3]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],2,inner=3,voxelcoord,overlay_name[[3]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_tvalues_cbar.pdf', align="left", width = "11%"),
                                                           # Atlas
-                                                          shiny::img(src=paste0(private$render_image(view[2],2,1,voxelcoord,"atlas")), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],2,2,voxelcoord,"atlas")), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],2,3,voxelcoord,"atlas")), align="left", width = "34.5%")),
+                                                          shiny::img(src=paste0(private$render_image(view[2],2,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],2,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],2,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")),
 
                                           shiny::tabPanel(title_0 = "P-Values",
                                                           value = c("P-Values"),
                                                           shiny::p("P-Values"),
                                                           # P-values
-                                                          shiny::img(src=paste0(private$render_image(view[2],2,1,voxelcoord,overlay_name[[1]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],2,2,voxelcoord,overlay_name[[1]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],2,3,voxelcoord,overlay_name[[1]])), align="left", width = "34.5%")),
+                                                          shiny::img(src=paste0(private$render_image(view[2],2,inner=1,voxelcoord,overlay_name[[1]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],2,inner=2,voxelcoord,overlay_name[[1]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],2,inner=3,voxelcoord,overlay_name[[1]])), align="left", width = "34.5%")),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf', align="left", width = "11%")),
                                           shiny::tabPanel(title_0 = "Adjusted P-Values",
                                                           value = c("Adjusted P-Values"),
                                                           shiny::p("Adjusted P-Values"),
-                                                          shiny::img(src=paste0(private$render_image(view[2],2,1,voxelcoord,overlay_name[[2]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],2,2,voxelcoord,overlay_name[[2]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],2,3,voxelcoord,overlay_name[[2]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],2,inner=1,voxelcoord,overlay_name[[2]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],2,inner=2,voxelcoord,overlay_name[[2]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],2,inner=3,voxelcoord,overlay_name[[2]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.pdf', align="left", width = "11.5%")),
                                           shiny::tabPanel(title_0 = "T-Values",
                                                           value = c("T-Values"),
                                                           shiny::p("T-Values"),
-                                                          shiny::img(src=paste0(private$render_image(view[2],2,1,voxelcoord,overlay_name[[3]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],2,2,voxelcoord,overlay_name[[3]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],2,3,voxelcoord,overlay_name[[3]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],2,inner=1,voxelcoord,overlay_name[[3]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],2,inner=2,voxelcoord,overlay_name[[3]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],2,inner=3,voxelcoord,overlay_name[[3]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_tvalues_cbar.pdf', align="left", width = "11%")),
                                           shiny::tabPanel(title_0 = "Atlas",
                                                           value = c("Atlas"),
                                                           shiny::p("Atlas"),
-                                                          shiny::img(src=paste0(private$render_image(view[2],2,1,voxelcoord,"atlas")), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],2,2,voxelcoord,"atlas")), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],2,3,voxelcoord,"atlas")), align="left", width = "34.5%")))),
+                                                          shiny::img(src=paste0(private$render_image(view[2],2,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],2,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],2,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")))),
 
 
                         shiny::tabPanel(title = shiny::h4("Cluster 3"),
@@ -250,52 +254,52 @@ BssRmdVolumeOutput <-
                                                           value = c("All"),
                                                           shiny::p("All"),
                                                           # P-values
-                                                          shiny::img(src=paste0(private$render_image(view[2],3,1,voxelcoord,overlay_name[[1]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],3,2,voxelcoord,overlay_name[[1]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],3,3,voxelcoord,overlay_name[[1]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],3,inner=1,voxelcoord,overlay_name[[1]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],3,inner=2,voxelcoord,overlay_name[[1]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],3,inner=3,voxelcoord,overlay_name[[1]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf', align="left", width = "11%"),
                                                           # Adj P-values
-                                                          shiny::img(src=paste0(private$render_image(view[2],3,1,voxelcoord,overlay_name[[2]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],3,2,voxelcoord,overlay_name[[2]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],3,3,voxelcoord,overlay_name[[2]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],3,inner=1,voxelcoord,overlay_name[[2]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],3,inner=2,voxelcoord,overlay_name[[2]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],3,inner=3,voxelcoord,overlay_name[[2]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.pdf', align="left", width = "11.2%"),
                                                           # T-values
-                                                          shiny::img(src=paste0(private$render_image(view[2],3,1,voxelcoord,overlay_name[[3]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],3,2,voxelcoord,overlay_name[[3]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],3,3,voxelcoord,overlay_name[[3]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],3,inner=1,voxelcoord,overlay_name[[3]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],3,inner=2,voxelcoord,overlay_name[[3]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],3,inner=3,voxelcoord,overlay_name[[3]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_tvalues_cbar.pdf', align="left", width = "11%"),
                                                           # Atlas
-                                                          shiny::img(src=paste0(private$render_image(view[2],3,1,voxelcoord,"atlas")), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],3,2,voxelcoord,"atlas")), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],3,3,voxelcoord,"atlas")), align="left", width = "34.5%")),
+                                                          shiny::img(src=paste0(private$render_image(view[2],3,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],3,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],3,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")),
                                           shiny::tabPanel(title_0 = "P-Values",
                                                           value = c("P-Values"),
                                                           shiny::p("P-Values"),
                                                           # P-values
-                                                          shiny::img(src=paste0(private$render_image(view[2],3,1,voxelcoord,overlay_name[[1]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],3,2,voxelcoord,overlay_name[[1]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],3,3,voxelcoord,overlay_name[[1]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],3,inner=1,voxelcoord,overlay_name[[1]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],3,inner=2,voxelcoord,overlay_name[[1]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],3,inner=3,voxelcoord,overlay_name[[1]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf', align="left", width = "11%")),
                                           shiny::tabPanel(title_0 = "Adjusted P-Values",
                                                           value = c("Adjusted P-Values"),
                                                           shiny::p("Adjusted P-Values"),
-                                                          shiny::img(src=paste0(private$render_image(view[2],3,1,voxelcoord,overlay_name[[2]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],3,2,voxelcoord,overlay_name[[2]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],3,3,voxelcoord,overlay_name[[2]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],3,inner=1,voxelcoord,overlay_name[[2]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],3,inner=2,voxelcoord,overlay_name[[2]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],3,inner=3,voxelcoord,overlay_name[[2]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.pdf', align="left", width = "11.5%")),
                                           shiny::tabPanel(title_0 = "T-Values",
                                                           value = c("T-Values"),
                                                           shiny::p("T-Values"),
-                                                          shiny::img(src=paste0(private$render_image(view[2],3,1,voxelcoord,overlay_name[[3]])), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],3,2,voxelcoord,overlay_name[[3]])), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],3,3,voxelcoord,overlay_name[[3]])), align="left", width = "34.5%"),
+                                                          shiny::img(src=paste0(private$render_image(view[2],3,inner=1,voxelcoord,overlay_name[[3]])), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],3,inner=2,voxelcoord,overlay_name[[3]])), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],3,inner=3,voxelcoord,overlay_name[[3]])), align="left", width = "34.5%"),
                                                           shiny::img(src='./bss_anova_age_mri.bfc.nii_tvalues_cbar.pdf', align="left", width = "11%")),
                                           shiny::tabPanel(title_0 = "Atlas",
                                                           value = c("Atlas"),
                                                           shiny::p("Atlas"),
-                                                          shiny::img(src=paste0(private$render_image(view[2],3,1,voxelcoord,"atlas")), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(private$render_image(view[1],3,2,voxelcoord,"atlas")), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(private$render_image(view[3],3,3,voxelcoord,"atlas")), align="left", width = "34.5%"))
+                                                          shiny::img(src=paste0(private$render_image(view[2],3,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
+                                                          shiny::img(src=paste0(private$render_image(view[1],3,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
+                                                          shiny::img(src=paste0(private$render_image(view[3],3,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%"))
 
                         )
                       )
@@ -306,3 +310,5 @@ BssRmdVolumeOutput <-
 
               )
   )
+
+

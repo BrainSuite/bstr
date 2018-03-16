@@ -28,9 +28,12 @@ BssRmdVolumeOutput <-
 
                     #instead use line 396 from save_bss_out_nifti_image in bsoutput_class
                     #bss_cmap@cmap_type is bs_stat_overlays$log_pvalues double check
-                    p_overlay <- paste(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",substr(bs_file_formats$nii_atlas, 1, 11),"_", bs_stat_overlays$log_pvalues, bss_data@data_type, sep="")
-                    adjp_overlay <- paste(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",substr(bs_file_formats$nii_atlas, 1, 11),"_", bs_stat_overlays$log_pvalues_adjusted, bss_data@data_type, sep="")
-                    t_overlay <- paste(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",substr(bs_file_formats$nii_atlas, 1, 11),"_", bs_stat_overlays$tvalues, bss_data@data_type, sep="")
+                    p_overlay <- paste(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", bs_stat_overlays$log_pvalues, bss_data@data_type, sep="")
+                    adjp_overlay <- paste(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", bs_stat_overlays$log_pvalues_adjusted, bss_data@data_type, sep="")
+                    t_overlay <- paste(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", bs_stat_overlays$tvalues, bss_data@data_type, sep="")
 
                     return(list("p_overlay" = p_overlay, "adjp_overlay" = adjp_overlay, "t_overlay" = t_overlay))
                   }

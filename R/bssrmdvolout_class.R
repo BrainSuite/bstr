@@ -28,9 +28,9 @@ BssRmdVolumeOutput <-
 
                     #instead use line 396 from save_bss_out_nifti_image in bsoutput_class
                     #bss_cmap@cmap_type is bs_stat_overlays$log_pvalues double check
-                    p_overlay <- paste(outdir, "bss_anova_age_mri.bfc.nii_",bs_stat_overlays$log_pvalues,bs_data_types$nifti_image, sep="") #log_pvalues.nii.gz
-                    adjp_overlay <- paste(outdir, "bss_anova_age_mri.bfc.nii_",bs_stat_overlays$log_pvalues_adjusted,bs_data_types$nifti_image, sep="") #log_pvalues.nii.gz
-                    t_overlay <- paste(outdir, "bss_anova_age_mri.bfc.nii_",bs_stat_overlays$tvalues,bs_data_types$nifti_image, sep="") #log_pvalues.nii.gz
+                    p_overlay <- paste(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",substr(bs_file_formats$nii_atlas, 1, 11),"_", bs_stat_overlays$log_pvalues, bss_data@data_type, sep="")
+                    adjp_overlay <- paste(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",substr(bs_file_formats$nii_atlas, 1, 11),"_", bs_stat_overlays$log_pvalues_adjusted, bss_data@data_type, sep="")
+                    t_overlay <- paste(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",substr(bs_file_formats$nii_atlas, 1, 11),"_", bs_stat_overlays$tvalues, bss_data@data_type, sep="")
 
                     return(list("p_overlay" = p_overlay, "adjp_overlay" = adjp_overlay, "t_overlay" = t_overlay))
                   }

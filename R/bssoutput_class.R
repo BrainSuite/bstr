@@ -321,7 +321,7 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
 
 
   nb_load_data <- sprintf("```{r echo=FALSE, message=FALSE, warning=FALSE, load_data}\n")
-  nb_load_data <- paste(nb_load_data, "\nDT::datatable(bss_data@demographics)\n", sep = "")
+  nb_load_data <- paste(nb_load_data, "\nDT::datatable(bss_data@demographics, rownames = FALSE)\n", sep = "")
   nb_load_data <- paste(nb_load_data, "\n```\n", sep = "")
 
 
@@ -333,8 +333,10 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
 
   nb_data_header_three <- "The final command (below) was used to render this document."
 
+  command_save_bss_out <- sprintf("save_bss_out(bss_data, bss_model, outdir = '%s')", bss_out@outdir)
+
   nb_data_command_three <-  sprintf("\n```{r eval=FALSE, message=FALSE, warning=FALSE, data_commands}\n")
-  nb_data_command_three <- paste(nb_data_command_three, "\nsave_bss_out(bss_data, bss_model,outdir = '", bss_out@outdir,"')\n")
+  nb_data_command_three <- paste(nb_data_command_three, "\n", command_save_bss_out,"\n")
   nb_data_command_three <- paste(nb_data_command_three, "\n```\n", sep = "")
 
 
@@ -345,9 +347,10 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
       nb_commands[[m]] <- paste(nb_commands[[m]], bss_model@stats_commands[[m]][i], "\n", sep = "")
     }
     nb_commands[[m]] <- paste(nb_commands[[m]], "```\n", sep = "")
-    nb_commands[[m]] <- paste(sprintf("\n#### Main effect of %d %s on %s controlling for %s \n",
-                                      bss_data@roiids[m], bss_data@roimeas, bss_model@main_effect,
-                                      bss_model@covariates ),
+    nb_commands[[m]] <- paste(sprintf("\n#### Main effect of %d[%s] %s on %s controlling for %s \n",
+                                      bss_data@roiids[m],
+                                      as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
+                                      bss_data@roimeas, bss_model@main_effect,bss_model@covariates ),
                               nb_commands[[m]], sep = "")
   }
 

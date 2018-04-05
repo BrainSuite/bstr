@@ -64,7 +64,12 @@ read_roi_data_for_all_subjects <- function(roi_filelist, demographics,roiids, ro
 
   roi_data_frame <- data.frame(matrix(nrow=length(roi_filelist),ncol=length(roiids)))
   rownames(roi_data_frame) <- demographics$subjID
-  colnames(roi_data_frame) <- roiids
+  #change colnames to tags from labels
+  #colnames(roi_data_frame) <- roiids
+  for (i in 1:length(roiids)){
+    colnames(roi_data_frame)[i] <- paste0(roiids[i],"[",as.character(get_roi_tag(read_label_desc(),roiids[i])[1,1]),"]")
+  }
+
 
   for (x in 1:length(roiids)) {
     roi_data_frame[,x] <- sapply(roi_filelist, function(i,roiid_column) {

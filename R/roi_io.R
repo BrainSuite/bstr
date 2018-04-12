@@ -67,7 +67,7 @@ read_roi_data_for_all_subjects <- function(roi_filelist, demographics,roiids, ro
   #change colnames to tags from labels
   #colnames(roi_data_frame) <- roiids
   for (i in 1:length(roiids)){
-    colnames(roi_data_frame)[i] <- paste0(roiids[i],"[",as.character(get_roi_tag(read_label_desc(),roiids[i])[1,1]),"]")
+    colnames(roi_data_frame)[i] <- paste0(as.character(get_roi_tag(read_label_desc(),roiids[i])), " (",roiids[i],")")
   }
 
 

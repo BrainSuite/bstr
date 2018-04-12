@@ -219,7 +219,7 @@ bss_roi_anova <- function(main_effect="", covariates="", bss_data=bss_data) {
 
   selected_col <- rep(NA, length(bss_data@roiids))
   for (i in 1:length(bss_data@roiids)){
-    selected_col[i] <- paste0(bss_data@roiids[i],"[",as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])[1,1]),"]")
+    selected_col[i] <- paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), " (",bss_data@roiids[i],")")
     bss_data@demographics[,selected_col[i]]
   }
   #bss_data@demographics[,as.character(bss_data@roiids)]

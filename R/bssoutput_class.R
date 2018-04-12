@@ -347,9 +347,9 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
       nb_commands[[m]] <- paste(nb_commands[[m]], bss_model@stats_commands[[m]][i], "\n", sep = "")
     }
     nb_commands[[m]] <- paste(nb_commands[[m]], "```\n", sep = "")
-    nb_commands[[m]] <- paste(sprintf("\n#### Main effect of %d[%s] %s on %s controlling for %s \n",
-                                      bss_data@roiids[m],
+    nb_commands[[m]] <- paste(sprintf("\n#### Main effect of %s (%d) %s on %s controlling for %s \n",
                                       as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
+                                      bss_data@roiids[m],
                                       bss_data@roimeas, bss_model@main_effect,bss_model@covariates ),
                               nb_commands[[m]], sep = "")
   }

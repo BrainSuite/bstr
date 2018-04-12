@@ -30,13 +30,13 @@ bs_file_formats <- list(
 bs_atlas_files <- list(
   atlas_BS1_tbm = 'svreg/BrainSuiteAtlas1/mri.bfc.nii.gz',
   atlas_BS1_mask_tbm = 'svreg/BrainSuiteAtlas1/mri.mask.nii.gz',
-  atlas_BS1_mask_dbm = 'svreg/BrainSuiteAtlas1/mri.wm.mask.nii.gz',
+  atlas_BS1_mask_dbm = 'svreg/BrainSuiteAtlas1/mri.cortex.dewisp.mask.nii.gz',
   lh_atlas_BS1_cbm = 'svreg/BrainSuiteAtlas1/mri.left.mid.cortex.dfs',
   rh_atlas_BS1_cbm = 'svreg/BrainSuiteAtlas1/mri.right.mid.cortex.dfs',
 
   atlas_BCIDNI_tbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.bfc.nii.gz',
   atlas_BCIDNI_mask_tbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.mask.nii.gz',
-  atlas_BCIDNI_mask_dbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.wm.mask.nii.gz',
+  atlas_BCIDNI_mask_dbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.cortex.dewisp.mask.nii.gz',
   lh_atlas_BCIDNI_cbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.left.mid.cortex.dfs',
   rh_atlas_BCIDNI_cbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.right.mid.cortex.dfs'
 )

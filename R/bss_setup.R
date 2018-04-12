@@ -173,7 +173,7 @@ get_bssr_ini_path <- function() {
 #'
 #' @export
 get_labeldesc_path <- function() {
-  labeldesc_file <- system.file("extdata", "brainsuite_labeldescriptions_14May2014.xml", package = 'bssr')
+  labeldesc_file <- file.path(get_brainsuite_install_path(), "labeldesc", "brainsuite_labeldescriptions_14May2014.xml")
   if (check_file_exists(labeldesc_file, raise_error = TRUE)) return(labeldesc_file) else return("")
 }
 

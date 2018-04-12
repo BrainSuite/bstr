@@ -55,5 +55,12 @@ get_roi_name <- function(label_desc_df, roiid) {
 #' @param roiid ROI label identifier
 #' @export
 get_roi_tag <- function(label_desc_df, roiid) {
-  return(label_desc_df[label_desc_df$roiid == roiid,]['tag'])
+  tag <- as.character(label_desc_df[label_desc_df$roiid == roiid,]['tag'][,1])
+  side <- ""
+  if (substr(as.character(label_desc_df[label_desc_df$roiid == roiid,]['roiname'][,1]),0,2) == "R."){
+    side <- "R."
+  } else if(substr(as.character(label_desc_df[label_desc_df$roiid == roiid,]['roiname'][,1]),0,2) == "L."){
+    side <- "L."
+  }
+  return(paste(side, tag))
 }

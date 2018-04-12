@@ -24,8 +24,7 @@
 #' Read BrainSuite label description file
 #' @export
 read_label_desc <- function() {
-  #second argument of below line becomes a variable
-  label_desc_filename <- system.file("extdata", "brainsuite_labeldescriptions_14May2014.xml", package = 'bssr')
+  label_desc_filename <- get_labeldesc_path()
   fid <- file(label_desc_filename, open="r")
   alllines <- readLines(fid)
   alllines <- alllines[3:(length(alllines)-1)]

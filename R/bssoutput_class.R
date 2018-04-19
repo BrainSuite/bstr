@@ -308,7 +308,7 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
   nb_header <- "### BrainSuite ROI statistical analysis report"
 
   nb_libraries <-"```{r librar_cmds, echo=FALSE}\n"
-  nb_libraries <- paste(nb_libraries, "\nlibrary('bssr')\n", sep="")
+  nb_libraries <- paste(nb_libraries, "\nlibrary('bssr')\nlibrary('ggplot2')\n", sep="")
   nb_libraries <- paste(nb_libraries, "\n```\n", sep="")
 
   nb_data_header_one <- "The following command loads the data."
@@ -316,7 +316,7 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
   # Add commands to load the data
   nb_data_command_one <- sprintf("\n```{r message=FALSE, warning=FALSE, results='hide', data_command_one}\n")
   nb_data_command_one <- paste(nb_data_command_one,"\n",
-                            bss_data@load_data_command,sep = "")
+                            bss_data@load_data_command,"\n",sep = "")
   nb_data_command_one <- paste(nb_data_command_one, "\n```\n", sep = "")
 
 
@@ -341,24 +341,40 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
 
 
   nb_commands <- lapply(as.character(bss_data@roiids),function(x){sprintf("```{r warning=FALSE, run_command_%s}\n",x)})
+  nb_plots <- lapply(as.character(bss_data@roiids),function(x){sprintf("```{r echo=FALSE, message=FALSE, warning=FALSE, plot_%s}\n",x)})
+
+  selected_col <- rep(NA, length(bss_data@roiids))
+  for (i in 1:length(bss_data@roiids)){
+    selected_col[i] <- paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")")
+    bss_data@demographics[,selected_col[i]]
+  }
 
   for (m in 1:length(bss_data@roiids)){
     for (i in 1:length(bss_model@stats_commands[[m]])) {
-      nb_commands[[m]] <- paste(nb_commands[[m]], bss_model@stats_commands[[m]][i], "\n", sep = "")
+      nb_commands[[m]] <- paste0(nb_commands[[m]], bss_model@stats_commands[[m]][i], "\n")
     }
-    nb_commands[[m]] <- paste(nb_commands[[m]], "```\n", sep = "")
-    nb_commands[[m]] <- paste(sprintf("\n#### Main effect of %s (%d) %s on %s controlling for %s \n",
+    nb_commands[[m]] <- paste0(nb_commands[[m]], "```\n\n")
+    if (class(bss_data@demographics[,stringr::word(bss_model@fullmodel)])=="integer"|class(bss_data@demographics[,stringr::word(bss_model@fullmodel)])=="double"){
+      nb_plots[[m]]<-paste0(nb_plots[[m]],"ggplot2::ggplot(data=bss_data@demographics, ggplot2::aes(x=",
+                            stringr::word(bss_model@fullmodel),
+                            ", y = `",selected_col[m],"`)) + ggplot2::geom_point()\n```\n")
+    } else if (class(bss_data@demographics[,stringr::word(bss_model@fullmodel)])=="factor"){
+      nb_plots[[m]]<-paste0(nb_plots[[m]],"ggplot2::ggplot(data=bss_data@demographics, ggplot2::aes(x=",
+                            stringr::word(bss_model@fullmodel),
+                            ", y = `",selected_col[m],"`)) + ggplot2::geom_bar(stat = 'identity')\n```\n")
+    }
+    nb_commands[[m]] <- paste0(sprintf("\n#### Main effect of %s (%d) %s on %s controlling for %s \n",
                                       as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
                                       bss_data@roiids[m],
                                       bss_data@roimeas, bss_model@main_effect,bss_model@covariates ),
-                              nb_commands[[m]], sep = "")
+                              nb_commands[[m]])
   }
 
   rmdfileconn<-file(file.path(outdir, "report.Rmd"))
   writeLines(c(nb_header, nb_libraries, nb_data_header_one, nb_data_command_one,
                nb_load_data, nb_data_header_two, nb_data_command_two,
                nb_data_header_three, nb_data_command_three,
-               unlist(lapply(nb_commands, paste, collapse=" "))), rmdfileconn)
+               unlist(mapply(paste0, nb_commands, nb_plots))), rmdfileconn)
   close(rmdfileconn)
 
   # Render the markdown

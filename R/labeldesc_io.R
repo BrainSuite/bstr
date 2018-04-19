@@ -62,5 +62,5 @@ get_roi_tag <- function(label_desc_df, roiid) {
   } else if(substr(as.character(label_desc_df[label_desc_df$roiid == roiid,]['roiname'][,1]),0,2) == "L."){
     side <- "L."
   }
-  return(paste(side, tag))
+  return(paste0(side, tag))
 }

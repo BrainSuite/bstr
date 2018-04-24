@@ -26,8 +26,6 @@ BssRmdVolumeOutput <-
 
                   get_custom_tbm_overlays = function(outdir) {
 
-                    #instead use line 396 from save_bss_out_nifti_image in bsoutput_class
-                    #bss_cmap@cmap_type is bs_stat_overlays$log_pvalues double check
                     p_overlay <- paste(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", bs_stat_overlays$log_pvalues, bss_data@data_type, sep="")
                     adjp_overlay <- paste(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
@@ -39,7 +37,7 @@ BssRmdVolumeOutput <-
                   }
 
                   #create a folder to store png images in
-                  dir.create(paste0(outdir,"/PNG_images"))
+                  dir.create(paste0(outdir,"PNG_images"))
 
                   for(cluster_iter in 1:length(voxelcoord)) {
                     private$render_overlay(
@@ -52,7 +50,7 @@ BssRmdVolumeOutput <-
                       view = c("ax", "cor", "sag"), name = c(bs_stat_overlays$log_pvalues,bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues), alpha = 120)
 
                     private$render_atlas(cluster_iter, voxelcoord,
-                                         filePath = bss_data@atlas_filename,
+                                         atlaspath = bss_data@atlas_filename,
                                          outdir,
                                          view = c("ax", "cor", "sag"))
                     # }
@@ -74,11 +72,9 @@ BssRmdVolumeOutput <-
 
                 render_overlay = function(cluster_iter,voxelcoord,atlaspath,overlaypath,outdir,view,name,alpha) {
                   for (inner_iter in 1:3) {
-                    #if (check error) { message, break}
                     view_ax <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[inner_iter], " -o ",outdir,"/PNG_images/",view[1],voxelcoord[[cluster_iter]][1], "_",name[inner_iter], ".png --slice ", voxelcoord[[cluster_iter]][1], " --", view[1], " -a ", alpha)
                     view_cor <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[inner_iter], " -o ",outdir,"/PNG_images/",view[2],voxelcoord[[cluster_iter]][2], "_",name[inner_iter], ".png --slice ", voxelcoord[[cluster_iter]][2], " --", view[2], " -a ", alpha)
                     view_sag <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[inner_iter], " -o ",outdir,"/PNG_images/",view[3],voxelcoord[[cluster_iter]][3], "_",name[inner_iter], ".png --slice ", voxelcoord[[cluster_iter]][3], " --", view[3], " -a ", alpha)
-
 
                     system(view_cor,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                     system(view_sag,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
@@ -87,10 +83,11 @@ BssRmdVolumeOutput <-
                   return(0)
                   #return message for error. Test if returns code for an error (i.e. pstatmap0)
                 },
-                render_atlas = function(cluster_iter,voxelcoord,filePath,outdir,view) {
-                  view_at_ax <- paste0("/usr/local/bin/volblend -i ",filePath," --view 1 --slice ",voxelcoord[[cluster_iter]][1]," --flop -o ", outdir,"/PNG_images/",view[1],voxelcoord[[cluster_iter]][1],"_atlas.png")
-                  view_at_cor <- paste0("/usr/local/bin/volblend -i ",filePath," --view 2 --slice ",voxelcoord[[cluster_iter]][1]," --flop -o ", outdir,"/PNG_images/",view[2],voxelcoord[[cluster_iter]][1],"_atlas.png")
-                  view_at_sag <- paste0("/usr/local/bin/volblend -i ",filePath," --view 3 --slice ",voxelcoord[[cluster_iter]][1]," --flop -o ", outdir,"/PNG_images/",view[3],voxelcoord[[cluster_iter]][1],"_atlas.png")
+                render_atlas = function(cluster_iter,voxelcoord,atlaspath,outdir,view) {
+
+                  view_at_ax <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view 1 --slice ",voxelcoord[[cluster_iter]][1]," --flop -o ", outdir,"/PNG_images/",view[1],voxelcoord[[cluster_iter]][1],"_atlas.png")
+                  view_at_cor <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view 2 --slice ",voxelcoord[[cluster_iter]][1]," --flop -o ", outdir,"/PNG_images/",view[2],voxelcoord[[cluster_iter]][1],"_atlas.png")
+                  view_at_sag <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view 3 --slice ",voxelcoord[[cluster_iter]][1]," --flop -o ", outdir,"/PNG_images/",view[3],voxelcoord[[cluster_iter]][1],"_atlas.png")
 
                   system(view_at_cor,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                   system(view_at_sag,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
@@ -313,5 +310,4 @@ BssRmdVolumeOutput <-
 
               )
   )
-
 

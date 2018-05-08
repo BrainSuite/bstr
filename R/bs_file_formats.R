@@ -71,6 +71,11 @@ bs_stat_overlays <- list(
   pvalues = "pvalues"
 )
 
+get_render_image_filename <- function(view, cluster_iter, inner, voxelcoord, overlay_name) {
+  return(paste0("./PNG_images/",view, voxelcoord[[cluster_iter]][inner],"_",overlay_name,".png"))
+}
+
+
 bs_surface_file_string <- function(hemi="left", smooth = 0) {
 
   if (smooth != 0)

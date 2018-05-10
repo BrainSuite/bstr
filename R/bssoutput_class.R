@@ -389,15 +389,16 @@ selected_col[m],"`)
 " == levels(bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),")[i],]$`",
 selected_col[m],"`)
 } \n",
-"modified_df <- data.frame(len = mean_lengths, sd = std_devs, x_factors = levels(bss_data@demographics$",
+"modified_df <- data.frame(len = mean_lengths, sd = std_devs,",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel)," = levels(bss_data@demographics$",
                 gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),"))\n",
-"ggplot2::ggplot(data=modified_df, ggplot2::aes(x = x_factors, y = len)) +
+"ggplot2::ggplot(data=modified_df, ggplot2::aes(x = ",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),
+                 ", y = len, color = ",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),
+                 ")) +
 ggplot2::geom_bar(stat = 'identity') + ggplot2::ggtitle('",
                             as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
                             " ", bss_data@roimeas,
                             " vs ", bss_model@main_effect,"') +
-ggplot2::labs(x='",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),
-        "', y='",as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
+ggplot2::labs(y='",as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
                             "') +
 ggplot2::geom_errorbar(mapping=aes(ymin=len-sd, ymax=len+sd)) +
 ggplot2::theme(axis.title=ggplot2::element_text(size=16,face='bold')) +

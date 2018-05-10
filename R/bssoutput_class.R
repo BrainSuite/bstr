@@ -378,21 +378,28 @@ ggplot2::ggsave(filename='",
                             "_", bss_data@roimeas,
                             "_vs_", bss_model@main_effect, ".pdf',device='pdf')\n```\n")
     } else if (class(bss_data@demographics[,gsub("([A-Za-z]+).*", "\\1", bss_model@fullmodel)])=="factor"){
-           nb_plots[[m]]<-paste0(nb_plots[[m]],"modified_df <- bss_data@demographics \n",
-"modified_df <- data.frame(modified_df,len = mean(bss_data@demographics[bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),
-                            " == levels(bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),")[",m,"],]$`", selected_col[m],
-                            "`)",", sd = sd(bss_data@demographics[bss_data@demographics$",
-                            gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),"[",m,"],]$`",
-                            selected_col[m],"`))\n",
-"ggplot2::ggplot(data=modified_df, ggplot2::aes(x=",
-                            gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),
-                            ", y = `",paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m])), ".",bss_data@roiids[m],"."),"`)) + ggplot2::geom_bar(stat = 'identity') + ggplot2::ggtitle('",
+           nb_plots[[m]]<-paste0(nb_plots[[m]],
+"mean_lengths <- rep(NA, length(levels(bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),")))
+std_devs <- rep(NA, length(levels(bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),")))
+for (i in 1:length(levels(bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),"))){
+  mean_lengths[i] <-  mean(bss_data@demographics[bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),
+" == levels(bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),")[i],]$`",
+selected_col[m],"`)
+  std_devs[i] <- sd (bss_data@demographics[bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),
+" == levels(bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),")[i],]$`",
+selected_col[m],"`)
+} \n",
+"modified_df <- data.frame(len = mean_lengths, sd = std_devs, x_factors = levels(bss_data@demographics$",
+                gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),"))\n",
+"ggplot2::ggplot(data=modified_df, ggplot2::aes(x = x_factors, y = len)) +
+ggplot2::geom_bar(stat = 'identity') + ggplot2::ggtitle('",
                             as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
                             " ", bss_data@roimeas,
-                            " vs ", bss_model@main_effect,"') + ggplot2::labs(y='",
-                            as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
+                            " vs ", bss_model@main_effect,"') +
+ggplot2::labs(x='",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),
+        "', y='",as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
                             "') +
-ggplot2::geom_errorbar(aes(ymin=len-sd, ymax=len+sd)) +
+ggplot2::geom_errorbar(mapping=aes(ymin=len-sd, ymax=len+sd)) +
 ggplot2::theme(axis.title=ggplot2::element_text(size=16,face='bold')) +
 ggplot2::theme(plot.title=ggplot2::element_text(size=18,face='bold'))\n
 ggplot2::ggsave(filename='",

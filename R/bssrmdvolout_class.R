@@ -19,10 +19,15 @@ BssRmdVolumeOutput <-
               #inherit = BssRmdOutput,
               public = list(
                 initialize = function(outdir = "./") {
-                  #super$
                   initialize(outdir)
                 },
                 save_out = function(bss_data, bss_model, voxelcoord, outdir) {
+
+                 # save_rmd<-file(file.path(outdir, "save_rmd.Rmd"))
+                 # writeLines(c(private$render_table(),private$render_html(outdir,voxelcoord)), save_rmd)
+                 # close(save_rmd)
+                  #rmarkdown::render("/Users/sarapesavento/Desktop/tbm_anova/save_rmd.Rmd")
+
 
 
                   get_custom_tbm_overlays = function(outdir) {
@@ -36,6 +41,7 @@ BssRmdVolumeOutput <-
 
                     return(list("p_overlay" = p_overlay, "adjp_overlay" = adjp_overlay, "t_overlay" = t_overlay))
                   }
+
 
 
 
@@ -105,7 +111,16 @@ BssRmdVolumeOutput <-
                 },
                 ## another function will generate the names for the pngs
 
-                render_html = function(outdir, voxelcoord, view, overlay_name) {
+                render_html = function(outdir, voxelcoord, view,overlay_name) {
+
+                  #First get colormaps
+                  pval <- paste0("magick ", outdir, "bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf ", outdir, "bss_anova_age_mri.bfc.nii_log_pvalues_cbar.png")
+                  adpval <- paste0("magick ", outdir, "bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.pdf ", outdir, "bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.png")
+                  tval <- paste0("magick ", outdir, "bss_anova_age_mri.bfc.nii_tvalues_cbar.pdf ", outdir, "bss_anova_age_mri.bfc.nii_tvalues_cbar.png")
+
+                  system(pval,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
+                  system(adpval,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
+                  system(tval,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
 
                   shiny::shinyUI(
                     shiny::fluidPage(

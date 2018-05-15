@@ -358,7 +358,8 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
     nb_commands[[m]] <- paste0(nb_commands[[m]], "```\n\n")
     nb_calculations[[m]] <- paste0(nb_calculations[[m]],"anova_table <- anova(lm_full_",
                                    bss_data@roiids[m],", lm_null_",bss_data@roiids[m],")\np_val_",
-                                   bss_data@roiids[m]," <- round(anova_table$`Pr(>F)`[2],digits=4)\n```\n\n")
+                                   bss_data@roiids[m]," <- round(anova_table$`Pr(>F)`[2],digits=4)\n",
+                                   "pval_string <- paste('pvalue:', as.character(p_val_",bss_data@roiids[m],"))\n```\n\n")
     if (class(bss_data@demographics[,gsub("([A-Za-z]+).*", "\\1", bss_model@fullmodel)])=="integer"|class(bss_data@demographics[,gsub("([A-Za-z]+).*", "\\1", bss_model@fullmodel)])=="double"){
       nb_plots[[m]]<-paste0(nb_plots[[m]],"ggplot2::ggplot(data=bss_data@demographics, ggplot2::aes(x=",
                             gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),
@@ -402,7 +403,8 @@ ggplot2::labs(y='",as.character(get_roi_name(label_desc_df = read_label_desc(),r
                             "') +
 ggplot2::geom_errorbar(mapping=aes(ymin=len-sd, ymax=len+sd)) +
 ggplot2::theme(axis.title=ggplot2::element_text(size=16,face='bold')) +
-ggplot2::theme(plot.title=ggplot2::element_text(size=18,face='bold'))\n
+ggplot2::theme(plot.title=ggplot2::element_text(size=18,face='bold')) +
+ggplot2::scale_color_discrete(name= pval_string)\n
 ggplot2::ggsave(filename='",
                             paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m]))), "_roi",bss_data@roiids[m],
                             "_", bss_data@roimeas,

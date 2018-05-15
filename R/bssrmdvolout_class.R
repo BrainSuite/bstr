@@ -119,14 +119,20 @@ BssRmdVolumeOutput <-
 
                 render_html = function(outdir, voxelcoord, view,overlay_name) {
 
-                  #First get colormaps
-                  pval <- paste0("magick ", outdir, "bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf ", outdir, "bss_anova_age_mri.bfc.nii_log_pvalues_cbar.png")
-                  adpval <- paste0("magick ", outdir, "bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.pdf ", outdir, "bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.png")
-                  tval <- paste0("magick ", outdir, "bss_anova_age_mri.bfc.nii_tvalues_cbar.pdf ", outdir, "bss_anova_age_mri.bfc.nii_tvalues_cbar.png")
+                  image <- image_read("/Users/sarapesavento/Desktop/tbm_anova/bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf")
+                  ppng <- image_convert(image, format = "PNG", type = NULL, colorspace = NULL,
+                                         depth = NULL, antialias = NULL)
+                  image_write(ppng, path ="/Users/sarapesavento/Desktop/tbm_anova/pvalues.png", format = "png")
 
-                  system(pval,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-                  system(adpval,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-                  system(tval,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
+                  image <- image_read("/Users/sarapesavento/Desktop/tbm_anova/bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.pdf")
+                  adppng <- image_convert(image, format = "PNG", type = NULL, colorspace = NULL,
+                                         depth = NULL, antialias = NULL)
+                  image_write(adppng, path ="/Users/sarapesavento/Desktop/tbm_anova/adjpvalues.png", format = "png")
+
+                  image <- image_read("/Users/sarapesavento/Desktop/tbm_anova/bss_anova_age_mri.bfc.nii_tvalues_cbar.pdf")
+                  tpng <- image_convert(image, format = "PNG", type = NULL, colorspace = NULL,
+                                         depth = NULL, antialias = NULL)
+                  image_write(tpng, path ="/Users/sarapesavento/Desktop/tbm_anova/adjpvalues.png", format = "png")
 
 
                   #function to make rmd work

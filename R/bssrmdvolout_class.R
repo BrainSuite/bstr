@@ -23,12 +23,6 @@ BssRmdVolumeOutput <-
                 },
                 save_out = function(bss_data, bss_model, voxelcoord, outdir) {
 
-                 # save_rmd<-file(file.path(outdir, "save_rmd.Rmd"))
-                 # writeLines(c(private$render_table(),private$render_html(outdir,voxelcoord)), save_rmd)
-                 # close(save_rmd)
-                  #rmarkdown::render("/Users/sarapesavento/Desktop/tbm_anova/save_rmd.Rmd")
-
-
 
                   get_custom_tbm_overlays = function(outdir) {
 
@@ -41,9 +35,6 @@ BssRmdVolumeOutput <-
 
                     return(list("p_overlay" = p_overlay, "adjp_overlay" = adjp_overlay, "t_overlay" = t_overlay))
                   }
-
-
-
 
                   #create a folder to store png images in
                   dir.create(paste0(outdir,"PNG_images"))
@@ -65,14 +56,29 @@ BssRmdVolumeOutput <-
                     # }
 
                     private$render_table()    #these need to know previous names
-
+                    rmdout1 <- private$render_table()
                     private$render_html(outdir,
                                         voxelcoord,
                                         view = c("ax", "cor", "sag"),
                                         overlay_name = c(bs_stat_overlays$log_pvalues,bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues))
+
+                  rmdout2 <-private$render_html(outdir,
+                                                  voxelcoord,
+                                                  view = c("ax", "cor", "sag"),
+                                                  overlay_name = c(bs_stat_overlays$log_pvalues,bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues))
+
                   }
+
+                  save_rmd<-file(file.path(outdir, "save_rmd.Rmd"))
+                  writeLines(text = "this text will show up", save_rmd)
+                  close(save_rmd)
+                  rmarkdown::render("/Users/sarapesavento/Desktop/tbm_anova/save_rmd.Rmd")
+
                 }
+
+
               ),
+
               private = list(
 
                 render_overlay = function(cluster_iter,voxelcoord,atlaspath,overlaypath,outdir,view,name,alpha) {
@@ -122,6 +128,13 @@ BssRmdVolumeOutput <-
                   system(adpval,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                   system(tval,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
 
+
+                  #function to make rmd work
+                    get_render_image_filename <- function(view, cluster_iter, inner, voxelcoord, overlay_name) {
+                      return(paste0("./PNG_images/",view, voxelcoord[[cluster_iter]][inner],"_",overlay_name,".png"))
+                    }
+
+
                   shiny::shinyUI(
                     shiny::fluidPage(
                       shinyjs::useShinyjs(),
@@ -140,6 +153,12 @@ BssRmdVolumeOutput <-
 
                                                           value = c("All"),
                                                           shiny::p("All"),
+                                                          bs_stat_overlays <- list(
+                                                            log_pvalues = "log_pvalues",
+                                                            log_pvalues_adjusted = "log_pvalues_adjusted",
+                                                            tvalues = "tvalues",
+                                                            pvalues = "pvalues"
+                                                          ),
 
                                                           ##CLUSTER 1, cluster_iter = 1, inner_iter = 1:3
                                                           view = c("ax", "cor", "sag"),

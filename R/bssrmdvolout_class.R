@@ -55,14 +55,13 @@ BssRmdVolumeOutput <-
                                          view = c("ax", "cor", "sag"))
                     # }
 
-                    private$render_table()    #these need to know previous names
-                    rmdout1 <- private$render_table()
-                    private$render_html(outdir,
+                  private$render_table()
+                  private$render_html(outdir,
                                         voxelcoord,
                                         view = c("ax", "cor", "sag"),
                                         overlay_name = c(bs_stat_overlays$log_pvalues,bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues))
 
-                  rmdout2 <-private$render_html(outdir,
+                 private$render_html(outdir,
                                                   voxelcoord,
                                                   view = c("ax", "cor", "sag"),
                                                   overlay_name = c(bs_stat_overlays$log_pvalues,bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues))
@@ -70,7 +69,9 @@ BssRmdVolumeOutput <-
                   }
 
                   save_rmd<-file(file.path(outdir, "save_rmd.Rmd"))
-                  writeLines(text = "this text will show up", save_rmd)
+                  writeLines(private$render_table(), save_rmd)
+                # attach(private$render_table(), save_rmd)
+
                   close(save_rmd)
                   rmarkdown::render("/Users/sarapesavento/Desktop/tbm_anova/save_rmd.Rmd")
 

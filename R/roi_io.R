@@ -66,7 +66,7 @@ read_roi_data_for_all_subjects <- function(roi_filelist, demographics,roiids, ro
   rownames(roi_data_frame) <- demographics$subjID
   for (i in 1:length(roiids)){
     if (!(roiids[i] %in% read_label_desc()$roiid)){
-      stop(sprintf('ROI ID %d not found. Please check that %d is a valid ROI.', roiids[i], roiids[i]))
+      stop(sprintf('ROI ID %d not found. This is not a valid ROI for %s.', roiids[i], bss_data@roimeas))
     }
     colnames(roi_data_frame)[i] <- paste0(as.character(get_roi_tag(read_label_desc(),roiids[i])), "(",roiids[i],")")
   }

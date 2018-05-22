@@ -118,17 +118,17 @@ BssRmdVolumeOutput <-
                   image <- image_read(paste0(outdir,"bss_anova_age_mri.bfc.nii_log_pvalues_cbar.pdf"))
                   ppng <- image_convert(image, format = "PNG", type = NULL, colorspace = NULL,
                                         depth = NULL, antialias = NULL)
-                  image_write(ppng, path ="/Users/sarapesavento/Desktop/tbm_anova/bss_anova_age_mri.bfc.nii_log_pvalues_cbar.png", format = "png")
+                  image_write(ppng, path =paste0(outdir,"bss_anova_age_mri.bfc.nii_log_pvalues_cbar.png"), format = "png")
 
                   image <- image_read(paste0(outdir,"bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.pdf"))
                   adppng <- image_convert(image, format = "PNG", type = NULL, colorspace = NULL,
                                           depth = NULL, antialias = NULL)
-                  image_write(adppng, path ="/Users/sarapesavento/Desktop/tbm_anova/bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.png", format = "png")
+                  image_write(adppng, path =paste0(outdir,"bss_anova_age_mri.bfc.nii_log_pvalues_adjusted_cbar.png"), format = "png")
 
                   image <- image_read(paste0(outdir, "bss_anova_age_mri.bfc.nii_tvalues_cbar.pdf"))
                   tpng <- image_convert(image, format = "PNG", type = NULL, colorspace = NULL,
                                         depth = NULL, antialias = NULL)
-                  image_write(tpng, path ="/Users/sarapesavento/Desktop/tbm_anova/bss_anova_age_mri.bfc.nii_tvalues_cbar.png", format = "png")
+                  image_write(tpng, path =paste0(outdir,"bss_anova_age_mri.bfc.nii_tvalues_cbar.png"), format = "png")
 
 
                   #function to make rmd work

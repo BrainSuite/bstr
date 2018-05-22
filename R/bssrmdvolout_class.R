@@ -68,7 +68,7 @@ BssRmdVolumeOutput <-
                   writeLines(private$render_table(), save_rmd)
                   #close(save_rmd)
                 # file.append("/Users/sarapesavento/Desktop/tbm_anova/save_rmd.Rmd", "/Users/sarapesavento/Desktop/tbm_anova/justhtml.Rmd")
-                  rmarkdown::render("/Users/sarapesavento/Desktop/tbm_anova/save_rmd.Rmd")
+                  rmarkdown::render(paste0(outdir, "save_rmd.Rmd"))
 
                 }
 

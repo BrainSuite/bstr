@@ -19,28 +19,14 @@
 #' @param csv filename of a comma separated (csv) file containing the subject demographic information.
 #' @param roiid numeric label identifier for the region of interest (ROI) type analysis.
 #' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
-#' @param outdir output directory name to save results for ROI analysis.
 #' @export
 #'
-bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas, outdir=NULL) {
+bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas) {
 
   if (!dir.exists(subjects_dir)) {
     stop(sprintf("Subjects directory %s does not exist.\n", subjects_dir), call. = FALSE)
   }
-  if (is.null(outdir)) {
-    # Outputted directory (if not specified) is of the same format (csv or tsv) as the inputted file
-    if (tools::file_ext(file.path(csv)) == "csv"){
-      outdir <- paste0(tools::file_path_sans_ext(csv), "_roidata.csv")
-      data_separator = ','
-    } else if (tools::file_ext(file.path(csv)) == "tsv"){
-      outdir <- paste0(tools::file_path_sans_ext(csv), "_roidata.tsv")
-      data_separator = '\t'
-    }
-    cat(sprintf('Output directory is not specified. Using %s to save outputs.\n', outdir))
-  }
-  else {
-    dir.create(file.path(outdir), showWarnings = FALSE)
-  }
+
   demographics <- read_demographics(csv)
   if("File_roi" %in% colnames(demographics)){
     warning(sprintf("The file %s already contains a File_roi column.\nWill overwrite this column.\n", csv), call.=FALSE)
@@ -63,22 +49,13 @@ bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas, outdir=NULL) {
 
   # Put outputted data frame together with demographics data frame
   combined_roidata_and_demographics <- cbind(demographics[,-which(names(demographics) == "File_roi")], roi_data_frame)
-  if (!is.null(outdir)) {
-    # Outputted directory (if not specified) is of the same format (csv or tsv) as the inputted file
-    if (tools::file_ext(file.path(outdir)) == "csv"){
-      data_separator = ','
-    } else if (tools::file_ext(file.path(outdir)) == "tsv"){
-      data_separator = '\t'
-    }
-  }
-  write.table(combined_roidata_and_demographics, outdir, sep = data_separator,row.names = FALSE)
 
-  bss_data <- list(df=combined_roidata_and_demographics, outdir=outdir, roiids=roiids, roimeas=roimeas, csv=outdir)
+  bss_data <- list(df=combined_roidata_and_demographics, roiids=roiids, roimeas=roimeas)
 
   # Finally also include the command to load the data
   pasted_roiids <- paste(roiids,collapse = ", ")
-  bss_data$load_data_command <- sprintf("bss_data <- bss_load_roi_data( '%s', '%s', c( %s), '%s', outdir = '%s') ",
-                                        subjects_dir, csv, pasted_roiids, roimeas, outdir)
+  bss_data$load_data_command <- sprintf("bss_data <- bss_load_roi_data( '%s', '%s', c( %s), '%s') ",
+                                        subjects_dir, csv, pasted_roiids, roimeas)
 
   return(bss_data)
 }

@@ -298,6 +298,24 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
 #' @rdname save_out
 setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", function(bss_out, bss_data, bss_model) {
 
+  # # Create the output directory
+  # if (is.null(outdir)) {
+  #   # Outputted directory (if not specified) is of the same format (csv or tsv) as the inputted file
+  #   if (tools::file_ext(file.path(csv)) == "csv"){
+  #     outdir <- paste0(tools::file_path_sans_ext(csv), "_roidata.csv")
+  #     data_separator = ','
+  #   } else if (tools::file_ext(file.path(csv)) == "tsv"){
+  #     outdir <- paste0(tools::file_path_sans_ext(csv), "_roidata.tsv")
+  #     data_separator = '\t'
+  #   }
+  #   cat(sprintf('Output directory is not specified. Using %s to save outputs.\n', outdir))
+  # }
+  # else {
+  #   dir.create(file.path(outdir), showWarnings = FALSE)
+  # }
+  #
+  # write.table(bss_data@demographics, outdir, sep = data_separator,row.names = FALSE)
+
   # Get the absolute path of outdir
   outdir <- tools::file_path_as_absolute(bss_out@outdir)
 
@@ -407,8 +425,8 @@ ggplot2::theme(plot.title=ggplot2::element_text(size=18,face='bold')) +
 ggplot2::scale_color_discrete(name= pval_string)\n
 ggplot2::ggsave(filename='",
                             paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m]))), "_roi",bss_data@roiids[m],
-                            "_", bss_data@roimeas,
-                            "_vs_", bss_model@main_effect, ".pdf',device='pdf')\n```\n")
+                            " ", bss_data@roimeas,
+                            " vs ", bss_model@main_effect, ".pdf',device='pdf')\n```\n")
     }
     nb_commands[[m]] <- paste0(sprintf("\n#### Main effect of %s (%d) %s on %s controlling for %s \n",
                                       as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),

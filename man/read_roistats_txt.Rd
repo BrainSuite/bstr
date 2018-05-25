@@ -9,10 +9,10 @@ read_roistats_txt(roiwise_txt_filename, roiids, roimeas = "gmthickness")
 \arguments{
 \item{roiwise_txt_filename}{filename for the ROIwise stats in the individual subject directory}
 
+\item{roiids}{vector of numeric label identifiers for the region of interest (ROI) type analysis.}
+
 \item{roimeas}{character string for the ROI measure. Should either be "gmthickness",
 "gmvolume", or "wmvolume".}
-
-\item{roiid}{numeric label identifier for the region of interest (ROI) type analysis.}
 }
 \description{
 Reads the BrainSuite ROI stats file saved for each subject after executing SVREG.

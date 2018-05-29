@@ -29,7 +29,8 @@ Imports:
     doParallel,
     foreach,
     bit,
-    Matrix
+    Matrix,
+    R6
 RoxygenNote: 6.0.1
 URL: http://brainsuite.org/bssr
 Suggests: testthat

@@ -21,9 +21,8 @@ BssRmdVolumeOutput <-
                 initialize = function(outdir = "./") {
                   initialize(outdir)
                 },
-                save_out = function(bss_data, bss_model, voxelcoord, outdir) {
-
-
+                save_bss_out = function(bss_data, bss_model, outdir,voxelcoord=list(c(90,90,90),c(107,107,107),c(120,120,120))) {
+                  cat(voxelcoord)
                   get_custom_tbm_overlays = function(outdir) {
 
                     p_overlay <- paste(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
@@ -116,11 +115,9 @@ BssRmdVolumeOutput <-
 
                 render_html = function(outdir, voxelcoord, view,overlay_name) {
 
-
-                  var_name="age"
-                  cbar_filename <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$log_pvalues, sep = '_'), '_cbar.png', sep = '')
-                  cbar_filename1 <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$log_pvalues_adjusted, sep = '_'), '_cbar.png', sep = '')
-                  cbar_filename2 <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$tvalues, sep = '_'), '_cbar.png', sep = '')
+                  cbar_filename <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$log_pvalues, sep = '_'), '_cbar.png', sep = '')
+                  cbar_filename1 <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$log_pvalues_adjusted, sep = '_'), '_cbar.png', sep = '')
+                  cbar_filename2 <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$tvalues, sep = '_'), '_cbar.png', sep = '')
 
                   #function to make rmd work
                   get_render_image_filename <- function(view, cluster_iter, inner, voxelcoord, overlay_name) {

@@ -16,7 +16,7 @@
 #'
 #' Reads the BrainSuite ROI stats file saved for each subject after executing SVREG.
 #' @param roiwise_txt_filename filename for the ROIwise stats in the individual subject directory
-#' @param roiid numeric label identifier for the region of interest (ROI) type analysis.
+#' @param roiids vector of numeric label identifiers for the region of interest (ROI) type analysis.
 #' @param roimeas character string for the ROI measure. Should either be "gmthickness",
 #' "gmvolume", or "wmvolume".
 #' @export
@@ -66,7 +66,7 @@ read_roi_data_for_all_subjects <- function(roi_filelist, demographics,roiids, ro
   rownames(roi_data_frame) <- demographics$subjID
   for (i in 1:length(roiids)){
     if (!(roiids[i] %in% read_label_desc()$roiid)){
-      stop(sprintf('ROI ID %d not found. This is not a valid ROI for %s.', roiids[i], bss_data@roimeas))
+      stop(sprintf('ROI ID %d not found. This is not a valid ROI for %s.', roiids[i], roimeas))
     }
     colnames(roi_data_frame)[i] <- paste0(as.character(get_roi_tag(read_label_desc(),roiids[i])), "(",roiids[i],")")
   }

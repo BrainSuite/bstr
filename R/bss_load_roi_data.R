@@ -17,7 +17,7 @@
 #' Loads the ROI measure for statistical analysis.
 #' @param subjects_dir character string for subject directory.
 #' @param csv filename of a comma separated (csv) file containing the subject demographic information.
-#' @param roiid numeric label identifier for the region of interest (ROI) type analysis.
+#' @param roiids vector of numeric label identifiers for the region of interest (ROI) type analysis.
 #' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
 #' @export
 #'

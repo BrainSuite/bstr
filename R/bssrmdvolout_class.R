@@ -87,7 +87,6 @@ BssRmdVolumeOutput <-
                     system(view_ax,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                   }
                   return(0)
-                  #return message for error. Test if returns code for an error (i.e. pstatmap0)
                 },
                 render_atlas = function(cluster_iter,voxelcoord,atlaspath,outdir,view) {
 

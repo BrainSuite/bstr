@@ -368,6 +368,10 @@ save_bss_color_files <- function(measure, var_name, cmap_title, bss_data, bss_mo
     basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
   save_colorbar(file.path(outdir,cbar_filename), bss_cmap@lut, bss_cmap@vmin, bss_cmap@vmax, cmap_title)
 
+  cbar_filename <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
+    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '_cbar.png', sep = '')
+  save_colorbar(file.path(outdir,cbar_filename), bss_cmap@lut, bss_cmap@vmin, bss_cmap@vmax, cmap_title)
+
   # save the color LUT
   lut_fileprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
     basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.lut', sep = '')

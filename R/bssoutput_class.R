@@ -213,6 +213,8 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
            save_bss_rds(bss_model@pvalues, bss_model@group_var, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
          }
   )
+  # add create an R6 class function from here
+
 
     # Copy modelspec file to the output directory
   file.copy(bss_model@mspec_file, bss_out@outdir)

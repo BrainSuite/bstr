@@ -21,7 +21,8 @@ BssRmdVolumeOutput <-
                 initialize = function(outdir = "./") {
                   initialize(outdir)
                 },
-                save_bss_out = function(bss_data, bss_model, outdir,voxelcoord) {
+                save_out = function(bss_data, bss_model, outdir) {
+                  voxelcoord <- list(c(90,90,90),c(107,107,107),c(120,120,120))
                   get_custom_tbm_overlays = function(outdir) {
 
                     p_overlay <- paste(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(

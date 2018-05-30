@@ -4,18 +4,16 @@
 \alias{bss_load_roi_data}
 \title{Load ROI data}
 \usage{
-bss_load_roi_data(subjects_dir, csv, roiid, roimeas, outdir = NULL)
+bss_load_roi_data(subjects_dir, csv, roiids, roimeas)
 }
 \arguments{
 \item{subjects_dir}{character string for subject directory.}
 
 \item{csv}{filename of a comma separated (csv) file containing the subject demographic information.}
 
-\item{roiid}{numeric label identifier for the region of interest (ROI) type analysis.}
+\item{roiids}{vector of numeric label identifiers for the region of interest (ROI) type analysis.}
 
 \item{roimeas}{character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".}
-
-\item{outdir}{output directory name to save results for ROI analysis.}
 }
 \description{
 Loads the ROI measure for statistical analysis.

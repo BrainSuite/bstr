@@ -63,6 +63,14 @@ bs_data_types <- list(
   nifti_image = '.nii.gz'
 )
 
+#' List of statistical and other overlay types used in BrainSuite
+bs_stat_overlays <- list(
+  log_pvalues <- "log_pvalues",
+  log_pvalues_adjusted <- "log_pvalues_adjusted",
+  tvalues <- "tvalues",
+  pvalues <- "pvalues"
+)
+
 bs_surface_file_string <- function(hemi="left", smooth = 0) {
 
   if (smooth != 0)
@@ -333,7 +341,7 @@ read_demographics <- function(csvfile) {
 
   switch(tools::file_ext(csvfile),
          "tsv" = {demo <- read.table(file = csvfile, sep = "\t", header = T)},
-         "csv" = {demo <- demo <- read.csv(csvfile)})
+         "csv" = {demo <- read.csv(csvfile)})
   # demo <- read.csv(csvfile)
   colnames(demo)[1] <- "subjID"
   return(demo)

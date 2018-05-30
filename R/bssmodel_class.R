@@ -49,6 +49,7 @@
 #' @slot se numeric vector storing the standard error
 #' @slot pvalues_adjusted numeric vector storing the adjusted p-values
 #' @slot stats_commands list of R commands (primarily for ROI analysis)
+#' @slot load_data_command character string for the command used to load the data
 #'
 #' @export
 BssModel <- setClass(
@@ -80,7 +81,8 @@ BssModel <- setClass(
     residuals = "matrix",
     se = "numeric",
     pvalues_adjusted = "numeric",
-    stats_commands = "vector"
+    stats_commands = "vector",
+    load_data_command = "character"
   )
 )
 

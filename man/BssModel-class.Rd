@@ -72,5 +72,7 @@ only}
 \item{\code{pvalues_adjusted}}{numeric vector storing the adjusted p-values}
 
 \item{\code{stats_commands}}{list of R commands (primarily for ROI analysis)}
+
+\item{\code{load_data_command}}{character string for the command used to load the data}
 }}
 

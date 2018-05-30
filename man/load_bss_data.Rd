@@ -5,7 +5,7 @@
 \title{Load data for statistical analysis.}
 \usage{
 load_bss_data(type = "cbm", subjdir = "", csv = "", hemi = "left",
-  smooth = 0, roiid = 0, roimeas = "gmthickness", measure = "",
+  smooth = 0, roiids = 0, roimeas = "gmthickness", measure = "",
   atlas = "", eddy = TRUE)
 }
 \arguments{
@@ -22,7 +22,7 @@ and should be exactly equal to the individual subject directory name.}
 
 \item{smooth}{numeric value denoting the smoothing level.}
 
-\item{roiid}{numeric label identifier for the region of interest (ROI) type analysis.}
+\item{roiids}{numeric label identifiers for the regions of interest (ROI) type analysis.}
 
 \item{roimeas}{character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".}
 
@@ -47,7 +47,7 @@ my_cbm_data <- load_bss_data(type="cbm", subjdir = "/path/to/my/subjectdirectory
 csv = "/path/to/my/demographics.csv", hemi = "left", smooth = 2.5)
 
 my_roi_data <- load_bss_data(type="roi", subjdir = "/path/to/my/subjectdirectory",
-csv="/path/to/my/demographics.csv", roiid=501, roimeas="gmthickness")
+csv="/path/to/my/demographics.csv", roiids=501, roimeas="gmthickness")
 }
 
 }

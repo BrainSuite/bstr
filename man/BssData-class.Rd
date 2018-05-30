@@ -28,5 +28,7 @@ S4 class for storing data for statistical analysis
 \item{\code{csv}}{filename of a comma separated (csv) file containing the subject demographic information.}
 
 \item{\code{filelist}}{list of files belonging to N subjects.}
+
+\item{\code{load_data_command}}{character string for the command used to load the data}
 }}
 

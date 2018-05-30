@@ -169,6 +169,13 @@ get_bssr_ini_path <- function() {
   if (check_file_exists(bssr_ini_file, raise_error = TRUE)) return(bssr_ini_file) else return("")
 }
 
+#' Retrieve label description path in the package
+#'
+#' @export
+get_labeldesc_path <- function() {
+  labeldesc_file <- file.path(get_brainsuite_install_path(), "labeldesc", "brainsuite_labeldescriptions_14May2014.xml")
+  if (check_file_exists(labeldesc_file, raise_error = TRUE)) return(labeldesc_file) else return("")
+}
 
 #' Retrieve BrainSuite installation path
 #' @param  quiet boolean specifying whether warnings/messages should be displayed

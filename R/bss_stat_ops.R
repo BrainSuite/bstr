@@ -217,49 +217,64 @@ bss_roi_anova <- function(main_effect="", covariates="", bss_data=bss_data) {
                    demographics = bss_data@demographics, mspec_file="")
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
 
-  bss_data@demographics[paste('ROI_', as.character(bss_data@roiid), sep = '' )]
+  selected_col <- rep(NA, length(bss_data@roiids))
+  for (i in 1:length(bss_data@roiids)){
+    selected_col[i] <- paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")")
+    bss_data@demographics[,selected_col[i]]
+  }
 
-  cmd1 <- sprintf("lm_full <- lm(%s, data = bss_data@demographics)",
-                  paste('ROI_', as.character(bss_data@roiid), ' ~ ', bss_model@fullmodel, sep = ''))
-  cmd2 <- sprintf("lm_null <- lm(%s, data = bss_data@demographics)",
-                  paste('ROI_', as.character(bss_data@roiid), ' ~ ', bss_model@nullmodel, sep = ''))
-  cmd3 <- "pander::pander(anova(lm_full, lm_null))"
+  cmd1 <- list()
+  cmd2 <- list()
+  cmd3 <- list()
+  stats_commands <- list()
 
-  stats_commands <- c(cmd1, cmd2, cmd3)
+  for (i in 1:length(bss_data@roiids)){
+    cmd1[[i]] <- sprintf("lm_full_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids[i]),
+                  paste('`',as.character(selected_col[i]),'`', ' ~ ', bss_model@fullmodel, sep = ''))
+    cmd2[[i]] <- sprintf("lm_null_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids[i]),
+                  paste('`',as.character(selected_col[i]),'`', ' ~ ', bss_model@nullmodel, sep = ''))
+    cmd3[[i]] <- sprintf("pander::pander(anova(lm_full_%s, lm_null_%s))",as.character(bss_data@roiids[i]),as.character(bss_data@roiids[i]))
+    stats_commands[[i]] <- c(cmd1[[i]], cmd2[[i]], cmd3[[i]])
+  }
 
-  for (cmd in stats_commands) {
-    eval(parse(text = cmd))
+  for (i in 1:length(bss_data@roiids)){
+    for (cmd in stats_commands[[i]]) {
+      eval(parse(text = cmd))
+    }
   }
   bss_model@stats_commands <- stats_commands
+
+  bss_model@load_data_command <- sprintf("bss_model <- bss_anova( main_effect = '%s', covariates = '%s', bss_data = bss_data) ",
+                                         main_effect, covariates)
 
   return(bss_model)
 
 }
 
-bss_roi_lm <- function(main_effect="", covariates="", bss_data=bss_data) {
-  # Check the model type and call the appropriate method
-  bss_model <- new("BssModel", model_type="bss_lm", main_effect = main_effect, covariates = covariates,
-                   demographics = bss_data@demographics, mspec_file="")
-  message('Running the statistical model. This may take a while...', appendLF = FALSE)
-
-  bss_data@demographics[paste('ROI_', as.character(bss_data@roiid), sep = '' )]
-
-  cmd1 <- sprintf("lm_full <- lm(%s, data = bss_data@demographics)",
-                  paste('ROI_', as.character(bss_data@roiid), ' ~ ', bss_model@fullmodel, sep = ''))
-  cmd2 <- sprintf("lm_null <- lm(%s, data = bss_data@demographics)",
-                  paste('ROI_', as.character(bss_data@roiid), ' ~ ', bss_model@nullmodel, sep = ''))
-  cmd3 <- "pander::pander(anova(lm_full, lm_null))"
-
-  stats_commands <- c(cmd1, cmd2, cmd3)
-
-  for (cmd in stats_commands) {
-    eval(parse(text = cmd))
-  }
-  bss_model@stats_commands <- stats_commands
-
-  return(bss_model)
-
-}
+# bss_roi_lm <- function(main_effect="", covariates="", bss_data=bss_data) {
+#   # Check the model type and call the appropriate method
+#   bss_model <- new("BssModel", model_type="bss_lm", main_effect = main_effect, covariates = covariates,
+#                    demographics = bss_data@demographics, mspec_file="")
+#   message('Running the statistical model. This may take a while...', appendLF = FALSE)
+#
+#   bss_data@demographics[,as.character(bss_data@roiids)]
+#
+#   cmd1 <- sprintf("lm_full_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids),
+#                   paste('`',as.character(bss_data@roiids),'`', ' ~ ', bss_model@fullmodel, sep = ''))
+#   cmd2 <- sprintf("lm_null_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids),
+#                   paste('`',as.character(bss_data@roiids),'`', ' ~ ', bss_model@nullmodel, sep = ''))
+#   cmd3 <- sprintf("pander::pander(anova(lm_full_%s, lm_null_%s))",as.character(bss_data@roiids),as.character(bss_data@roiids))
+#
+#   stats_commands <- c(cmd1, cmd2, cmd3)
+#
+#   for (cmd in stats_commands) {
+#     eval(parse(text = cmd))
+#   }
+#   bss_model@stats_commands <- stats_commands
+#
+#   return(bss_model)
+#
+# }
 
 #' Test for Correlation between a variable \code{corr_var} and a brain imaging phenotype.
 #'

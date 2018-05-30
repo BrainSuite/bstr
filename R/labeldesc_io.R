@@ -24,19 +24,21 @@
 #' Read BrainSuite label description file
 #' @export
 read_label_desc <- function() {
-  label_desc_filename <- system.file("extdata", "brainsuite_labeldescriptions_14May2014.xml", package = 'bssr')
+  label_desc_filename <- get_labeldesc_path()
   fid <- file(label_desc_filename, open="r")
   alllines <- readLines(fid)
   alllines <- alllines[3:(length(alllines)-1)]
   roiid <- vector(mode = "numeric", length = length(alllines))
   roiname <- vector(mode = "character", length = length(alllines))
+  tag <- vector(mode = "character", length = length(alllines))
   for (ii in seq(alllines)) {
     tempstr <- gsub("<|/>", "", gsub("\"", "", alllines[ii]))
     roiid[ii] <- unlist(strsplit(unlist(strsplit(tempstr, " "))[2], '='))[2]
     roiname[ii] <- unlist(strsplit(tempstr, '='))[5]
+    tag[ii] <- unlist(strsplit(unlist(strsplit(tempstr, " "))[3], '='))[2]
   }
   close(fid)
-  return (data.frame(roiid = roiid, roiname = roiname))
+  return (data.frame(roiid = roiid, roiname = roiname, tag = tag))
 }
 
 
@@ -46,4 +48,19 @@ read_label_desc <- function() {
 #' @export
 get_roi_name <- function(label_desc_df, roiid) {
   return(label_desc_df[label_desc_df$roiid == roiid,]['roiname'])
+}
+
+#' Get the ROI tag from the ROI label
+#' @param label_desc_df \code{\link{data.frame}} containing fields from the label description file
+#' @param roiid ROI label identifier
+#' @export
+get_roi_tag <- function(label_desc_df, roiid) {
+  tag <- as.character(label_desc_df[label_desc_df$roiid == roiid,]['tag'][,1])
+  side <- ""
+  if (substr(as.character(label_desc_df[label_desc_df$roiid == roiid,]['roiname'][,1]),0,2) == "R."){
+    side <- "R."
+  } else if(substr(as.character(label_desc_df[label_desc_df$roiid == roiid,]['roiname'][,1]),0,2) == "L."){
+    side <- "L."
+  }
+  return(paste0(side, tag))
 }

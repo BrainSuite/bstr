@@ -16,11 +16,11 @@
 #'
 #' Reads the BrainSuite ROI stats file saved for each subject after executing SVREG.
 #' @param roiwise_txt_filename filename for the ROIwise stats in the individual subject directory
-#' @param roiid numeric label identifier for the region of interest (ROI) type analysis.
+#' @param roiids vector of numeric label identifiers for the region of interest (ROI) type analysis.
 #' @param roimeas character string for the ROI measure. Should either be "gmthickness",
 #' "gmvolume", or "wmvolume".
 #' @export
-read_roistats_txt <- function(roiwise_txt_filename, roiid, roimeas = 'gmthickness') {
+read_roistats_txt <- function(roiwise_txt_filename, roiids, roimeas = 'gmthickness') {
 
   measure_dict <- list(gmthickness = "Mean_Thickness(mm)",
                        gmvolume = "GM_Volume(mm^3)",
@@ -42,20 +42,46 @@ read_roistats_txt <- function(roiwise_txt_filename, roiid, roimeas = 'gmthicknes
     stop(sprintf('The file %s is not a valid roiwise.stats.txt file.\n', roiwise_txt_filename), call. = FALSE)
   }
   roiwise_stats <- read.table(roiwise_txt_filename, header = TRUE, check.names = FALSE)
-  # rownames(roiwise_stats) <- roiwise_stats[,1]
-  if ( !(roiid %in% roiwise_stats$ROI_ID) ) {
+
+  # Check if all the inputted roiids are in the file
+  roiids_not_in_file <- !(roiids %in% roiwise_stats$ROI_ID)
+  if (any(roiids_not_in_file == TRUE)) {
+    incorrect_roiids <- roiids[roiids_not_in_file]
     stop(sprintf('ROI ID %d not found in the roiwise stats file %s.\nPlease check if %d is a valid ROI.\n',
-                 roiid, roiwise_txt_filename, roiid), call. = FALSE)
+                 incorrect_roiids, roiwise_txt_filename, incorrect_roiids), call. = FALSE)
   }
-  return (roiwise_stats[roiwise_stats$ROI_ID == roiid, as.character(measure_dict[roimeas])])
+
+  roiids_from_file <- sapply(roiids, function(x) {
+    roiwise_stats[roiwise_stats$ROI_ID == x,as.character(measure_dict[roimeas])]
+    })
+
+  return(roiids_from_file)
+
 }
 
-read_roi_data_for_all_subjects <- function(roi_filelist, roiid, roimeas = 'gmthickness') {
 
-  roi_data <- lapply(roi_filelist, function(i) {
-    read_roistats_txt(i, roiid, roimeas)
-  })
-  return(unlist(roi_data))
+read_roi_data_for_all_subjects <- function(roi_filelist, demographics,roiids, roimeas = 'gmthickness') {
+
+  roi_data_frame <- data.frame(matrix(nrow=length(roi_filelist),ncol=length(roiids)))
+  rownames(roi_data_frame) <- demographics$subjID
+  for (i in 1:length(roiids)){
+    if (!(roiids[i] %in% read_label_desc()$roiid)){
+      stop(sprintf('ROI ID %d not found. This is not a valid ROI for %s.', roiids[i], roimeas))
+    }
+    colnames(roi_data_frame)[i] <- paste0(as.character(get_roi_tag(read_label_desc(),roiids[i])), "(",roiids[i],")")
+  }
+
+
+  for (x in 1:length(roiids)) {
+    roi_data_frame[,x] <- sapply(roi_filelist, function(i,roiid_column) {
+      read_roistats_txt(i, roiids[x], roimeas)
+    },roiid_column=roiids[x])
+  }
+
+  # Add file path column to data frame
+  roi_data_frame$ROI_filelist <- roi_filelist
+
+  return(roi_data_frame)
 }
 
 

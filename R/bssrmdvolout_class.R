@@ -34,9 +34,9 @@ BssRmdVolumeOutput <-
                     return(list("p_overlay" = p_overlay, "adjp_overlay" = adjp_overlay, "t_overlay" = t_overlay))
                   }
 
+
                   #create a folder to store png images in
                   dir.create(paste0(outdir,"PNG_images"))
-
                   for(cluster_iter in 1:length(voxelcoord)) {
                     private$render_overlay(
                       cluster_iter,
@@ -62,13 +62,15 @@ BssRmdVolumeOutput <-
 
                   }
 
-                  save_rmd<-file(file.path(outdir, "save_rmd.Rmd"))
-                  writeLines(private$render_table(), save_rmd)
-                  #close(save_rmd)
-                  file.append("/Users/sarapesavento/Desktop/tbm_anova/save_rmd.Rmd", "/Users/sarapesavento/Desktop/tbm_anova/justhtml.Rmd")
-                  rmarkdown::render(paste0(outdir, "save_rmd.Rmd"))
-                  rmarkdown::render(paste0(outdir, "justhtml.Rmd"))
+                  private$save_rmd_preamble(file.path(outdir, "save_rmd.Rmd"))
 
+                  # save_rmd<-file(file.path(outdir, "save_rmd.Rmd"))
+                  # writeLines(private$render_table(), save_rmd)
+                  # close(save_rmd)
+                  #close(save_rmd)
+                  # file.append("/Users/sjoshi/Desktop/tbm_anova/save_rmd.Rmd", "/Users/sjoshi/Desktop/tbm_anova/justhtml.Rmd")
+                  # file.append(file.path(outdir, "save_rmd.Rmd"), file.path(outdir, "justhtml.Rmd"))
+                  rmarkdown::render(paste0(outdir, "save_rmd.Rmd"))
                 }
 
 
@@ -109,6 +111,31 @@ BssRmdVolumeOutput <-
                   table$Cluster <- paste0("[", table$Cluster, "](", t, ")")
                   knitr::kable(table[1:4], align=c(rep('l', 4)))
                 },
+
+                save_rmd_preamble = function(rmdfile) {
+
+
+                  # file_rmd_preamble <-file(rmdfile)
+                  templines <- deparse(private$render_html)
+                  templines[1] <- "render_html = function(outdir, voxelcoord, view,overlay_name)"
+                  sink(rmdfile, append=TRUE, type = "output")
+                  cat("---\n")
+                  cat("title: BSSR Report\n")
+                  cat("output: html_document\n")
+                  cat("```{r echo=FALSE, warning=FALSE}\n")
+                  writeLines(templines)
+
+                  cat("```\n")
+                  sink()
+
+
+                  # writeLines(templines, file_rmd_preamble)
+
+                  # cmd_text <- sprintf("render_html(outdir=\"%s/\", voxelcoord = list(c(90,90,90),c(107,107,107),c(120,120,120)),view = c(\"ax\", \"cor\", \"sag\"),overlay_name = c(bs_stat_overlays$log_pvalues,bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues))",
+                                      # dirname(rmdfile))
+                  # write(file_rmd_preamble, cmd_text)
+                },
+
                 ## another function will generate the names for the pngs
 
                 render_html = function(outdir, voxelcoord, view,overlay_name) {

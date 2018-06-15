@@ -144,7 +144,6 @@ BssRmdVolumeOutput <-
                   cbar_filename1 <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$log_pvalues_adjusted, sep = '_'), '_cbar.png', sep = '')
                   cbar_filename2 <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$tvalues, sep = '_'), '_cbar.png', sep = '')
 
-                  view = c("ax", "cor", "sag")
                   #function to make rmd work
                   get_render_image_filename <- function(view, cluster_iter, inner, voxelcoord, overlay_name) {
                     return(paste0("./PNG_images/",view, voxelcoord[[cluster_iter]][inner],"_",overlay_name,".png"))

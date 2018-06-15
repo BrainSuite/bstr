@@ -30,7 +30,8 @@ Imports:
     foreach,
     bit,
     Matrix,
-    R6
+    R6,
+    shinyjs
 RoxygenNote: 6.0.1
 URL: http://brainsuite.org/bssr
 Suggests: testthat

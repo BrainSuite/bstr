@@ -214,6 +214,8 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
          }
   )
   # add create an R6 class function from here
+  bssrmd_volout <- BssRmdVolumeOutput$new()
+  bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = list(c(90,90,90),c(107,107,107),c(120,120,120)), outdir)
 
 
     # Copy modelspec file to the output directory

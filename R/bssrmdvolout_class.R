@@ -45,18 +45,16 @@ BssRmdVolumeOutput <-
                       overlaypath = c(get_custom_tbm_overlays(outdir)[[1]],get_custom_tbm_overlays(outdir)[[2]],get_custom_tbm_overlays(outdir)[[3]]),
                       #stat_overlay
                       outdir,
-                      view = c("ax", "cor", "sag"), name = c(bs_stat_overlays$log_pvalues,bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues), alpha = 120)
+                      name = c(bs_stat_overlays$log_pvalues,bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues), alpha = 120)
 
                     private$render_atlas(cluster_iter, voxelcoord,
                                          atlaspath = bss_data@atlas_filename,
-                                         outdir,
-                                         view = c("ax", "cor", "sag"))
+                                         outdir)
                     # }
 
                     private$render_table()
                     private$render_html(outdir,
                                         voxelcoord,
-                                        view = c("ax", "cor", "sag"),
                                         overlay_name = c(bs_stat_overlays$log_pvalues,bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues))
 
 
@@ -72,17 +70,15 @@ BssRmdVolumeOutput <-
                   # file.append(file.path(outdir, "save_rmd.Rmd"), file.path(outdir, "justhtml.Rmd"))
                   rmarkdown::render(paste0(outdir, "save_rmd.Rmd"))
                 }
-
-
               ),
 
               private = list(
 
-                render_overlay = function(cluster_iter,voxelcoord,atlaspath,overlaypath,outdir,view,name,alpha) {
-                  for (inner_iter in 1:3) {
-                    view_ax <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[inner_iter], " -o ",outdir,"/PNG_images/",view[1],voxelcoord[[cluster_iter]][1], "_",name[inner_iter], ".png --slice ", voxelcoord[[cluster_iter]][1], " --", view[1], " -a ", alpha)
-                    view_cor <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[inner_iter], " -o ",outdir,"/PNG_images/",view[2],voxelcoord[[cluster_iter]][2], "_",name[inner_iter], ".png --slice ", voxelcoord[[cluster_iter]][2], " --", view[2], " -a ", alpha)
-                    view_sag <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[inner_iter], " -o ",outdir,"/PNG_images/",view[3],voxelcoord[[cluster_iter]][3], "_",name[inner_iter], ".png --slice ", voxelcoord[[cluster_iter]][3], " --", view[3], " -a ", alpha)
+                render_overlay = function(voxelcoord_index,voxelcoord,atlaspath,overlaypath,outdir,name,alpha) {
+                  for (stats_measure_index in 1:3) {
+                    view_ax <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/PNG_images/","ax",voxelcoord[[voxelcoord_index]][1], "_",name[stats_measure_index], ".png --slice ", voxelcoord[[voxelcoord_index]][1], " --", "ax", " -a ", alpha)
+                    view_cor <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/PNG_images/","cor",voxelcoord[[voxelcoord_index]][2], "_",name[stats_measure_index], ".png --slice ", voxelcoord[[voxelcoord_index]][2], " --", "cor", " -a ", alpha)
+                    view_sag <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/PNG_images/","sag",voxelcoord[[voxelcoord_index]][3], "_",name[stats_measure_index], ".png --slice ", voxelcoord[[voxelcoord_index]][3], " --", "sag", " -a ", alpha)
 
                     system(view_cor,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                     system(view_sag,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
@@ -90,12 +86,12 @@ BssRmdVolumeOutput <-
                   }
                   return(0)
                 },
-                render_atlas = function(cluster_iter,voxelcoord,atlaspath,outdir,view) {
+                render_atlas = function(voxelcoord_index,voxelcoord,atlaspath,outdir) {
 
-                  view_at_ax <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view 1 --slice ",voxelcoord[[cluster_iter]][1]," --flop -o ", outdir,"/PNG_images/",view[1],voxelcoord[[cluster_iter]][1],"_atlas.png")
+                  view_at_ax <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view 1 --slice ",voxelcoord[[voxelcoord_index]][1]," --flop -o ", outdir,"/PNG_images/","ax",voxelcoord[[voxelcoord_index]][1],"_atlas.png")
 
-                  view_at_cor <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view 2 --slice ",voxelcoord[[cluster_iter]][1]," --flop -o ", outdir,"/PNG_images/",view[2],voxelcoord[[cluster_iter]][1],"_atlas.png")
-                  view_at_sag <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view 3 --slice ",voxelcoord[[cluster_iter]][1]," --flop -o ", outdir,"/PNG_images/",view[3],voxelcoord[[cluster_iter]][1],"_atlas.png")
+                  view_at_cor <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view 2 --slice ",voxelcoord[[voxelcoord_index]][1]," --flop -o ", outdir,"/PNG_images/","cor",voxelcoord[[voxelcoord_index]][1],"_atlas.png")
+                  view_at_sag <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view 3 --slice ",voxelcoord[[voxelcoord_index]][1]," --flop -o ", outdir,"/PNG_images/","sag",voxelcoord[[voxelcoord_index]][1],"_atlas.png")
 
                   system(view_at_cor,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                   system(view_at_sag,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
@@ -117,7 +113,7 @@ BssRmdVolumeOutput <-
 
                   # file_rmd_preamble <-file(rmdfile)
                   templines <- deparse(private$render_html)
-                  templines[1] <- "render_html = function(outdir, voxelcoord, view, overlay_name)"
+                  templines[1] <- "render_html = function(outdir, voxelcoord, overlay_name)"
                   sink(rmdfile, append=TRUE, type = "output")
                   cat("---\n")
                   cat("title: BSSR Report\n")
@@ -125,227 +121,295 @@ BssRmdVolumeOutput <-
                   cat("---\n")
                   cat("```{r echo=FALSE, warning=FALSE}\n")
                   writeLines(templines)
-                  cat("render_html(outdir, voxelcoord, view, overlay_name)\n")
+                  cat("render_html(outdir, voxelcoord, overlay_name)\n")
                   cat("```\n")
                   sink()
 
                   # writeLines(templines, file_rmd_preamble)
 
-                  # cmd_text <- sprintf("render_html(outdir=\"%s/\", voxelcoord = list(c(90,90,90),c(107,107,107),c(120,120,120)),view = c(\"ax\", \"cor\", \"sag\"),overlay_name = c(bs_stat_overlays$log_pvalues,bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues))",
+                  # cmd_text <- sprintf("render_html(outdir=\"%s/\", voxelcoord = list(c(90,90,90),c(107,107,107),c(120,120,120)),overlay_name = c(bs_stat_overlays$log_pvalues,bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues))",
                   # dirname(rmdfile))
                   # write(file_rmd_preamble, cmd_text)
                 },
 
                 ## another function will generate the names for the pngs
 
-                render_html = function(outdir, voxelcoord, view,overlay_name) {
-
+                render_html = function(outdir, voxelcoord, overlay_name) {
                   cbar_filename <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$log_pvalues, sep = '_'), '_cbar.png', sep = '')
                   cbar_filename1 <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$log_pvalues_adjusted, sep = '_'), '_cbar.png', sep = '')
                   cbar_filename2 <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$tvalues, sep = '_'), '_cbar.png', sep = '')
 
                   #function to make rmd work
-                  get_render_image_filename <- function(view, cluster_iter, inner, voxelcoord, overlay_name) {
-                    return(paste0("./PNG_images/",view, voxelcoord[[cluster_iter]][inner],"_",overlay_name,".png"))
+                  get_render_image_filename <- function(individual_voxelcoord, overlay_name) {
+                    return(paste0("./PNG_images/", individual_voxelcoord,"_",overlay_name,
+                                  ".png"))
                   }
 
+                  # Function to return a shiny image object
+                  shiny_image = function(specific_voxelcoord,overlay_type, width){
+                    align <- "left"
+                    return(paste0("shiny::img(src=paste0(",get_render_image_filename(specific_voxelcoord,overlay_type),"), align, width)"))
+                  }
 
-                  shiny::shinyUI(
+                  # Function that creates a tabPanel
+                  tab_panel = function(panel_type, voxelcoord_index){
+                    width <- c("28.8%","24%","34.5%","11%")
+                    overlay <- c(bs_stat_overlays$log_pvalues, bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues)
+                    cbar <- c(cbar_filename, cbar_filename1,cbar_filename2)
+                    if (panel_type == "P-Values"){
+                      overlay = overlay[1]
+                      cbar = cbar[1]
+                    } else if (panel_type == "Adjusted P-Values"){
+                      overlay = overlay[2]
+                      cbar = cbar[2]
+                    } else if (panel_type == "T-Values"){
+                      overlay = overlay[3]
+                      cbar = cbar[3]
+                    }
+                    images <- ""
+                    if (panel_type == "All") {
+                      for (overlay_index in 1:length(overlay)) {
+                        for (inner_coord_index in 1:3) {
+                          images <- paste0(images, shiny_image(voxelcoord[[voxelcoord_index]][inner_coord_index], overlay[overlay_index], width[inner_coord_index]))
+                        }
+                        images <- c(images, paste0(shiny::img(src=paste0(outdir, cbar), align="left", width = width[4])))
+                      }
+                    } else {
+                      for (inner_coord_index in 1:3) {
+                        images <- c(images, shiny_image(voxelcoord[[voxelcoord_index]][inner_coord_index],overlay, width[inner_coord_index]))
+                      }
+                      images <- c(images, shiny::img(src=paste0(outdir, cbar), align="left", width = width[4]))
+                    }
+                    return(shiny::tabPanel(title_0 = panel_type, value = c(panel_type),shiny::p(panel_type),parse(text=paste(images, sep = ", "))))
+                  }
+
+                  # Function that creates clusters for each panel
+                  cluster_panels = function(voxelcoord){
+                    panels <- paste0("shiny::tabPanel(title = shiny::h4(paste('Cluster 1'),shiny::tableOutput('data'),shiny::tabsetPanel(id = 'navbar',type = 'pills',",
+                                                                                   tab_panel('All', 1),", ",
+                                                                                   tab_panel('P-Values', 1), ", ",
+                                                                                   tab_panel('Adjusted P-Values', 1), ", ",
+                                                                                   tab_panel('T-Values', 1),")))")
+                    for (voxelcoord_index in 2:length(voxelcoord)){
+                      panels <- paste0(panels, ", shiny::tabPanel(title = shiny::h4(paste('Cluster', ", voxelcoord_index, "),shiny::tableOutput('data'),
+                                                                            shiny::tabsetPanel(id = 'navbar',type = 'pills',",
+                                                                                               tab_panel('All', voxelcoord_index),",",
+                                                                                               tab_panel('P-Values', voxelcoord_index),",",
+                                                                                               tab_panel('Adjusted P-Values', voxelcoord_index),",",
+                                                                                               tab_panel('T-Values', voxelcoord_index),")")
+
+                    }
+                    return(panels)
+                  }
+
+                  eval(parse(text= paste("shiny::shinyUI(
                     shiny::fluidPage(
                       shinyjs::useShinyjs(),
-                      shiny::h3("Choose a cluster and an overlay below"),
+                      shiny::h3('Choose a cluster and an overlay below'),
                       shiny::tabsetPanel(
-                        id = "navbar",
-                        type = "tabs",
-                        shiny::tabPanel(title = shiny::h4("Cluster 1"),
-                                        shiny::tableOutput("data"),
-
-                                        shiny::tabsetPanel(
-                                          id = "navbar",
-
-                                          type = "pills",
-                                          shiny::tabPanel(title_0 = "All",
-
-                                                          value = c("All"),
-                                                          shiny::p("All"),
-
-                                                          ##CLUSTER 1, cluster_iter = 1, inner_iter = 1:3
-                                                          view = c("ax", "cor", "sag"),
-                                                          # P-values
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],1,inner=1,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],1,inner=2,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],1,inner=3,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename), align="left", width = "11%"),
-
-                                                          # Adj P-values
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],1,inner=1,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],1,inner=2,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],1,inner=3,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename1), align="left", width = "11.2%"),
-                                                          # T-values
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],1,inner=1,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],1,inner=2,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],1,inner=3,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename2), align="left", width = "11.2%"),
-                                                          # Atlas
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],1,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],1,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],1,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")),
-
-                                          shiny::tabPanel(title_0 = "P-Values",
-                                                          value = c("P-Values"),
-                                                          shiny::p("P-Values"),
-                                                          # P-values
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],1,inner=1,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],1,inner=2,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],1,inner=3,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename), align="left", width = "11%")),
-                                          shiny::tabPanel(title_0 = "Adjusted P-Values",
-                                                          value = c("Adjusted P-Values"),
-                                                          shiny::p("Adjusted P-Values"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],1,inner=1,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],1,inner=2,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],1,inner=3,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename1), align="left", width = "11.5%")),
-                                          shiny::tabPanel(title_0 = "T-Values",
-                                                          value = c("T-Values"),
-                                                          shiny::p("T-Values"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],1,inner=1,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],1,inner=2,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],1,inner=3,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename2), align="left", width = "11%")),
-                                          shiny::tabPanel(title_0 = "Atlas",
-                                                          value = c("Atlas"),
-                                                          shiny::p("Atlas"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],1,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],1,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],1,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")))),
-
-
-
-                        shiny::tabPanel(title = shiny::h4("Cluster 2"),
-                                        shiny::tableOutput("data"),
-                                        shiny::tabsetPanel(
-                                          id = "navbar",
-                                          type = "pills",
-                                          shiny::tabPanel(title_0 = "All",
-                                                          value = c("All"),
-                                                          shiny::p("All"),
-                                                          # P-values
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],2,inner=1,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],2,inner=2,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],2,inner=3,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename), align="left", width = "11%"),
-                                                          # Adj P-values
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],2,inner=1,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],2,inner=2,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],2,inner=3,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename1), align="left", width = "11.2%"),
-                                                          # T-values
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],2,inner=1,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],2,inner=2,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],2,inner=3,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename2), align="left", width = "11%"),
-                                                          # Atlas
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],2,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],2,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],2,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")),
-
-                                          shiny::tabPanel(title_0 = "P-Values",
-                                                          value = c("P-Values"),
-                                                          shiny::p("P-Values"),
-                                                          # P-values
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],2,inner=1,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],2,inner=2,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],2,inner=3,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename), align="left", width = "11%")),
-                                          shiny::tabPanel(title_0 = "Adjusted P-Values",
-                                                          value = c("Adjusted P-Values"),
-                                                          shiny::p("Adjusted P-Values"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],2,inner=1,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],2,inner=2,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],2,inner=3,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename1), align="left", width = "11.5%")),
-                                          shiny::tabPanel(title_0 = "T-Values",
-                                                          value = c("T-Values"),
-                                                          shiny::p("T-Values"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],2,inner=1,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],2,inner=2,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],2,inner=3,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename2), align="left", width = "11%")),
-                                          shiny::tabPanel(title_0 = "Atlas",
-                                                          value = c("Atlas"),
-                                                          shiny::p("Atlas"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],2,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],2,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],2,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")))),
-
-
-                        shiny::tabPanel(title = shiny::h4("Cluster 3"),
-                                        shiny::tableOutput("data"),
-                                        shiny::tabsetPanel(
-                                          id = "navbar",
-                                          type = "pills",
-                                          shiny::tabPanel(title_0 = "All",
-
-                                                          value = c("All"),
-                                                          shiny::p("All"),
-                                                          # P-values
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],3,inner=1,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],3,inner=2,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],3,inner=3,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename), align="left", width = "11%"),
-                                                          # Adj P-values
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],3,inner=1,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],3,inner=2,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],3,inner=3,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename1), align="left", width = "11.2%"),
-                                                          # T-values
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],3,inner=1,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],3,inner=2,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],3,inner=3,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename2), align="left", width = "11%"),
-                                                          # Atlas
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],3,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],3,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],3,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")),
-
-                                          shiny::tabPanel(title_0 = "P-Values",
-                                                          value = c("P-Values"),
-                                                          shiny::p("P-Values"),
-                                                          # P-values
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],3,inner=1,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],3,inner=2,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],3,inner=3,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename), align="left", width = "11%")),
-                                          shiny::tabPanel(title_0 = "Adjusted P-Values",
-                                                          value = c("Adjusted P-Values"),
-                                                          shiny::p("Adjusted P-Values"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],3,inner=1,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],3,inner=2,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],3,inner=3,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename1), align="left", width = "11.5%")),
-                                          shiny::tabPanel(title_0 = "T-Values",
-                                                          value = c("T-Values"),
-                                                          shiny::p("T-Values"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],3,inner=1,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],3,inner=2,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],3,inner=3,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "34.5%"),
-                                                          shiny::img(src=paste0(outdir, cbar_filename2), align="left", width = "11%")),
-                                          shiny::tabPanel(title_0 = "Atlas",
-                                                          value = c("Atlas"),
-                                                          shiny::p("Atlas"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[2],3,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[1],3,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
-                                                          shiny::img(src=paste0(get_render_image_filename(view[3],3,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")))
-
-                        )
-                      )
-                    )
-                  )
+                        id = 'navbar',
+                        type = 'tabs',",
+                        cluster_panels(voxelcoord),")))")))
 
                 }
+
               )
   )
+
+                  # shiny::shinyUI(
+                  #   shiny::fluidPage(
+                      #shinyjs::useShinyjs(),
+                      #shiny::h3("Choose a cluster and an overlay below"),
+                      # shiny::tabsetPanel(
+                      #   id = "navbar",
+                      #   type = "tabs",
+                        # shiny::tabPanel(title = shiny::h4("Cluster 1"),
+                        #                 shiny::tableOutput("data"),
+                        #
+                        #                 shiny::tabsetPanel(
+                        #                   id = "navbar",
+                        #
+                        #                   type = "pills",
+                        #                   shiny::tabPanel(title_0 = "All",
+                        #
+                        #                                   value = c("All"),
+                        #                                   shiny::p("All"),
+                        #                                   ##CLUSTER 1, cluster_iter = 1, inner_iter = 1:3
+                        #                                   # P-values
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=1,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=2,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=3,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename), align="left", width = "11%"),
+                        #
+                        #                                   # Adj P-values
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=1,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=2,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=3,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename1), align="left", width = "11.2%"),
+                        #                                   # T-values
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=1,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=2,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=3,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename2), align="left", width = "11.2%"),
+                        #                                   # Atlas
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")),
+                        #
+                        #                   shiny::tabPanel(title_0 = "P-Values",
+                        #                                   value = c("P-Values"),
+                        #                                   shiny::p("P-Values"),
+                        #                                   # P-values
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=1,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=2,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=3,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename), align="left", width = "11%")),
+                        #                   shiny::tabPanel(title_0 = "Adjusted P-Values",
+                        #                                   value = c("Adjusted P-Values"),
+                        #                                   shiny::p("Adjusted P-Values"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=1,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=2,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=3,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename1), align="left", width = "11.5%")),
+                        #                   shiny::tabPanel(title_0 = "T-Values",
+                        #                                   value = c("T-Values"),
+                        #                                   shiny::p("T-Values"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=1,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=2,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=3,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename2), align="left", width = "11%")),
+                        #                   shiny::tabPanel(title_0 = "Atlas",
+                        #                                   value = c("Atlas"),
+                        #                                   shiny::p("Atlas"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(1,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")))),
+                        #
+
+
+                        # shiny::tabPanel(title = shiny::h4("Cluster 2"),
+                        #                 shiny::tableOutput("data"),
+                        #                 shiny::tabsetPanel(
+                        #                   id = "navbar",
+                        #                   type = "pills",
+                        #                   shiny::tabPanel(title_0 = "All",
+                        #                                   value = c("All"),
+                        #                                   shiny::p("All"),
+                        #                                   # P-values
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=1,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=2,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=3,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename), align="left", width = "11%"),
+                        #                                   # Adj P-values
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=1,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=2,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=3,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename1), align="left", width = "11.2%"),
+                        #                                   # T-values
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=1,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=2,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=3,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename2), align="left", width = "11%"),
+                        #                                   # Atlas
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")),
+                        #
+                        #                   shiny::tabPanel(title_0 = "P-Values",
+                        #                                   value = c("P-Values"),
+                        #                                   shiny::p("P-Values"),
+                        #                                   # P-values
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=1,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=2,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=3,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename), align="left", width = "11%")),
+                        #                   shiny::tabPanel(title_0 = "Adjusted P-Values",
+                        #                                   value = c("Adjusted P-Values"),
+                        #                                   shiny::p("Adjusted P-Values"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=1,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=2,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=3,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename1), align="left", width = "11.5%")),
+                        #                   shiny::tabPanel(title_0 = "T-Values",
+                        #                                   value = c("T-Values"),
+                        #                                   shiny::p("T-Values"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=1,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=2,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=3,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename2), align="left", width = "11%")),
+                        #                   shiny::tabPanel(title_0 = "Atlas",
+                        #                                   value = c("Atlas"),
+                        #                                   shiny::p("Atlas"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(2,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")))),
+
+
+                        # shiny::tabPanel(title = shiny::h4("Cluster 3"),
+                        #                 shiny::tableOutput("data"),
+                        #                 shiny::tabsetPanel(
+                        #                   id = "navbar",
+                        #                   type = "pills",
+                        #                   shiny::tabPanel(title_0 = "All",
+                        #
+                        #                                   value = c("All"),
+                        #                                   shiny::p("All"),
+                        #                                   # P-values
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=1,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=2,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=3,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename), align="left", width = "11%"),
+                        #                                   # Adj P-values
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=1,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=2,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=3,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename1), align="left", width = "11.2%"),
+                        #                                   # T-values
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=1,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=2,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=3,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename2), align="left", width = "11%"),
+                        #                                   # Atlas
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")),
+                        #
+                        #                   shiny::tabPanel(title_0 = "P-Values",
+                        #                                   value = c("P-Values"),
+                        #                                   shiny::p("P-Values"),
+                        #                                   # P-values
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=1,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=2,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=3,voxelcoord,bs_stat_overlays$log_pvalues)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename), align="left", width = "11%")),
+                        #                   shiny::tabPanel(title_0 = "Adjusted P-Values",
+                        #                                   value = c("Adjusted P-Values"),
+                        #                                   shiny::p("Adjusted P-Values"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=1,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=2,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=3,voxelcoord,bs_stat_overlays$log_pvalues_adjusted)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename1), align="left", width = "11.5%")),
+                        #                   shiny::tabPanel(title_0 = "T-Values",
+                        #                                   value = c("T-Values"),
+                        #                                   shiny::p("T-Values"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=1,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=2,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=3,voxelcoord,bs_stat_overlays$tvalues)), align="left", width = "34.5%"),
+                        #                                   shiny::img(src=paste0(outdir, cbar_filename2), align="left", width = "11%")),
+                        #                   shiny::tabPanel(title_0 = "Atlas",
+                        #                                   value = c("Atlas"),
+                        #                                   shiny::p("Atlas"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=1,voxelcoord,"atlas")), align="left", width = "28.8%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=2,voxelcoord,"atlas")), align="left", width = "24%"),
+                        #                                   shiny::img(src=paste0(get_render_image_filename(3,inner=3,voxelcoord,"atlas")), align="left", width = "34.5%")))
+                        #
+                        # )
+                      # )
+                  #   )
+                  # )
+
+  #               }
+  #             )
+  # )
 
 

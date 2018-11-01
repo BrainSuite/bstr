@@ -112,6 +112,11 @@ BssRmdVolumeOutput <-
 
 
                   # file_rmd_preamble <-file(rmdfile)
+                  load_library <- "library(bssr)"
+                  data_command_1 <- paste0("bss_data <- load_bss_data(type = '",bss_data@analysis_type,"', subjdir = '",bss_data@subjdir,"', csv = '", bss_data@csv,"', smooth = ",bss_data@smooth,")")
+                  data_command_2 <- paste0("bss_model <- bss_anova(main_effect = '",bss_model@main_effect,"', covariates = '", bss_model@covariates,"', bss_data = bss_data)")
+                  #data_command_3 <- sprintf("save_bss_out(bss_data, bss_model, outdir = '%s')", bss_out@outdir)
+                  user_input <- paste0(data_command_1,"\n",data_command_2,"\n")#,data_command_3,"\n")
                   templines <- deparse(private$render_html)
                   templines[1] <- "render_html = function(outdir, voxelcoord, overlay_name)"
                   sink(rmdfile, append=TRUE, type = "output")
@@ -119,6 +124,9 @@ BssRmdVolumeOutput <-
                   cat("title: BSSR Report\n")
                   cat("output: html_document\n")
                   cat("---\n")
+                  cat("```{r eval=FALSE, user_input_commands}\n")
+                  writeLines(user_input)
+                  cat("```\n")
                   cat("```{r echo=FALSE, warning=FALSE}\n")
                   writeLines(templines)
                   cat("render_html(outdir, voxelcoord, overlay_name)\n")
@@ -135,20 +143,26 @@ BssRmdVolumeOutput <-
                 ## another function will generate the names for the pngs
 
                 render_html = function(outdir, voxelcoord, overlay_name) {
-                  cbar_filename <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$log_pvalues, sep = '_'), '_cbar.png', sep = '')
-                  cbar_filename1 <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$log_pvalues_adjusted, sep = '_'), '_cbar.png', sep = '')
-                  cbar_filename2 <- paste(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$tvalues, sep = '_'), '_cbar.png', sep = '')
+                  cbar_filename <- paste0(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$log_pvalues, sep = '_'), '_cbar.png')
+                  cbar_filename1 <- paste0(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$log_pvalues_adjusted, sep = '_'), '_cbar.png')
+                  cbar_filename2 <- paste0(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$tvalues, sep = '_'), '_cbar.png')
 
                   #function to make rmd work
-                  get_render_image_filename <- function(individual_voxelcoord, overlay_name) {
-                    return(paste0("./PNG_images/", individual_voxelcoord,"_",overlay_name,
-                                  ".png"))
+                  get_render_image_filename <- function(individual_voxelcoord, overlay_name, brain_sector_index) {
+                    if (brain_sector_index == 1) {
+                      return(paste0("./PNG_images/cor", individual_voxelcoord,"_",overlay_name,".png"))
+                    } else if (brain_sector_index == 2){
+                      return(paste0("./PNG_images/ax", individual_voxelcoord,"_",overlay_name,".png"))
+                    } else {
+                      return(paste0("./PNG_images/sag", individual_voxelcoord,"_",overlay_name,".png"))
+                    }
+
                   }
 
                   # Function to return a shiny image object
-                  shiny_image = function(specific_voxelcoord,overlay_type, width){
+                  shiny_image = function(specific_voxelcoord, index_brain_sector, overlay_type, width){
                     align <- "left"
-                    return(paste0("shiny::img(src=paste0(",get_render_image_filename(specific_voxelcoord,overlay_type),"), align, width)"))
+                    return(paste0("shiny::img(src='",get_render_image_filename(specific_voxelcoord,overlay_type, index_brain_sector),"', align = '", align, "', width = '", width,"')"))
                   }
 
                   # Function that creates a tabPanel
@@ -170,17 +184,18 @@ BssRmdVolumeOutput <-
                     if (panel_type == "All") {
                       for (overlay_index in 1:length(overlay)) {
                         for (inner_coord_index in 1:3) {
-                          images <- paste0(images, shiny_image(voxelcoord[[voxelcoord_index]][inner_coord_index], overlay[overlay_index], width[inner_coord_index]))
+                          images <- paste0(images, shiny_image(voxelcoord[[voxelcoord_index]][inner_coord_index], inner_coord_index, overlay[overlay_index], width[inner_coord_index]), ",")
                         }
-                        images <- c(images, paste0(shiny::img(src=paste0(outdir, cbar), align="left", width = width[4])))
+                        images <- paste0(images, paste0("shiny::img(src=paste0('", cbar[overlay_index], "'), align='left', width = '", width[4],"'),"))
                       }
                     } else {
                       for (inner_coord_index in 1:3) {
-                        images <- c(images, shiny_image(voxelcoord[[voxelcoord_index]][inner_coord_index],overlay, width[inner_coord_index]))
+                        images <- paste0(images, shiny_image(voxelcoord[[voxelcoord_index]][inner_coord_index], inner_coord_index,overlay, width[inner_coord_index]), ",")
                       }
-                      images <- c(images, shiny::img(src=paste0(outdir, cbar), align="left", width = width[4]))
+                      images <- paste0(images, "shiny::img(src=paste0('", cbar, "'), align='left', width = '", width[4], "'),")
                     }
-                    return(shiny::tabPanel(title_0 = panel_type, value = c(panel_type),shiny::p(panel_type),parse(text=paste(images, sep = ", "))))
+                    images <- substr(images,1,nchar(images)-1)
+                    return(paste0("shiny::tabPanel(title_0 = '", panel_type, "', value = c('", panel_type, "'), shiny::p('", panel_type, "'), ",images,")"))
                   }
 
                   # Function that creates clusters for each panel
@@ -191,24 +206,17 @@ BssRmdVolumeOutput <-
                                                                                    tab_panel('Adjusted P-Values', 1), ", ",
                                                                                    tab_panel('T-Values', 1),")))")
                     for (voxelcoord_index in 2:length(voxelcoord)){
-                      panels <- paste0(panels, ", shiny::tabPanel(title = shiny::h4(paste('Cluster', ", voxelcoord_index, "),shiny::tableOutput('data'),
-                                                                            shiny::tabsetPanel(id = 'navbar',type = 'pills',",
+                      panels <- paste0(panels, ", shiny::tabPanel(title = shiny::h4(paste('Cluster ", voxelcoord_index, "'),shiny::tableOutput('data'),shiny::tabsetPanel(id = 'navbar',type = 'pills',",
                                                                                                tab_panel('All', voxelcoord_index),",",
                                                                                                tab_panel('P-Values', voxelcoord_index),",",
                                                                                                tab_panel('Adjusted P-Values', voxelcoord_index),",",
-                                                                                               tab_panel('T-Values', voxelcoord_index),")")
+                                                                                               tab_panel('T-Values', voxelcoord_index),")))")
 
                     }
                     return(panels)
                   }
 
-                  eval(parse(text= paste("shiny::shinyUI(
-                    shiny::fluidPage(
-                      shinyjs::useShinyjs(),
-                      shiny::h3('Choose a cluster and an overlay below'),
-                      shiny::tabsetPanel(
-                        id = 'navbar',
-                        type = 'tabs',",
+                  eval(parse(text= paste0("shiny::shinyUI(shiny::fluidPage(shinyjs::useShinyjs(),shiny::h3('Choose a cluster and an overlay below'),shiny::tabsetPanel(id = 'navbar',type = 'tabs',",
                         cluster_panels(voxelcoord),")))")))
 
                 }

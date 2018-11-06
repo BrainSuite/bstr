@@ -60,7 +60,10 @@ BssRmdVolumeOutput <-
 
                   }
 
-                  private$save_rmd_preamble(file.path(outdir, "save_rmd.Rmd"))
+                  private$save_rmd_preamble(file.path(outdir, "save_rmd.Rmd"),
+                                            outdir,
+                                            voxelcoord,
+                                            overlay_name = "c(bs_stat_overlays$log_pvalues,bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues)")
 
                   # save_rmd<-file(file.path(outdir, "save_rmd.Rmd"))
                   # writeLines(private$render_table(), save_rmd)
@@ -108,7 +111,7 @@ BssRmdVolumeOutput <-
                   knitr::kable(table[1:4], align=c(rep('l', 4)))
                 },
 
-                save_rmd_preamble = function(rmdfile) {
+                save_rmd_preamble = function(rmdfile, outdir, voxelcoord, overlay_name) {
 
 
                   # file_rmd_preamble <-file(rmdfile)
@@ -124,12 +127,21 @@ BssRmdVolumeOutput <-
                   cat("title: BSSR Report\n")
                   cat("output: html_document\n")
                   cat("---\n")
-                  cat("```{r eval=FALSE, user_input_commands}\n")
+                  cat("```{r eval=TRUE, echo=FALSE, message=FALSE, results='hide', user_input_commands}\n")
                   writeLines(user_input)
                   cat("```\n")
                   cat("```{r echo=FALSE, warning=FALSE}\n")
                   writeLines(templines)
-                  cat("render_html(outdir, voxelcoord, overlay_name)\n")
+                  voxelcoord_char <- "list("
+                  for (i in 1:length(voxelcoord)){
+                    voxelcoord_char <- paste0(voxelcoord_char, "c(")
+                    for (m in 1:length(voxelcoord[[i]])){
+                      voxelcoord_char <- paste0(voxelcoord_char, voxelcoord[[i]][m],",")
+                    }
+                    voxelcoord_char <- paste0(substr(voxelcoord_char,1,nchar(voxelcoord_char)-1),"),")
+                  }
+                  voxelcoord_char <- paste0(substr(voxelcoord_char,1,nchar(voxelcoord_char)-1),")")
+                  cat("render_html('",outdir,"', ", voxelcoord_char, ", ",overlay_name,")\n")
                   cat("```\n")
                   sink()
 

@@ -40,7 +40,7 @@ setMethod("initialize", valueClass = "BssOutput", signature = "BssOutput", funct
   }
   else {
     .Object@outdir <- outdir
-    message(sprintf("The output directory %s already exists. Will overwrite it's contents.", outdir))
+    message(sprintf("The output directory %s already exists. Will overwrite its contents.", outdir))
   }
   return(.Object)
 })

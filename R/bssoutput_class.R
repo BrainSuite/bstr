@@ -213,7 +213,7 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
            save_bss_rds(bss_model@pvalues, bss_model@group_var, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
          }
   )
-  #ADD NEW FUNCTION HERE
+  # Function to get the voxelcoordinate
   get_voxelcoord <- function(outdir){
     save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
     #call cluster code from terminal
@@ -221,17 +221,19 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
     system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
     vox_table <- read.table("cluster.tsv",header=F,sep="\t")
     voxelcoord <- vector("list",nrow(vox_table))
-    for (i in 1:nrow(vox_table)){
-      for (m in 1:3){
-        voxelcoord[[i]]<- c(voxelcoord[[i]],vox_table[i,3+m])
+    for (individ_vox in 1:nrow(vox_table)){
+      for (vox_component in 1:3){
+        voxelcoord[[individ_vox]]<- c(voxelcoord[[individ_vox]],vox_table[individ_vox,3+vox_component])
       }
     }
     return(voxelcoord)
   }
   # add create an R6 class function from here
   bssrmd_volout <- BssRmdVolumeOutput$new()
-  #bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = list(c(90,90,90),c(107,107,107),c(120,120,120)), outdir)
   bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = get_voxelcoord(outdir), outdir)
+  # Old version with hard-coded voxelcoord below
+  #bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = list(c(90,90,90),c(107,107,107),c(120,120,120)), outdir)
+
 
 
 
@@ -360,15 +362,15 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
 
 
   nb_load_data <- sprintf("```{r echo=FALSE, message=FALSE, warning=FALSE, load_data}\n")
-  nb_load_data <- paste(nb_load_data, "\nDT::datatable(bss_data@demographics[,-(ncol(bss_data@demographics))], rownames = FALSE)\n", sep = "")
-  nb_load_data <- paste(nb_load_data, "\n```\n", sep = "")
+  nb_load_data <- paste0(nb_load_data, "\nDT::datatable(bss_data@demographics[,-(ncol(bss_data@demographics))], rownames = FALSE)\n")
+  nb_load_data <- paste0(nb_load_data, "\n```\n")
 
 
   nb_data_header_two <- "The following command creates the model used to analyze the data."
 
   nb_data_command_two <- sprintf("\n```{r message=FALSE, warning=FALSE, results='hide', data_command_two}\n")
   nb_data_command_two <- paste(nb_data_command_two, "\n",bss_model@load_data_command,"\n")
-  nb_data_command_two <- paste(nb_data_command_two, "\n```\n", sep = "")
+  nb_data_command_two <- paste0(nb_data_command_two, "\n```\n")
 
   nb_data_header_three <- "The final command (below) was used to render this document."
 
@@ -376,7 +378,7 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
 
   nb_data_command_three <-  sprintf("\n```{r eval=FALSE, message=FALSE, warning=FALSE, data_command_three}\n")
   nb_data_command_three <- paste(nb_data_command_three, "\n", command_save_bss_out,"\n")
-  nb_data_command_three <- paste(nb_data_command_three, "\n```\n", sep = "")
+  nb_data_command_three <- paste0(nb_data_command_three, "\n```\n")
 
 
   nb_commands <- lapply(as.character(bss_data@roiids),function(x){sprintf("```{r warning=FALSE, run_command_%s}\n",x)})

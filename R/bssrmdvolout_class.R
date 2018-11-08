@@ -78,28 +78,21 @@ BssRmdVolumeOutput <-
               private = list(
 
                 render_overlay = function(voxelcoord_index,voxelcoord,atlaspath,overlaypath,outdir,name,alpha) {
+                  view_order <- c("cor","ax","sag")
                   for (stats_measure_index in 1:3) {
-                    view_ax <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/PNG_images/","ax",voxelcoord[[voxelcoord_index]][1], "_",name[stats_measure_index], ".png --slice ", voxelcoord[[voxelcoord_index]][1], " --", "ax", " -a ", alpha)
-                    view_cor <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/PNG_images/","cor",voxelcoord[[voxelcoord_index]][2], "_",name[stats_measure_index], ".png --slice ", voxelcoord[[voxelcoord_index]][2], " --", "cor", " -a ", alpha)
-                    view_sag <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/PNG_images/","sag",voxelcoord[[voxelcoord_index]][3], "_",name[stats_measure_index], ".png --slice ", voxelcoord[[voxelcoord_index]][3], " --", "sag", " -a ", alpha)
-
-                    system(view_cor,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-                    system(view_sag,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-                    system(view_ax,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
+                    for (view in 1:3){
+                       current_view <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/PNG_images/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[stats_measure_index], ".png --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view], " -a ", alpha)
+                       system(current_view,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
+                    }
                   }
                   return(0)
                 },
                 render_atlas = function(voxelcoord_index,voxelcoord,atlaspath,outdir) {
-
-                  view_at_ax <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view 1 --slice ",voxelcoord[[voxelcoord_index]][1]," --flop -o ", outdir,"/PNG_images/","ax",voxelcoord[[voxelcoord_index]][1],"_atlas.png")
-
-                  view_at_cor <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view 2 --slice ",voxelcoord[[voxelcoord_index]][1]," --flop -o ", outdir,"/PNG_images/","cor",voxelcoord[[voxelcoord_index]][1],"_atlas.png")
-                  view_at_sag <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view 3 --slice ",voxelcoord[[voxelcoord_index]][1]," --flop -o ", outdir,"/PNG_images/","sag",voxelcoord[[voxelcoord_index]][1],"_atlas.png")
-
-                  system(view_at_cor,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-                  system(view_at_sag,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-                  system(view_at_ax,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-
+                  view_order <- c("cor","ax","sag")
+                  for (view in 1:3){
+                    current_view <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view ", view," --slice ",voxelcoord[[voxelcoord_index]][view]," --flop -o ", outdir,"/PNG_images/",view_order[view],voxelcoord[[voxelcoord_index]][view],"_atlas.png")
+                    system(current_view,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
+                  }
                   return(0)
                 },
                 render_table = function() {
@@ -133,10 +126,10 @@ BssRmdVolumeOutput <-
                   cat("```{r echo=FALSE, warning=FALSE}\n")
                   writeLines(templines)
                   voxelcoord_char <- "list("
-                  for (i in 1:length(voxelcoord)){
+                  for (individual_voxelcoord in 1:length(voxelcoord)){
                     voxelcoord_char <- paste0(voxelcoord_char, "c(")
-                    for (m in 1:length(voxelcoord[[i]])){
-                      voxelcoord_char <- paste0(voxelcoord_char, voxelcoord[[i]][m],",")
+                    for (view in 1:length(voxelcoord[[individual_voxelcoord]])){
+                      voxelcoord_char <- paste0(voxelcoord_char, voxelcoord[[individual_voxelcoord]][view],",")
                     }
                     voxelcoord_char <- paste0(substr(voxelcoord_char,1,nchar(voxelcoord_char)-1),"),")
                   }
@@ -155,20 +148,17 @@ BssRmdVolumeOutput <-
                 ## another function will generate the names for the pngs
 
                 render_html = function(outdir, voxelcoord, overlay_name) {
-                  cbar_filename <- paste0(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$log_pvalues, sep = '_'), '_cbar.png')
-                  cbar_filename1 <- paste0(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$log_pvalues_adjusted, sep = '_'), '_cbar.png')
-                  cbar_filename2 <- paste0(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), bs_stat_overlays$tvalues, sep = '_'), '_cbar.png')
+                  cbar <- vector("list",3)
+                  overlay <- c(bs_stat_overlays$log_pvalues, bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues)
+                  for (cbar_index in 1:3){
+                    cbar[[cbar_index]] <- paste0(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), overlay[cbar_index], sep = '_'), '_cbar.png')
+
+                  }
 
                   #function to make rmd work
                   get_render_image_filename <- function(individual_voxelcoord, overlay_name, brain_sector_index) {
-                    if (brain_sector_index == 1) {
-                      return(paste0("./PNG_images/cor", individual_voxelcoord,"_",overlay_name,".png"))
-                    } else if (brain_sector_index == 2){
-                      return(paste0("./PNG_images/ax", individual_voxelcoord,"_",overlay_name,".png"))
-                    } else {
-                      return(paste0("./PNG_images/sag", individual_voxelcoord,"_",overlay_name,".png"))
-                    }
-
+                    view_order <- c("cor","ax","sag")
+                    return(paste0("./PNG_images/", view_order[brain_sector_index], individual_voxelcoord,"_",overlay_name,".png"))
                   }
 
                   # Function to return a shiny image object
@@ -181,19 +171,9 @@ BssRmdVolumeOutput <-
                   tab_panel = function(panel_type, voxelcoord_index){
                     width <- c("28.8%","24%","34.5%","11%")
                     overlay <- c(bs_stat_overlays$log_pvalues, bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues)
-                    cbar <- c(cbar_filename, cbar_filename1,cbar_filename2)
-                    if (panel_type == "P-Values"){
-                      overlay = overlay[1]
-                      cbar = cbar[1]
-                    } else if (panel_type == "Adjusted P-Values"){
-                      overlay = overlay[2]
-                      cbar = cbar[2]
-                    } else if (panel_type == "T-Values"){
-                      overlay = overlay[3]
-                      cbar = cbar[3]
-                    }
+                    panel_names <- c("All","P-Values","Adjusted P-Values","T-Values")
                     images <- ""
-                    if (panel_type == "All") {
+                    if (panel_type == 1) {
                       for (overlay_index in 1:length(overlay)) {
                         for (inner_coord_index in 1:3) {
                           images <- paste0(images, shiny_image(voxelcoord[[voxelcoord_index]][inner_coord_index], inner_coord_index, overlay[overlay_index], width[inner_coord_index]), ",")
@@ -202,30 +182,29 @@ BssRmdVolumeOutput <-
                       }
                     } else {
                       for (inner_coord_index in 1:3) {
-                        images <- paste0(images, shiny_image(voxelcoord[[voxelcoord_index]][inner_coord_index], inner_coord_index,overlay, width[inner_coord_index]), ",")
+                        images <- paste0(images, shiny_image(voxelcoord[[voxelcoord_index]][inner_coord_index], inner_coord_index,overlay[panel_type], width[inner_coord_index]), ",")
                       }
-                      images <- paste0(images, "shiny::img(src=paste0('", cbar, "'), align='left', width = '", width[4], "'),")
+                      images <- paste0(images, "shiny::img(src=paste0('", cbar[panel_type-1], "'), align='left', width = '", width[4], "'),")
                     }
                     images <- substr(images,1,nchar(images)-1)
-                    return(paste0("shiny::tabPanel(title_0 = '", panel_type, "', value = c('", panel_type, "'), shiny::p('", panel_type, "'), ",images,")"))
+                    return(paste0("shiny::tabPanel(title_0 = '", panel_names[panel_type], "', value = c('", panel_names[panel_type], "'), shiny::p('", panel_names[panel_type], "'), ",images,")"))
                   }
 
                   # Function that creates clusters for each panel
                   cluster_panels = function(voxelcoord){
-                    panels <- paste0("shiny::tabPanel(title = shiny::h4(paste('Cluster 1'),shiny::tableOutput('data'),shiny::tabsetPanel(id = 'navbar',type = 'pills',",
-                                                                                   tab_panel('All', 1),", ",
-                                                                                   tab_panel('P-Values', 1), ", ",
-                                                                                   tab_panel('Adjusted P-Values', 1), ", ",
-                                                                                   tab_panel('T-Values', 1),")))")
-                    for (voxelcoord_index in 2:length(voxelcoord)){
-                      panels <- paste0(panels, ", shiny::tabPanel(title = shiny::h4(paste('Cluster ", voxelcoord_index, "'),shiny::tableOutput('data'),shiny::tabsetPanel(id = 'navbar',type = 'pills',",
-                                                                                               tab_panel('All', voxelcoord_index),",",
-                                                                                               tab_panel('P-Values', voxelcoord_index),",",
-                                                                                               tab_panel('Adjusted P-Values', voxelcoord_index),",",
-                                                                                               tab_panel('T-Values', voxelcoord_index),")))")
-
+                    panels <- ""
+                    for (voxelcoord_index in 1:length(voxelcoord)){
+                      panels <- paste0(panels, "shiny::tabPanel(title = shiny::h4(paste('Cluster ", voxelcoord_index, "'),shiny::tableOutput('data'),shiny::tabsetPanel(id = 'navbar',type = 'pills',")
+                                                                                               # tab_panel(1, voxelcoord_index),",",
+                                                                                               # tab_panel(2, voxelcoord_index),",",
+                                                                                               # tab_panel(3, voxelcoord_index),",",
+                                                                                               #tab_panel(4, voxelcoord_index),"))), ")
+                      for (tab_panel_type in 1:4){
+                        panels <- paste0(panels,tab_panel(tab_panel_type, voxelcoord_index),",")
+                      }
+                      panels <- paste0(substr(panels,1,nchar(panels)-1),"))), ")
                     }
-                    return(panels)
+                    return(substr(panels,1,nchar(panels)-2))
                   }
 
                   eval(parse(text= paste0("shiny::shinyUI(shiny::fluidPage(shinyjs::useShinyjs(),shiny::h3('Choose a cluster and an overlay below'),shiny::tabsetPanel(id = 'navbar',type = 'tabs',",

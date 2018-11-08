@@ -195,10 +195,6 @@ BssRmdVolumeOutput <-
                     panels <- ""
                     for (voxelcoord_index in 1:length(voxelcoord)){
                       panels <- paste0(panels, "shiny::tabPanel(title = shiny::h4(paste('Cluster ", voxelcoord_index, "'),shiny::tableOutput('data'),shiny::tabsetPanel(id = 'navbar',type = 'pills',")
-                                                                                               # tab_panel(1, voxelcoord_index),",",
-                                                                                               # tab_panel(2, voxelcoord_index),",",
-                                                                                               # tab_panel(3, voxelcoord_index),",",
-                                                                                               #tab_panel(4, voxelcoord_index),"))), ")
                       for (tab_panel_type in 1:4){
                         panels <- paste0(panels,tab_panel(tab_panel_type, voxelcoord_index),",")
                       }

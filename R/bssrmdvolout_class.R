@@ -24,12 +24,12 @@ BssRmdVolumeOutput <-
                 save_out = function(bss_data, bss_model, outdir, voxelcoord) {
                   get_custom_tbm_overlays = function(outdir) {
 
-                    p_overlay <- paste(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
-                      basename(bss_data@atlas_filename)),"_", bs_stat_overlays$log_pvalues, bss_data@data_type, sep="")
-                    adjp_overlay <- paste(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
-                      basename(bss_data@atlas_filename)),"_", bs_stat_overlays$log_pvalues_adjusted, bss_data@data_type, sep="")
-                    t_overlay <- paste(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
-                      basename(bss_data@atlas_filename)),"_", bs_stat_overlays$tvalues, bss_data@data_type, sep="")
+                    p_overlay <- paste0(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", bs_stat_overlays$log_pvalues, bss_data@data_type)
+                    adjp_overlay <- paste0(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", bs_stat_overlays$log_pvalues_adjusted, bss_data@data_type)
+                    t_overlay <- paste0(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", bs_stat_overlays$tvalues, bss_data@data_type)
 
                     return(list("p_overlay" = p_overlay, "adjp_overlay" = adjp_overlay, "t_overlay" = t_overlay))
                   }
@@ -78,7 +78,7 @@ BssRmdVolumeOutput <-
               private = list(
 
                 render_overlay = function(voxelcoord_index,voxelcoord,atlaspath,overlaypath,outdir,name,alpha) {
-                  view_order <- c("cor","ax","sag")
+                  view_order <- c("sag","cor","ax")
                   for (stats_measure_index in 1:3) {
                     for (view in 1:3){
                        current_view <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/PNG_images/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[stats_measure_index], ".png --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view], " -a ", alpha)
@@ -88,9 +88,9 @@ BssRmdVolumeOutput <-
                   return(0)
                 },
                 render_atlas = function(voxelcoord_index,voxelcoord,atlaspath,outdir) {
-                  view_order <- c("cor","ax","sag")
-                  for (view in 1:3){
-                    current_view <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view ", view," --slice ",voxelcoord[[voxelcoord_index]][view]," --flop -o ", outdir,"/PNG_images/",view_order[view],voxelcoord[[voxelcoord_index]][view],"_atlas.png")
+                  view_order <- c("sag","cor","ax")
+                  for (view_iter in 1:3){
+                    current_view <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view ", view_iter," --slice ",voxelcoord[[voxelcoord_index]][view_iter]," --flop -o ", outdir,"/PNG_images/",view_iter,voxelcoord[[voxelcoord_index]][view_iter],"_atlas.png")
                     system(current_view,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                   }
                   return(0)
@@ -152,7 +152,7 @@ BssRmdVolumeOutput <-
 
                   #function to make rmd work
                   get_render_image_filename <- function(individual_voxelcoord, overlay_name, brain_sector_index) {
-                    view_order <- c("cor","ax","sag")
+                    view_order <- c("sag","cor","ax")
                     return(paste0("./PNG_images/", view_order[brain_sector_index], individual_voxelcoord,"_",overlay_name,".png"))
                   }
 
@@ -164,7 +164,7 @@ BssRmdVolumeOutput <-
 
                   # Function that creates a tabPanel
                   tab_panel = function(panel_type, voxelcoord_index){
-                    width <- c("28.8%","24%","34.5%","11%")
+                    width <- c("34.5%","28.8%","24%","11%")
                     overlay <- c(bs_stat_overlays$log_pvalues, bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues)
                     panel_names <- c("All","P-Values","Adjusted P-Values","T-Values")
                     images <- ""

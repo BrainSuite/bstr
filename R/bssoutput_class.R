@@ -213,10 +213,11 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
            save_bss_rds(bss_model@pvalues, bss_model@group_var, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
          }
   )
+
   # Function to get the voxelcoordinate
   get_voxelcoord <- function(outdir){
     save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-    #call cluster code from terminal
+    # Call cluster code from terminal
     voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,"_mri.bfc.nii_log_pvalues_adjusted.nii.gz","  -o cluster.tsv")
     system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
     vox_table <- read.table("cluster.tsv",header=F,sep="\t")
@@ -228,6 +229,7 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
     }
     return(voxelcoord)
   }
+
   # add create an R6 class function from here
   bssrmd_volout <- BssRmdVolumeOutput$new()
   bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = get_voxelcoord(outdir), outdir)
@@ -305,6 +307,28 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
            save_bss_out_nifti_image(tvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
          }
   )
+
+  # Function to get the voxelcoordinate
+  get_voxelcoord <- function(outdir){
+    save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+    # Call cluster code from terminal
+    voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,"_mri.bfc.nii_log_pvalues_adjusted.nii.gz","  -o cluster.tsv")
+    system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
+    vox_table <- read.table("cluster.tsv",header=F,sep="\t")
+    voxelcoord <- vector("list",nrow(vox_table))
+    for (individ_vox in 1:nrow(vox_table)){
+      for (vox_component in 1:3){
+        voxelcoord[[individ_vox]]<- c(voxelcoord[[individ_vox]],vox_table[individ_vox,3+vox_component])
+      }
+    }
+    return(voxelcoord)
+  }
+
+
+  # add create an R6 class function from here
+  bssrmd_volout <- BssRmdVolumeOutput$new()
+  bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = get_voxelcoord(outdir), outdir)
+
 
   # Copy modelspec file to the output directory
   file.copy(bss_model@mspec_file, bss_out@outdir)
@@ -528,9 +552,9 @@ save_bss_out_surface <- function(measure, var_name, bss_cmap, bss_data, bss_mode
 
 save_bss_out_nifti_image <- function(measure, var_name, bss_cmap, bss_data, bss_model, outdir) {
 
-  # BELOW LINE GENERATES FILENAME
-  outprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), bss_data@data_type, sep = '')
+
+  outprefix <- paste0(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
+    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), bss_data@data_type)
   RNifti::writeNifti(measure, file.path(outdir, outprefix), template = bss_data@atlas_image)
 }
 
@@ -540,3 +564,4 @@ save_bss_rds <- function(measure, var_name, label, bss_data, bss_model, outdir) 
     basename(bss_data@atlas_filename)), label, sep = '_'), ".rds", sep = '')
   saveRDS(measure, file=file.path(outdir, outprefix))
 }
+

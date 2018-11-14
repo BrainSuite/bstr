@@ -88,9 +88,10 @@ BssRmdVolumeOutput <-
                   return(0)
                 },
                 render_atlas = function(voxelcoord_index,voxelcoord,atlaspath,outdir) {
-                  view_order <- c("sag","cor","ax")
+                  view_name <- c("ax","cor","sag")
+                  view_order <- c(3,2,1)
                   for (view_iter in 1:3){
-                    current_view <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view ", view_iter," --slice ",voxelcoord[[voxelcoord_index]][view_iter]," --flop -o ", outdir,"/PNG_images/",view_iter,voxelcoord[[voxelcoord_index]][view_iter],"_atlas.png")
+                    current_view <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view ", view_iter," --slice ",voxelcoord[[voxelcoord_index]][view_order[view_iter]]," --flop -o ", outdir,"/PNG_images/",view_name[view_iter], voxelcoord[[voxelcoord_index]][view_order[view_iter]],"_atlas.png")
                     system(current_view,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                   }
                   return(0)

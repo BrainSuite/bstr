@@ -160,7 +160,7 @@ setMethod("load_data", signature = "BssDBMData", function(bss_data, atlas_filena
 
   bss_data@atlas_filename <- atlas_filename
   bss_data@atlas_image <- RNifti::readNifti(atlas_filename)
-  bss_data@filelist <- get_dbm_file_list(bss_data, measure, smooth, eddy)
+  bss_data@filelist <- get_dbm_file_list(bss_data, measure = "FA", smooth, eddy)
   attrib_siz <- length(bss_data@atlas_image)
   if ( !is.null(maskfile) ) {
     bss_data@maskfile <- maskfile

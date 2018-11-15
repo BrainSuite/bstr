@@ -22,6 +22,7 @@
 #' @slot subjdir character string for subject directory.
 #' @slot csv filename of a comma separated (csv) file containing the subject demographic information.
 #' @slot smooth numeric value used to smooth the data.
+#' @slot measure character string denoting the type of measure used.
 #' @slot filelist list of files belonging to N subjects.
 #' @slot load_data_command character string for the command used to load the data
 #'
@@ -38,6 +39,7 @@ BssData <- setClass(
     subjdir = "character",
     csv = "character",
     smooth = "numeric",
+    measure = "character",
     filelist = "character",
     load_data_command = "character"
   )
@@ -126,6 +128,7 @@ setMethod("load_data", signature = "BssCBMData", function(bss_data, atlas_filena
   bss_data@data_array <- read_dfs_attributes_for_all_subjects(cbm_filelist, attrib_siz)
   bss_data@filelist <- cbm_filelist
   bss_data@analysis_type <- "cbm"
+  bss_data@smooth <- smooth
   bss_data@data_type <- bs_data_types$surface
   return(bss_data)
 })
@@ -137,6 +140,7 @@ setMethod("load_data", signature = "BssTBMData", function(bss_data, atlas_filena
   bss_data@atlas_image <- RNifti::readNifti(atlas_filename)
   bss_data@filelist <- get_tbm_file_list(bss_data, smooth)
   bss_data@smooth <- smooth
+  bss_data@measure <- ""
   attrib_siz <- length(bss_data@atlas_image)
   if ( !is.null(maskfile) ) {
     bss_data@maskfile <- maskfile
@@ -161,6 +165,8 @@ setMethod("load_data", signature = "BssDBMData", function(bss_data, atlas_filena
   bss_data@atlas_filename <- atlas_filename
   bss_data@atlas_image <- RNifti::readNifti(atlas_filename)
   bss_data@filelist <- get_dbm_file_list(bss_data, measure = "FA", smooth, eddy)
+  bss_data@smooth <- smooth
+  bss_data@measure <- measure
   attrib_siz <- length(bss_data@atlas_image)
   if ( !is.null(maskfile) ) {
     bss_data@maskfile <- maskfile

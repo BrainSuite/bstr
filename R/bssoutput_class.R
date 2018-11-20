@@ -49,13 +49,14 @@ setMethod("initialize", valueClass = "BssOutput", signature = "BssOutput", funct
 #' @param bss_out object of type \code{BssOutput}
 #' @param bss_data object of type \code{BssData}
 #' @param bss_model object of type \code{BssModel}
+#' @param nclusters numeric parameter denoting number of clusters (default is 10)
 #' @details
 #' For the most part, the user will never have to call this function directly.
 #' Instead the user should call \code{\link{save_bss_out}}.
 #' @seealso \code{\link{save_bss_out}}
 #'
 #' @export
-setGeneric("save_out", valueClass = "BssOutput", function(bss_out, bss_data, bss_model) {
+setGeneric("save_out", valueClass = "BssOutput", function(bss_out, bss_data, bss_model, ...) {
   standardGeneric("save_out")
 })
 
@@ -144,7 +145,7 @@ setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", f
 )
 
 #' @rdname save_out
-setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", function(bss_out, bss_data, bss_model) {
+setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", function(bss_out, bss_data, bss_model, nclusters = 10) {
 
   log_pvalues <- rep(1, length(bss_data@atlas_image))
   log_pvalues[bss_data@mask_idx] <- log10_transform(bss_model@pvalues)
@@ -218,7 +219,7 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
   get_voxelcoord <- function(outdir){
     save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
     # Call cluster code from terminal
-    voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,"_mri.bfc.nii_log_pvalues_adjusted.nii.gz","  -o cluster.tsv")
+    voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,"_mri.bfc.nii_log_pvalues_adjusted.nii.gz","  -o cluster.tsv -n ", nclusters)
     system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
     vox_table <- read.table("cluster.tsv",header=F,sep="\t")
     voxelcoord <- vector("list",nrow(vox_table))
@@ -243,7 +244,7 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
 
 
 #' @rdname save_out
-setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", function(bss_out, bss_data, bss_model) {
+setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", function(bss_out, bss_data, bss_model, nclusters = 10) {
 
   log_pvalues <- rep(1, length(bss_data@atlas_image))
   log_pvalues[bss_data@mask_idx] <- log10_transform(bss_model@pvalues)
@@ -312,7 +313,7 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
   get_voxelcoord <- function(outdir){
     save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
     # Call cluster code from terminal
-    voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,"_mri.bfc.nii_log_pvalues_adjusted.nii.gz","  -o cluster.tsv")
+    voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,"_mri.bfc.nii_log_pvalues_adjusted.nii.gz","  -o cluster.tsv -n ", nclusters)
     system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
     vox_table <- read.table("cluster.tsv",header=F,sep="\t")
     voxelcoord <- vector("list",nrow(vox_table))
@@ -498,8 +499,9 @@ ggplot2::ggsave(filename='",
 #' @param bss_data object of type \code{BssData}
 #' @param bss_model object of type \code{BssModel}
 #' @param outdir output directory to save the results
+#' @param nclusters number of clusters (default is 10)
 #' @export
-save_bss_out <- function(bss_data, bss_model, outdir="") {
+save_bss_out <- function(bss_data, bss_model, outdir="", nclusters = 10) {
 
   valid_types <- c("cbm", "tbm", "roi", "dbm", "nca")
   if (! bss_data@analysis_type %in% valid_types)
@@ -511,7 +513,7 @@ save_bss_out <- function(bss_data, bss_model, outdir="") {
          dbm = { bss_out <- new("BssDBMOutput", outdir) },
          roi = { bss_out <- new("BssROIOutput", outdir) }
   )
-  bss_out <- save_out(bss_out, bss_data, bss_model)
+  bss_out <- save_out(bss_out, bss_data, bss_model, nclusters = nclusters)
   invisible(bss_out)
 }
 

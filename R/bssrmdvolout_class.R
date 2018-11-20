@@ -121,6 +121,18 @@ BssRmdVolumeOutput <-
                   cat("title: BSSR Report\n")
                   cat("output: html_document\n")
                   cat("---\n")
+                  cat("<style>\n\n")
+                  cat("table, td, th {")
+                  cat("border: none;")
+                  cat("padding-left: 1em;")
+                  cat("padding-right: 1em;")
+                  cat("min-width: 50%;")
+                  cat("margin-left: auto;")
+                  cat("margin-right: auto;")
+                  cat("margin-top: 1em;")
+                  cat("margin-bottom: 1em;")
+                  cat("}\n\n")
+                  cat("</style>\n")
                   cat("```{r eval=TRUE, echo=FALSE, message=FALSE, results='hide', user_input_commands}\n")
                   writeLines(user_input)
                   cat("```\n")
@@ -152,7 +164,7 @@ BssRmdVolumeOutput <-
                   }
                   vox_table <- read.table("~/cluster.tsv",header=F,sep="\t")
                   vox_table[,1] <- 1:nrow(vox_table)
-                  colnames(vox_table) <- c("Cluster Number","Number of Voxels","Maximum Value","X Coordinate","Y Coordinate","Z Coordinate")
+                  colnames(vox_table) <- c("Cluster Number","Number of Voxels","Maximum Value","X Coord","Y Coord","Z Coord")
 
                   #function to make rmd work
                   get_render_image_filename <- function(individual_voxelcoord, overlay_name, brain_sector_index) {
@@ -215,7 +227,6 @@ BssRmdVolumeOutput <-
 
                   eval(parse(text= paste0("shiny::shinyUI(shiny::fluidPage(shinyjs::useShinyjs(),shiny::h3('Choose a cluster and an overlay below'),shiny::tabsetPanel(id = 'navbar',type = 'tabs',",
                         table_tab(), cluster_panels(voxelcoord),")))")))
-                        #table_tab(),")))")))
 
                 }
 

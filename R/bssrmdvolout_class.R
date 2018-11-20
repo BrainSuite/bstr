@@ -220,7 +220,7 @@ BssRmdVolumeOutput <-
                       table <- paste0(substr(table,1,nchar(table)-1),"),")
                     }
                     table <- paste0(substr(table,1,nchar(table)-1),")")
-                    panel <- paste0("shiny::tabPanel(title = shiny::h4(paste('Voxel Coordinate Table'),shiny::tableOutput('data'),shiny::tabsetPanel(id = 'navbar',type = 'pills',")
+                    panel <- paste0("shiny::tabPanel(title = shiny::h4(paste(''),shiny::tableOutput('data'),shiny::tabsetPanel(id = 'navbar',type = 'pills',")
                     panel <- paste0(panel,"shiny::tabPanel(title_0 = 'Voxel Coordinate Table' , value = c('Voxel Coordinate Table'), shiny::p('Voxel Coordinate Table'), shiny::tags$table(",table,"))))")
                     return(panel)
                   }

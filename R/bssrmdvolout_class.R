@@ -120,13 +120,12 @@ BssRmdVolumeOutput <-
                   cat("---\n")
                   cat("title: BSSR Report\n")
                   cat("output: html_document\n")
+                  cat("runtime: shiny\n")
                   cat("---\n")
                   cat("<style>\n\n")
                   cat("table, td, th {\n")
                   cat("border: 1px solid black;\n")
                   cat("border-spacing: 5px;\n")
-                  cat("padding-left: 1em;\n")
-                  cat("padding-right: 1em;\n")
                   cat("min-width: 50%;\n")
                   cat("margin-left: auto;\n")
                   cat("margin-right: auto;\n")
@@ -138,6 +137,10 @@ BssRmdVolumeOutput <-
                   writeLines(user_input)
                   cat("```\n")
                   cat("```{r echo=FALSE, warning=FALSE}\n")
+                  cat("vox_table <- read.table('", outdir,"cluster.tsv', header = F, sep = '\t')\n", sep = "")
+                  cat("vox_table[, 1] <- 1:nrow(vox_table)\n")
+                  cat("colnames(vox_table) <- c('Cluster Number', 'Number of Voxels', 'Maximum Value', 'X Coord', 'Y Coord', 'Z Coord')\n")
+                  cat("DT::datatable(vox_table, rownames = FALSE)\n")
                   writeLines(templines)
                   voxelcoord_char <- "list("
                   for (individual_voxelcoord in 1:length(voxelcoord)){
@@ -161,11 +164,13 @@ BssRmdVolumeOutput <-
                   overlay <- c(bs_stat_overlays$log_pvalues, bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues)
                   for (cbar_index in 1:3){
                     cbar[[cbar_index]] <- paste0(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), overlay[cbar_index], sep = '_'), '_cbar.png')
-
                   }
-                  vox_table <- read.table("~/cluster.tsv",header=F,sep="\t")
-                  vox_table[,1] <- 1:nrow(vox_table)
-                  colnames(vox_table) <- c("Cluster Number","Number of Voxels","Maximum Value","X Coord","Y Coord","Z Coord")
+                  cluster_filepath <- paste0(outdir,"cluster.tsv")
+                  cluster_filepath <- gsub(" ", "", cluster_filepath, fixed = TRUE)
+                  vox_table <- read.table(cluster_filepath, header = F, sep = '\t')
+                  vox_table[, 1] <- 1:nrow(vox_table)
+                  colnames(vox_table) <- c('Cluster Number', 'Number of Voxels', 'Maximum Value', 'X Coord', 'Y Coord', 'Z Coord')
+
 
                   #function to make rmd work
                   get_render_image_filename <- function(individual_voxelcoord, overlay_name, brain_sector_index) {

@@ -40,7 +40,7 @@ setMethod("initialize", valueClass = "BssOutput", signature = "BssOutput", funct
   }
   else {
     .Object@outdir <- outdir
-    message(sprintf("The output directory %s already exists. Will overwrite its contents.", outdir))
+    message(sprintf("The output directory %s already exists.", outdir))
   }
   return(.Object)
 })
@@ -49,6 +49,7 @@ setMethod("initialize", valueClass = "BssOutput", signature = "BssOutput", funct
 #' @param bss_out object of type \code{BssOutput}
 #' @param bss_data object of type \code{BssData}
 #' @param bss_model object of type \code{BssModel}
+#' @param overwrite logical parameter denoting if existing output directory should be overwritten or not (default is false)
 #' @param nclusters numeric parameter denoting number of clusters (default is 10)
 #' @details
 #' For the most part, the user will never have to call this function directly.
@@ -56,7 +57,7 @@ setMethod("initialize", valueClass = "BssOutput", signature = "BssOutput", funct
 #' @seealso \code{\link{save_bss_out}}
 #'
 #' @export
-setGeneric("save_out", valueClass = "BssOutput", function(bss_out, bss_data, bss_model, ...) {
+setGeneric("save_out", valueClass = "BssOutput", function(bss_out, bss_data, bss_model, overwrite = FALSE, ...) {
   standardGeneric("save_out")
 })
 
@@ -81,7 +82,20 @@ BssROIOutput <- setClass(
 )
 
 #' @rdname save_out
-setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", function(bss_out, bss_data, bss_model) {
+setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", function(bss_out, bss_data, bss_model, overwrite = F) {
+
+  # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
+  if (overwrite == TRUE){
+    if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+      while (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+        unlink(paste0(bss_out@outdir,list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)[1]), recursive=TRUE)
+      }
+    }
+  } else {
+    if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+      stop(sprintf("Output directory %s is not empty.\n", bss_out@outdir), call. = FALSE)
+    }
+  }
 
   log_pvalues <- log10_transform(bss_model@pvalues)
   outdir <- bss_out@outdir
@@ -145,7 +159,20 @@ setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", f
 )
 
 #' @rdname save_out
-setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", function(bss_out, bss_data, bss_model, nclusters = 10) {
+setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", function(bss_out, bss_data, bss_model, overwrite = F, nclusters = 10) {
+
+  # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
+  if (overwrite == TRUE){
+    if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+      while (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+        unlink(paste0(bss_out@outdir,list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)[1]), recursive = T)
+      }
+    }
+  } else {
+    if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+      stop(sprintf("Output directory %s is not empty.\n", bss_out@outdir), call. = FALSE)
+    }
+  }
 
   log_pvalues <- rep(1, length(bss_data@atlas_image))
   log_pvalues[bss_data@mask_idx] <- log10_transform(bss_model@pvalues)
@@ -219,9 +246,9 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
   get_voxelcoord <- function(outdir){
     save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
     # Call cluster code from terminal
-    voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,"_mri.bfc.nii_log_pvalues_adjusted.nii.gz","  -o cluster.tsv -n ", nclusters)
+    voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,"_mri.bfc.nii_log_pvalues_adjusted.nii.gz","  -o ", outdir, "cluster.tsv -n ", nclusters)
     system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-    vox_table <- read.table("cluster.tsv",header=F,sep="\t")
+    vox_table <- read.table(paste0(outdir,"cluster.tsv"),header=F,sep="\t")
     voxelcoord <- vector("list",nrow(vox_table))
     for (individ_vox in 1:nrow(vox_table)){
       for (vox_component in 1:3){
@@ -244,7 +271,20 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
 
 
 #' @rdname save_out
-setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", function(bss_out, bss_data, bss_model, nclusters = 10) {
+setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", function(bss_out, bss_data, bss_model, overwrite = F, nclusters = 10) {
+
+  # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
+  if (overwrite == TRUE){
+    if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+      while (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+        unlink(paste0(bss_out@outdir,list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)[1]), recursive = T)
+      }
+    }
+  } else {
+    if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+      stop(sprintf("Output directory %s is not empty.\n", bss_out@outdir), call. = FALSE)
+    }
+  }
 
   log_pvalues <- rep(1, length(bss_data@atlas_image))
   log_pvalues[bss_data@mask_idx] <- log10_transform(bss_model@pvalues)
@@ -313,9 +353,9 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
   get_voxelcoord <- function(outdir){
     save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
     # Call cluster code from terminal
-    voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,"_mri.bfc.nii_log_pvalues_adjusted.nii.gz","  -o cluster.tsv -n ", nclusters)
+    voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,"_mri.bfc.nii_log_pvalues_adjusted.nii.gz","  -o ", outdir, "cluster.tsv -n ", nclusters)
     system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-    vox_table <- read.table("cluster.tsv",header=F,sep="\t")
+    vox_table <- read.table(paste0(outdir,"cluster.tsv"),header=F,sep="\t")
     voxelcoord <- vector("list",nrow(vox_table))
     for (individ_vox in 1:nrow(vox_table)){
       for (vox_component in 1:3){
@@ -340,7 +380,7 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
 
 
 #' @rdname save_out
-setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", function(bss_out, bss_data, bss_model) {
+setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", function(bss_out, bss_data, bss_model, overwrite = F) {
 
   # # Create the output directory
   # if (is.null(outdir)) {
@@ -359,6 +399,19 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
   # }
   #
   # write.table(bss_data@demographics, outdir, sep = data_separator,row.names = FALSE)
+
+  # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
+  if (overwrite == TRUE){
+    if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+      while (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+        unlink(paste0(bss_out@outdir,list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)[1]), recursive = T)
+      }
+    }
+  } else {
+    if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+      stop(sprintf("Output directory %s is not empty.\n", bss_out@outdir), call. = FALSE)
+    }
+  }
 
   # Get the absolute path of outdir
   outdir <- tools::file_path_as_absolute(bss_out@outdir)
@@ -499,9 +552,10 @@ ggplot2::ggsave(filename='",
 #' @param bss_data object of type \code{BssData}
 #' @param bss_model object of type \code{BssModel}
 #' @param outdir output directory to save the results
+#' @param overwrite logical parameter denoting if existing output directory should be overwritten or not (default is false)
 #' @param nclusters number of clusters (default is 10)
 #' @export
-save_bss_out <- function(bss_data, bss_model, outdir="", nclusters = 10) {
+save_bss_out <- function(bss_data, bss_model, outdir="", overwrite = F, nclusters = 10) {
 
   valid_types <- c("cbm", "tbm", "roi", "dbm", "nca")
   if (! bss_data@analysis_type %in% valid_types)
@@ -513,7 +567,7 @@ save_bss_out <- function(bss_data, bss_model, outdir="", nclusters = 10) {
          dbm = { bss_out <- new("BssDBMOutput", outdir) },
          roi = { bss_out <- new("BssROIOutput", outdir) }
   )
-  bss_out <- save_out(bss_out, bss_data, bss_model, nclusters = nclusters)
+  bss_out <- save_out(bss_out, bss_data, bss_model, overwrite = overwrite, nclusters = nclusters)
   invisible(bss_out)
 }
 

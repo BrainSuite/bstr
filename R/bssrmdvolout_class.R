@@ -124,8 +124,6 @@ BssRmdVolumeOutput <-
                   cat("---\n")
                   cat("<style>\n\n")
                   cat("table, td, th {\n")
-                  cat("border: 1px solid black;\n")
-                  cat("border-spacing: 5px;\n")
                   cat("min-width: 50%;\n")
                   cat("margin-left: auto;\n")
                   cat("margin-right: auto;\n")
@@ -200,8 +198,12 @@ BssRmdVolumeOutput <-
 
                   # Function that creates clusters for each panel
                   cluster_panels = function(voxelcoord){
-                    panels <- ""
-                    for (voxelcoord_index in 1:length(voxelcoord)){
+                    panels <- paste0("shiny::tabPanel(title = shiny::h4(paste('Cluster 1: Voxel Coordinate (",voxelcoord[[1]][1],",",voxelcoord[[1]][2],",",voxelcoord[[1]][3],")'),shiny::tableOutput('data'),shiny::tabsetPanel(id = 'navbar',type = 'pills',")
+                    for (tab_panel_type in 1:3){
+                      panels <- paste0(panels,tab_panel(tab_panel_type, 1),",")
+                    }
+                    panels <- paste0(substr(panels,1,nchar(panels)-1),")))")
+                    for (voxelcoord_index in 2:length(voxelcoord)){
                       panels <- paste0(panels, ", shiny::tabPanel(title = shiny::h4(paste('Cluster ", voxelcoord_index, ": Voxel Coordinate (",voxelcoord[[voxelcoord_index]][1],",",voxelcoord[[voxelcoord_index]][2],",",voxelcoord[[voxelcoord_index]][3],")'),shiny::tableOutput('data'),shiny::tabsetPanel(id = 'navbar',type = 'pills',")
                       for (tab_panel_type in 1:3){
                         panels <- paste0(panels,tab_panel(tab_panel_type, voxelcoord_index),",")
@@ -211,28 +213,9 @@ BssRmdVolumeOutput <-
                     return(substr(panels,1,nchar(panels)))
                   }
 
-                  # Function that creates the table tab
-                  table_tab <- function(){
-                    table <- "shiny::tags$tr(shiny::tags$th('"
-                    for (table_header in 1:length(colnames(vox_table))){
-                      table <- paste0(table,colnames(vox_table)[table_header],"    '),shiny::tags$th('")
-                    }
-                    table <- paste0(substr(table,1,nchar(table)-17),"),")
-                    for (colwise_data in 1:nrow(vox_table)){
-                      table <- paste0(table, "shiny::tags$tr(")
-                      for (rowwise_data in 1:length(colnames(vox_table))){
-                        table <- paste0(table,"shiny::tags$td(vox_table[",colwise_data,",",rowwise_data,"]),")
-                      }
-                      table <- paste0(substr(table,1,nchar(table)-1),"),")
-                    }
-                    table <- paste0(substr(table,1,nchar(table)-1),")")
-                    panel <- paste0("shiny::tabPanel(title = shiny::h4(paste(''),shiny::tableOutput('data'),shiny::tabsetPanel(id = 'navbar',type = 'pills',")
-                    panel <- paste0(panel,"shiny::tabPanel(title_0 = 'Voxel Coordinate Table' , value = c('Voxel Coordinate Table'), shiny::p('Voxel Coordinate Table'), shiny::tags$table(",table,"))))")
-                    return(panel)
-                  }
 
                   eval(parse(text= paste0("shiny::shinyUI(shiny::fluidPage(shinyjs::useShinyjs(),shiny::h3('Choose a cluster and an overlay below'),shiny::tabsetPanel(id = 'navbar',type = 'tabs',",
-                        table_tab(), cluster_panels(voxelcoord),")))")))
+                        cluster_panels(voxelcoord),")))")))
 
                 }
 

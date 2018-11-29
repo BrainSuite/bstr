@@ -136,7 +136,6 @@ BssRmdVolumeOutput <-
                   cat("```\n")
                   cat("```{r echo=FALSE, warning=FALSE}\n")
                   cat("vox_table <- read.table('", outdir,"cluster.tsv', header = F, sep = '\t')\n", sep = "")
-                  cat("vox_table[, 1] <- 1:nrow(vox_table)\n")
                   cat("colnames(vox_table) <- c('Cluster Number', 'Number of Voxels', 'Maximum Value', 'X Coord', 'Y Coord', 'Z Coord')\n")
                   cat("DT::datatable(vox_table, rownames = FALSE)\n")
                   writeLines(templines)
@@ -166,7 +165,6 @@ BssRmdVolumeOutput <-
                   cluster_filepath <- paste0(outdir,"cluster.tsv")
                   cluster_filepath <- gsub(" ", "", cluster_filepath, fixed = TRUE)
                   vox_table <- read.table(cluster_filepath, header = F, sep = '\t')
-                  vox_table[, 1] <- 1:nrow(vox_table)
                   colnames(vox_table) <- c('Cluster Number', 'Number of Voxels', 'Maximum Value', 'X Coord', 'Y Coord', 'Z Coord')
 
 

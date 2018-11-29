@@ -246,7 +246,9 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
   get_voxelcoord <- function(outdir){
     save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
     # Call cluster code from terminal
-    voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,"_mri.bfc.nii_log_pvalues_adjusted.nii.gz","  -o ", outdir, "cluster.tsv -n ", nclusters)
+    voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,
+                              "_mri.bfc.nii_log_pvalues_adjusted.nii.gz -m /Applications/BrainSuite18a/svreg/BrainSuiteAtlas1/mri.cortex.dewisp.mask.nii.gz",
+                              " -o ", outdir, "cluster.tsv -n ", nclusters)
     system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
     vox_table <- read.table(paste0(outdir,"cluster.tsv"),header=F,sep="\t")
     voxelcoord <- vector("list",nrow(vox_table))
@@ -353,7 +355,9 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
   get_voxelcoord <- function(outdir){
     save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
     # Call cluster code from terminal
-    voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,"_mri.bfc.nii_log_pvalues_adjusted.nii.gz","  -o ", outdir, "cluster.tsv -n ", nclusters)
+    voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,
+                              "_mri.bfc.nii_log_pvalues_adjusted.nii.gz -m /Applications/BrainSuite18a/svreg/BrainSuiteAtlas1/mri.cortex.dewisp.mask.nii.gz",
+                              " -o ", outdir, "cluster.tsv -n ", nclusters)
     system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
     vox_table <- read.table(paste0(outdir,"cluster.tsv"),header=F,sep="\t")
     voxelcoord <- vector("list",nrow(vox_table))

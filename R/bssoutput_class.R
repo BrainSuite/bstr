@@ -187,68 +187,45 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
   tvalues[bss_data@mask_idx] <- bss_model@tvalues
   dim(tvalues) <- dim(bss_data@atlas_image)
 
-  if (bss_model@model_type == "bss_corr") {
-    corr_values <- rep(0, length(bss_data@atlas_image))
-    corr_values[bss_data@mask_idx] <- bss_model@corr_values
-    dim(corr_values) <- dim(bss_data@atlas_image)
-  }
-
+  tvalues_adjusted <- rep(0, length(bss_data@atlas_image))
+  tvalues_adjusted[bss_data@mask_idx] <- bss_model@tvalues_adjusted
+  dim(tvalues_adjusted) <- dim(bss_data@atlas_image)
+  measure <- NULL
   switch(bss_model@model_type,
          bss_anova = {
-           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@main_effect, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@main_effect, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(tvalues, bss_model@main_effect, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(tvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           save_bss_rds(bss_model@pvalues, bss_model@main_effect, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
+           var_name = bss_model@main_effect
          },
-
          bss_lm = {
-           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@main_effect, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@main_effect, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(tvalues, bss_model@main_effect, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(tvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           save_bss_rds(bss_model@pvalues, bss_model@main_effect, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
+           var_name = bss_model@main_effect
          },
          bss_corr = {
-           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@corr_var, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@corr_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(corr_values, bss_model@corr_var, "corr_values", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(corr_values, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
-           save_bss_rds(bss_model@pvalues, bss_model@corr_var, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
+           corr_values <- rep(0, length(bss_data@atlas_image))
+           corr_values[bss_data@mask_idx] <- bss_model@corr_values
+           dim(corr_values) <- dim(bss_data@atlas_image)
+
+           corr_values_masked_adjusted <- rep(0, length(bss_data@atlas_image))
+           corr_values_masked_adjusted[bss_data@mask_idx] <- bss_model@corr_values_masked_adjusted
+           dim(corr_values_masked_adjusted) <- dim(bss_data@atlas_image)
+
+           var_name = bss_model@corr_var
          },
          pairedttest = {
-           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@group_var, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@group_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(tvalues, bss_model@group_var, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(tvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           save_bss_rds(bss_model@pvalues, bss_model@group_var, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
+           var_name = bss_model@group_var
          },
          unpairedttest = {
-           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@group_var, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@group_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(tvalues, bss_model@group_var, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(tvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           save_bss_rds(bss_model@pvalues, bss_model@group_var, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
+           var_name = bss_model@group_var
          }
   )
 
+  save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
+
   # Function to get the voxelcoordinate
   get_voxelcoord <- function(outdir){
-    save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
     # Call cluster code from terminal
     voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,
-                              "_mri.bfc.nii_log_pvalues_adjusted.nii.gz -m /Applications/BrainSuite18a/svreg/BrainSuiteAtlas1/mri.cortex.dewisp.mask.nii.gz",
-                              " -o ", outdir, "cluster.tsv -n ", nclusters)
+                              "_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)), "_tvalues_adjusted.nii.gz",
+                              " -m ", bss_data@maskfile, " -o ", outdir, "/cluster.tsv", " -n ", nclusters)
+
     system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
     vox_table <- read.table(paste0(outdir,"cluster.tsv"),header=F,sep="\t")
     voxelcoord <- vector("list",nrow(vox_table))
@@ -301,65 +278,44 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
   tvalues[bss_data@mask_idx] <- bss_model@tvalues
   dim(tvalues) <- dim(bss_data@atlas_image)
 
-  if (bss_model@model_type == "bss_corr") {
-    corr_values <- rep(0, length(bss_data@atlas_image))
-    corr_values[bss_data@mask_idx] <- bss_model@corr_values
-    dim(corr_values) <- dim(bss_data@atlas_image)
-  }
-
+  measure <- NULL
   switch(bss_model@model_type,
          bss_anova = {
-           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@main_effect, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@main_effect, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(tvalues, bss_model@main_effect, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(tvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
+           var_name = bss_model@main_effect
          },
-
          bss_lm = {
-           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@main_effect, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@main_effect, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(tvalues, bss_model@main_effect, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(tvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
+           var_name = bss_model@main_effect
          },
          bss_corr = {
-           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@corr_var, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@corr_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(corr_values, bss_model@corr_var, "corr_values", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(corr_values, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
+           corr_values <- rep(0, length(bss_data@atlas_image))
+           corr_values[bss_data@mask_idx] <- bss_model@corr_values
+           dim(corr_values) <- dim(bss_data@atlas_image)
+
+           corr_values_masked_adjusted <- rep(0, length(bss_data@atlas_image))
+           corr_values_masked_adjusted[bss_data@mask_idx] <- bss_model@corr_values_masked_adjusted
+           dim(corr_values_masked_adjusted) <- dim(bss_data@atlas_image)
+
+           var_name = bss_model@corr_var
          },
          pairedttest = {
-           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@group_var, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@group_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(tvalues, bss_model@group_var, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(tvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           var_name = bss_model@group_var
          },
          unpairedttest = {
-           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@group_var, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@group_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(tvalues, bss_model@group_var, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(tvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           var_name = bss_model@group_var
          }
   )
 
+  save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
+
   # Function to get the voxelcoordinate
   get_voxelcoord <- function(outdir){
-    save_bss_out_nifti_image(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
     # Call cluster code from terminal
     voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,
-                              "_mri.bfc.nii_log_pvalues_adjusted.nii.gz -m /Applications/BrainSuite18a/svreg/BrainSuiteAtlas1/mri.cortex.dewisp.mask.nii.gz",
-                              " -o ", outdir, "cluster.tsv -n ", nclusters)
+                              "_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)), "_tvalues_adjusted.nii.gz",
+                              " -m ", bss_data@maskfile, " -o ", outdir, "/cluster.tsv", " -n ", nclusters)
+
     system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-    vox_table <- read.table(paste0(outdir,"cluster.tsv"),header=F,sep="\t")
+    vox_table <- read.table(paste0(outdir,"/cluster.tsv"),header=F,sep="\t")
     voxelcoord <- vector("list",nrow(vox_table))
     for (individ_vox in 1:nrow(vox_table)){
       for (vox_component in 1:3){
@@ -380,8 +336,6 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
   invisible(bss_out)
 }
 )
-
-
 
 #' @rdname save_out
 setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", function(bss_out, bss_data, bss_model, overwrite = F) {
@@ -625,4 +579,30 @@ save_bss_rds <- function(measure, var_name, label, bss_data, bss_model, outdir) 
   saveRDS(measure, file=file.path(outdir, outprefix))
 }
 
+save_vol_stats_out <- function(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted,
+                               var_name, bss_data, bss_model, outdir) {
+
+  bss_cmap <- save_bss_color_files(log_pvalues, var_name, "log_pvalues", bss_data, bss_model, outdir)
+  save_bss_out_nifti_image(log_pvalues, var_name, bss_cmap, bss_data, bss_model, outdir)
+
+  bss_cmap <- save_bss_color_files(log_pvalues_adjusted, var_name, "log_pvalues_adjusted", bss_data, bss_model, outdir)
+  save_bss_out_nifti_image(log_pvalues_adjusted, var_name, bss_cmap, bss_data, bss_model, outdir)
+
+  bss_cmap <- save_bss_color_files(tvalues, var_name, "tvalues", bss_data, bss_model, outdir)
+  save_bss_out_nifti_image(tvalues, var_name, bss_cmap, bss_data, bss_model, outdir)
+
+  bss_cmap <- save_bss_color_files(tvalues_adjusted, var_name, "tvalues_adjusted", bss_data, bss_model, outdir)
+  save_bss_out_nifti_image(tvalues_adjusted, var_name, bss_cmap, bss_data, bss_model, outdir)
+  save_bss_rds(bss_model@pvalues, var_name, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
+
+  switch(bss_model@model_type,
+         bss_corr = {
+           bss_cmap <- save_bss_color_files(bss_model@corr_values, var_name, "corr_values", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(bss_model@corr_values, var_name, bss_cmap, bss_data, bss_model, outdir)
+
+           bss_cmap <- save_bss_color_files(bss_model@corr_values_masked_adjusted, var_name, "corr_values_masked_adjusted", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(bss_model@corr_values_masked_adjusted, var_name, bss_cmap, bss_data, bss_model, outdir)
+         }
+  )
+}
 

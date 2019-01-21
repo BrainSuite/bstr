@@ -68,6 +68,7 @@ bs_stat_overlays <- list(
   log_pvalues = "log_pvalues",
   log_pvalues_adjusted = "log_pvalues_adjusted",
   tvalues = "tvalues",
+  tvalues_adjusted = "tvalues_adjusted",
   pvalues = "pvalues"
 )
 

@@ -55,6 +55,8 @@ bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr", 
       bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
       nulldist <- pvalue_and_nulldist[[2]]
       bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
+      bss_model@tvalues_adjusted <- bss_model@tvalues
+      bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
       stopCluster(cl)
       options(warn=0)
     },
@@ -63,6 +65,8 @@ bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr", 
       bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
       bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
       bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
+      bss_model@tvalues_adjusted <- bss_model@tvalues
+      bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
     }
   )
 
@@ -307,6 +311,10 @@ bss_corr <- function(corr_var, bss_data, mult_comp="fdr") {
   bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
   # bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
   bss_model@corr_values[abs(bss_model@pvalues) >= 0.05] <- 0
+  bss_model@corr_values_masked_adjusted <- bss_model@corr_values
+  bss_model@corr_values_masked_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+  bss_model@tvalues_adjusted <- bss_model@tvalues
+  bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
   message('Done.')
   return(bss_model)
 }
@@ -373,6 +381,8 @@ bss_ttest <- function(group_var, bss_data, paired = FALSE, mult_comp="fdr") {
   bss_model@tvalues[abs(pvalues) >= 0.05] <- 0
   bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
   # bss_model@pvalues_adjusted <- p.adjust(abs(bss_model@pvalues), 'BH')
+  bss_model@tvalues_adjusted <- bss_model@tvalues
+  bss_model@tvalues_adjusted[abs(pvalues_adjusted) >= 0.05] <- 0
 
   message('Done.')
   return(bss_model)

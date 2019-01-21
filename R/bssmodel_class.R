@@ -23,6 +23,7 @@
 #' @slot corr_var character variable name. This should be present in the demographics csv file associated
 #' with \code{bss_data}.
 #' @slot corr_values numeric vector to store correlation coefficients
+#' @slot corr_values_masked_adjusted numeric vector storing the masked correlation coefficients corresponding to the adjusted p-values
 #' @slot group_var Categorical variable name. This should be present in the demographics csv file associated
 #' with \code{bss_data}.
 #' @slot model_type character string denoting the type of model. Should be one of \code{"bss_anova"},
@@ -60,6 +61,7 @@ BssModel <- setClass(
     covariates = "character",
     corr_var = "character",
     corr_values = "numeric",
+    corr_values_masked_adjusted = "numeric",
     group_var = "character",
     model_type = "character",
     fullmodel = "character",
@@ -81,6 +83,7 @@ BssModel <- setClass(
     residuals = "matrix",
     se = "numeric",
     pvalues_adjusted = "numeric",
+    tvalues_adjusted = "numeric",
     stats_commands = "vector",
     load_data_command = "character"
   )

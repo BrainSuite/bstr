@@ -4,7 +4,8 @@
 \alias{save_bss_out}
 \title{Save the statistical analysis output}
 \usage{
-save_bss_out(bss_data, bss_model, outdir = "")
+save_bss_out(bss_data, bss_model, outdir = "", overwrite = F,
+  nclusters = 10)
 }
 \arguments{
 \item{bss_data}{object of type \code{BssData}}
@@ -12,6 +13,10 @@ save_bss_out(bss_data, bss_model, outdir = "")
 \item{bss_model}{object of type \code{BssModel}}
 
 \item{outdir}{output directory to save the results}
+
+\item{overwrite}{logical parameter denoting if existing output directory should be overwritten or not (default is false)}
+
+\item{nclusters}{number of clusters (default is 10)}
 }
 \description{
 Save the statistical analysis output

@@ -15,7 +15,7 @@ S4 class for storing data for statistical analysis
 
 \item{\code{data_array_lh}}{matrix containing data for left hemisphere.}
 
-\item{\code{data_array_rh}}{atrix containing data for right hemisphere.}
+\item{\code{data_array_rh}}{matrix containing data for right hemisphere.}
 
 \item{\code{analysis_type}}{character string denoting the type of analysis. Valid types are "cbm", "tbm" or "roi".}
 
@@ -26,6 +26,10 @@ S4 class for storing data for statistical analysis
 \item{\code{subjdir}}{character string for subject directory.}
 
 \item{\code{csv}}{filename of a comma separated (csv) file containing the subject demographic information.}
+
+\item{\code{smooth}}{numeric value used to smooth the data.}
+
+\item{\code{measure}}{character string denoting the type of measure used.}
 
 \item{\code{filelist}}{list of files belonging to N subjects.}
 

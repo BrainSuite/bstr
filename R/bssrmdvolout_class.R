@@ -37,6 +37,7 @@ BssRmdVolumeOutput <-
 
                   #create a folder to store png images in
                   dir.create(paste0(outdir,"PNG_images"))
+                  dir.create(paste0(outdir,"PNG_images_crosshairs"))
                   for(cluster_iter in 1:length(voxelcoord)) {
                     private$render_overlay(
                       cluster_iter,
@@ -81,8 +82,38 @@ BssRmdVolumeOutput <-
                   view_order <- c("sag","cor","ax")
                   for (stats_measure_index in 1:3) {
                     for (view in 1:3){
+                       current_view_with_crosshairs <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/PNG_images_crosshairs/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[stats_measure_index], ".png --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view], " -a ", alpha)
+                       system(current_view_with_crosshairs,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                        current_view <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/PNG_images/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[stats_measure_index], ".png --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view], " -a ", alpha)
                        system(current_view,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
+                       coord_range <- c(180,216,180)
+                       start_coord <- c(0,1,1.0553)
+                       if (view == 1){
+                         x0_center = (voxelcoord[[voxelcoord_index]][2]*(1/215))+(1/215)
+                         x_additive = 15/(coord_range[2]-start_coord[2])
+                         y0_center = (voxelcoord[[voxelcoord_index]][3]*(1/178.945))+(1.0553/178.945)
+                         y_additive = 15/(coord_range[3]-start_coord[3])
+                       } else if (view == 2) {
+                         x0_center = voxelcoord[[voxelcoord_index]][1]*(1/180)
+                         x_additive = 15/(coord_range[1]-start_coord[1])
+                         y0_center = (voxelcoord[[voxelcoord_index]][3]*(1/178.945))+(1.0553/178.945)
+                         y_additive = 15/(coord_range[3]-start_coord[3])
+                       } else {
+                         x0_center = voxelcoord[[voxelcoord_index]][1]*(1/180)
+                         x_additive = 15/(coord_range[1]-start_coord[1])
+                         y0_center = (voxelcoord[[voxelcoord_index]][2]*(1/215))+(1/215)
+                         y_additive = 15/(coord_range[2]-start_coord[2])
+                       }
+                       temp_image <- readPNG(get_render_image_filename(outdir,voxelcoord[[voxelcoord_index]][view],name[stats_measure_index], view))
+                       png(get_render_image_filename(outdir,voxelcoord[[voxelcoord_index]][view],name[stats_measure_index], view)) #bg = "transparent")
+                       plot(0:1, 0:1, type='n', axes = F, ann = F)
+                       par(mar = c(0,0,0,0))
+                       rasterImage(temp_image, 0, 0, 1, 1)
+                       # Add horizontal crosshair
+                       segments(x0 = x0_center - x_additive, y0 = y0_center, x1 = x0_center + x_additive , y1 = y0_center, col="black", lwd=3)
+                       # Add vertical crosshair
+                       segments(x0 = x0_center, y0 = y0_center - y_additive, x1 = x0_center, y1 = y0_center + y_additive, col="black", lwd=3)
+                       dev.off()
                     }
                   }
                   return(0)
@@ -131,12 +162,13 @@ BssRmdVolumeOutput <-
                   cat("margin-bottom: 1em;\n")
                   cat("}\n\n")
                   cat("</style>\n")
-                  cat("```{r eval=TRUE, echo=FALSE, message=FALSE, results='hide', user_input_commands}\n")
+                  cat("```{r eval=FALSE, echo=FALSE, message=FALSE, results='hide', user_input_commands}\n")
+                  cat("#Change the above argument eval to TRUE to knit the file.\n")
                   writeLines(user_input)
                   cat("```\n")
                   cat("```{r echo=FALSE, warning=FALSE}\n")
                   cat("vox_table <- read.table('", outdir,"cluster.tsv', header = F, sep = '\t')\n", sep = "")
-                  cat("colnames(vox_table) <- c('Cluster Number', 'Number of Voxels', 'Maximum Value', 'X Coord', 'Y Coord', 'Z Coord')\n")
+                  cat("colnames(vox_table) <- c('Cluster Number', 'Number of Voxels', 'T-Value', 'X Coord', 'Y Coord', 'Z Coord')\n")
                   cat("DT::datatable(vox_table, rownames = FALSE)\n")
                   writeLines(templines)
                   voxelcoord_char <- "list("
@@ -169,27 +201,29 @@ BssRmdVolumeOutput <-
 
 
                   #function to make rmd work
-                  get_render_image_filename <- function(individual_voxelcoord, overlay_name, brain_sector_index) {
+                  get_render_image_filename <- function(outdir, individual_voxelcoord, overlay_name, brain_sector_index) {
                     view_order <- c("sag","cor","ax")
-                    return(paste0("./PNG_images/", view_order[brain_sector_index], individual_voxelcoord,"_",overlay_name,".png"))
+                    #return(paste0(outdir, "PNG_images_crosshairs/", view_order[brain_sector_index], individual_voxelcoord,"_",overlay_name,".png"))
+                    return(paste0("./PNG_images_crosshairs/", view_order[brain_sector_index], individual_voxelcoord,"_",overlay_name,".png"))
                   }
 
                   # Function to return a shiny image object
-                  shiny_image = function(specific_voxelcoord, index_brain_sector, overlay_type, width){
+                  shiny_image = function(outdir, specific_voxelcoord, index_brain_sector, overlay_type, width){
                     align <- "left"
-                    return(paste0("shiny::img(src='",get_render_image_filename(specific_voxelcoord,overlay_type, index_brain_sector),"', align = '", align, "', width = '", width,"')"))
+                    return(paste0("shiny::img(src='",get_render_image_filename(outdir, specific_voxelcoord,overlay_type, index_brain_sector),"', align = '", align, "', width = '", width,"')"))
                   }
 
                   # Function that creates a tabPanel
                   tab_panel = function(panel_type, voxelcoord_index){
-                    width <- c("34.5%","28.8%","24%","11%")
+                    #width <- c("34.5%","28.8%","24%","11%")
+                    width <- c("31%", "7%")
                     overlay <- c(bs_stat_overlays$log_pvalues, bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues)
                     panel_names <- c("P-Values","Adjusted P-Values","T-Values")
                     images <- ""
                     for (inner_coord_index in 1:3) {
-                      images <- paste0(images, shiny_image(voxelcoord[[voxelcoord_index]][inner_coord_index], inner_coord_index,overlay[panel_type], width[inner_coord_index]), ",")
+                      images <- paste0(images, shiny_image(outdir, voxelcoord[[voxelcoord_index]][inner_coord_index], inner_coord_index,overlay[panel_type], width[1]), ",")
                     }
-                    images <- paste0(images, "shiny::img(src=paste0('", cbar[panel_type], "'), align='left', width = '", width[4], "'),")
+                    images <- paste0(images, "shiny::img(src=paste0('", cbar[panel_type], "'), align='left', width = '", width[2], "'),")
                     images <- substr(images,1,nchar(images)-1)
                     return(paste0("shiny::tabPanel(title_0 = '", panel_names[panel_type], "', value = c('", panel_names[panel_type], "'), shiny::p('", panel_names[panel_type], "'), ",images,")"))
                   }

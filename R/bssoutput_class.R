@@ -219,27 +219,24 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
 
   save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
 
-  # Function to get the voxelcoordinate
-  # get_voxelcoord <- function(outdir){
-  #   # Call cluster code from terminal
-  #   voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,
-  #                             "_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)), "_tvalues_adjusted.nii.gz",
-  #                             " -m ", bss_data@maskfile, " -o ", outdir, "/cluster.tsv", " -n ", nclusters)
-  #
-  #   system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-  #   vox_table <- read.table(paste0(outdir,"cluster.tsv"),header=F,sep="\t")
-  #   voxelcoord <- vector("list",nrow(vox_table))
-  #   for (individ_vox in 1:nrow(vox_table)){
-  #     for (vox_component in 1:3){
-  #       voxelcoord[[individ_vox]]<- c(voxelcoord[[individ_vox]],vox_table[individ_vox,3+vox_component])
-  #     }
-  #   }
-  #   return(voxelcoord)
-  # }
+  voxelcoord <- get_voxelcoord(bss_out, bss_data, bss_model, outdir, nclusters)
+
+  # Check if voxelcoord is empty
+  if (length(voxelcoord) == 0) {
+    sink(paste0(outdir, "save_rmd.Rmd"), type = "output")
+    cat("---\n")
+    cat("title: BSSR Report\n")
+    cat("output: html_document\n")
+    cat("---\n\n\n")
+    cat("No detected clusters above significance threshold.")
+    sink()
+    rmarkdown::render(paste0(outdir, "save_rmd.Rmd"))
+    stop("No detected clusters above significance threshold.")
+  }
 
   # add create an R6 class function from here
   bssrmd_volout <- BssRmdVolumeOutput$new()
-  bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = get_voxelcoord(bss_out, bss_data, bss_model, outdir, nclusters), outdir)
+  bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = voxelcoord, outdir)
 
 
     # Copy modelspec file to the output directory
@@ -306,25 +303,6 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
   )
 
   save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
-
-  # Function to get the voxelcoordinate
-  # get_voxelcoord <- function(outdir){
-  #   # Call cluster code from terminal
-  #   voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,
-  #                             "_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)), "_tvalues_adjusted.nii.gz",
-  #                             " -m ", bss_data@maskfile, " -o ", outdir, "/cluster.tsv", " -n ", nclusters)
-  #
-  #   system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-  #   vox_table <- read.table(paste0(outdir,"/cluster.tsv"),header=F,sep="\t")
-  #   voxelcoord <- vector("list",nrow(vox_table))
-  #   for (individ_vox in 1:nrow(vox_table)){
-  #     for (vox_component in 1:3){
-  #       voxelcoord[[individ_vox]]<- c(voxelcoord[[individ_vox]],vox_table[individ_vox,3+vox_component])
-  #     }
-  #   }
-  #   return(voxelcoord)
-  # }
-
 
   # add create an R6 class function from here
   bssrmd_volout <- BssRmdVolumeOutput$new()
@@ -618,6 +596,21 @@ get_voxelcoord <- function(bss_out, bss_data, bss_model, outdir, nclusters){
   for (individ_vox in 1:nrow(vox_table)){
     for (vox_component in 1:3){
       voxelcoord[[individ_vox]]<- c(voxelcoord[[individ_vox]],vox_table[individ_vox,3+vox_component])
+    }
+  }
+  # Use tvalues instead of adjusted tvalues if no clusters are found
+  if (length(voxelcoord) == 0){
+    voxelcoord_call <- paste0("clustermap -i ", outdir,bss_model@model_type,"_",bss_model@main_effect,
+                              "_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)), "_tvalues.nii.gz",
+                              " -m ", bss_data@maskfile, " -o ", outdir, "/cluster.tsv", " -n ", nclusters)
+
+    system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
+    vox_table <- read.table(paste0(outdir,"cluster.tsv"),header=F,sep="\t")
+    voxelcoord <- vector("list",nrow(vox_table))
+    for (individ_vox in 1:nrow(vox_table)){
+      for (vox_component in 1:3){
+        voxelcoord[[individ_vox]]<- c(voxelcoord[[individ_vox]],vox_table[individ_vox,3+vox_component])
+      }
     }
   }
   return(voxelcoord)

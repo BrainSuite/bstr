@@ -65,16 +65,16 @@ bs_data_types <- list(
 
 #' List of statistical and other overlay types used in BrainSuite
 bs_stat_overlays <- list(
-  log_pvalues = "log_pvalues",
   log_pvalues_adjusted = "log_pvalues_adjusted",
-  tvalues = "tvalues",
   tvalues_adjusted = "tvalues_adjusted",
+  log_pvalues = "log_pvalues",
+  tvalues = "tvalues",
   pvalues = "pvalues"
 )
 
-get_render_image_filename <- function(outdir,individual_voxelcoord, overlay_name, brain_sector_index) {
+get_render_image_filename <- function(outdir,voxelcoord, overlay_name, brain_sector_index, voxelcoord_index) {
   view_order <- c("sag","cor","ax")
-  return(paste0(outdir, "PNG_images_crosshairs/", view_order[brain_sector_index], individual_voxelcoord,"_",overlay_name,".png"))
+  return(paste0(outdir, "PNG_images_crosshairs/", view_order[brain_sector_index], voxelcoord[[voxelcoord_index]][brain_sector_index],"_",overlay_name,"_cluster",voxelcoord_index,".png"))
 }
 
 bs_surface_file_string <- function(hemi="left", smooth = 0) {

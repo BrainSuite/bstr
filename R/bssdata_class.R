@@ -296,7 +296,7 @@ load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0, atlas="", 
   }
   else
     dbm_atlas_and_mask <- get_custom_tbm_atlas_and_mask(atlas)
-  bss_dbm_data <- load_data(bss_dbm_data, atlas_filename = dbm_atlas_and_mask$nii_atlas, maskfile = dbm_atlas_and_mask$nii_atlas_mask, measure=measure, smooth=smooth)
+  bss_dbm_data <- load_data(bss_dbm_data, atlas_filename = dbm_atlas_and_mask$nii_atlas, maskfile = dbm_atlas_and_mask$nii_atlas_mask, measure=measure, smooth=smooth, eddy=eddy)
   bss_dbm_data@data_type <- bs_data_types$nifti_image
   return(bss_dbm_data)
 }

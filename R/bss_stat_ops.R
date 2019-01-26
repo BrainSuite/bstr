@@ -353,8 +353,8 @@ bss_ttest <- function(group_var, bss_data, paired = FALSE, mult_comp="fdr") {
     bss_model <- new("BssModel", model_type="pairedttest", group_var = group_var,
                      demographics = bss_data@demographics, mspec_file="")
 
-  group1 <- levels(bss_data@demographics[[group_var]])[1]
-  group2 <- levels(bss_data@demographics[[group_var]])[2]
+  group1 <- levels(as.factor(bss_data@demographics[[group_var]]))[1]
+  group2 <- levels(as.factor(bss_data@demographics[[group_var]]))[2]
   idx_group1 <- which(bss_data@demographics[[group_var]] == group1)
   idx_group2 <- which(bss_data@demographics[[group_var]] == group2)
 

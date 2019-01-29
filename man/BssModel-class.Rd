@@ -25,6 +25,8 @@ with \code{bss_data}.}
 
 \item{\code{corr_values}}{numeric vector to store correlation coefficients}
 
+\item{\code{corr_values_masked_adjusted}}{numeric vector storing the masked correlation coefficients corresponding to the adjusted p-values}
+
 \item{\code{group_var}}{Categorical variable name. This should be present in the demographics csv file associated
 with \code{bss_data}.}
 

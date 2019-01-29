@@ -13,7 +13,7 @@
 # if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #' An S4 class for representing colormaps
-#' @slot cmap_type A character string for the type of colormap. Valid values are "corr_values", "tvalues", "log_pvalues", "log_pvalues_adjusted"
+#' @slot cmap_type A character string for the type of colormap. Valid values are "corr_values", "tvalues", "tvalues_adjusted", "log_pvalues", "log_pvalues_adjusted"
 #' @slot cmap_name A character string for the title of the colormap. This string will be displayed on the colorbar.
 #' @slot values A numeric vector containing the values or measures to be mapped.
 #' @slot cex Maximum absolute value of the measure to be mapped.
@@ -61,6 +61,7 @@ setMethod("initialize", valueClass = "BssColormap", signature = "BssColormap",
             switch(.Object@cmap_type,
                    corr_values = { cmap <- get_tvalue_colors(cmap_name, values)}, # Use tvalue cmap for correlations
                    tvalues = { cmap <- get_tvalue_colors(cmap_name, values)},
+                   tvalues_adjusted = { cmap <- get_tvalue_colors(cmap_name, values)},
                    log_pvalues = { cmap <- get_logpvalue_colors(cmap_name, values)},
                    log_pvalues_adjusted = { cmap <- get_logpvalue_colors(cmap_name, values)}
             )
@@ -221,7 +222,7 @@ save_colorbar <- function(filename, lut, vmin, vmax, labeltxt) {
     ggplot2::scale_x_continuous(expand = c(0, 0)) +
     ggplot2::theme(plot.background = ggplot2::element_blank()) +
     ggplot2::theme(panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1)) +
-    ggplot2::ggsave(filename, device = "pdf", width = 1.3, height = 3.5, dpi = 600)
+    ggplot2::ggsave(filename, width = 1.3, height = 3.5, dpi = 600)
 
 }
 

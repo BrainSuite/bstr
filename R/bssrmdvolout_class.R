@@ -1,6 +1,6 @@
 # BrainSuite Statistics Toolbox in R (bssr)
 # Copyright (C) 2017 The Regents of the University of California
-# Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
+# Creator: Shantanu H. Joshi,e Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
 #
 # This program is free software; you can redistribute it and/or modify it under the terms
 # of the GNU General Public License as published by the Free Software Foundation; version 2.
@@ -16,24 +16,248 @@
 #' @export
 BssRmdVolumeOutput <-
   R6::R6Class("BssRmdVolumeOutput",
-              inherit = BssRmdOutput,
+              #inherit = BssRmdOutput,
               public = list(
-                initialize = function(outdir = NULL) {
-                  super$initialize(outdir)
+                initialize = function(outdir = "./") {
+                  initialize(outdir)
                 },
-                save_out = function(bss_data, bss_model) {
+                save_out = function(bss_data, bss_model, outdir, voxelcoord) {
+                  get_custom_tbm_overlays = function(outdir) {
 
+                    adjp_overlay <- paste0(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", bs_stat_overlays$log_pvalues_adjusted, bss_data@data_type)
+                    adjt_overlay <- paste0(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", bs_stat_overlays$tvalues_adjusted, bss_data@data_type)
+                    p_overlay <- paste0(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", bs_stat_overlays$log_pvalues, bss_data@data_type)
+                    t_overlay <- paste0(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", bs_stat_overlays$tvalues, bss_data@data_type)
+
+                    return(list("adjp_overlay" = adjp_overlay, "adjt_overlay" = adjt_overlay, "p_overlay" = p_overlay, "t_overlay" = t_overlay))
+                  }
+
+
+                  #create a folder to store png images in
+                  dir.create(paste0(outdir,"PNG_images"))
+                  dir.create(paste0(outdir,"PNG_images_crosshairs"))
+                  for(cluster_iter in 1:length(voxelcoord)) {
+                    private$render_overlay(
+                      cluster_iter,
+                      voxelcoord,
+                      atlaspath = bss_data@atlas_filename,
+                      overlaypath = c(get_custom_tbm_overlays(outdir)[[1]],get_custom_tbm_overlays(outdir)[[2]],get_custom_tbm_overlays(outdir)[[3]],get_custom_tbm_overlays(outdir)[[4]]),
+                      #stat_overlay
+                      outdir,
+                      name = c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues), alpha = 120)
+
+                    private$render_atlas(cluster_iter, voxelcoord,
+                                         atlaspath = bss_data@atlas_filename,
+                                         outdir)
+                    # }
+
+                    private$render_table()
+                    private$render_html(outdir,
+                                        voxelcoord,
+                                        overlay_name = c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues))
+
+
+                  }
+
+                  private$save_rmd_preamble(file.path(outdir, "save_rmd.Rmd"),
+                                            outdir,
+                                            voxelcoord,
+                                            overlay_name = "c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues)")
+
+                  # save_rmd<-file(file.path(outdir, "save_rmd.Rmd"))
+                  # writeLines(private$render_table(), save_rmd)
+                  # close(save_rmd)
+                  #close(save_rmd)
+                  # file.append("/Users/sjoshi/Desktop/tbm_anova/save_rmd.Rmd", "/Users/sjoshi/Desktop/tbm_anova/justhtml.Rmd")
+                  # file.append(file.path(outdir, "save_rmd.Rmd"), file.path(outdir, "justhtml.Rmd"))
+                  rmarkdown::render(paste0(outdir, "save_rmd.Rmd"))
                 }
               ),
+
               private = list(
-                render_overlay = function() {
+
+                render_overlay = function(voxelcoord_index,voxelcoord,atlaspath,overlaypath,outdir,name,alpha) {
+                  view_order <- c("sag","cor","ax")
+                  for (stats_measure_index in 1:4) {
+                    for (view in 1:3){
+                       current_view_with_crosshairs <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/PNG_images_crosshairs/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[stats_measure_index], "_cluster",voxelcoord_index,".png --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view], " -a ", alpha)
+                       system(current_view_with_crosshairs,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
+                       current_view <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/PNG_images/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[stats_measure_index], "_cluster",voxelcoord_index,".png --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view], " -a ", alpha)
+                       system(current_view,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
+                       coord_range <- c(181,217,181)
+                       if (view == 1){
+                         x_end = 217/181
+                         y_end = 1
+                         x0_center = x_end*(1-(voxelcoord[[voxelcoord_index]][2]*(1/coord_range[2])))
+                         x_additive = x_end*(15/coord_range[2])
+                         y0_center = y_end*(voxelcoord[[voxelcoord_index]][3]*(1/coord_range[3]))
+                         y_additive = y_end*(15/coord_range[3])
+
+                       } else if (view == 2) {
+                         x_end = 1
+                         y_end = 1
+                         x0_center = x_end*(1-(voxelcoord[[voxelcoord_index]][1]*(1/coord_range[1])))
+                         x_additive = x_end*(15/coord_range[1])
+                         y0_center = y_end*(voxelcoord[[voxelcoord_index]][3]*(1/coord_range[3]))
+                         y_additive = y_end*(15/coord_range[3])
+                       } else {
+                         x_end = 1
+                         y_end = 217/181
+                         x0_center = x_end*(1-(voxelcoord[[voxelcoord_index]][1]*(1/coord_range[1])))
+                         x_additive = x_end*(15/coord_range[1])
+                         y0_center = y_end*(voxelcoord[[voxelcoord_index]][2]*(1/coord_range[2]))
+                         y_additive = y_end*(15/coord_range[2])
+                       }
+                       temp_image <- readPNG(get_render_image_filename(outdir,voxelcoord,name[stats_measure_index], view, voxelcoord_index))
+                       png(get_render_image_filename(outdir,voxelcoord,name[stats_measure_index], view, voxelcoord_index))
+                       plot(0:1, 0:1, type='n', axes = F, ann = F)
+                       par(mar = c(0,0,0,0))
+                       rasterImage(temp_image, 0, 0, x_end, y_end)
+                       # Add horizontal crosshair
+                       segments(x0 = x0_center - x_additive, y0 = y0_center, x1 = x0_center + x_additive , y1 = y0_center, col="black", lwd=3)
+                       # Add vertical crosshair
+                       segments(x0 = x0_center, y0 = y0_center - y_additive, x1 = x0_center, y1 = y0_center + y_additive, col="black", lwd=3)
+                       dev.off()
+                    }
+                  }
+                  return(0)
+                },
+                render_atlas = function(voxelcoord_index,voxelcoord,atlaspath,outdir) {
+                  view_name <- c("ax","cor","sag")
+                  view_order <- c(3,2,1)
+                  for (view_iter in 1:3){
+                    current_view <- paste0("/usr/local/bin/volblend -i ",atlaspath," --view ", view_iter," --slice ",voxelcoord[[voxelcoord_index]][view_order[view_iter]]," --flop -o ", outdir,"/PNG_images/",view_name[view_iter], voxelcoord[[voxelcoord_index]][view_order[view_iter]],"_atlas.png")
+                    system(current_view,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
+                  }
+                  return(0)
+                },
+                render_table = function() {
+
+                  t <- c("#test1","#test2","#test3","#test4","#test5")
+                  Cluster <- 1:5
+                  table <- data.frame(Cluster = 1:5, Vol_Size = c(33, 22.3, 21, 25, 30), voxelcoord = c(3,3,4,5,3), T_val =c(8,7.2,6,9.8,7.8))
+                  table$Cluster <- paste0("[", table$Cluster, "](", t, ")")
+                  knitr::kable(table[1:4], align=c(rep('l', 4)))
+                },
+
+                save_rmd_preamble = function(rmdfile, outdir, voxelcoord, overlay_name) {
+
+
+                  # file_rmd_preamble <-file(rmdfile)
+                  load_library <- "library(bssr)"
+                  data_command_1 <- paste0("bss_data <- load_bss_data(type = '",bss_data@analysis_type,"', subjdir = '",bss_data@subjdir,"', csv = '", bss_data@csv,"', measure = '", bss_data@measure,"', smooth = ",bss_data@smooth,")")
+                  data_command_2 <- paste0("bss_model <- bss_anova(main_effect = '",bss_model@main_effect,"', covariates = '", bss_model@covariates,"', bss_data = bss_data)")
+                  data_command_3 <- "bs_stat_overlays = list(log_pvalues_adjusted = 'log_pvalues_adjusted', tvalues_adjusted = 'tvalues_adjusted', log_pvalues = 'log_pvalues', tvalues = 'tvalues', pvalues = 'pvalues')"
+                  user_input <- paste0(load_library,"\n",data_command_1,"\n",data_command_2,"\n",data_command_3,"\n")
+                  templines <- deparse(private$render_html)
+                  templines[1] <- "render_html = function(outdir, voxelcoord, overlay_name)"
+                  sink(rmdfile, append=TRUE, type = "output")
+                  cat("---\n")
+                  cat("title: BSSR Report\n")
+                  cat("output: html_document\n")
+                  cat("runtime: shiny\n")
+                  cat("---\n")
+                  cat("<style>\n\n")
+                  cat("table, td, th {\n")
+                  cat("min-width: 50%;\n")
+                  cat("margin-left: auto;\n")
+                  cat("margin-right: auto;\n")
+                  cat("margin-top: 1em;\n")
+                  cat("margin-bottom: 1em;\n")
+                  cat("}\n\n")
+                  cat("</style>\n")
+                  cat("```{r eval=FALSE, echo=FALSE, message=FALSE, results='hide', user_input_commands}\n")
+                  cat("#Change the above argument eval to TRUE to knit the file.\n")
+                  writeLines(user_input)
+                  cat("```\n")
+                  cat("```{r echo=FALSE, warning=FALSE}\n")
+                  cat("vox_table <- read.table('", outdir,"cluster.tsv', header = F, sep = '\t')\n", sep = "")
+                  cat("colnames(vox_table) <- c('Cluster Number', 'Number of Voxels', 'T-Value', 'X Coord', 'Y Coord', 'Z Coord')\n")
+                  cat("DT::datatable(vox_table, rownames = FALSE)\n")
+                  writeLines(templines)
+                  voxelcoord_char <- "list("
+                  for (individual_voxelcoord in 1:length(voxelcoord)){
+                    voxelcoord_char <- paste0(voxelcoord_char, "c(")
+                    for (view in 1:length(voxelcoord[[individual_voxelcoord]])){
+                      voxelcoord_char <- paste0(voxelcoord_char, voxelcoord[[individual_voxelcoord]][view],",")
+                    }
+                    voxelcoord_char <- paste0(substr(voxelcoord_char,1,nchar(voxelcoord_char)-1),"),")
+                  }
+                  voxelcoord_char <- paste0(substr(voxelcoord_char,1,nchar(voxelcoord_char)-1),")")
+                  cat("render_html('",outdir,"', ", voxelcoord_char, ", ",overlay_name,")\n")
+                  cat("```\n")
+                  sink()
 
                 },
-                render_atlas = function() {
 
-                },
-                render_html = function() {
+                ## another function will generate the names for the pngs
+
+                render_html = function(outdir, voxelcoord, overlay_name) {
+                  cbar <- vector("list",4)
+                  overlay <- c(bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues_adjusted, bs_stat_overlays$log_pvalues, bs_stat_overlays$tvalues)
+                  for (cbar_index in 1:4){
+                    cbar[[cbar_index]] <- paste0(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), overlay[cbar_index], sep = '_'), '_cbar.png')
+                  }
+                  cluster_filepath <- paste0(outdir,"cluster.tsv")
+                  cluster_filepath <- gsub(" ", "", cluster_filepath, fixed = TRUE)
+                  vox_table <- read.table(cluster_filepath, header = F, sep = '\t')
+                  colnames(vox_table) <- c('Cluster Number', 'Number of Voxels', 'Maximum Value', 'X Coord', 'Y Coord', 'Z Coord')
+
+
+                  #function to make rmd work
+                  get_render_image_filename <- function(outdir, voxelcoord, overlay_name, brain_sector_index, voxelcoord_index) {
+                    view_order <- c("sag","cor","ax")
+                    return(paste0("./PNG_images_crosshairs/", view_order[brain_sector_index], voxelcoord[[voxelcoord_index]][brain_sector_index],"_",overlay_name,"_cluster",voxelcoord_index,".png"))
+                  }
+
+                  # Function to return a shiny image object
+                  shiny_image = function(outdir, voxelcoord, index_brain_sector, overlay_type, width, voxelcoord_index){
+                    align <- "left"
+                    return(paste0("shiny::img(src='",get_render_image_filename(outdir, voxelcoord,overlay_type, index_brain_sector, voxelcoord_index),"', align = '", align, "', width = '", width,"')"))
+                  }
+
+                  # Function that creates a tabPanel
+                  tab_panel = function(panel_type, voxelcoord_index){
+                    #width <- c("34.5%","28.8%","24%","11%")
+                    width <- c("31%", "7%")
+                    overlay <- c(bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues_adjusted, bs_stat_overlays$log_pvalues, bs_stat_overlays$tvalues)
+                    panel_names <- c("Adjusted P-Values","Adjusted T-Values","P-Values","T-Values")
+                    images <- ""
+                    for (inner_coord_index in 1:3) {
+                      images <- paste0(images, shiny_image(outdir, voxelcoord, inner_coord_index,overlay[panel_type], width[1], voxelcoord_index), ",")
+                    }
+                    images <- paste0(images, "shiny::img(src=paste0('", cbar[panel_type], "'), align='left', width = '", width[2], "'),")
+                    images <- substr(images,1,nchar(images)-1)
+                    return(paste0("shiny::tabPanel(title_0 = '", panel_names[panel_type], "', value = c('", panel_names[panel_type], "'), shiny::p('", panel_names[panel_type], "'), ",images,")"))
+                  }
+
+                  # Function that creates clusters for each panel
+                  cluster_panels = function(voxelcoord){
+                    panels <- paste0("shiny::tabPanel(title = shiny::h4(paste('Cluster 1: Voxel Coordinate (",voxelcoord[[1]][1],",",voxelcoord[[1]][2],",",voxelcoord[[1]][3],")'),shiny::tableOutput('data'),shiny::tabsetPanel(id = 'navbar',type = 'pills',")
+                    for (tab_panel_type in 1:4){
+                      panels <- paste0(panels,tab_panel(tab_panel_type, 1),",")
+                    }
+                    panels <- paste0(substr(panels,1,nchar(panels)-1),")))")
+                    for (voxelcoord_index in 2:length(voxelcoord)){
+                      panels <- paste0(panels, ", shiny::tabPanel(title = shiny::h4(paste('Cluster ", voxelcoord_index, ": Voxel Coordinate (",voxelcoord[[voxelcoord_index]][1],",",voxelcoord[[voxelcoord_index]][2],",",voxelcoord[[voxelcoord_index]][3],")'),shiny::tableOutput('data'),shiny::tabsetPanel(id = 'navbar',type = 'pills',")
+                      for (tab_panel_type in 1:4){
+                        panels <- paste0(panels,tab_panel(tab_panel_type, voxelcoord_index),",")
+                      }
+                      panels <- paste0(substr(panels,1,nchar(panels)-1),")))")
+                    }
+                    return(substr(panels,1,nchar(panels)))
+                  }
+
+
+                  eval(parse(text= paste0("shiny::shinyUI(shiny::fluidPage(shinyjs::useShinyjs(),shiny::h3('Choose a cluster and an overlay below'),shiny::tabsetPanel(id = 'navbar',type = 'tabs',",
+                        cluster_panels(voxelcoord),")))")))
 
                 }
+
               )
   )
+

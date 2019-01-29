@@ -11,7 +11,7 @@ An S4 class for representing colormaps
 \section{Slots}{
 
 \describe{
-\item{\code{cmap_type}}{A character string for the type of colormap. Valid values are "corr_values", "tvalues", "log_pvalues", "log_pvalues_adjusted"}
+\item{\code{cmap_type}}{A character string for the type of colormap. Valid values are "corr_values", "tvalues", "tvalues_adjusted", "log_pvalues", "log_pvalues_adjusted"}
 
 \item{\code{cmap_name}}{A character string for the title of the colormap. This string will be displayed on the colorbar.}
 

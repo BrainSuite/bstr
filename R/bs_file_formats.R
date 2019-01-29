@@ -65,11 +65,17 @@ bs_data_types <- list(
 
 #' List of statistical and other overlay types used in BrainSuite
 bs_stat_overlays <- list(
-  log_pvalues <- "log_pvalues",
-  log_pvalues_adjusted <- "log_pvalues_adjusted",
-  tvalues <- "tvalues",
-  pvalues <- "pvalues"
+  log_pvalues_adjusted = "log_pvalues_adjusted",
+  tvalues_adjusted = "tvalues_adjusted",
+  log_pvalues = "log_pvalues",
+  tvalues = "tvalues",
+  pvalues = "pvalues"
 )
+
+get_render_image_filename <- function(outdir,voxelcoord, overlay_name, brain_sector_index, voxelcoord_index) {
+  view_order <- c("sag","cor","ax")
+  return(paste0(outdir, "PNG_images_crosshairs/", view_order[brain_sector_index], voxelcoord[[voxelcoord_index]][brain_sector_index],"_",overlay_name,"_cluster",voxelcoord_index,".png"))
+}
 
 bs_surface_file_string <- function(hemi="left", smooth = 0) {
 
@@ -94,13 +100,13 @@ bs_diffusion_file_string <- function(measure = "FA", smooth = 0, eddy = TRUE) {
     stop(sprintf('Invalid diffusion measure: %s. Valid measures are %s.', measure, paste(valid_diffusion_measures, collapse = ', ')))
 
   if (eddy == TRUE && smooth != 0)
-    return(paste('%s.dwi.RAS.correct.', measure, sprintf('.atlas.smooth%2.1fmm.nii.gz', smooth), sep = ''))
+    return(paste0('%s.dwi.RAS.correct.atlas.', measure, sprintf('.smooth%2.1fmm.nii.gz', smooth)))
   if (eddy == FALSE && smooth != 0)
-    return(paste('%s.dwi.RAS.', measure, sprintf('.atlas.smooth%2.1fmm.nii.gz', smooth), sep = ''))
+    return(paste0('%s.dwi.RAS.atlas.', measure, sprintf('.smooth%2.1fmm.nii.gz', smooth)))
   if (eddy == TRUE && smooth == 0)
-    return(paste('%s.dwi.RAS.correct.', measure, '.atlas.nii.gz', sep = ''))
+    return(paste0('%s.dwi.RAS.correct.atlas.', measure, '.nii.gz'))
   if (eddy == FALSE && smooth == 0)
-    return(paste('%s.dwi.RAS.', measure, '.atlas.nii.gz', sep = ''))
+    return(paste0('%s.dwi.RAS.atlas.', measure, '.nii.gz'))
 }
 
 get_bs_file_list <- function(analysis_type) {

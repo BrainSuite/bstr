@@ -305,6 +305,12 @@ get_tbm_atlas_and_mask <- function(brainsuite_atlas_id) {
   return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
 }
 
+get_custom_cbm_atlas_and_mask <- function(atlas, maskfile="") {
+  #TODO Only the atlas file is implemented
+  check_file_exists(atlas, raise_error = TRUE)
+  return(atlas)
+}
+
 get_custom_tbm_atlas_and_mask <- function(brainsuite_custom_atlas_prefix) {
 
   brainsuite_custom_atlas_prefix <- get_brainsute_custom_volume_atlas_prefix(brainsuite_custom_atlas_prefix)

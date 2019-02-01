@@ -167,6 +167,7 @@ parse_model <- function(main_effect="", covariates="", corr_var="", group_var = 
     if(!group_var %in% colnames(demographics)) {
       stop(sprintf("group_var *%s* doesn't occur in the demographics csv file.\n", group_var), call. = FALSE)
     }
+    demographics[[group_var]] <- as.factor(demographics[[group_var]])
     # Check if group_var is a factor having exactly 2 levels
     if( nlevels(demographics[[group_var]]) != 2)
       stop("group_var should be a factor having exactly 2 levels.\n", call. = FALSE)

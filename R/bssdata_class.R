@@ -262,7 +262,7 @@ load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left",
     stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
 
   switch(type,
-         cbm = { bss_data <- load_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth) },
+         cbm = { bss_data <- load_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth, atlas=atlas) },
          tbm = { bss_data <- load_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth, atlas=atlas) },
          dbm = { bss_data <- load_dbm_data(subjdir=subjdir, csv=csv, measure=measure, smooth=smooth, atlas=atlas, eddy=eddy) },
          roi = { bss_data <- load_roi_data(subjdir, csv, roiids, roimeas) }
@@ -271,11 +271,16 @@ load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left",
 }
 
 
-load_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0) {
+load_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="") {
 
   bss_cbm_data <- new("BssCBMData", subjdir, csv)
-  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
-  cbm_surf_atlas <- get_cbm_atlas(brainsuite_atlas_id, hemi)
+  if (atlas == "") {
+    brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+    cbm_surf_atlas <- get_cbm_atlas(brainsuite_atlas_id, hemi)
+  }
+  else
+    cbm_surf_atlas <- get_custom_cbm_atlas_and_mask(atlas)
+
   bss_cbm_data <- load_data(bss_cbm_data, atlas_filename = cbm_surf_atlas, hemi = hemi, smooth=smooth)
   bss_cbm_data@data_type <- bs_data_types$surface
   return(bss_cbm_data)
@@ -305,7 +310,7 @@ load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0, atlas="", 
   }
   else
     dbm_atlas_and_mask <- get_custom_tbm_atlas_and_mask(atlas)
-  bss_dbm_data <- load_data(bss_dbm_data, atlas_filename = dbm_atlas_and_mask$nii_atlas, maskfile = dbm_atlas_and_mask$nii_atlas_mask, measure=measure, smooth=smooth)
+  bss_dbm_data <- load_data(bss_dbm_data, atlas_filename = dbm_atlas_and_mask$nii_atlas, maskfile = dbm_atlas_and_mask$nii_atlas_mask, measure=measure, smooth=smooth, eddy=eddy)
   bss_dbm_data@data_type <- bs_data_types$nifti_image
   return(bss_dbm_data)
 }

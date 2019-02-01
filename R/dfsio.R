@@ -119,13 +119,30 @@ readdfsattributes <- function(filename) {
   return(dfs$attributes)
 }
 
-read_dfs_attributes_for_all_subjects <- function(dfs_filelist, attrib_siz) {
+read_dfs_attributes_for_all_subjects_old <- function(dfs_filelist, attrib_siz) {
   data_matrix <- vapply(dfs_filelist, function(i) {
     cat(sprintf('%s\n', i))
     readdfsattributes(i)
   }, FUN.VALUE = numeric(attrib_siz))
   colnames(data_matrix) <- NULL
   return(t(data_matrix))
+}
+
+read_dfs_attributes_for_all_subjects <- function(dfs_filelist, attrib_siz) {
+
+  data_matrix <- matrix(NA_real_, nrow = length(dfs_filelist), ncol = attrib_siz)
+  for (ii in seq_along(dfs_filelist)) {
+    x <- readdfsattributes(dfs_filelist[ii])
+    if ( length(x) != attrib_siz) {
+      stop(sprintf('Dimensions of subject file %s and the atlas do not match.', dfs_filelist[ii]), call. = FALSE)
+    }
+    data_matrix[ii, ] <- x
+    cat(sprintf('Loaded %s\n', dfs_filelist[ii]))
+  }
+
+  colnames(data_matrix) <- NULL
+  gc()
+  return(data_matrix)
 }
 
 #' Write dfs file

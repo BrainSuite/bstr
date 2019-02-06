@@ -3,7 +3,6 @@
 \docType{data}
 \name{BssRmdVolumeOutput}
 \alias{BssRmdVolumeOutput}
-\alias{BssRmdVolumeOutput}
 \title{R6 derived class for Rmd surface output functionality}
 \format{An object of class \code{R6ClassGenerator} of length 24.}
 \usage{

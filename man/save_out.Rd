@@ -11,15 +11,17 @@
 \usage{
 save_out(bss_out, bss_data, bss_model, overwrite = FALSE, ...)
 
-\S4method{save_out}{BssCBMOutput}(bss_out, bss_data, bss_model, overwrite = F)
+\S4method{save_out}{BssCBMOutput}(bss_out, bss_data, bss_model,
+  overwrite = F)
 
-\S4method{save_out}{BssTBMOutput}(bss_out, bss_data, bss_model, overwrite = F,
-  nclusters = 10)
+\S4method{save_out}{BssTBMOutput}(bss_out, bss_data, bss_model,
+  overwrite = F, nclusters = 10)
 
-\S4method{save_out}{BssDBMOutput}(bss_out, bss_data, bss_model, overwrite = F,
-  nclusters = 10)
+\S4method{save_out}{BssDBMOutput}(bss_out, bss_data, bss_model,
+  overwrite = F, nclusters = 10)
 
-\S4method{save_out}{BssROIOutput}(bss_out, bss_data, bss_model, overwrite = F)
+\S4method{save_out}{BssROIOutput}(bss_out, bss_data, bss_model,
+  overwrite = F)
 }
 \arguments{
 \item{bss_out}{object of type \code{BssOutput}}
@@ -29,6 +31,8 @@ save_out(bss_out, bss_data, bss_model, overwrite = FALSE, ...)
 \item{bss_model}{object of type \code{BssModel}}
 
 \item{overwrite}{logical parameter denoting if existing output directory should be overwritten or not (default is false)}
+
+\item{...}{Extra named arguments passed to save_out}
 
 \item{nclusters}{numeric parameter denoting number of clusters (default is 10)}
 }

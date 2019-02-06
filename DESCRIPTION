@@ -32,6 +32,6 @@ Imports:
     Matrix,
     R6,
     shinyjs
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 URL: http://brainsuite.org/bssr
 Suggests: testthat

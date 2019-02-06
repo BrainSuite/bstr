@@ -4,8 +4,8 @@
 \alias{bss_anova}
 \title{Perform analysis of variance (ANOVA) for brain imaging data.}
 \usage{
-bss_anova(main_effect = "", covariates = "", bss_data, mult_comp = "fdr",
-  niter = 5000)
+bss_anova(main_effect = "", covariates = "", bss_data,
+  mult_comp = "fdr", niter = 5000)
 }
 \arguments{
 \item{main_effect}{Character string containing an independent variable whose effect you want to measure.

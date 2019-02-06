@@ -50,12 +50,11 @@ setMethod("initialize", valueClass = "BssOutput", signature = "BssOutput", funct
 #' @param bss_data object of type \code{BssData}
 #' @param bss_model object of type \code{BssModel}
 #' @param overwrite logical parameter denoting if existing output directory should be overwritten or not (default is false)
-#' @param nclusters numeric parameter denoting number of clusters (default is 10)
+#' @param ... Extra named arguments passed to save_out
 #' @details
 #' For the most part, the user will never have to call this function directly.
 #' Instead the user should call \code{\link{save_bss_out}}.
 #' @seealso \code{\link{save_bss_out}}
-#'
 #' @export
 setGeneric("save_out", valueClass = "BssOutput", function(bss_out, bss_data, bss_model, overwrite = FALSE, ...) {
   standardGeneric("save_out")
@@ -81,7 +80,9 @@ BssROIOutput <- setClass(
   contains = "BssOutput"
 )
 
+
 #' @rdname save_out
+#' @inheritParams save_out
 setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", function(bss_out, bss_data, bss_model, overwrite = F) {
 
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
@@ -158,7 +159,10 @@ setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", f
   }
 )
 
+
 #' @rdname save_out
+#' @inheritParams save_out
+#' @param nclusters numeric parameter denoting number of clusters (default is 10)
 setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", function(bss_out, bss_data, bss_model, overwrite = F, nclusters = 10) {
 
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
@@ -247,6 +251,7 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
 
 
 #' @rdname save_out
+#' @inheritParams save_out
 setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", function(bss_out, bss_data, bss_model, overwrite = F, nclusters = 10) {
 
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
@@ -275,6 +280,9 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
   tvalues[bss_data@mask_idx] <- bss_model@tvalues
   dim(tvalues) <- dim(bss_data@atlas_image)
 
+  tvalues_adjusted <- rep(0, length(bss_data@atlas_image))
+  tvalues_adjusted[bss_data@mask_idx] <- bss_model@tvalues_adjusted
+  dim(tvalues_adjusted) <- dim(bss_data@atlas_image)
   measure <- NULL
   switch(bss_model@model_type,
          bss_anova = {
@@ -316,6 +324,7 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
 )
 
 #' @rdname save_out
+#' @inheritParams save_out
 setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", function(bss_out, bss_data, bss_model, overwrite = F) {
 
   # # Create the output directory

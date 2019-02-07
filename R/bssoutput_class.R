@@ -49,7 +49,7 @@ setMethod("initialize", valueClass = "BssOutput", signature = "BssOutput", funct
 #' @param bss_out object of type \code{BssOutput}
 #' @param bss_data object of type \code{BssData}
 #' @param bss_model object of type \code{BssModel}
-#' @param overwrite logical parameter denoting if existing output directory should be overwritten or not (default is false)
+#' @param overwrite logical parameter denoting if existing output directory should be overwritten or not (default is FALSE)
 #' @param ... Extra named arguments passed to save_out
 #' @details
 #' For the most part, the user will never have to call this function directly.
@@ -312,10 +312,9 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
 
   save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
 
-  # add create an R6 class function from here
+  # Create a new R6 class object here
   bssrmd_volout <- BssRmdVolumeOutput$new()
   bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = get_voxelcoord(bss_out, bss_data, bss_model, outdir, nclusters), outdir)
-
 
   # Copy modelspec file to the output directory
   file.copy(bss_model@mspec_file, bss_out@outdir)
@@ -497,8 +496,8 @@ ggplot2::ggsave(filename='",
 #' @param bss_data object of type \code{BssData}
 #' @param bss_model object of type \code{BssModel}
 #' @param outdir output directory to save the results
-#' @param overwrite logical parameter denoting if existing output directory should be overwritten or not (default is false)
-#' @param nclusters number of clusters (default is 10)
+#' @param overwrite logical parameter denoting if existing output directory should be overwritten or not (default is FALSE)
+#' @param nclusters numeric value denoting number of clusters (default is 10)
 #' @export
 save_bss_out <- function(bss_data, bss_model, outdir="", overwrite = F, nclusters = 10) {
 
@@ -515,6 +514,15 @@ save_bss_out <- function(bss_data, bss_model, outdir="", overwrite = F, ncluster
   bss_out <- save_out(bss_out, bss_data, bss_model, overwrite = overwrite, nclusters = nclusters)
   invisible(bss_out)
 }
+
+#' Save the color LUT and ini colormap images
+#' @param measure numeric value denoting the measures used to create the color file
+#' @param var_name string denoting name of variable that the color file is being created for
+#' @param cmap_title string denoting the type of color map
+#' @param bss_data object of type \code{BssData}
+#' @param bss_model object of type \code{BssModel}
+#' @param outdir string specifying output directory to save the results in
+#' @export
 
 save_bss_color_files <- function(measure, var_name, cmap_title, bss_data, bss_model, outdir) {
 
@@ -540,6 +548,15 @@ save_bss_color_files <- function(measure, var_name, cmap_title, bss_data, bss_mo
   return(bss_cmap)
 }
 
+#' Save the surface output to the given ouput directory
+#' @param measure numeric value denoting the measures used to create the output
+#' @param var_name string denoting name of variable used by the function
+#' @param cmap_title string denoting the type of color map
+#' @param bss_data object of type \code{BssData}
+#' @param bss_model object of type \code{BssModel}
+#' @param outdir string specifying output directory to save the results in
+#' @export
+
 save_bss_out_surface <- function(measure, var_name, bss_cmap, bss_data, bss_model, outdir) {
 
   s1 <- bss_data@atlas_surface
@@ -551,13 +568,30 @@ save_bss_out_surface <- function(measure, var_name, bss_cmap, bss_data, bss_mode
   writedfs(file.path(outdir, outprefix), s1)
 }
 
-save_bss_out_nifti_image <- function(measure, var_name, bss_cmap, bss_data, bss_model, outdir) {
+#' Save the nifti image to the output file
+#' @param measure denotes the measure used to create the output
+#' @param var_name string denoting name of variable used by the function
+#' @param cmap_title string denoting the type of color map
+#' @param bss_data object of type \code{BssData}
+#' @param bss_model object of type \code{BssModel}
+#' @param outdir string specifying output directory to save the results in
+#' @export
 
+save_bss_out_nifti_image <- function(measure, var_name, bss_cmap, bss_data, bss_model, outdir) {
 
   outprefix <- paste0(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
     basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), bss_data@data_type)
   RNifti::writeNifti(measure, file.path(outdir, outprefix), template = bss_data@atlas_image)
 }
+
+#' Save the measure to the output directory
+#' @param measure numeric value denoting the measures used to create the output
+#' @param var_name string denoting name of variable used by the function
+#' @param label string denoting the label for the object
+#' @param bss_data object of type \code{BssData}
+#' @param bss_model object of type \code{BssModel}
+#' @param outdir string specifying output directory to save the results in
+#' @export
 
 save_bss_rds <- function(measure, var_name, label, bss_data, bss_model, outdir) {
 
@@ -565,6 +599,17 @@ save_bss_rds <- function(measure, var_name, label, bss_data, bss_model, outdir) 
     basename(bss_data@atlas_filename)), label, sep = '_'), ".rds", sep = '')
   saveRDS(measure, file=file.path(outdir, outprefix))
 }
+
+#' Save the volume statistics
+#' @param log_pvalues log transformed p-values
+#' @param log_pvalues_adjusted log transformed adjusted p-values
+#' @param tvalues t-values
+#' @param tvalues_adjusted adjusted t-values
+#' @param var_name string denoting name of variable used by the function
+#' @param bss_data object of type \code{BssData}
+#' @param bss_model object of type \code{BssModel}
+#' @param outdir string specifying output directory to save the results in
+#' @export
 
 save_vol_stats_out <- function(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted,
                                var_name, bss_data, bss_model, outdir) {
@@ -592,6 +637,14 @@ save_vol_stats_out <- function(log_pvalues, log_pvalues_adjusted, tvalues, tvalu
          }
   )
 }
+
+#' Get voxel coordinates of all significant clusters (up to number of clusters)
+#' @param bss_out object of type \code{BssOut}
+#' @param bss_data object of type \code{BssData}
+#' @param bss_model object of type \code{BssModel}
+#' @param outdir string specifying output directory to save the results in
+#' @param nclusters numeric value specifying number of clusters
+#' @export
 
 get_voxelcoord <- function(bss_out, bss_data, bss_model, outdir, nclusters){
   # Call cluster code from terminal

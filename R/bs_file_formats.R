@@ -74,7 +74,7 @@ bs_stat_overlays <- list(
 
 get_render_image_filename <- function(outdir,voxelcoord, overlay_name, brain_sector_index, voxelcoord_index) {
   view_order <- c("sag","cor","ax")
-  return(paste0(outdir, "PNG_images_crosshairs/", view_order[brain_sector_index], voxelcoord[[voxelcoord_index]][brain_sector_index],"_",overlay_name,"_cluster",voxelcoord_index,".png"))
+  return(paste0(outdir, "png_images_crosshairs/", view_order[brain_sector_index], voxelcoord[[voxelcoord_index]][brain_sector_index],"_",overlay_name,"_cluster",voxelcoord_index,".png"))
 }
 
 bs_surface_file_string <- function(hemi="left", smooth = 0) {

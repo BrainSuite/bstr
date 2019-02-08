@@ -62,12 +62,12 @@ BssRmdVolumeOutput <-
 
                   }
 
-                  private$save_rmd_preamble(file.path(outdir, "save_rmd.Rmd"),
+                  private$save_rmd_preamble(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, bss_model@main_effect)),
                                             outdir,
                                             voxelcoord,
                                             overlay_name = "c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues)")
 
-                  rmarkdown::render(file.path(outdir, "save_rmd.Rmd"))
+                  rmarkdown::render(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, bss_model@main_effect)))
                 }
               ),
 

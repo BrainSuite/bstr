@@ -227,14 +227,14 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
 
   # Check if voxelcoord is empty
   if (length(voxelcoord) == 0) {
-    sink(paste0(outdir, "save_rmd.Rmd"), type = "output")
+    sink(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, bss_model@main_effect)), type = "output")
     cat("---\n")
     cat("title: BSSR Report\n")
     cat("output: html_document\n")
     cat("---\n\n\n")
     cat("No detected clusters above significance threshold.")
     sink()
-    rmarkdown::render(paste0(outdir, "save_rmd.Rmd"))
+    rmarkdown::render(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, bss_model@main_effect)))
     stop("No detected clusters above significance threshold.")
   }
 

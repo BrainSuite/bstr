@@ -88,9 +88,7 @@ setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", f
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
   if (overwrite == TRUE){
     if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
-      while (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
-        unlink(paste0(bss_out@outdir,list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)[1]), recursive=TRUE)
-      }
+      delete_and_recreate_dir(bss_out@outdir)
     }
   } else {
     if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
@@ -168,9 +166,7 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
   if (overwrite == TRUE){
     if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
-      while (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
-        unlink(paste0(bss_out@outdir,list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)[1]), recursive = T)
-      }
+      delete_and_recreate_dir(bss_out@outdir)
     }
   } else {
     if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
@@ -257,9 +253,7 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
   if (overwrite == TRUE){
     if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
-      while (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
-        unlink(paste0(bss_out@outdir,list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)[1]), recursive = T)
-      }
+      delete_and_recreate_dir(bss_out@outdir)
     }
   } else {
     if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
@@ -347,9 +341,7 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
   if (overwrite == TRUE){
     if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
-      while (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
-        unlink(paste0(bss_out@outdir,list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)[1]), recursive = T)
-      }
+      delete_and_recreate_dir(bss_out@outdir)
     }
   } else {
     if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){

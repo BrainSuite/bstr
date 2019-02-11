@@ -56,13 +56,12 @@ check_multiple_files_exists <- function(filelist, errmesg=NULL) {
   return (TRUE)
 }
 
-#' #' Delete and recreate directory
-#' #'
-# #' @param directory Name of directory.
-#' #'
-# #' @export
-#' empty_dir <- function(dir){
-#'     while (length(list.files(dir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
-#'       unlink(paste0(dir,list.files(dir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)[1]), recursive=TRUE)
-#'     }
-#' }
+#' Delete and recreate directory
+#'
+#' @param directory Name of directory.
+#'
+#' @export
+delete_and_recreate_dir <- function(dir){
+  unlink(dir,recursive=TRUE)
+  dir.create(dir)
+}

@@ -58,7 +58,7 @@ check_multiple_files_exists <- function(filelist, errmesg=NULL) {
 
 #' Delete and recreate directory
 #'
-#' @param directory Name of directory.
+#' @param dir Name of directory.
 #'
 #' @export
 delete_and_recreate_dir <- function(dir){

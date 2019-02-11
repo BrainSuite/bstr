@@ -503,8 +503,13 @@ save_bss_out <- function(bss_data, bss_model, outdir="", overwrite = F, ncluster
          dbm = { bss_out <- new("BssDBMOutput", outdir) },
          roi = { bss_out <- new("BssROIOutput", outdir) }
   )
-  bss_out <- save_out(bss_out, bss_data, bss_model, overwrite = overwrite, nclusters = nclusters)
-  invisible(bss_out)
+  if (bss_data@analysis_type == "tbm" | bss_data@analysis_type == "dbm"){
+    bss_out <- save_out(bss_out, bss_data, bss_model, overwrite = overwrite, nclusters = nclusters)
+    invisible(bss_out)
+  } else {
+    bss_out <- save_out(bss_out, bss_data, bss_model, overwrite = overwrite)
+    invisible(bss_out)
+  }
 }
 
 #' Save the color LUT and ini colormap images

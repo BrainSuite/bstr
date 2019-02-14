@@ -195,7 +195,13 @@ setMethod("load_data", signature = "BssROIData", function(bss_data, roiids = NUL
                     csv = bss_data@csv,
                     roiids = bss_data@roiids,
                     roimeas = bss_data@roimeas)
+
   bss_data@demographics <- as.data.frame(all_subjects[[1]])
+  bss_data@data_array <- matrix(nrow=nrow(bss_data@demographics),ncol = length(bss_data@roiids))
+  for (col in 1:length(bss_data@roiids)){
+    current_col <- which(colnames(bss_data@demographics) == paste0(bssr:::get_roi_tag(label_desc_df = bssr:::read_label_desc(),roiid=bss_data@roiids[col])[[1]],"(",bss_data@roiids[col],")"))
+    bss_data@data_array[,col] <- bss_data@demographics[,current_col]
+  }
   bss_data@load_data_command <- sprintf("bss_data <- load_bss_data(type= 'roi',subjdir = '%s',csv= '%s',roiids= c( %s), roimeas= '%s')",
                                         bss_data@subjdir, bss_data@csv, paste(bss_data@roiids,collapse = ", "), bss_data@roimeas)
 

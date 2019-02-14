@@ -27,7 +27,7 @@
 #' @slot group_var Categorical variable name. This should be present in the demographics csv file associated
 #' with \code{bss_data}.
 #' @slot model_type character string denoting the type of model. Should be one of \code{"bss_anova"},
-#' \code{"bss_corr"}, \code{"bss_corr"}, \code{"pairedttest"} or \code{"unpairedttest"}
+#' \code{"bss_corr"}, \code{"bss_corr"}, \code{"pairedttest"}, \code{"unpairedttest"} or \code{"bss_lme"}
 #' @slot fullmodel character string like an R formula denoting the full model including both
 #' the main effect and covariates.
 #' @slot nullmodel character string like an R formula denoting the null model including covariates
@@ -169,12 +169,12 @@ parse_model <- function(main_effect="", covariates="", corr_var="", group_var = 
       stop(sprintf("group_var *%s* doesn't occur in the demographics csv file.\n", group_var), call. = FALSE)
     }
     demographics[[group_var]] <- as.factor(demographics[[group_var]])
-    # Check if group_var is a factor having exactly 2 levels
-    if( nlevels(demographics[[group_var]]) != 2)
-      stop("group_var should be a factor having exactly 2 levels.\n", call. = FALSE)
 
     # If model_type is pairedttest group_var should have is a factor having exactly 2 levels
     if( model_type == "pairedttest") {
+      # Check if group_var is a factor having exactly 2 levels
+      if( nlevels(demographics[[group_var]]) != 2)
+        stop("group_var should be a factor having exactly 2 levels.\n", call. = FALSE)
       group1 <- levels(demographics[[group_var]])[1]
       group2 <- levels(demographics[[group_var]])[2]
       group1_elems <- demographics[[group_var]][demographics[[group_var]] == group1]

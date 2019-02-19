@@ -156,9 +156,10 @@ anova_vec <- function(bss_lm_full, bss_lm_null, bss_data) {
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
 #' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
 #' @param  bss_data Object of type \code{\link{BssData}}
+#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.
 #'
 #' @export
-bss_lm <- function(main_effect="", covariates="", bss_data) {
+bss_lm <- function(main_effect="", covariates="", bss_data, mult_comp = "fdr") {
 
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
   bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
@@ -680,69 +681,45 @@ perm_p_adjust <- function(main_effect = "", covariates = "", bss_data, tvalues_n
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
 #' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
 #' @param  bss_data Object of type \code{\link{BssData}}
+#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.
 #'
 #' @export
-bss_lme <- function(group_var, main_effect="", covariates="", bss_data) {
+bss_lme <- function(group_var, main_effect="", covariates="", bss_data, mult_comp = "fdr") {
 
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
   bss_model <- new("BssModel", model_type="bss_lme", group_var = group_var, main_effect = main_effect, covariates = covariates,
                    demographics = bss_data@demographics, mspec_file="")
-  if (class(bss_data) != "BssROIData") {
-    bss_lme_full <- lme_vec(group_var, main_effect = main_effect, covariates = covariates, bss_data = bss_data)
-    bss_lme_null <- lme_vec(group_var,main_effect = "", covariates = covariates, bss_data = bss_data)
-    bss_model <- anova_vec(bss_lme_full, bss_lme_null, bss_data)
+  bss_lme_full <- lme_vec(group_var, main_effect = main_effect, covariates = covariates, bss_data = bss_data)
+  #bss_lme_null <- lme_vec(group_var,main_effect = "", covariates = covariates, bss_data = bss_data)
+  #bss_model <- anova_vec(bss_lme_full, bss_lme_null, bss_data)
 
-    switch(mult_comp,
-           perm={
-             cl <- parallel::makeCluster(parallel::detectCores())
-             registerDoParallel(cl)
-             options(warn=-1)
-             pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
-             bss_model@pvalues <- pvalue_and_nulldist[[1]]
-             bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
-             bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
-             #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
-             nulldist <- pvalue_and_nulldist[[2]]
-             bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
-             bss_model@tvalues_adjusted <- bss_model@tvalues
-             bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
-             stopCluster(cl)
-             options(warn=0)
+  switch(mult_comp,
+          perm={
+            cl <- parallel::makeCluster(parallel::detectCores())
+            registerDoParallel(cl)
+            options(warn=-1)
+            pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
+            bss_model@pvalues <- pvalue_and_nulldist[[1]]
+            bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+            bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+            #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+            nulldist <- pvalue_and_nulldist[[2]]
+            bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
+            bss_model@tvalues_adjusted <- bss_model@tvalues
+            bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+            stopCluster(cl)
+            options(warn=0)
            },
            fdr={
-             bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
-             bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
-             #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
-             bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
-             bss_model@tvalues_adjusted <- bss_model@tvalues
-             bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
-           }
-    )
-  } else {
-
-    # For univariate lme
-
-    roi_full_lmemodel = list()
-    for (i in 1:length(bss_data@roiids)){
-      bss_lme_formula <- as.formula(paste0("`",as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")`"," ~ ",bss_model@main_effect," + (",bss_model@main_effect,"|",bss_model@group_var,") + ",bss_model@covariates))
-      roi_full_lmemodel[[i]] <- lme4::lmer(bss_lme_formula,bss_data@demographics,control=lme4::lmerControl(check.nobs.vs.nRE="ignore"))
-      N <- dim(bss_data@data_array)[1]
-      Np <- length(unlist(strsplit(as.character(covariates), '\\+'))) + 1
-      #tvalues <- lme4::fixef(roi_full_lmemodel[[i]])/sqrt(diag(lme4::vcov.merMod(roi_full_lmemodel[[i]],full=TRUE))) # tvalue
-      tvalues <- coef(summary(roi_full_lmemodel[[i]]))[,"t value"]
-      pvalues <- 2*pt(abs(tvalues), N-Np-1, lower.tail = FALSE) # pvalue
-      pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
-      bss_model@pvalues <- pvalues
-      bss_model@tvalues <- tvalues
-      #bss_model@beta_coeff <- beta_coeff
-      #bss_model@residuals <- residuals(roi_full_lmemodel[[i]])
-      bss_model@residuals <- bss_data@data_array - coef(summary(roi_full_lmemodel[[i]]))[,"Estimate"]
-      bss_model@rss <- colSums((bss_model@residuals)^2)
-      #bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
-      bss_model@tvalues_adjusted <- bss_model@tvalues
-      bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
-
-    }
+            bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+            bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+            #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+            bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
+            bss_model@tvalues_adjusted <- bss_model@tvalues
+            bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+          }
+  )
+  if (class(bss_data) == "BssROIData") {
 
 
     selected_col <- rep(NA, length(bss_data@roiids))
@@ -803,34 +780,54 @@ lme_vec <- function(group_var, main_effect = "", covariates = "", bss_data) {
   bss_model <- new("BssModel", model_type="bss_lme", main_effect = main_effect, covariates = covariates,
                    group_var = group_var, demographics = bss_data@demographics, mspec_file="")
 
+  # For univariate lme
+  roi_full_lmemodel = list()
+  for (i in 1:length(bss_data@roiids)){
+    bss_lme_formula <- as.formula(paste0("`",as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")`"," ~ ",bss_model@main_effect," + (",bss_model@main_effect,"|",bss_model@group_var,") + ",bss_model@covariates))
+    roi_full_lmemodel[[i]] <- lme4::lmer(bss_lme_formula,bss_data@demographics,control=lme4::lmerControl(check.nobs.vs.nRE="ignore"))
+    N <- dim(bss_data@data_array)[1]
+    Np <- length(unlist(strsplit(as.character(covariates), '\\+'))) + 1
+    #tvalues <- lme4::fixef(roi_full_lmemodel[[i]])/sqrt(diag(lme4::vcov.merMod(roi_full_lmemodel[[i]],full=TRUE))) # tvalue
+    tvalues <- coef(summary(roi_full_lmemodel[[i]]))[,"t value"]
+    pvalues <- 2*pt(abs(tvalues), N-Np-1, lower.tail = FALSE) # pvalue
+    pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
+    bss_model@pvalues <- pvalues
+    bss_model@tvalues <- tvalues
+    bss_model@tvalues_sign <- sign_tvalues(tvalues)
+    #bss_model@beta_coeff <- beta_coeff
+    #bss_model@residuals <- residuals(roi_full_lmemodel[[i]])
+    bss_model@residuals <- bss_data@data_array - coef(summary(roi_full_lmemodel[[i]]))[,"Estimate"]
+    bss_model@rss <- colSums((bss_model@residuals)^2)
+  }
+
 
   # Mass Univariate Linear Mixed Effects Analysis (still in progress)
-  # lm_formula <- formula(sprintf('~ %s', paste(main_effect, '+', covariates)))
-  lme_formula <- bss_model@lm_formula
+  #lm_formula <- formula(sprintf('~ %s', paste(main_effect, '+', covariates)))
+  #lme_formula <- bss_model@lm_formula
 
   # Fit model
-  N <- dim(bss_data@data_array)[1]
-  Np <- length(unlist(strsplit(as.character(covariates), '\\+'))) + 1
-
-  X <- model.matrix(lm_formula, data = bss_data@demographics)
-  X_hat <- solve(t(X) %*% X) %*% t(X) # pre hat matrix
-  beta_coeff <- X_hat %*% bss_data@data_array  # beta coefficients
-  Y <- X %*% beta_coeff  # predicted response
-  rss <- colSums((bss_data@data_array - Y)^2) # residual sum of squares
-
-  if (main_effect == "")
-    main_effect = "(Intercept)" # If main_effect is empty, return the parameters of the Intercept
-
-  se <- sqrt(diag(solve(t(X) %*% X)))[[main_effect]] * sqrt(rss / (N-Np-1)) # standard error
-  tvalues <- as.numeric(beta_coeff[main_effect, ]/(se + .Machine$double.eps)) # tvalue
-  pvalues <- 2*pt(abs(tvalues), N-Np-1, lower.tail = FALSE) # pvalu
-  residuals <- bss_data@data_array - Y
-  pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
-  bss_model@pvalues <- pvalues
-  bss_model@tvalues <- tvalues
-  bss_model@beta_coeff <- beta_coeff
-  bss_model@rss <- rss
-  bss_model@residuals <- residuals
+  # N <- dim(bss_data@data_array)[1]
+  # Np <- length(unlist(strsplit(as.character(covariates), '\\+'))) + 1
+  #
+  # X <- model.matrix(lm_formula, data = bss_data@demographics)
+  # X_hat <- solve(t(X) %*% X) %*% t(X) # pre hat matrix
+  # beta_coeff <- X_hat %*% bss_data@data_array  # beta coefficients
+  # Y <- X %*% beta_coeff  # predicted response
+  # rss <- colSums((bss_data@data_array - Y)^2) # residual sum of squares
+  #
+  # if (main_effect == "")
+  #   main_effect = "(Intercept)" # If main_effect is empty, return the parameters of the Intercept
+  #
+  # se <- sqrt(diag(solve(t(X) %*% X)))[[main_effect]] * sqrt(rss / (N-Np-1)) # standard error
+  # tvalues <- as.numeric(beta_coeff[main_effect, ]/(se + .Machine$double.eps)) # tvalue
+  # pvalues <- 2*pt(abs(tvalues), N-Np-1, lower.tail = FALSE) # pvalu
+  # residuals <- bss_data@data_array - Y
+  # pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
+  # bss_model@pvalues <- pvalues
+  # bss_model@tvalues <- tvalues
+  # bss_model@beta_coeff <- beta_coeff
+  # bss_model@rss <- rss
+  # bss_model@residuals <- residuals
 
   return(bss_model)
 }

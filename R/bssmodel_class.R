@@ -244,6 +244,7 @@ setMethod("initialize_lm", signature("BssModel", "character", "character", "data
 model_type_list <- list(
   bss_anova = 'bss_anova',
   bss_lm = 'bss_lm',
+  bss_lme = 'bss_lme',
   bss_corr = 'bss_corr',
   pairedttest = 'pairedttest',
   unpairedttest = 'unpairedttest'

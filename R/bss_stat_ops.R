@@ -34,69 +34,45 @@
 #' @export
 bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr", niter=5000) {
 
+  if (class(bss_data) == "BssROIData") {
+    return(bss_roi_anova(main_effect = main_effect, covariates = covariates, bss_data = bss_data))
+  }
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
   bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
   bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
   bss_model <- anova_vec(bss_lm_full, bss_lm_null, bss_data)
 
   switch(mult_comp,
-    perm={
-      cl <- parallel::makeCluster(parallel::detectCores())
-      registerDoParallel(cl)
-      options(warn=-1)
-      pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
-      bss_model@pvalues <- pvalue_and_nulldist[[1]]
-      bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
-      bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
-      #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
-      nulldist <- pvalue_and_nulldist[[2]]
-      bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
-      bss_model@tvalues_adjusted <- bss_model@tvalues
-      bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
-      stopCluster(cl)
-      options(warn=0)
-    },
-    fdr={
-      bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
-      bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
-      #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
-      bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
-      bss_model@tvalues_adjusted <- bss_model@tvalues
-      bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
-    }
-  )
+         perm={
+           cl <- parallel::makeCluster(parallel::detectCores())
+           registerDoParallel(cl)
+           options(warn=-1)
+           pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
+           bss_model@pvalues <- pvalue_and_nulldist[[1]]
+           bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+           bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+           #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+           nulldist <- pvalue_and_nulldist[[2]]
+           bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
+           bss_model@tvalues_adjusted <- bss_model@tvalues
+           bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+           stopCluster(cl)
+           options(warn=0)
+         },
+         fdr={
+           bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+           bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+           #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+           bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
+           bss_model@tvalues_adjusted <- bss_model@tvalues
+           bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+         }
+ )
 
-  if (class(bss_data) == "BssROIData") {
-    bss_model@model_type="bss_lm"
+ message('Done.')
+ return(bss_model)
 
-    selected_col <- rep(NA, length(bss_data@roiids))
-    for (i in 1:length(bss_data@roiids)){
-      selected_col[i] <- paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")")
-    }
 
-    cmd1 <- list()
-    cmd2 <- list()
-    cmd3 <- list()
-    stats_commands <- list()
-
-    for (i in 1:length(bss_data@roiids)){
-      cmd1[[i]] <- sprintf("lm_full_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids[i]),
-                           paste('`',as.character(selected_col[i]),'`', ' ~ ', bss_model@fullmodel, sep = ''))
-      cmd2[[i]] <- sprintf("lm_null_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids[i]),
-                           paste('`',as.character(selected_col[i]),'`', ' ~ ', bss_model@nullmodel, sep = ''))
-      cmd3[[i]] <- sprintf("pander::pander(anova(lm_full_%s, lm_null_%s))",as.character(bss_data@roiids[i]),as.character(bss_data@roiids[i]))
-      stats_commands[[i]] <- c(cmd1[[i]], cmd2[[i]], cmd3[[i]])
-    }
-
-    eval(parse(text = stats_commands))
-    bss_model@stats_commands <- stats_commands
-    bss_model@load_data_command <- sprintf("bss_model <- bss_anova( main_effect = '%s', covariates = '%s', bss_data = bss_data) ",
-                                           main_effect, covariates)
-
-  }
-
-  message('Done.')
-  return(bss_model)
 }
 
 #' A vectorized version of analysis of variance (ANOVA).
@@ -161,8 +137,11 @@ anova_vec <- function(bss_lm_full, bss_lm_null, bss_data) {
 #' @export
 bss_lm <- function(main_effect="", covariates="", bss_data, mult_comp = "fdr") {
 
+  if (class(bss_data) == "BssROIData") {
+    return(bss_roi_anova(main_effect = main_effect, covariates = covariates, bss_data = bss_data))
+  }
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
-  bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
+  bss_model <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
   bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
   bss_model <- anova_vec(bss_lm_full, bss_lm_null, bss_data)
 
@@ -191,47 +170,12 @@ bss_lm <- function(main_effect="", covariates="", bss_data, mult_comp = "fdr") {
            bss_model@tvalues_adjusted <- bss_model@tvalues
            bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
          }
-  )
-  if (class(bss_data) == "BssROIData") {
-    bss_model@model_type="bss_lm"
+ )
 
-    selected_col <- rep(NA, length(bss_data@roiids))
-    for (i in 1:length(bss_data@roiids)){
-      selected_col[i] <- paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")")
-    }
-
-    cmd1 <- list()
-    cmd2 <- list()
-    cmd3 <- list()
-    stats_commands <- list()
-
-    for (i in 1:length(bss_data@roiids)){
-      cmd1[[i]] <- sprintf("lm_full_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids[i]),
-                           paste('`',as.character(selected_col[i]),'`', ' ~ ', bss_model@fullmodel, sep = ''))
-      cmd2[[i]] <- sprintf("lm_null_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids[i]),
-                           paste('`',as.character(selected_col[i]),'`', ' ~ ', bss_model@nullmodel, sep = ''))
-      cmd3[[i]] <- sprintf("pander::pander(anova(lm_full_%s, lm_null_%s))",as.character(bss_data@roiids[i]),as.character(bss_data@roiids[i]))
-      stats_commands[[i]] <- c(cmd1[[i]], cmd2[[i]], cmd3[[i]])
-    }
-
-    eval(parse(text = stats_commands))
-    bss_model@stats_commands <- stats_commands
-    bss_model@load_data_command <- sprintf("bss_model <- bss_anova( main_effect = '%s', covariates = '%s', bss_data = bss_data) ",
-                                           main_effect, covariates)
-
-  }
-
-  message('Done.')
-  return(bss_model)
+ message('Done.')
+ return(bss_model)
 
   # # Check the model type and call the appropriate method
-  # bss_model <- new("BssModel", model_type="bss_lm", main_effect = main_effect, covariates = covariates,
-  #                  demographics = bss_data@demographics, mspec_file="")
-  # message('Running the statistical model. This may take a while...', appendLF = FALSE)
-  # bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
-  # browser()
-  # bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
-  #
   # Xtemp <- solve(t(bss_model@X_design_full) %*% bss_model@X_design_full) %*% t(bss_model@X_design_full) # Pre Hat matrix
   # beta_full <- Xtemp %*% bss_data@data_array  # beta coefficients
   # y_full <- bss_model@X_design_full %*% beta_full  # Predicted response
@@ -261,8 +205,7 @@ bss_lm <- function(main_effect="", covariates="", bss_data, mult_comp = "fdr") {
   # bss_model@tvalues <- tvalues
   # bss_model@tvalues[abs(pvalues) >= 0.05] <- 0
   # bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
-  # message('Done.')
-  # return(bss_model)
+
 }
 
 #' Vectorized linear regression for brain imaging phenotypes.
@@ -315,6 +258,59 @@ lm_vec <- function(main_effect = "", covariates = "", bss_data) {
   bss_model@residuals <- residuals
   return(bss_model)
 }
+
+
+#' This function performs the ANOVA analysis for ROIs
+#'
+#' @param main_effect Character string containing an independent variable whose effect you want to measure.
+#' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
+#' either a categorical or a continuous variable.
+#' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
+#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
+#' @param  bss_data Object of type \code{\link{BssData}}
+#'
+#' @export
+
+bss_roi_anova <- function(main_effect="", covariates="", bss_data=bss_data) {
+  # Check the model type and call the appropriate method
+  bss_model <- new("BssModel", model_type="bss_lm", main_effect = main_effect, covariates = covariates,
+                   demographics = bss_data@demographics, mspec_file="")
+  message('Running the statistical model. This may take a while...', appendLF = FALSE)
+
+  selected_col <- rep(NA, length(bss_data@roiids))
+  for (i in 1:length(bss_data@roiids)){
+    selected_col[i] <- paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")")
+    bss_data@demographics[,selected_col[i]]
+  }
+
+  cmd1 <- list()
+  cmd2 <- list()
+  cmd3 <- list()
+  stats_commands <- list()
+
+  for (i in 1:length(bss_data@roiids)){
+    cmd1[[i]] <- sprintf("lm_full_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids[i]),
+                         paste('`',as.character(selected_col[i]),'`', ' ~ ', bss_model@fullmodel, sep = ''))
+    cmd2[[i]] <- sprintf("lm_null_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids[i]),
+                         paste('`',as.character(selected_col[i]),'`', ' ~ ', bss_model@nullmodel, sep = ''))
+    cmd3[[i]] <- sprintf("pander::pander(anova(lm_full_%s, lm_null_%s))",as.character(bss_data@roiids[i]),as.character(bss_data@roiids[i]))
+    stats_commands[[i]] <- c(cmd1[[i]], cmd2[[i]], cmd3[[i]])
+  }
+
+  for (i in 1:length(bss_data@roiids)){
+    for (cmd in stats_commands[[i]]) {
+      eval(parse(text = cmd))
+    }
+  }
+  bss_model@stats_commands <- stats_commands
+
+  bss_model@load_data_command <- sprintf("bss_model <- bss_anova( main_effect = '%s', covariates = '%s', bss_data = bss_data) ",
+                                         main_effect, covariates)
+
+  return(bss_model)
+
+}
+
 
 # bss_roi_lm <- function(main_effect="", covariates="", bss_data=bss_data) {
 #   # Check the model type and call the appropriate method
@@ -686,71 +682,37 @@ perm_p_adjust <- function(main_effect = "", covariates = "", bss_data, tvalues_n
 #' @export
 bss_lme <- function(group_var, main_effect="", covariates="", bss_data, mult_comp = "fdr") {
 
-  message('Running the statistical model. This may take a while...', appendLF = FALSE)
-  bss_model <- new("BssModel", model_type="bss_lme", group_var = group_var, main_effect = main_effect, covariates = covariates,
-                   demographics = bss_data@demographics, mspec_file="")
-  bss_lme_full <- lme_vec(group_var, main_effect = main_effect, covariates = covariates, bss_data = bss_data)
-  #bss_lme_null <- lme_vec(group_var,main_effect = "", covariates = covariates, bss_data = bss_data)
-  #bss_model <- anova_vec(bss_lme_full, bss_lme_null, bss_data)
-
-  switch(mult_comp,
-          perm={
-            cl <- parallel::makeCluster(parallel::detectCores())
-            registerDoParallel(cl)
-            options(warn=-1)
-            pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
-            bss_model@pvalues <- pvalue_and_nulldist[[1]]
-            bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
-            bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
-            #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
-            nulldist <- pvalue_and_nulldist[[2]]
-            bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
-            bss_model@tvalues_adjusted <- bss_model@tvalues
-            bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
-            stopCluster(cl)
-            options(warn=0)
-           },
-           fdr={
-            bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
-            bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
-            #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
-            bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
-            bss_model@tvalues_adjusted <- bss_model@tvalues
-            bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
-          }
-  )
   if (class(bss_data) == "BssROIData") {
-
-
-    selected_col <- rep(NA, length(bss_data@roiids))
-    for (i in 1:length(bss_data@roiids)){
-      selected_col[i] <- paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")")
-    }
-
-    cmd1 <- list()
-    cmd2 <- list()
-    cmd3 <- list()
-    stats_commands <- list()
-
-    for (i in 1:length(bss_data@roiids)){
-      bss_lme_full_formula <- paste0("`",as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")`"," ~ ",bss_model@main_effect," + (",bss_model@main_effect,"|",bss_model@group_var,") + ",bss_model@covariates)
-      bss_lme_null_formula <- paste0("`",as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")`"," ~ (1|",bss_model@group_var,") + ",bss_model@covariates)
-
-      cmd1[[i]] <- sprintf("lme_full_%s <- lme4::lmer((%s, data = bss_data@demographics,control=lme4::lmerControl(check.nobs.vs.nRE='ignore'))",
-                           as.character(bss_data@roiids[i]),bss_lme_full_formula)
-      cmd2[[i]] <- sprintf("lme_null_%s <- lme4::lmer(%s, data = bss_data@demographics,control=lme4::lmerControl(check.nobs.vs.nRE='ignore'))",
-                           as.character(bss_data@roiids[i]),bss_lme_null_formula)
-      cmd3[[i]] <- sprintf("pander::pander(anova(lme_full_%s, lme_null_%s))",as.character(bss_data@roiids[i]),as.character(bss_data@roiids[i]))
-      stats_commands[[i]] <- c(cmd1[[i]], cmd2[[i]], cmd3[[i]])
-    }
-
-    eval(parse(text = stats_commands))
-    bss_model@stats_commands <- stats_commands
-    bss_model@load_data_command <- sprintf("bss_model <- bss_anova( main_effect = '%s', covariates = '%s', bss_data = bss_data) ",
-                                           main_effect, covariates)
-
+    return(bss_roi_lme_anova(group_var, main_effect = main_effect, covariates = covariates, bss_data = bss_data))
   }
-
+  message('Running the statistical model. This may take a while...', appendLF = FALSE)
+  bss_model <- lme_vec(group_var, main_effect = main_effect, covariates = covariates, bss_data = bss_data)
+    # switch(mult_comp,
+    #        perm={
+    #          cl <- parallel::makeCluster(parallel::detectCores())
+    #          registerDoParallel(cl)
+    #          options(warn=-1)
+    #          pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
+    #          bss_model@pvalues <- pvalue_and_nulldist[[1]]
+    #          bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+    #          bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+    #         #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+    #          nulldist <- pvalue_and_nulldist[[2]]
+    #          bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
+    #          bss_model@tvalues_adjusted <- bss_model@tvalues
+    #          bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+    #          stopCluster(cl)
+    #          options(warn=0)
+    #        },
+    #        fdr={
+    #          bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+    #          bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+    #          #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+    #          bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
+    #          bss_model@tvalues_adjusted <- bss_model@tvalues
+    #          bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+    #        }
+    # )
 
   message('Done.')
   return(bss_model)
@@ -780,33 +742,12 @@ lme_vec <- function(group_var, main_effect = "", covariates = "", bss_data) {
   bss_model <- new("BssModel", model_type="bss_lme", main_effect = main_effect, covariates = covariates,
                    group_var = group_var, demographics = bss_data@demographics, mspec_file="")
 
-  # For univariate lme
-  roi_full_lmemodel = list()
-  for (i in 1:length(bss_data@roiids)){
-    bss_lme_formula <- as.formula(paste0("`",as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")`"," ~ ",bss_model@main_effect," + (",bss_model@main_effect,"|",bss_model@group_var,") + ",bss_model@covariates))
-    roi_full_lmemodel[[i]] <- lme4::lmer(bss_lme_formula,bss_data@demographics,control=lme4::lmerControl(check.nobs.vs.nRE="ignore"))
-    N <- dim(bss_data@data_array)[1]
-    Np <- length(unlist(strsplit(as.character(covariates), '\\+'))) + 1
-    #tvalues <- lme4::fixef(roi_full_lmemodel[[i]])/sqrt(diag(lme4::vcov.merMod(roi_full_lmemodel[[i]],full=TRUE))) # tvalue
-    tvalues <- coef(summary(roi_full_lmemodel[[i]]))[,"t value"]
-    pvalues <- 2*pt(abs(tvalues), N-Np-1, lower.tail = FALSE) # pvalue
-    pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
-    bss_model@pvalues <- pvalues
-    bss_model@tvalues <- tvalues
-    bss_model@tvalues_sign <- sign_tvalues(tvalues)
-    #bss_model@beta_coeff <- beta_coeff
-    #bss_model@residuals <- residuals(roi_full_lmemodel[[i]])
-    bss_model@residuals <- bss_data@data_array - coef(summary(roi_full_lmemodel[[i]]))[,"Estimate"]
-    bss_model@rss <- colSums((bss_model@residuals)^2)
-  }
-
-
   # Mass Univariate Linear Mixed Effects Analysis (still in progress)
   #lm_formula <- formula(sprintf('~ %s', paste(main_effect, '+', covariates)))
   #lme_formula <- bss_model@lm_formula
 
   # Fit model
-  # N <- dim(bss_data@data_array)[1]
+  N <- dim(bss_data@data_array)[1]
   # Np <- length(unlist(strsplit(as.character(covariates), '\\+'))) + 1
   #
   # X <- model.matrix(lm_formula, data = bss_data@demographics)
@@ -831,4 +772,56 @@ lme_vec <- function(group_var, main_effect = "", covariates = "", bss_data) {
 
   return(bss_model)
 }
+
+#' This function performs the ANOVA Linear Mixed Effects analysis for ROIs
+#'
+#' @param group_var Categorical variable name. This should be present in the demographics csv file associated
+#' with \code{bss_data}.
+#' @param main_effect Character string containing an independent variable whose effect you want to measure.
+#' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
+#' either a categorical or a continuous variable.
+#' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
+#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
+#' @param  bss_data Object of type \code{\link{BssData}}
+#'
+#' @export
+
+bss_roi_lme_anova <- function(group_var, main_effect="", covariates="", bss_data){
+
+  bss_model <- new("BssModel", model_type="bss_lme", main_effect = main_effect, covariates = covariates,
+                   group_var = group_var, demographics = bss_data@demographics, mspec_file="")
+  message('Running the statistical model. This may take a while...', appendLF = FALSE)
+
+  # For univariate lme
+  selected_col <- rep(NA, length(bss_data@roiids))
+  for (i in 1:length(bss_data@roiids)){
+    selected_col[i] <- paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")")
+  }
+
+  cmd1 <- list()
+  cmd2 <- list()
+  cmd3 <- list()
+  stats_commands <- list()
+
+  for (i in 1:length(bss_data@roiids)){
+    bss_lme_full_formula <- paste0("`",as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")`"," ~ ",bss_model@main_effect," + (",bss_model@main_effect,"|",bss_model@group_var,") + ",bss_model@covariates)
+    bss_lme_null_formula <- paste0("`",as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")`"," ~ (1|",bss_model@group_var,") + ",bss_model@covariates)
+
+    cmd1[[i]] <- sprintf("lme_full_%s <- lme4::lmer(%s, data = bss_data@demographics,control=lme4::lmerControl(check.nobs.vs.nRE='ignore'))",
+                         as.character(bss_data@roiids[i]),bss_lme_full_formula)
+    cmd2[[i]] <- sprintf("lme_null_%s <- lme4::lmer(%s, data = bss_data@demographics,control=lme4::lmerControl(check.nobs.vs.nRE='ignore'))",
+                         as.character(bss_data@roiids[i]),bss_lme_null_formula)
+    cmd3[[i]] <- sprintf("pander::pander(anova(lme_full_%s, lme_null_%s))",as.character(bss_data@roiids[i]),as.character(bss_data@roiids[i]))
+    stats_commands[[i]] <- c(cmd1[[i]], cmd2[[i]], cmd3[[i]])
+  }
+
+  eval(parse(text = stats_commands))
+  bss_model@stats_commands <- stats_commands
+  bss_model@load_data_command <- sprintf("bss_model <- bss_anova( main_effect = '%s', covariates = '%s', bss_data = bss_data) ",
+                                         main_effect, covariates)
+
+  message('Done.')
+  return (bss_model)
+}
+
 

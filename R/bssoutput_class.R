@@ -393,15 +393,20 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
     selected_col[i] <- paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")")
     bss_data@demographics[,selected_col[i]]
   }
+   if (bss_model@model_type=="bss_lme"){
+     comparison_stat = "Chisq"
+   } else {
+     comparison_stat = "F"
+   }
 
   for (m in 1:length(bss_data@roiids)){
     for (i in 1:length(bss_model@stats_commands[[m]])) {
       nb_commands[[m]] <- paste0(nb_commands[[m]], bss_model@stats_commands[[m]][i], "\n")
     }
     nb_commands[[m]] <- paste0(nb_commands[[m]], "```\n\n")
-    nb_calculations[[m]] <- paste0(nb_calculations[[m]],"anova_table <- anova(lm_full_",
-                                   bss_data@roiids[m],", lm_null_",bss_data@roiids[m],")\np_val_",
-                                   bss_data@roiids[m]," <- round(anova_table$`Pr(>F)`[2],digits=4)\n",
+    nb_calculations[[m]] <- paste0(nb_calculations[[m]],"anova_table <- ",
+                                   substr(bss_model@stats_commands[[m]][3],nchar("pander::pander(")+1,nchar(bss_model@stats_commands[[m]][3])-1),
+                                   "\np_val_",bss_data@roiids[m],"<- round(anova_table$`Pr(>",comparison_stat,")`[2],digits=4)\n",
                                    "pval_string <- paste('pvalue:', as.character(p_val_",bss_data@roiids[m],"))\n```\n\n")
     if (class(bss_data@demographics[,gsub("([A-Za-z]+).*", "\\1", bss_model@fullmodel)])=="integer"|class(bss_data@demographics[,gsub("([A-Za-z]+).*", "\\1", bss_model@fullmodel)])=="double"){
       nb_plots[[m]]<-paste0(nb_plots[[m]],"ggplot2::ggplot(data=bss_data@demographics, ggplot2::aes(x=",

@@ -817,8 +817,8 @@ bss_roi_lme_anova <- function(group_var, main_effect="", covariates="", bss_data
 
   eval(parse(text = stats_commands))
   bss_model@stats_commands <- stats_commands
-  bss_model@load_data_command <- sprintf("bss_model <- bss_anova( main_effect = '%s', covariates = '%s', bss_data = bss_data) ",
-                                         main_effect, covariates)
+  bss_model@load_data_command <- sprintf("bss_model <- bss_lme(group_var = '%s', main_effect = '%s', covariates = '%s', bss_data = bss_data) ",
+                                         group_var, main_effect, covariates)
 
   message('Done.')
   return (bss_model)

@@ -372,35 +372,14 @@ bss_corr <- function(corr_var, bss_data, mult_comp="fdr") {
   bss_model@corr_values_masked_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
   bss_model@tvalues_adjusted <- bss_model@tvalues
   bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
-  message('Done.')
-  return(bss_model)
 
   if (class(bss_data) == "BssROIData") {
-
-    selected_col <- rep(NA, length(bss_data@roiids))
-    for (i in 1:length(bss_data@roiids)){
-      selected_col[i] <- paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")")
-    }
-
-    cmd1 <- list()
-    cmd2 <- list()
-    cmd3 <- list()
-    stats_commands <- list()
-
-    for (i in 1:length(bss_data@roiids)){
-      cmd1[[i]] <- sprintf("lm_full_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids[i]),
-                           paste('`',as.character(selected_col[i]),'`', ' ~ ', bss_model@fullmodel, sep = ''))
-      cmd2[[i]] <- sprintf("lm_null_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids[i]),
-                           paste('`',as.character(selected_col[i]),'`', ' ~ ', bss_model@nullmodel, sep = ''))
-      cmd3[[i]] <- sprintf("pander::pander(anova(lm_full_%s, lm_null_%s))",as.character(bss_data@roiids[i]),as.character(bss_data@roiids[i]))
-      stats_commands[[i]] <- c(cmd1[[i]], cmd2[[i]], cmd3[[i]])
-    }
-
-    eval(parse(text = stats_commands))
-    bss_model@stats_commands <- stats_commands
-    bss_model@load_data_command <- sprintf("bss_model <- bss_corr(corr_var = '%s', bss_data = bss_data, mult_comp = '%s') ",
-                                           corr_var, mult_comp)
+     (bss_roi_corr(corr_var, bss_data, mult_comp="fdr"))
   }
+
+
+  message('Done.')
+  return(bss_model)
 
 }
 
@@ -468,6 +447,9 @@ bss_ttest <- function(group_var, bss_data, paired = FALSE, mult_comp="fdr") {
   # bss_model@pvalues_adjusted <- p.adjust(abs(bss_model@pvalues), 'BH')
   bss_model@tvalues_adjusted <- bss_model@tvalues
   #bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+
+  bss_model@load_data_command <- sprintf("bss_model <- bss_ttest(group_var = '%s', bss_data = bss_data, paired = %s, mult_comp= '%s')",
+                                         group_var, paired,mult_comp)
 
   message('Done.')
   return(bss_model)

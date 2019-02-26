@@ -401,32 +401,40 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
     else {comparison_stat = "F"}
 
     for (m in 1:length(bss_data@roiids)){
-      for (i in 1:length(bss_model@stats_commands[[m]])) {
-        nb_commands[[m]] <- paste0(nb_commands[[m]], bss_model@stats_commands[[m]][i], "\n")
+      if (bss_model@model_type != 'bss_corr'){
+        for (i in 1:length(bss_model@stats_commands[[m]])) {
+          nb_commands[[m]] <- paste0(nb_commands[[m]], bss_model@stats_commands[[m]][i], "\n")
+        }
+        nb_commands[[m]] <- paste0(nb_commands[[m]], "```\n\n")
+        nb_calculations[[m]] <- paste0(nb_calculations[[m]],"anova_table <- ",
+                                       substr(bss_model@stats_commands[[m]][3],nchar("pander::pander(")+1,nchar(bss_model@stats_commands[[m]][3])-1),
+                                       "\np_val_",bss_data@roiids[m],"<- round(anova_table$`Pr(>",comparison_stat,")`[2],digits=4)\n",
+                                       "pval_string <- paste('pvalue:', as.character(p_val_",bss_data@roiids[m],"))\n```\n\n")
       }
-      nb_commands[[m]] <- paste0(nb_commands[[m]], "```\n\n")
-      nb_calculations[[m]] <- paste0(nb_calculations[[m]],"anova_table <- ",
-                                     substr(bss_model@stats_commands[[m]][3],nchar("pander::pander(")+1,nchar(bss_model@stats_commands[[m]][3])-1),
-                                     "\np_val_",bss_data@roiids[m],"<- round(anova_table$`Pr(>",comparison_stat,")`[2],digits=4)\n",
-                                     "pval_string <- paste('pvalue:', as.character(p_val_",bss_data@roiids[m],"))\n```\n\n")
-      if (class(bss_data@demographics[,gsub("([A-Za-z]+).*", "\\1", bss_model@fullmodel)])=="integer"|class(bss_data@demographics[,gsub("([A-Za-z]+).*", "\\1", bss_model@fullmodel)])=="double"){
+      if (class(bss_data@demographics[,gsub("([A-Za-z]+).*", "\\1", bss_model@fullmodel)])=="integer"|class(bss_data@demographics[,gsub("([A-Za-z]+).*", "\\1", bss_model@fullmodel)])=="double"|bss_model@model_type == 'bss_corr'){
+        if (bss_model@model_type == "bss_corr"){
+          x_var = bss_model@corr_var
+          annotate_label = paste0("paste('corr val:',",round(bss_model@corr_values[m],5),")")
+        } else {
+          x_var = gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel)
+          annotate_label = paste0("paste('pvalue:', as.character(p_val_",bss_data@roiids[m],"))")
+        }
         nb_plots[[m]]<-paste0(nb_plots[[m]],"ggplot2::ggplot(data=bss_data@demographics, ggplot2::aes(x=",
-                              gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),
-                              ", y = `",selected_col[m],"`)) + ggplot2::geom_point() + ggplot2::ggtitle('",
+                              x_var,", y = `",selected_col[m],"`)) + ggplot2::geom_point() + ggplot2::ggtitle('",
                               as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
                               " ", bss_data@roimeas,
-                              " vs ", bss_model@main_effect, "') + ggplot2::labs(y='",
+                              " vs ", x_var, "') + ggplot2::labs(y='",
                               as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
                               "') + ggplot2::geom_smooth(method=lm, se=TRUE) +
-                              ggplot2::xlim(",min(bss_data@demographics[,gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel)]),", ",max(bss_data@demographics[,gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel)])+6,") +
+                              ggplot2::xlim(",min(bss_data@demographics[,x_var]),", ",max(bss_data@demographics[,x_var])+6,") +
                               ggplot2::theme(axis.title=ggplot2::element_text(size=16,face='bold')) +
                               ggplot2::theme(plot.title=ggplot2::element_text(size=18,face='bold')) +
-                              ggplot2::annotate('label',x=",max(bss_data@demographics[,gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel)])+2,",y= max(bss_data@demographics$`",selected_col[m],"`)",
-                              ",label= paste('pvalue:', as.character(p_val_",bss_data@roiids[m],")))\n
+                              ggplot2::annotate('label',x=",max(bss_data@demographics[,x_var])+2,",y= max(bss_data@demographics$`",selected_col[m],"`)",
+                              ",label= ",annotate_label,")\n
                               ggplot2::ggsave(filename='",
                               paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m]))), "_roi",bss_data@roiids[m],
                               "_", bss_data@roimeas,
-                              "_vs_", bss_model@main_effect, ".pdf',device='pdf')\n```\n")
+                              "_vs_", x_var, ".pdf',device='pdf')\n```\n")
       } else if (class(bss_data@demographics[,gsub("([A-Za-z]+).*", "\\1", bss_model@fullmodel)])=="factor"){
         nb_plots[[m]]<-paste0(nb_plots[[m]],
                               "mean_lengths <- rep(NA, length(levels(bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),")))
@@ -458,12 +466,21 @@ ggplot2::ggsave(filename='",
 paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m]))), "_roi",bss_data@roiids[m],
 " ", bss_data@roimeas,
 " vs ", bss_model@main_effect, ".pdf',device='pdf')\n```\n")
-                              }
-      nb_commands[[m]] <- paste0(sprintf("\n#### Main effect of %s (%d) %s on %s controlling for %s \n",
-                                         as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
-                                         bss_data@roiids[m],
-                                         bss_data@roimeas, bss_model@main_effect,bss_model@covariates ),
-                                 nb_commands[[m]])
+      }
+      if (bss_model@model_type == 'bss_corr'){
+        nb_commands[[m]] <- paste0(sprintf("\n#### Main effect of %s (%d) %s on %s \n",
+                                           as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
+                                           bss_data@roiids[m],
+                                           bss_data@roimeas, bss_model@corr_var),
+                                   nb_commands[[m]])
+      } else{
+        nb_commands[[m]] <- paste0(sprintf("\n#### Main effect of %s (%d) %s on %s controlling for %s \n",
+                                           as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
+                                           bss_data@roiids[m],
+                                           bss_data@roimeas, bss_model@main_effect,bss_model@covariates ),
+                                   nb_commands[[m]])
+      }
+
       }
   } else {
     for (i in 1:length(bss_data@roiids)){

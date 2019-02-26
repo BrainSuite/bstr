@@ -373,10 +373,8 @@ bss_corr <- function(corr_var, bss_data, mult_comp="fdr") {
   bss_model@tvalues_adjusted <- bss_model@tvalues
   bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
 
-  if (class(bss_data) == "BssROIData") {
-     (bss_roi_corr(corr_var, bss_data, mult_comp="fdr"))
-  }
-
+  bss_model@load_data_command <- sprintf("bss_model <- bss_corr(corr_var = '%s', bss_data = bss_data, mult_comp= '%s')",
+                                         corr_var, mult_comp)
 
   message('Done.')
   return(bss_model)

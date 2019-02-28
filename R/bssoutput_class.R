@@ -384,19 +384,18 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
 
 
   nb_commands <- lapply(as.character(bss_data@roiids),function(x){sprintf("```{r warning=FALSE, run_command_%s}\n",x)})
-  if (bss_model@model_type != 'pairedttest' & bss_model@model_type != 'unpairedttest') {
-    nb_plots <- lapply(as.character(bss_data@roiids),function(x){sprintf("```{r echo=FALSE, message=FALSE, warning=FALSE, plot_%s}\n",x)})
-  }
+  nb_plots <- lapply(as.character(bss_data@roiids),function(x){sprintf("```{r echo=FALSE, message=FALSE, warning=FALSE, plot_%s}\n",x)})
   if (bss_model@model_type != 'bss_corr'){
     nb_calculations <- lapply(as.character(bss_data@roiids),function(x){sprintf("```{r echo=FALSE, message=FALSE, warning=FALSE, pval_%s}\n",x)})
   }
 
+  selected_col <- rep(NA, length(bss_data@roiids))
+  for (i in 1:length(bss_data@roiids)){
+    selected_col[i] <- paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")")
+    bss_data@demographics[,selected_col[i]]
+  }
+
   if (bss_model@model_type != 'pairedttest' & bss_model@model_type != 'unpairedttest') {
-    selected_col <- rep(NA, length(bss_data@roiids))
-    for (i in 1:length(bss_data@roiids)){
-      selected_col[i] <- paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")")
-      bss_data@demographics[,selected_col[i]]
-    }
     if (bss_model@model_type=="bss_lme"){ comparison_stat = "Chisq"}
     else {comparison_stat = "F"}
 
@@ -492,18 +491,26 @@ paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m]))), "_roi",
                                      nb_calculations[[i]],"\nDT::formatStyle(DT::datatable(",current_t_test_table,
                                      "),column = 'P.Values',color = ifelse(",abs(round(bss_model@pvalues[i],6)),
                                      "<=0.05,'red','black'))\n```\n")
+      nb_plots[[i]]<-paste0(nb_plots[[i]],"ggplot2::ggplot(data=bss_data@demographics, ggplot2::aes(x=factor(",
+                            bss_model@group_var,"), y = `",selected_col[i],"`, color = factor(",bss_model@group_var,"))) + ggplot2::geom_boxplot() + ggplot2::ggtitle('",
+                            as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[i])[[1]]),
+                            " ", bss_data@roimeas,
+                            " vs ", bss_model@group_var, "') + ggplot2::labs(x = '",bss_model@group_var,"', y='",
+                            as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[i])[[1]]),
+                            "', colour = '",bss_model@group_var,"') +
+                            ggplot2::theme(axis.title=ggplot2::element_text(size=16,face='bold')) +
+                            ggplot2::theme(plot.title=ggplot2::element_text(size=18,face='bold')) +\n
+                            ggplot2::ggsave(filename='",
+                            paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i]))), "_roi",bss_data@roiids[i],
+                            "_", bss_data@roimeas,
+                            "_vs_", bss_model@group_var, ".pdf',device='pdf')\n```\n")
     }
   }
 
 
 
   rmdfileconn<-file(file.path(outdir, "report.Rmd"))
-  if (bss_model@model_type == 'pairedttest' | bss_model@model_type == 'unpairedttest') {
-    writeLines(c(nb_header, nb_libraries, nb_data_header_one, nb_data_command_one,
-                 nb_load_data, nb_data_header_two, nb_data_command_two,
-                 nb_data_header_three, nb_data_command_three,
-                 unlist(mapply(paste0, nb_calculations))), rmdfileconn)
-  } else if (bss_model@model_type == 'bss_corr'){
+  if (bss_model@model_type == 'bss_corr'){
     writeLines(c(nb_header, nb_libraries, nb_data_header_one, nb_data_command_one,
                  nb_load_data, nb_data_header_two, nb_data_command_two,
                  nb_data_header_three, nb_data_command_three,

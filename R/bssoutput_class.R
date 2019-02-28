@@ -489,7 +489,9 @@ paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m]))), "_roi",
                                    ",row.names = paste0('roiid ',",bss_data@roiids[i],"))")
       nb_calculations[[i]] <- paste0(sprintf("\n#### T-test output for differences between means of brain imaging phenotypes for %s for roiid %d \n",
                                              bss_model@group_var,bss_data@roiids[i]),
-                                     nb_calculations[[i]],"\nDT::datatable(",current_t_test_table,")\n```\n")
+                                     nb_calculations[[i]],"\nDT::formatStyle(DT::datatable(",current_t_test_table,
+                                     "),column = 'P.Values',color = ifelse(",abs(round(bss_model@pvalues[i],6)),
+                                     "<=0.05,'red','black'))\n```\n")
     }
   }
 

@@ -142,8 +142,6 @@ bss_lm <- function(main_effect="", covariates="", bss_data, mult_comp = "fdr") {
   }
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
   bss_model <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
-  bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
-  bss_model <- anova_vec(bss_lm_full, bss_lm_null, bss_data)
 
   switch(mult_comp,
          perm={

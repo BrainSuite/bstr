@@ -515,6 +515,11 @@ paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m]))), "_roi",
                  nb_load_data, nb_data_header_two, nb_data_command_two,
                  nb_data_header_three, nb_data_command_three,
                  unlist(mapply(paste0, nb_commands, nb_plots))), rmdfileconn)
+  } else if (bss_model@model_type == 'pairedttest' | bss_model@model_type == 'unpairedttest'){
+    writeLines(c(nb_header, nb_libraries, nb_data_header_one, nb_data_command_one,
+                 nb_load_data, nb_data_header_two, nb_data_command_two,
+                 nb_data_header_three, nb_data_command_three,
+                 unlist(mapply(paste0, nb_calculations, nb_plots))), rmdfileconn)
   } else {
     writeLines(c(nb_header, nb_libraries, nb_data_header_one, nb_data_command_one,
                  nb_load_data, nb_data_header_two, nb_data_command_two,
@@ -589,7 +594,7 @@ save_bss_color_files <- function(measure, var_name, cmap_title, bss_data, bss_mo
   # save ini colormap with ranges
   ini_fileprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
     basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.ini', sep = '')
-  save_colormap_to_ini(file.path(outdir, "/", ini_fileprefix), bss_cmap)
+  save_colormap_to_ini(file.path(outdir, "/",ini_fileprefix), bss_cmap)
   return(bss_cmap)
 }
 

@@ -584,12 +584,12 @@ save_bss_color_files <- function(measure, var_name, cmap_title, bss_data, bss_mo
   # save the color LUT
   lut_fileprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
     basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.lut', sep = '')
-  save_BrainSuiteLUT(file.path(outdir, lut_fileprefix), bss_cmap@lut)
+  save_BrainSuiteLUT(file.path(outdir, "/", lut_fileprefix), bss_cmap@lut)
 
   # save ini colormap with ranges
   ini_fileprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
     basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.ini', sep = '')
-  save_colormap_to_ini(file.path(outdir, ini_fileprefix), bss_cmap)
+  save_colormap_to_ini(file.path(outdir, "/", ini_fileprefix), bss_cmap)
   return(bss_cmap)
 }
 
@@ -698,7 +698,7 @@ get_voxelcoord <- function(bss_out, bss_data, bss_model, outdir, nclusters){
                             " -m ", bss_data@maskfile, " -o ", outdir, "/cluster.tsv", " -n ", nclusters)
 
   system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-  vox_table <- read.table(paste0(outdir,"cluster.tsv"),header=F,sep="\t")
+  vox_table <- read.table(paste0(outdir,"/cluster.tsv"),header=F,sep="\t")
   voxelcoord <- vector("list",nrow(vox_table))
   for (individ_vox in 1:nrow(vox_table)){
     for (vox_component in 1:3){

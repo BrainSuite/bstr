@@ -24,13 +24,13 @@ BssRmdVolumeOutput <-
                 save_out = function(bss_data, bss_model, outdir, voxelcoord) {
                   get_custom_tbm_overlays = function(outdir) {
 
-                    adjp_overlay <- paste0(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                    adjp_overlay <- paste0(outdir, "/", bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", bs_stat_overlays$log_pvalues_adjusted, bss_data@data_type)
-                    adjt_overlay <- paste0(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                    adjt_overlay <- paste0(outdir, "/", bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", bs_stat_overlays$tvalues_adjusted, bss_data@data_type)
-                    p_overlay <- paste0(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                    p_overlay <- paste0(outdir, "/", bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", bs_stat_overlays$log_pvalues, bss_data@data_type)
-                    t_overlay <- paste0(outdir, bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                    t_overlay <- paste0(outdir, "/", bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", bs_stat_overlays$tvalues, bss_data@data_type)
 
                     return(list("adjp_overlay" = adjp_overlay, "adjt_overlay" = adjt_overlay, "p_overlay" = p_overlay, "t_overlay" = t_overlay))
@@ -38,8 +38,8 @@ BssRmdVolumeOutput <-
 
 
                   #create a folder to store png images in
-                  dir.create(paste0(outdir,"png_images"))
-                  dir.create(paste0(outdir,"png_images_crosshairs"))
+                  dir.create(paste0(outdir,"/png_images"))
+                  dir.create(paste0(outdir,"/png_images_crosshairs"))
                   for(cluster_iter in 1:length(voxelcoord)) {
                     private$render_overlay(
                       cluster_iter,
@@ -186,7 +186,7 @@ BssRmdVolumeOutput <-
                   for (cbar_index in 1:4){
                     cbar[[cbar_index]] <- paste0(paste(bss_model@model_type, bss_model@main_effect, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), overlay[cbar_index], sep = '_'), '_cbar.png')
                   }
-                  cluster_filepath <- paste0(outdir,"cluster.tsv")
+                  cluster_filepath <- paste0(outdir,"/cluster.tsv")
                   cluster_filepath <- gsub(" ", "", cluster_filepath, fixed = TRUE)
                   vox_table <- read.table(cluster_filepath, header = F, sep = '\t')
                   colnames(vox_table) <- c('Cluster Number', 'Number of Voxels', 'Maximum Value', 'X Coord', 'Y Coord', 'Z Coord')

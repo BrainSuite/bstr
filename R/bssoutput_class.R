@@ -213,8 +213,10 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
          }
   )
 
-  save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
-
+  if (bss_model@model_type=="bss_corr"){
+    save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir,corr_values,corr_values_masked_adjusted)
+  } else {
+    save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
   voxelcoord <- get_voxelcoord(bss_out, bss_data, bss_model, outdir, nclusters)
 
   # Check if voxelcoord is empty
@@ -233,6 +235,7 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
   # add create an R6 class function from here
   bssrmd_volout <- BssRmdVolumeOutput$new()
   bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = voxelcoord, outdir)
+  }
 
 
     # Copy modelspec file to the output directory
@@ -298,11 +301,31 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
          }
   )
 
-  save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
+  if (bss_model@model_type=="bss_corr"){
+    save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir,corr_values,corr_values_masked_adjusted)
+  } else {
+    save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
+  }
 
-  # Create a new R6 class object here
+  voxelcoord <- get_voxelcoord(bss_out, bss_data, bss_model, outdir, nclusters)
+
+  # Check if voxelcoord is empty
+  if (length(voxelcoord) == 0) {
+    sink(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, bss_model@main_effect)), type = "output")
+    cat("---\n")
+    cat("title: BSSR Report\n")
+    cat("output: html_document\n")
+    cat("---\n\n\n")
+    cat("No detected clusters above significance threshold.")
+    sink()
+    rmarkdown::render(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, bss_model@main_effect)))
+    stop("No detected clusters above significance threshold.")
+  }
+
+  # add create an R6 class function from here
   bssrmd_volout <- BssRmdVolumeOutput$new()
-  bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = get_voxelcoord(bss_out, bss_data, bss_model, outdir, nclusters), outdir)
+  bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = voxelcoord, outdir)
+
 
   # Copy modelspec file to the output directory
   file.copy(bss_model@mspec_file, bss_out@outdir)
@@ -574,7 +597,7 @@ save_bss_out <- function(bss_data, bss_model, outdir="", overwrite = F, ncluster
 #' @param outdir string specifying output directory to save the results in
 #' @export
 
-save_bss_color_files <- function(measure, var_name, cmap_title, bss_data, bss_model, outdir) {
+ save_bss_color_files <- function(measure, var_name, cmap_title, bss_data, bss_model, outdir) {
 
   measure <- as.numeric(measure)
   bss_cmap <- new("BssColormap", cmap_title, "RdYlBu", measure)
@@ -659,10 +682,12 @@ save_bss_rds <- function(measure, var_name, label, bss_data, bss_model, outdir) 
 #' @param bss_data object of type \code{BssData}
 #' @param bss_model object of type \code{BssModel}
 #' @param outdir string specifying output directory to save the results in
+#' @param corr_values optional argument used for the correlation output only
+#' @param corr_values_masked_adjusted optional argument used for the adjusted correlation output only
 #' @export
 
 save_vol_stats_out <- function(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted,
-                               var_name, bss_data, bss_model, outdir) {
+                               var_name, bss_data, bss_model, outdir, corr_values = NULL, corr_values_masked_adjusted = NULL) {
 
   bss_cmap <- save_bss_color_files(log_pvalues, var_name, "log_pvalues", bss_data, bss_model, outdir)
   save_bss_out_nifti_image(log_pvalues, var_name, bss_cmap, bss_data, bss_model, outdir)
@@ -679,11 +704,12 @@ save_vol_stats_out <- function(log_pvalues, log_pvalues_adjusted, tvalues, tvalu
 
   switch(bss_model@model_type,
          bss_corr = {
-           bss_cmap <- save_bss_color_files(bss_model@corr_values, var_name, "corr_values", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(bss_model@corr_values, var_name, bss_cmap, bss_data, bss_model, outdir)
 
-           bss_cmap <- save_bss_color_files(bss_model@corr_values_masked_adjusted, var_name, "corr_values_masked_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(bss_model@corr_values_masked_adjusted, var_name, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(corr_values, bss_model@corr_var, "corr_values", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(corr_values, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
+
+           # bss_cmap <- save_bss_color_files(corr_values_masked_adjusted, bss_model@corr_values_masked_adjusted, "corr_values", bss_data, bss_model, outdir)
+           # save_bss_out_nifti_image(corr_values_masked_adjusted, bss_model@corr_values_masked_adjusted, bss_cmap, bss_data, bss_model, outdir)
          }
   )
 }

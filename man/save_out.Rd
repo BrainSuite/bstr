@@ -30,7 +30,7 @@ save_out(bss_out, bss_data, bss_model, overwrite = FALSE, ...)
 
 \item{bss_model}{object of type \code{BssModel}}
 
-\item{overwrite}{logical parameter denoting if existing output directory should be overwritten or not (default is false)}
+\item{overwrite}{logical parameter denoting if existing output directory should be overwritten or not (default is FALSE)}
 
 \item{...}{Extra named arguments passed to save_out}
 

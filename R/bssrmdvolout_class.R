@@ -32,8 +32,12 @@ BssRmdVolumeOutput <-
                       basename(bss_data@atlas_filename)),"_", bs_stat_overlays$log_pvalues, bss_data@data_type)
                     t_overlay <- paste0(outdir, "/", bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", bs_stat_overlays$tvalues, bss_data@data_type)
+                    corr_overlay <- paste0(outdir, "/", bss_model@model_type, "_", bss_model@corr_var,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", bs_stat_overlays$corr_values, bss_data@data_type)
+                    # adj_corr_overlay <- paste0(outdir, "/", bss_model@model_type, "_", bss_model@corr_var,"_",tools::file_path_sans_ext(
+                    #   basename(bss_data@atlas_filename)),"_", bs_stat_overlays$corr_values_adjusted, bss_data@data_type)
 
-                    return(list("adjp_overlay" = adjp_overlay, "adjt_overlay" = adjt_overlay, "p_overlay" = p_overlay, "t_overlay" = t_overlay))
+                    return(list("adjp_overlay" = adjp_overlay, "adjt_overlay" = adjt_overlay, "p_overlay" = p_overlay, "t_overlay" = t_overlay, "corr_overlay" = corr_overlay))
                   }
 
 
@@ -45,10 +49,11 @@ BssRmdVolumeOutput <-
                       cluster_iter,
                       voxelcoord,
                       atlaspath = bss_data@atlas_filename,
-                      overlaypath = c(get_custom_tbm_overlays(outdir)[[1]],get_custom_tbm_overlays(outdir)[[2]],get_custom_tbm_overlays(outdir)[[3]],get_custom_tbm_overlays(outdir)[[4]]),
+                      overlaypath = ifelse(bss_model@model_type=="bss_corr",c(get_custom_tbm_overlays(outdir)[[5]]),
+                                           c(get_custom_tbm_overlays(outdir)[[1]],get_custom_tbm_overlays(outdir)[[2]],get_custom_tbm_overlays(outdir)[[3]],get_custom_tbm_overlays(outdir)[[4]])),
                       #stat_overlay
                       outdir,
-                      name = c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues), alpha = 120)
+                      name = c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues,bs_stat_overlays$corr_values), alpha = 120)
 
                     private$render_atlas(cluster_iter, voxelcoord,
                                          atlaspath = bss_data@atlas_filename,
@@ -57,17 +62,21 @@ BssRmdVolumeOutput <-
 
                     private$render_html(outdir,
                                         voxelcoord,
-                                        overlay_name = c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues))
+                                        overlay_name = c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues,bs_stat_overlays$corr_values))
 
 
                   }
 
-                  private$save_rmd_preamble(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, bss_model@main_effect)),
+                  private$save_rmd_preamble(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, ifelse(bss_model@model_type=="bss_corr",
+                                                                                                                        bss_model@corr_var,
+                                                                                                                        bss_model@main_effect))),
                                             outdir,
                                             voxelcoord,
                                             overlay_name = "c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues)")
 
-                  rmarkdown::render(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, bss_model@main_effect)))
+                  rmarkdown::render(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, ifelse(bss_model@model_type=="bss_corr",
+                                                                                                            bss_model@corr_var,
+                                                                                                            bss_model@main_effect))))
                 }
               ),
 
@@ -75,7 +84,7 @@ BssRmdVolumeOutput <-
 
                 render_overlay = function(voxelcoord_index,voxelcoord,atlaspath,overlaypath,outdir,name,alpha) {
                   view_order <- c("sag","cor","ax")
-                  for (stats_measure_index in 1:4) {
+                  for (stats_measure_index in 1:length(overlaypath)) {
                     crosshair_length_multiplier <- 15
                     for (view in 1:3){
                        current_view_with_crosshairs <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images_crosshairs/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[stats_measure_index], "_cluster",voxelcoord_index,".png --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view], " -a ", alpha)
@@ -134,8 +143,10 @@ BssRmdVolumeOutput <-
 
                   load_library <- "library(bssr)"
                   data_command_1 <- paste0("bss_data <- load_bss_data(type = '",bss_data@analysis_type,"', subjdir = '",bss_data@subjdir,"', csv = '", bss_data@csv,"', measure = '", bss_data@measure,"', smooth = ",bss_data@smooth,")")
-                  data_command_2 <- paste0("bss_model <- ,",bss_model@model_type,",(main_effect = '",bss_model@main_effect,"', covariates = '", bss_model@covariates,"', bss_data = bss_data)")
-                  data_command_3 <- "bs_stat_overlays = list(log_pvalues_adjusted = 'log_pvalues_adjusted', tvalues_adjusted = 'tvalues_adjusted', log_pvalues = 'log_pvalues', tvalues = 'tvalues', pvalues = 'pvalues')"
+                  data_command_2 <- ifelse(bss_model@model_type=="bss_corr",
+                                           paste0("bss_model <- ,",bss_model@model_type,",(corr_var = '",bss_model@corr_var,"', bss_data = bss_data, mult_comp = '",bss_model@mult_comp,"')"),
+                                           paste0("bss_model <- ,",bss_model@model_type,",(main_effect = '",bss_model@main_effect,"', covariates = '", bss_model@covariates,"', bss_data = bss_data)"))
+                  data_command_3 <- "bs_stat_overlays = list(log_pvalues_adjusted = 'log_pvalues_adjusted', tvalues_adjusted = 'tvalues_adjusted', log_pvalues = 'log_pvalues', tvalues = 'tvalues', pvalues = 'pvalues', corr_values = 'corr_values')"
                   user_input <- paste0(load_library,"\n",data_command_1,"\n",data_command_2,"\n",data_command_3,"\n")
                   templines <- deparse(private$render_html)
                   templines[1] <- "render_html = function(outdir, voxelcoord, overlay_name)"
@@ -209,7 +220,8 @@ BssRmdVolumeOutput <-
                     #width <- c("34.5%","28.8%","24%","11%")
                     width <- c("31%", "7%")
                     overlay <- c(bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues_adjusted, bs_stat_overlays$log_pvalues, bs_stat_overlays$tvalues)
-                    panel_names <- c("Adjusted P-Values","Adjusted T-Values","P-Values","T-Values")
+                    panel_names <- ifelse(bss_model@model_type=="bss_corr",c("Correlation Values"),
+                                          c("Adjusted P-Values","Adjusted T-Values","P-Values","T-Values"))
                     images <- ""
                     for (inner_coord_index in 1:3) {
                       images <- paste0(images, shiny_image(outdir, voxelcoord, inner_coord_index,overlay[panel_type], width[1], voxelcoord_index), ",")
@@ -221,14 +233,16 @@ BssRmdVolumeOutput <-
 
                   # Function that creates clusters for each panel
                   cluster_panels = function(voxelcoord){
+                    panel_names <- ifelse(bss_model@model_type=="bss_corr",c("Correlation Values"),
+                                          c("Adjusted P-Values","Adjusted T-Values","P-Values","T-Values"))
                     panels <- paste0("shiny::tabPanel(title = shiny::h4(paste('Cluster 1: Voxel Coordinate (",voxelcoord[[1]][1],",",voxelcoord[[1]][2],",",voxelcoord[[1]][3],")'),shiny::tableOutput('data'),shiny::tabsetPanel(id = 'navbar',type = 'pills',")
-                    for (tab_panel_type in 1:4){
+                    for (tab_panel_type in 1:length(panel_names)){
                       panels <- paste0(panels,tab_panel(tab_panel_type, 1),",")
                     }
                     panels <- paste0(substr(panels,1,nchar(panels)-1),")))")
                     for (voxelcoord_index in 2:length(voxelcoord)){
                       panels <- paste0(panels, ", shiny::tabPanel(title = shiny::h4(paste('Cluster ", voxelcoord_index, ": Voxel Coordinate (",voxelcoord[[voxelcoord_index]][1],",",voxelcoord[[voxelcoord_index]][2],",",voxelcoord[[voxelcoord_index]][3],")'),shiny::tableOutput('data'),shiny::tabsetPanel(id = 'navbar',type = 'pills',")
-                      for (tab_panel_type in 1:4){
+                      for (tab_panel_type in 1:length(panel_names)){
                         panels <- paste0(panels,tab_panel(tab_panel_type, voxelcoord_index),",")
                       }
                       panels <- paste0(substr(panels,1,nchar(panels)-1),")))")

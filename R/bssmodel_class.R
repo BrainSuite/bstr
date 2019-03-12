@@ -64,6 +64,7 @@ BssModel <- setClass(
     corr_values = "numeric",
     corr_values_masked_adjusted = "numeric",
     group_var = "character",
+    mult_comp = "character",
     model_type = "character",
     fullmodel = "character",
     fullvars = "character",
@@ -192,7 +193,7 @@ parse_model <- function(main_effect="", covariates="", corr_var="", group_var = 
 
 # TODO: Call read_modelspec from within initialize
 setMethod("initialize", valueClass = "BssModel", signature = "BssModel",
-          function(.Object, model_type, main_effect="", covariates="", corr_var="", group_var="", demographics, mspec_file) {
+          function(.Object, model_type, main_effect="", covariates="", corr_var="", group_var="", mult_comp="", demographics, mspec_file) {
 
           if (model_type == "bss_lm" || model_type == "bss_anova")
             parse_model_result <- parse_lm(main_effect, covariates, corr_var, group_var, model_type, demographics)
@@ -204,6 +205,7 @@ setMethod("initialize", valueClass = "BssModel", signature = "BssModel",
           .Object@corr_var <- corr_var
           .Object@group_var <- group_var
           .Object@model_type <- model_type
+          .Object@mult_comp <- mult_comp
 
           if (parse_model_result$main_effect_present || parse_model_result$covariates_present) {
             .Object <- initialize_lm(.Object, main_effect, covariates, demographics)

@@ -215,8 +215,10 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
 
   if (bss_model@model_type=="bss_corr"){
     save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir,corr_values,corr_values_masked_adjusted)
-  } else {
+  } else if (bss_model@model_type != "pairedttest" & bss_model@model_type != "unpairedttest"){
     save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
+  }
+  if (bss_model@model_type != "pairedttest" & bss_model@model_type != "unpairedttest"){
   voxelcoord <- get_voxelcoord(bss_out, bss_data, bss_model, outdir, nclusters)
 
   # Check if voxelcoord is empty
@@ -303,10 +305,10 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
 
   if (bss_model@model_type=="bss_corr"){
     save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir,corr_values,corr_values_masked_adjusted)
-  } else {
+  } else  if (bss_model@model_type != "pairedttest" & bss_model@model_type != "unpairedttest") {
     save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
   }
-
+  if (bss_model@model_type != "pairedttest" & bss_model@model_type != "unpairedttest") {
   voxelcoord <- get_voxelcoord(bss_out, bss_data, bss_model, outdir, nclusters)
 
   # Check if voxelcoord is empty
@@ -325,7 +327,7 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
   # add create an R6 class function from here
   bssrmd_volout <- BssRmdVolumeOutput$new()
   bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = voxelcoord, outdir)
-
+  }
 
   # Copy modelspec file to the output directory
   file.copy(bss_model@mspec_file, bss_out@outdir)
@@ -580,6 +582,7 @@ save_bss_out <- function(bss_data, bss_model, outdir="", overwrite = F, ncluster
          roi = { bss_out <- new("BssROIOutput", outdir) }
   )
   if (bss_data@analysis_type == "tbm" | bss_data@analysis_type == "dbm"){
+    browser()
     bss_out <- save_out(bss_out, bss_data, bss_model, overwrite = overwrite, nclusters = nclusters)
     invisible(bss_out)
   } else {
@@ -603,6 +606,7 @@ save_bss_out <- function(bss_data, bss_model, outdir="", overwrite = F, ncluster
   bss_cmap <- new("BssColormap", cmap_title, "RdYlBu", measure)
   cbar_filename <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
     basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
+
   save_colorbar(file.path(outdir,cbar_filename), bss_cmap@lut, bss_cmap@vmin, bss_cmap@vmax, cmap_title)
 
   cbar_filename <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
@@ -708,8 +712,8 @@ save_vol_stats_out <- function(log_pvalues, log_pvalues_adjusted, tvalues, tvalu
            bss_cmap <- save_bss_color_files(corr_values, bss_model@corr_var, "corr_values", bss_data, bss_model, outdir)
            save_bss_out_nifti_image(corr_values, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
 
-           # bss_cmap <- save_bss_color_files(corr_values_masked_adjusted, bss_model@corr_values_masked_adjusted, "corr_values", bss_data, bss_model, outdir)
-           # save_bss_out_nifti_image(corr_values_masked_adjusted, bss_model@corr_values_masked_adjusted, bss_cmap, bss_data, bss_model, outdir)
+           #bss_cmap <- save_bss_color_files(corr_values_masked_adjusted, bss_model@corr_values_masked_adjusted, "corr_values_masked_adjusted", bss_data, bss_model, outdir)
+           #save_bss_out_nifti_image(corr_values_masked_adjusted, bss_model@corr_values_masked_adjusted, bss_cmap, bss_data, bss_model, outdir)
          }
   )
 }
@@ -724,10 +728,15 @@ save_vol_stats_out <- function(log_pvalues, log_pvalues_adjusted, tvalues, tvalu
 
 get_voxelcoord <- function(bss_out, bss_data, bss_model, outdir, nclusters){
   # Call cluster code from terminal
+  if (bss_model@model_type=="bss_corr"){
+    voxelcoord_call <- paste0("clustermap -i ", outdir,"/",bss_model@model_type,"_",bss_model@corr_var,
+                              "_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)), "_corr_values.nii.gz",
+                              " -m ", bss_data@maskfile, " -o ", outdir, "/cluster.tsv", " -n ", nclusters)
+  } else {
   voxelcoord_call <- paste0("clustermap -i ", outdir,"/",bss_model@model_type,"_",bss_model@main_effect,
                             "_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)), "_tvalues_adjusted.nii.gz",
                             " -m ", bss_data@maskfile, " -o ", outdir, "/cluster.tsv", " -n ", nclusters)
-
+  }
   system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
   vox_table <- read.table(paste0(outdir,"/cluster.tsv"),header=F,sep="\t")
   voxelcoord <- vector("list",nrow(vox_table))

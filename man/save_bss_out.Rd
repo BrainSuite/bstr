@@ -14,9 +14,9 @@ save_bss_out(bss_data, bss_model, outdir = "", overwrite = F,
 
 \item{outdir}{output directory to save the results}
 
-\item{overwrite}{logical parameter denoting if existing output directory should be overwritten or not (default is false)}
+\item{overwrite}{logical parameter denoting if existing output directory should be overwritten or not (default is FALSE)}
 
-\item{nclusters}{number of clusters (default is 10)}
+\item{nclusters}{numeric value denoting number of clusters (default is 10)}
 }
 \description{
 Save the statistical analysis output

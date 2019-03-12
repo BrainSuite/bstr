@@ -31,7 +31,7 @@ with \code{bss_data}.}
 with \code{bss_data}.}
 
 \item{\code{model_type}}{character string denoting the type of model. Should be one of \code{"bss_anova"},
-\code{"bss_corr"}, \code{"bss_corr"}, \code{"pairedttest"} or \code{"unpairedttest"}}
+\code{"bss_corr"}, \code{"bss_corr"}, \code{"pairedttest"}, \code{"unpairedttest"} or \code{"bss_lme"}}
 
 \item{\code{fullmodel}}{character string like an R formula denoting the full model including both
 the main effect and covariates.}

@@ -133,9 +133,10 @@ anova_vec <- function(bss_lm_full, bss_lm_null, bss_data) {
 #' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
 #' @param  bss_data Object of type \code{\link{BssData}}
 #' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.
+#' @param  niter numeric variable for the number of iterations for permutations test. Will be ignored if mult_comp="fdr"
 #'
 #' @export
-bss_lm <- function(main_effect="", covariates="", bss_data, mult_comp = "fdr") {
+bss_lm <- function(main_effect="", covariates="", bss_data, mult_comp = "fdr", niter=5000) {
 
   if (class(bss_data) == "BssROIData") {
     return(bss_roi_anova(main_effect = main_effect, covariates = covariates, bss_data = bss_data))

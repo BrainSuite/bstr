@@ -582,7 +582,6 @@ save_bss_out <- function(bss_data, bss_model, outdir="", overwrite = F, ncluster
          roi = { bss_out <- new("BssROIOutput", outdir) }
   )
   if (bss_data@analysis_type == "tbm" | bss_data@analysis_type == "dbm"){
-    browser()
     bss_out <- save_out(bss_out, bss_data, bss_model, overwrite = overwrite, nclusters = nclusters)
     invisible(bss_out)
   } else {

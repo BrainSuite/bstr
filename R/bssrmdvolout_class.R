@@ -23,14 +23,19 @@ BssRmdVolumeOutput <-
                 },
                 save_out = function(bss_data, bss_model, outdir, voxelcoord) {
                   get_custom_tbm_overlays = function(outdir) {
+                    if (bss_model@model_type=="unpairedttest" | bss_model@model_type=="pairedttest"){
+                      indep_var <- bss_model@group_var
+                    } else {
+                      indep_var <- bss_model@main_effect
+                    }
 
-                    adjp_overlay <- paste0(outdir, "/", bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                    adjp_overlay <- paste0(outdir, "/", bss_model@model_type, "_", indep_var,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", bs_stat_overlays$log_pvalues_adjusted, bss_data@data_type)
-                    adjt_overlay <- paste0(outdir, "/", bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                    adjt_overlay <- paste0(outdir, "/", bss_model@model_type, "_", indep_var,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", bs_stat_overlays$tvalues_adjusted, bss_data@data_type)
-                    p_overlay <- paste0(outdir, "/", bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                    p_overlay <- paste0(outdir, "/", bss_model@model_type, "_", indep_var,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", bs_stat_overlays$log_pvalues, bss_data@data_type)
-                    t_overlay <- paste0(outdir, "/", bss_model@model_type, "_", bss_model@main_effect,"_",tools::file_path_sans_ext(
+                    t_overlay <- paste0(outdir, "/", bss_model@model_type, "_", indep_var,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", bs_stat_overlays$tvalues, bss_data@data_type)
                     corr_overlay <- paste0(outdir, "/", bss_model@model_type, "_", bss_model@corr_var,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", bs_stat_overlays$corr_values, bss_data@data_type)
@@ -76,16 +81,24 @@ BssRmdVolumeOutput <-
 
                   }
 
-                  private$save_rmd_preamble(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, ifelse(bss_model@model_type=="bss_corr",
-                                                                                                                        bss_model@corr_var,
-                                                                                                                        bss_model@main_effect))),
+                  private$save_rmd_preamble(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, switch(bss_model@model_type,
+                                                                                                                        bss_corr = {bss_model@corr_var},
+                                                                                                                        unpairedttest = {bss_model@group_var},
+                                                                                                                        pairedttest = {bss_model@group_var},
+                                                                                                                        bss_anova = {bss_model@main_effect},
+                                                                                                                        bss_lm = {bss_model@main_effect},
+                                                                                                                        bss_lme = {bss_model@main_effect}))),
                                             outdir,
                                             voxelcoord,
                                             overlay_name = "c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues,bs_stat_overlays$corr_values)")
 
-                  rmarkdown::render(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, ifelse(bss_model@model_type=="bss_corr",
-                                                                                                            bss_model@corr_var,
-                                                                                                            bss_model@main_effect))))
+                  rmarkdown::render(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, switch(bss_model@model_type,
+                                                                                                                bss_corr = {bss_model@corr_var},
+                                                                                                                unpairedttest = {bss_model@group_var},
+                                                                                                                pairedttest = {bss_model@group_var},
+                                                                                                                bss_anova = {bss_model@main_effect},
+                                                                                                                bss_lm = {bss_model@main_effect},
+                                                                                                                bss_lme = {bss_model@main_effect}))))
                 }
               ),
 
@@ -262,12 +275,14 @@ BssRmdVolumeOutput <-
                       panels <- paste0(panels,tab_panel(tab_panel_type, 1),",")
                     }
                     panels <- paste0(substr(panels,1,nchar(panels)-1),")))")
+                    if (length(voxelcoord)>1){
                     for (voxelcoord_index in 2:length(voxelcoord)){
                       panels <- paste0(panels, ", shiny::tabPanel(title = shiny::h4(paste('Cluster ", voxelcoord_index, ": Voxel Coordinate (",voxelcoord[[voxelcoord_index]][1],",",voxelcoord[[voxelcoord_index]][2],",",voxelcoord[[voxelcoord_index]][3],")'),shiny::tableOutput('data'),shiny::tabsetPanel(id = 'navbar',type = 'pills',")
                       for (tab_panel_type in 1:length(panel_names)){
                         panels <- paste0(panels,tab_panel(tab_panel_type, voxelcoord_index),",")
                       }
                       panels <- paste0(substr(panels,1,nchar(panels)-1),")))")
+                    }
                     }
                     return(substr(panels,1,nchar(panels)))
                   }

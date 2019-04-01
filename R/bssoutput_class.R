@@ -215,10 +215,9 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
 
   if (bss_model@model_type=="bss_corr"){
     save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir,corr_values,corr_values_masked_adjusted)
-  } else { #if (bss_model@model_type != "pairedttest" & bss_model@model_type != "unpairedttest"){
+  } else {
     save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
   }
-  #if (bss_model@model_type != "pairedttest" & bss_model@model_type != "unpairedttest"){
   voxelcoord <- get_voxelcoord(bss_out, bss_data, bss_model, outdir, nclusters)
 
   # Check if voxelcoord is empty
@@ -237,7 +236,6 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
   # add create an R6 class function from here
   bssrmd_volout <- BssRmdVolumeOutput$new()
   bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = voxelcoord, outdir)
-  #}
 
 
     # Copy modelspec file to the output directory
@@ -305,10 +303,9 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
 
   if (bss_model@model_type=="bss_corr"){
     save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir,corr_values,corr_values_masked_adjusted)
-  } else {  #if (bss_model@model_type != "pairedttest" & bss_model@model_type != "unpairedttest") {
+  } else {
     save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
   }
-  #if (bss_model@model_type != "pairedttest" & bss_model@model_type != "unpairedttest") {
   voxelcoord <- get_voxelcoord(bss_out, bss_data, bss_model, outdir, nclusters)
 
   # Check if voxelcoord is empty
@@ -327,7 +324,6 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
   # add create an R6 class function from here
   bssrmd_volout <- BssRmdVolumeOutput$new()
   bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = voxelcoord, outdir)
-  #}
 
   # Copy modelspec file to the output directory
   file.copy(bss_model@mspec_file, bss_out@outdir)

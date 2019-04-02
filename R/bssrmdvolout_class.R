@@ -121,7 +121,6 @@ BssRmdVolumeOutput <-
                          x_additive = x_end*(crosshair_length_multiplier/coord_range[2])
                          y0_center = y_end*(voxelcoord[[voxelcoord_index]][3]*(1/coord_range[3]))
                          y_additive = y_end*(crosshair_length_multiplier/coord_range[3])
-
                        } else if (view == 2) {
                          x_end = dim(bss_data@atlas_image)[1]/dim(bss_data@atlas_image)[1]
                          y_end = dim(bss_data@atlas_image)[3]/dim(bss_data@atlas_image)[1]

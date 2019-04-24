@@ -737,25 +737,40 @@ get_voxelcoord <- function(bss_out, bss_data, bss_model, outdir, nclusters){
                             " -m ", bss_data@maskfile, " -o ", outdir, "/cluster.tsv", " -n ", nclusters)
   }
   system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-  vox_table <- read.table(paste0(outdir,"/cluster.tsv"),header=F,sep="\t")
-  voxelcoord <- vector("list",nrow(vox_table))
+  vox_table <- tryCatch({read.table(paste0(outdir,"/cluster.tsv"),header=F,sep="\t")},
+                        error=function(cond) {
+                          NULL
+                        }, warning=function(cond){
+                          NULL
+                        })
+  if (is.null(vox_table)){
+    voxelcoord <- vector('numeric')
+  } else {
+    voxelcoord <- vector("list",nrow(vox_table))
   for (individ_vox in 1:nrow(vox_table)){
-    for (vox_component in 1:3){
-      voxelcoord[[individ_vox]]<- c(voxelcoord[[individ_vox]],vox_table[individ_vox,3+vox_component])
+      for (vox_component in 1:3){
+        voxelcoord[[individ_vox]]<- c(voxelcoord[[individ_vox]],vox_table[individ_vox,3+vox_component])
+      }
     }
   }
   # Use tvalues instead of adjusted tvalues if no clusters are found
   if (length(voxelcoord) == 0){
-    voxelcoord_call <- paste0("clustermap -i ", outdir,"/",bss_model@model_type,"_",bss_model@main_effect,
-                              "_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)), "_tvalues.nii.gz",
-                              " -m ", bss_data@maskfile, " -o ", outdir, "/cluster.tsv", " -n ", nclusters)
-
+    stringr::str_remove(voxelcoord_call,"_adjusted")
     system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-    vox_table <- read.table(paste0(outdir,"cluster.tsv"),header=F,sep="\t")
-    voxelcoord <- vector("list",nrow(vox_table))
-    for (individ_vox in 1:nrow(vox_table)){
-      for (vox_component in 1:3){
-        voxelcoord[[individ_vox]]<- c(voxelcoord[[individ_vox]],vox_table[individ_vox,3+vox_component])
+    vox_table <- tryCatch({read.table(paste0(outdir,"/cluster.tsv"),header=F,sep="\t")},
+                          error=function(cond) {
+                            NULL
+                          }, warning=function(cond){
+                            NULL
+                          })
+    if (is.null(vox_table)){
+      voxelcoord <- vector('numeric')
+    } else {
+      voxelcoord <- vector("list",nrow(vox_table))
+      for (individ_vox in 1:nrow(vox_table)){
+        for (vox_component in 1:3){
+          voxelcoord[[individ_vox]]<- c(voxelcoord[[individ_vox]],vox_table[individ_vox,3+vox_component])
+        }
       }
     }
   }

@@ -192,7 +192,7 @@ BssRmdVolumeOutput <-
                   cat("```\n")
                   cat("```{r echo=FALSE, warning=FALSE}\n")
                   cat("vox_table <- read.table('", outdir,"/cluster.tsv', header = F, sep = '\t')\n", sep = "")
-                  cat("colnames(vox_table) <- c('Cluster Number', 'Number of Voxels', 'T-Value', 'X Coord', 'Y Coord', 'Z Coord')\n")
+                  cat("colnames(vox_table) <- c('Cluster Number', 'Number of Voxels', ",ifelse(bss_model@model_type=='bss_corr',"'Corr Value'","'T-Value'"),", 'X Coord', 'Y Coord', 'Z Coord')\n")
                   cat("DT::datatable(vox_table, rownames = FALSE)\n")
                   writeLines(templines)
                   voxelcoord_char <- "list("

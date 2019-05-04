@@ -109,9 +109,10 @@ BssRmdVolumeOutput <-
                   for (stats_measure_index in 1:length(overlaypath)) {
                     crosshair_length_multiplier <- 15
                     for (view in 1:3){
-                       current_view_with_crosshairs <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images_crosshairs/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[stats_measure_index], "_cluster",voxelcoord_index,".png --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view], " -a ", alpha)
+                       name_index <- ifelse(bss_model@model_type == "bss_corr",stats_measure_index+4, stats_measure_index)
+                       current_view_with_crosshairs <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images_crosshairs/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,".png --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view], " -a ", alpha)
                        system(current_view_with_crosshairs,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-                       current_view <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[stats_measure_index], "_cluster",voxelcoord_index,".png --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view], " -a ", alpha)
+                       current_view <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,".png --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view], " -a ", alpha)
                        system(current_view,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                        coord_range <- c(dim(bss_data@atlas_image)[1],dim(bss_data@atlas_image)[2],dim(bss_data@atlas_image)[3])
                        if (view == 1){
@@ -136,8 +137,8 @@ BssRmdVolumeOutput <-
                          y0_center = y_end*(voxelcoord[[voxelcoord_index]][2]*(1/coord_range[2]))
                          y_additive = y_end*(crosshair_length_multiplier/coord_range[2])
                        }
-                       temp_image <- png::readPNG(get_render_image_filename(outdir,voxelcoord,name[stats_measure_index], view, voxelcoord_index))
-                       png(get_render_image_filename(outdir,voxelcoord,name[stats_measure_index], view, voxelcoord_index))
+                       temp_image <- png::readPNG(get_render_image_filename(outdir,voxelcoord,name[name_index], view, voxelcoord_index))
+                       png(get_render_image_filename(outdir,voxelcoord,name[name_index], view, voxelcoord_index))
                        plot(0:1, 0:1, type='n', axes = F, ann = F)
                        par(mar = c(0,0,0,0))
                        rasterImage(temp_image, 0, 0, x_end, y_end)
@@ -247,11 +248,13 @@ BssRmdVolumeOutput <-
                   tab_panel = function(panel_type, voxelcoord_index){
                     #width <- c("34.5%","28.8%","24%","11%")
                     width <- c("31%", "7%")
-                    overlay <- c(bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues_adjusted, bs_stat_overlays$log_pvalues, bs_stat_overlays$tvalues, bs_stat_overlays$corr_values)
                     if (bss_model@model_type=="bss_corr"){
-                      panel_names<- c("Correlation Values")
+                      panel_names<- c("Correlation Values","Adjusted Correlation Values")
+                      overlay <- c(bs_stat_overlays$corr_values,bs_stat_overlays$corr_values_adjusted)
                     } else {
                       panel_names <- c("Adjusted P-Values","Adjusted T-Values","P-Values","T-Values")
+                      overlay <- c(bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues_adjusted,
+                                   bs_stat_overlays$log_pvalues, bs_stat_overlays$tvalues)
                     }
                     images <- ""
                     for (inner_coord_index in 1:3) {
@@ -265,7 +268,7 @@ BssRmdVolumeOutput <-
                   # Function that creates clusters for each panel
                   cluster_panels = function(voxelcoord){
                     if (bss_model@model_type=="bss_corr"){
-                      panel_names<- c("Correlation Values")
+                      panel_names<- c("Correlation Values","Adjusted Correlation Values")
                     } else {
                       panel_names <- c("Adjusted P-Values","Adjusted T-Values","P-Values","T-Values")
                     }

@@ -196,11 +196,11 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
          },
          bss_corr = {
            corr_values <- rep(0, length(bss_data@atlas_image))
-           corr_values[bss_data@mask_idx] <- bss_model@corr_values
+           corr_values[bss_data@mask_idx] <- bss_model@corr_values*5
            dim(corr_values) <- dim(bss_data@atlas_image)
 
            corr_values_masked_adjusted <- rep(0, length(bss_data@atlas_image))
-           corr_values_masked_adjusted[bss_data@mask_idx] <- bss_model@corr_values_masked_adjusted
+           corr_values_masked_adjusted[bss_data@mask_idx] <- bss_model@corr_values_masked_adjusted*5
            dim(corr_values_masked_adjusted) <- dim(bss_data@atlas_image)
 
            var_name = bss_model@corr_var
@@ -284,11 +284,11 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
          },
          bss_corr = {
            corr_values <- rep(0, length(bss_data@atlas_image))
-           corr_values[bss_data@mask_idx] <- bss_model@corr_values
+           corr_values[bss_data@mask_idx] <- bss_model@corr_values*5
            dim(corr_values) <- dim(bss_data@atlas_image)
 
            corr_values_masked_adjusted <- rep(0, length(bss_data@atlas_image))
-           corr_values_masked_adjusted[bss_data@mask_idx] <- bss_model@corr_values_masked_adjusted
+           corr_values_masked_adjusted[bss_data@mask_idx] <- bss_model@corr_values_masked_adjusted*5
            dim(corr_values_masked_adjusted) <- dim(bss_data@atlas_image)
 
            var_name = bss_model@corr_var
@@ -704,11 +704,11 @@ save_vol_stats_out <- function(log_pvalues, log_pvalues_adjusted, tvalues, tvalu
   switch(bss_model@model_type,
          bss_corr = {
 
-           bss_cmap <- save_bss_color_files(corr_values, bss_model@corr_var, "corr_values", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(corr_values, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(corr_values, var_name, "corr_values", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(corr_values, var_name, bss_cmap, bss_data, bss_model, outdir)
 
-           #bss_cmap <- save_bss_color_files(corr_values_masked_adjusted, bss_model@corr_values_masked_adjusted, "corr_values_masked_adjusted", bss_data, bss_model, outdir)
-           #save_bss_out_nifti_image(corr_values_masked_adjusted, bss_model@corr_values_masked_adjusted, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(corr_values_masked_adjusted, var_name, "corr_values_masked_adjusted", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(corr_values_masked_adjusted, var_name, bss_cmap, bss_data, bss_model, outdir)
          }
   )
 }

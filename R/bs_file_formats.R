@@ -71,7 +71,7 @@ bs_stat_overlays <- list(
   tvalues = "tvalues",
   pvalues = "pvalues",
   corr_values = "corr_values",
-  corr_values_adjusted = "corr_values_adjusted"
+  corr_values_masked_adjusted = "corr_values_masked_adjusted"
 )
 
 get_render_image_filename <- function(outdir,voxelcoord, overlay_name, brain_sector_index, voxelcoord_index) {

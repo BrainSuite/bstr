@@ -39,10 +39,11 @@ BssRmdVolumeOutput <-
                       basename(bss_data@atlas_filename)),"_", bs_stat_overlays$tvalues, bss_data@data_type)
                     corr_overlay <- paste0(outdir, "/", bss_model@model_type, "_", bss_model@corr_var,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", bs_stat_overlays$corr_values, bss_data@data_type)
-                    # adj_corr_overlay <- paste0(outdir, "/", bss_model@model_type, "_", bss_model@corr_var,"_",tools::file_path_sans_ext(
-                    #   basename(bss_data@atlas_filename)),"_", bs_stat_overlays$corr_values_adjusted, bss_data@data_type)
+                    adj_corr_overlay <- paste0(outdir, "/", bss_model@model_type, "_", bss_model@corr_var,"_",tools::file_path_sans_ext(
+                       basename(bss_data@atlas_filename)),"_", bs_stat_overlays$corr_values_masked_adjusted, bss_data@data_type)
 
-                    return(list("adjp_overlay" = adjp_overlay, "adjt_overlay" = adjt_overlay, "p_overlay" = p_overlay, "t_overlay" = t_overlay, "corr_overlay" = corr_overlay))
+                    return(list("adjp_overlay" = adjp_overlay, "adjt_overlay" = adjt_overlay, "p_overlay" = p_overlay,
+                                "t_overlay" = t_overlay, "corr_overlay" = corr_overlay, "adj_corr_overlay" = adj_corr_overlay))
                   }
 
 
@@ -55,10 +56,10 @@ BssRmdVolumeOutput <-
                         cluster_iter,
                         voxelcoord,
                         atlaspath = bss_data@atlas_filename,
-                        overlaypath = c(get_custom_tbm_overlays(outdir)[[5]]),
+                        overlaypath = c(get_custom_tbm_overlays(outdir)[[5]],get_custom_tbm_overlays(outdir)[[6]]),
                         #stat_overlay
                         outdir,
-                        name = c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues,bs_stat_overlays$corr_values), alpha = 120)
+                        name = c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues,bs_stat_overlays$corr_values,bs_stat_overlays$corr_values_masked_adjusted), alpha = 120)
                     } else {
                     private$render_overlay(
                       cluster_iter,
@@ -67,7 +68,7 @@ BssRmdVolumeOutput <-
                       overlaypath = c(get_custom_tbm_overlays(outdir)[[1]],get_custom_tbm_overlays(outdir)[[2]],get_custom_tbm_overlays(outdir)[[3]],get_custom_tbm_overlays(outdir)[[4]]),
                       #stat_overlay
                       outdir,
-                      name = c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues,bs_stat_overlays$corr_values), alpha = 120)
+                      name = c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues), alpha = 120)
                     }
                     private$render_atlas(cluster_iter, voxelcoord,
                                          atlaspath = bss_data@atlas_filename,
@@ -76,7 +77,7 @@ BssRmdVolumeOutput <-
 
                     private$render_html(outdir,
                                         voxelcoord,
-                                        overlay_name = c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues,bs_stat_overlays$corr_values))
+                                        overlay_name = c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues,bs_stat_overlays$corr_values,bs_stat_overlays$corr_values_masked_adjusted))
 
 
                   }
@@ -214,9 +215,9 @@ BssRmdVolumeOutput <-
                 ## another function will generate the names for the pngs
 
                 render_html = function(outdir, voxelcoord, overlay_name) {
-                  overlay <- c(bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues_adjusted, bs_stat_overlays$log_pvalues, bs_stat_overlays$tvalues, bs_stat_overlays$corr_values)
+                  overlay <- c(bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues_adjusted, bs_stat_overlays$log_pvalues, bs_stat_overlays$tvalues, bs_stat_overlays$corr_values, bs_stat_overlays$corr_values_masked_adjusted)
                   if (bss_model@model_type=="bss_corr"){
-                    cbar <- vector("list",1)
+                    cbar <- vector("list",2)
                     for (cbar_index in 1:length(cbar)){
                       cbar[[cbar_index]] <- paste0(paste(bss_model@model_type, bss_model@corr_var, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), overlay[4+cbar_index], sep = '_'), '_cbar.png')
                     }
@@ -250,7 +251,7 @@ BssRmdVolumeOutput <-
                     width <- c("31%", "7%")
                     if (bss_model@model_type=="bss_corr"){
                       panel_names<- c("Correlation Values","Adjusted Correlation Values")
-                      overlay <- c(bs_stat_overlays$corr_values,bs_stat_overlays$corr_values_adjusted)
+                      overlay <- c(bs_stat_overlays$corr_values,bs_stat_overlays$corr_values_masked_adjusted)
                     } else {
                       panel_names <- c("Adjusted P-Values","Adjusted T-Values","P-Values","T-Values")
                       overlay <- c(bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues_adjusted,

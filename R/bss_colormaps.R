@@ -177,9 +177,9 @@ get_tvalue_colors <- function(cmap_name, values) {
     lut <- get_color_palette('gray', N)
   }
   else {
-    negcolors <- get_color_palette('rev_winter', round(neglen/(1.001*totlen)*N))
-    zerocolors <- get_color_palette('gray', round(zerolen/(1.001*totlen)*N))
-    poscolors <- get_color_palette('spring', round(poslen/(1.001*totlen)*N))
+    negcolors <- get_color_palette('rev_winter', round(neglen*N/(1.001*totlen)))
+    zerocolors <- get_color_palette('gray', round(zerolen*N/(1.001*totlen)))
+    poscolors <- get_color_palette('spring', round(poslen*N/(1.001*totlen)))
     lut <- c(negcolors, zerocolors, poscolors)
   }
   lut <- colorRampPalette(lut)(256) # Set the length of the lut to 256

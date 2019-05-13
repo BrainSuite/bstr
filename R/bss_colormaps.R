@@ -81,7 +81,10 @@ setMethod("initialize", valueClass = "BssColormap", signature = "BssColormap",
 setGeneric("get_colors", valueClass = "matrix",function(bss_cmap) {
   standardGeneric("get_colors")
 })
-
+#' Get log pvalue colormap
+#' @param cmap_name name of the colormap
+#' @param values log-transformed p-values
+#' @export
 get_logpvalue_colormap <- function(cmap_name, values) {
   hexcolrs <- RColorBrewer::brewer.pal(11, cmap_name)
   hexcolrs[6] <- hexcolrstr$gray
@@ -116,7 +119,10 @@ setMethod("get_colors", valueClass = "matrix", signature = "BssColormap", functi
   return(bss_cmap@rgbcolors)
 
 })
-
+#' Get log pvalue colors, generate lut, and calculate min/max values
+#' @param cmap_name name of the colormap
+#' @param values log-transformed p-values
+#' @export
 get_logpvalue_colors <- function(cmap_name, values) {
 
   #                   log10(0.05)/1.0001   -log10(0.05)/1.0001
@@ -156,7 +162,10 @@ get_logpvalue_colors <- function(cmap_name, values) {
   return(list("rgbcolors"=rgbcolors, "lut"=lut, "vmin"=-1*pex, "vmax"=pex,
               "cnegmin"=cnegmin, "cnegmax"=cnegmax, "cposmin"=cposmin, "cposmax"=cposmax))
 }
-
+#' Get tvalue colors, generate lut, and calculate min/max values
+#' @param cmap_name name of the colormap
+#' @param values t-values
+#' @export
 get_tvalue_colors <- function(cmap_name, values) {
 
   # |---------------|-----------|------------|-------------------|
@@ -191,7 +200,13 @@ get_tvalue_colors <- function(cmap_name, values) {
   return(list("rgbcolors"=rgbcolors, "lut"=lut, "vmin"=tnegmax, "vmax"=tposmax,
               "cnegmin"=tnegmin, "cnegmax"=tnegmax, "cposmin"=tposmin, "cposmax"=tposmax))
 }
-
+#' Generates the components of a colorbar for an individual voxelcoordinate and overlay
+#' @param lut previously generated lut file
+#' @param min minimum value for the colorbar
+#' @param max maximum value for the colorbar (default is the negative of the minimum)
+#' @param ticks number of desired tick marks
+#' @param title title of the colorbar
+#' @export
 colorbar <- function(lut, min, max=-min, nticks=11, ticks=seq(min, max, len=nticks), title='') {
   scale = (length(lut)-1)/(max-min)
 
@@ -203,7 +218,13 @@ colorbar <- function(lut, min, max=-min, nticks=11, ticks=seq(min, max, len=ntic
     rect(0,y,10,y+1/scale, col=lut[i], border=NA)
   }
 }
-
+#' Creates the display of a colorbar for an individual voxelcoordinate and overlay
+#' @param filename name of the file
+#' @param lut previously generated lut file
+#' @param vmin minimum value for the colorbar
+#' @param vmax maximum value for the colorbar
+#' @param labeltxt the label for the colorbar
+#' @export
 save_colorbar <- function(filename, lut, vmin, vmax, labeltxt) {
   df <- data.frame(
     y=seq(vmin, vmax, length=256)
@@ -254,7 +275,10 @@ get_color_palette <- function(cmap_name, N) {
          }
         )
 }
-
+#' Saves the colormap values for min and max to an ini file
+#' @param filename name of the file
+#' @param bss_cmap BssColormap object
+#' @export
 save_colormap_to_ini <- function(filename, bss_cmap) {
   cmap_to_save <- list()
   cmap_to_save[["colormap"]] <- list(cmap_type=bss_cmap@cmap_type,
@@ -265,7 +289,10 @@ save_colormap_to_ini <- function(filename, bss_cmap) {
                                      cposmax = bss_cmap@cposmax)
   ini::write.ini(cmap_to_save, filename)
 }
-
+#' Saves and writes the lut for BrainSuite use
+#' @param filename name of the file
+#' @param lut previously generated lut
+#' @export
 save_BrainSuiteLUT <- function(filename, lut) {
   write(col2rgb(lut)/255, file=filename, sep = " ", ncolumns = 3)
 }

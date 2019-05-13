@@ -12,6 +12,9 @@
 # You should have received a copy of the GNU General Public License along with this program;
 # if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#' Check that subject directory and demographics files exist
+#' @param object object of type \code{BssOutput}
+#'
 check_files <- function(object){
   if (!dir.exists(object@subjdir)) {
     stop(sprintf("Subjects directory %s does not exist.\n", object@subjdir), call. = FALSE)

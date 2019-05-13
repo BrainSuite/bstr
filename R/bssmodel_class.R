@@ -97,7 +97,8 @@ BssModel <- setClass(
 #' @param group_var string designating which column of demographics is the group variable
 #' @param model_type string designating the type of model
 #' @param demographics data frame of the demographics
-#' @export
+#'
+
 parse_lm <- function(main_effect="", covariates="", corr_var="", group_var = "", model_type="", demographics) {
   main_effect_present <- !(main_effect == "")
   covariates_present <- !(covariates == "")
@@ -130,7 +131,7 @@ parse_lm <- function(main_effect="", covariates="", corr_var="", group_var = "",
 #' @param group_var string designating which column of demographics is the group variable
 #' @param model_type string designating the type of model
 #' @param demographics data frame of the demographics
-#' @export
+#'
 
 parse_model <- function(main_effect="", covariates="", corr_var="", group_var = "", model_type="", demographics) {
 

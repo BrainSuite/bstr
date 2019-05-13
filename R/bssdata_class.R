@@ -276,7 +276,16 @@ load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left",
   return(bss_data)
 }
 
-
+#' Load cortical surface data for statistical analysis.
+#' @param subjdir subject directory containing BrainSuite processed data.
+#' @param csv filename of a comma separated (csv) file containing the subject demographic information.
+#' The first column of this csv file
+#' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
+#' and should be exactly equal to the individual subject directory name.
+#' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
+#' @param smooth numeric value denoting the smoothing level.
+#' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
+#' Otherwise, for example, if the atlas for tensor based morphometry is located at /path/to/atlas/myatlas.mri.bfc.nii.gz, then specify atlas="/path/to/atlas/myatlas".
 load_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="") {
 
   bss_cbm_data <- new("BssCBMData", subjdir, csv)
@@ -291,7 +300,16 @@ load_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="")
   bss_cbm_data@data_type <- bs_data_types$surface
   return(bss_cbm_data)
 }
-
+#' Load tensor-based morphometry data for statistical analysis.
+#' @param subjdir subject directory containing BrainSuite processed data.
+#' @param csv filename of a comma separated (csv) file containing the subject demographic information.
+#' The first column of this csv file
+#' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
+#' and should be exactly equal to the individual subject directory name.
+#' @param smooth numeric value denoting the smoothing level.
+#' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
+#' Otherwise, for example, if the atlas for tensor based morphometry is located at /path/to/atlas/myatlas.mri.bfc.nii.gz, then specify atlas="/path/to/atlas/myatlas".
+#'
 load_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas="") {
 
   bss_tbm_data <- new("BssTBMData", subjdir, csv)
@@ -306,6 +324,18 @@ load_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas="") {
   bss_tbm_data@data_type <- bs_data_types$nifti_image
   return(bss_tbm_data)
 }
+#' Load diffusion data for statistical analysis.
+#' @param subjdir subject directory containing BrainSuite processed data.
+#' @param csv filename of a comma separated (csv) file containing the subject demographic information.
+#' The first column of this csv file
+#' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
+#' and should be exactly equal to the individual subject directory name.
+#' @param measure character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".
+#' @param smooth numeric value denoting the smoothing level.
+#' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
+#' Otherwise, for example, if the atlas for tensor based morphometry is located at /path/to/atlas/myatlas.mri.bfc.nii.gz, then specify atlas="/path/to/atlas/myatlas".
+#' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
+#'
 
 load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0, atlas="", eddy=TRUE) {
 
@@ -321,7 +351,15 @@ load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0, atlas="", 
   return(bss_dbm_data)
 }
 
-
+#' Load ROI data for statistical analysis.
+#' @param subjdir subject directory containing BrainSuite processed data.
+#' @param csv filename of a comma separated (csv) file containing the subject demographic information.
+#' The first column of this csv file
+#' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
+#' and should be exactly equal to the individual subject directory name.
+#' @param roiids numeric label identifiers for the regions of interest (ROI) type analysis.
+#' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
+#'
 load_roi_data <- function(subjdir="", csv="", roiids="", roimeas="") {
   bss_roi_data <- new("BssROIData", subjdir, csv)
   bss_roi_data <- load_data(bss_roi_data, roiids = roiids, roimeas = roimeas)

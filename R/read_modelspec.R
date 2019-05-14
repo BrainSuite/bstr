@@ -48,6 +48,15 @@ read_modelspec <- function(modelspecfile) {
   return(mspec)
 }
 
+#' Check that modelspec.ini file is valid
+#'
+#' The modelspec file specifies the subject directory, paths to the atlas files,
+#' the model specification, whether linear regerssion, correlation etc.
+#' The modelspec file was used in the previous versions of bssr.
+#' Currently, the user does not have to create this explicitly.
+#' This functionality is still kept in case a future need arises to generate these automatically.
+#' @param modelspecfile path to the modelspec file
+#'
 check_modelspec_validity <- function(modelspecfile) {
 
   check_file_exists(modelspecfile, raise_error = TRUE)
@@ -116,6 +125,17 @@ check_modelspec_validity <- function(modelspecfile) {
   return (mspec)
 }
 
+#' Get the cortical surface modelspec.ini file
+#'
+#' The modelspec file specifies the subject directory, paths to the atlas files,
+#' the model specification, whether linear regerssion, correlation etc.
+#' The modelspec file was used in the previous versions of bssr.
+#' Currently, the user does not have to create this explicitly.
+#' This functionality is still kept in case a future need arises to generate these automatically.
+#' @param mspec path to the modelspec file
+#' @param bs_atlas_path path to the atlas file
+#' @param svreg_log_file file containing svreg log output
+#'
 get_cbm_atlas_files <- function(mspec, bs_atlas_path, svreg_log_file) {
 
   lh_atlas_file <- file.path(dirname(bs_atlas_path), bs_file_formats$surf_atlas_left)
@@ -143,6 +163,17 @@ get_cbm_atlas_files <- function(mspec, bs_atlas_path, svreg_log_file) {
   return(mspec)
 }
 
+#' Get the tensor-based morphometry modelspec.ini file
+#'
+#' The modelspec file specifies the subject directory, paths to the atlas files,
+#' the model specification, whether linear regerssion, correlation etc.
+#' The modelspec file was used in the previous versions of bssr.
+#' Currently, the user does not have to create this explicitly.
+#' This functionality is still kept in case a future need arises to generate these automatically.
+#' @param mspec path to the modelspec file
+#' @param bs_atlas_path path to the atlas file
+#' @param svreg_log_file file containing svreg log output
+#'
 get_tbm_atlas_files <- function(mspec, bs_atlas_path, svreg_log_file) {
 
   atlas_file <- file.path(dirname(bs_atlas_path), bs_file_formats$nii_atlas)
@@ -183,6 +214,15 @@ get_tbm_atlas_files <- function(mspec, bs_atlas_path, svreg_log_file) {
   return(mspec)
 }
 
+#' Get the ROI modelspec.ini file
+#'
+#' The modelspec file specifies the subject directory, paths to the atlas files,
+#' the model specification, whether linear regerssion, correlation etc.
+#' The modelspec file was used in the previous versions of bssr.
+#' Currently, the user does not have to create this explicitly.
+#' This functionality is still kept in case a future need arises to generate these automatically.
+#' @param mspec path to the modelspec file
+#'
 get_roi_specs <- function(mspec) {
 
   if (is.null(mspec$subject$roiid))

@@ -365,7 +365,9 @@ load_roi_data <- function(subjdir="", csv="", roiids="", roimeas="") {
   bss_roi_data <- load_data(bss_roi_data, roiids = roiids, roimeas = roimeas)
   return(bss_roi_data)
 }
-
+#' Check that subject directory and demographics csv files exist
+#' @param object object of type \code{BssData}
+#'
 check_files <- function(object){
   if (!dir.exists(object@subjdir)) {
     stop(sprintf("Subjects directory %s does not exist.\n", object@subjdir), call. = FALSE)
@@ -437,6 +439,16 @@ package_data <- function(type="cbm", subjdir=NULL, csv="", hemi="left",
   file.copy(csv, file.path(outdir, basename(csv)))
 }
 
+#' Package cortical surface data for reproducible statistical analysis.
+#' @param subjdir subject directory containing BrainSuite processed data.
+#' @param csv filename of a comma separated (csv) file containing the subject demographic information.
+#' The first column of this csv file
+#' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
+#' and should be exactly equal to the individual subject directory name.
+#' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
+#' @param smooth numeric value denoting the smoothing level.
+#' @param outdir output directory that will contain the copied data
+#'
 copy_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, outdir) {
 
   bss_data <- new("BssCBMData", subjdir, csv)
@@ -456,6 +468,16 @@ copy_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, outdir) {
   file_copy(src_filelist, dest_filelist)
 }
 
+#' Package tensor-based morphometry data for reproducible statistical analysis.
+#' @param subjdir subject directory containing BrainSuite processed data.
+#' @param csv filename of a comma separated (csv) file containing the subject demographic information.
+#' The first column of this csv file
+#' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
+#' and should be exactly equal to the individual subject directory name.
+#' @param smooth numeric value denoting the smoothing level.
+#' @param atlas path name to the atlas
+#' @param outdir output directory that will contain the copied data
+#'
 copy_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas, outdir) {
 
   bss_data <- new("BssTBMData", subjdir, csv)
@@ -477,6 +499,18 @@ copy_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas, outdir) {
   file_copy(src_filelist, dest_filelist)
 }
 
+#' Package diffusion data for reproducible statistical analysis.
+#' @param subjdir subject directory containing BrainSuite processed data.
+#' @param csv filename of a comma separated (csv) file containing the subject demographic information.
+#' The first column of this csv file
+#' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
+#' and should be exactly equal to the individual subject directory name.
+#' @param measure character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".
+#' @param atlas path name to the atlas
+#' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
+#' @param smooth numeric value denoting the smoothing level.
+#' @param outdir output directory that will contain the copied data
+#'
 copy_dbm_data <- function(subjdir="", csv="", measure="FA", atlas="", eddy=TRUE, smooth=0.0, outdir) {
 
   bss_data <- new("BssDBMData", subjdir, csv)
@@ -498,6 +532,14 @@ copy_dbm_data <- function(subjdir="", csv="", measure="FA", atlas="", eddy=TRUE,
   file_copy(src_filelist, dest_filelist)
 }
 
+#' Package ROI data for reproducible statistical analysis.
+#' @param subjdir subject directory containing BrainSuite processed data.
+#' @param csv filename of a comma separated (csv) file containing the subject demographic information.
+#' The first column of this csv file
+#' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
+#' and should be exactly equal to the individual subject directory name.
+#' @param outdir output directory that will contain the copied data
+#'
 copy_roi_data <- function(subjdir="", csv="", outdir) {
 
   bss_data <- new("BssROIData", subjdir, csv)
@@ -512,6 +554,10 @@ copy_roi_data <- function(subjdir="", csv="", outdir) {
   file_copy(roiwise_file_list, dest_filelist)
 }
 
+#' Copy files from the inputted source to the inputted destination
+#' @param src_filelist list of source files
+#' @param dest_filelist list of destination files
+#'
 file_copy <- function(src_filelist, dest_filelist, progress = TRUE) {
 
   if (length(src_filelist) != length(dest_filelist))

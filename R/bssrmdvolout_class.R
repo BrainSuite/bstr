@@ -22,7 +22,7 @@ BssRmdVolumeOutput <-
                   initialize(outdir)
                 },
                 save_out = function(bss_data, bss_model, outdir, voxelcoord) {
-                  get_custom_tbm_overlays = function(outdir) {
+                  get_custom_overlays = function(outdir) {
                     if (bss_model@model_type=="unpairedttest" | bss_model@model_type=="pairedttest"){
                       indep_var <- bss_model@group_var
                     } else {
@@ -46,6 +46,99 @@ BssRmdVolumeOutput <-
                                 "t_overlay" = t_overlay, "corr_overlay" = corr_overlay, "adj_corr_overlay" = adj_corr_overlay))
                   }
 
+                  get_custom_lut = function(outdir) {
+                    switch(bss_model@model_type,
+                           bss_anova = {var_name = bss_model@main_effect},
+                           bss_lm = {var_name = bss_model@main_effect},
+                           bss_lme = {var_name = bss_model@main_effect},
+                           bss_corr = {var_name = bss_model@corr_var},
+                           pairedttest = {var_name = bss_model@group_var},
+                           unpairedttest = {var_name = bss_model@group_var}
+                    )
+                    adjp_lut <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", "log_pvalues_adjusted.lut")
+                    adjt_lut <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", "tvalues_adjusted.lut")
+                    p_lut <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", "log_pvalues.lut")
+                    t_lut <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", "tvalues.lut")
+                    if (bss_model@model_type == "bss_corr"){
+                      corr_lut <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                        basename(bss_data@atlas_filename)),"_", "corr_values.lut")
+                      adjcorr_lut <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                        basename(bss_data@atlas_filename)),"_", "corr_values_masked_adjusted.lut")
+                      return(list("adjp_lut" = adjp_lut, "adjt_lut" = adjt_lut, "p_lut" = p_lut, "t_lut" = t_lut,"corr_lut" = corr_lut, "adjcorr_lut" = adjcorr_lut))
+                    }
+
+                    return(list("adjp_lut" = adjp_lut, "adjt_lut" = adjt_lut, "p_lut" = p_lut, "t_lut" = t_lut))
+
+                  }
+                  get_min_vals = function(outdir) {
+                    switch(bss_model@model_type,
+                           bss_anova = {var_name = bss_model@main_effect},
+                           bss_lm = {var_name = bss_model@main_effect},
+                           bss_lme = {var_name = bss_model@main_effect},
+                           bss_corr = {var_name = bss_model@corr_var},
+                           pairedttest = {var_name = bss_model@group_var},
+                           unpairedttest = {var_name = bss_model@group_var}
+                    )
+                    adjp_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", "log_pvalues_adjusted.ini")
+                    adjp_min <- as.numeric(substr(read.table(adjp_ini)[5,],9,nchar(adjp_ini)))
+                    adjt_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", "tvalues_adjusted.ini")
+                    adjt_min <- as.numeric(substr(read.table(adjt_ini)[5,],9,nchar(adjt_ini)))
+                    p_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", "log_pvalues.ini")
+                    p_min <- as.numeric(substr(read.table(p_ini)[5,],9,nchar(p_ini)))
+                    t_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", "tvalues.ini")
+                    t_min <- as.numeric(substr(read.table(t_ini)[5,],9,nchar(t_ini)))
+                    if (bss_model@model_type == "bss_corr"){
+                      corr_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                        basename(bss_data@atlas_filename)),"_", "corr_values.ini")
+                      corr_min <- as.numeric(substr(read.table(corr_ini)[5,],9,nchar(corr_ini)))
+                      adjcorr_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                        basename(bss_data@atlas_filename)),"_", "corr_values_masked_adjusted.ini")
+                      adjcorr_min <- as.numeric(substr(read.table(adjcorr_ini)[5,],9,nchar(adjcorr_ini)))
+                      return(c(adjp_min,adjt_min,p_min,t_min,corr_min,adjcorr_min))
+                    }
+                    return(c(adjp_min,adjt_min,p_min,t_min))
+                  }
+                  get_max_vals = function(outdir) {
+                    switch(bss_model@model_type,
+                           bss_anova = {var_name = bss_model@main_effect},
+                           bss_lm = {var_name = bss_model@main_effect},
+                           bss_lme = {var_name = bss_model@main_effect},
+                           bss_corr = {var_name = bss_model@corr_var},
+                           pairedttest = {var_name = bss_model@group_var},
+                           unpairedttest = {var_name = bss_model@group_var}
+                    )
+                    adjp_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", "log_pvalues_adjusted.ini")
+                    adjp_max <- as.numeric(substr(read.table(adjp_ini)[7,],9,nchar(adjp_ini)))
+                    adjt_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", "tvalues_adjusted.ini")
+                    adjt_max <- as.numeric(substr(read.table(adjt_ini)[7,],9,nchar(adjt_ini)))
+                    p_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", "log_pvalues.ini")
+                    p_max <- as.numeric(substr(read.table(p_ini)[7,],9,nchar(p_ini)))
+                    t_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                      basename(bss_data@atlas_filename)),"_", "tvalues.ini")
+                    t_max <- as.numeric(substr(read.table(t_ini)[7,],9,nchar(t_ini)))
+                    if (bss_model@model_type == "bss_corr"){
+                      corr_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                        basename(bss_data@atlas_filename)),"_", "corr_values.ini")
+                      corr_max <- as.numeric(substr(read.table(corr_ini)[7,],9,nchar(corr_ini)))
+                      adjcorr_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
+                        basename(bss_data@atlas_filename)),"_", "corr_values_masked_adjusted.ini")
+                      adjcorr_max <- as.numeric(substr(read.table(adjcorr_ini)[7,],9,nchar(adjcorr_ini)))
+                      return(c(adjp_max,adjt_max,p_max,t_max,corr_max,adjcorr_max))
+                    }
+                    return(c(adjp_max,adjt_max,p_max,t_max))
+                  }
+
 
                   #create a folder to store png images in
                   dir.create(paste0(outdir,"/png_images"))
@@ -56,8 +149,11 @@ BssRmdVolumeOutput <-
                         cluster_iter,
                         voxelcoord,
                         atlaspath = bss_data@atlas_filename,
-                        overlaypath = c(get_custom_tbm_overlays(outdir)[[5]],get_custom_tbm_overlays(outdir)[[6]]),
+                        overlaypath = c(get_custom_overlays(outdir)[[5]],get_custom_overlays(outdir)[[6]]),
                         #stat_overlay
+                        lutpaths = c(get_custom_lut(outdir)[[1]],get_custom_lut(outdir)[[2]],get_custom_lut(outdir)[[3]],get_custom_lut(outdir)[[4]],get_custom_lut(outdir)[[5]],get_custom_lut(outdir)[[6]]),
+                        max_vals = c(get_max_vals(outdir)[1],get_max_vals(outdir)[2],get_max_vals(outdir)[3],get_max_vals(outdir)[4],get_max_vals(outdir)[5],get_max_vals(outdir)[6]),
+                        min_vals = c(get_min_vals(outdir)[1],get_min_vals(outdir)[2],get_min_vals(outdir)[3],get_min_vals(outdir)[4],get_min_vals(outdir)[5],get_min_vals(outdir)[6]),
                         outdir,
                         name = c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues,bs_stat_overlays$corr_values,bs_stat_overlays$corr_values_masked_adjusted), alpha = 120)
                     } else {
@@ -65,8 +161,11 @@ BssRmdVolumeOutput <-
                       cluster_iter,
                       voxelcoord,
                       atlaspath = bss_data@atlas_filename,
-                      overlaypath = c(get_custom_tbm_overlays(outdir)[[1]],get_custom_tbm_overlays(outdir)[[2]],get_custom_tbm_overlays(outdir)[[3]],get_custom_tbm_overlays(outdir)[[4]]),
+                      overlaypath = c(get_custom_overlays(outdir)[[1]],get_custom_overlays(outdir)[[2]],get_custom_overlays(outdir)[[3]],get_custom_overlays(outdir)[[4]]),
                       #stat_overlay
+                      lutpaths = c(get_custom_lut(outdir)[[1]],get_custom_lut(outdir)[[2]],get_custom_lut(outdir)[[3]],get_custom_lut(outdir)[[4]]),
+                      max_vals = c(get_max_vals(outdir)[1],get_max_vals(outdir)[2],get_max_vals(outdir)[3],get_max_vals(outdir)[4]),
+                      min_vals = c(get_min_vals(outdir)[1],get_min_vals(outdir)[2],get_min_vals(outdir)[3],get_min_vals(outdir)[4]),
                       outdir,
                       name = c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues), alpha = 120)
                     }
@@ -105,15 +204,34 @@ BssRmdVolumeOutput <-
 
               private = list(
 
-                render_overlay = function(voxelcoord_index,voxelcoord,atlaspath,overlaypath,outdir,name,alpha) {
+                render_overlay = function(voxelcoord_index,voxelcoord,atlaspath,overlaypath,outdir,name,alpha,lutpaths,min_vals,max_vals) {
                   view_order <- c("sag","cor","ax")
+                  switch(bss_model@model_type,
+                         bss_anova = {var_name = bss_model@main_effect},
+                         bss_lm = {var_name = bss_model@main_effect},
+                         bss_lme = {var_name = bss_model@main_effect},
+                         bss_corr = {var_name = bss_model@corr_var},
+                         pairedttest = {var_name = bss_model@group_var},
+                         unpairedttest = {var_name = bss_model@group_var}
+                  )
+                  for (lut_index in 1:length(lutpaths)){
+                    json_file <- paste0("lut2cbar -i ",lutpaths[lut_index]," -o ",outdir,"/",bss_model@model_type,"_",var_name,"_mri.bfc.nii_",name[lut_index],".cbar",
+                                        " --min ",min_vals[lut_index], " --max ",max_vals[lut_index])
+                    system(json_file,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
+                  }
                   for (stats_measure_index in 1:length(overlaypath)) {
                     crosshair_length_multiplier <- 15
                     for (view in 1:3){
                        name_index <- ifelse(bss_model@model_type == "bss_corr",stats_measure_index+4, stats_measure_index)
-                       current_view_with_crosshairs <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images_crosshairs/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,".png --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view], " -a ", alpha)
+                       current_view_with_crosshairs <- paste0("statmap -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images_crosshairs/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
+                                                              ".png --atlas ", atlaspath," --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view],
+                                                              " --max ", max_vals[name_index], " --min ", min_vals[name_index],
+                                                              " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_mri.bfc.nii_",name[name_index],".cbar")
                        system(current_view_with_crosshairs,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-                       current_view <- paste0("pstatmap --atlas ", atlaspath, " -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,".png --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view], " -a ", alpha)
+                       current_view <- paste0("statmap -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
+                                              ".png --atlas ", atlaspath, " --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view],
+                                              " --max ", max_vals[name_index], " --min ", min_vals[name_index],
+                                              " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_mri.bfc.nii_",name[name_index],".cbar")
                        system(current_view,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                        coord_range <- c(dim(bss_data@atlas_image)[1],dim(bss_data@atlas_image)[2],dim(bss_data@atlas_image)[3])
                        if (view == 1){

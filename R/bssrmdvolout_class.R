@@ -220,6 +220,7 @@ BssRmdVolumeOutput <-
                     system(json_file,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                   }
                   for (stats_measure_index in 1:length(overlaypath)) {
+                    if (min_vals[stats_measure_index]==0 & max_vals[stats_measure_index]==0){next}
                     crosshair_length_multiplier <- 15
                     for (view in 1:3){
                        name_index <- ifelse(bss_model@model_type == "bss_corr",stats_measure_index+4, stats_measure_index)

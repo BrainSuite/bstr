@@ -236,22 +236,22 @@ BssRmdVolumeOutput <-
                        system(current_view,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                        coord_range <- c(dim(bss_data@atlas_image)[1],dim(bss_data@atlas_image)[2],dim(bss_data@atlas_image)[3])
                        if (view == 1){
-                         x_end = dim(bss_data@atlas_image)[2]/dim(bss_data@atlas_image)[1]
-                         y_end = dim(bss_data@atlas_image)[3]/dim(bss_data@atlas_image)[1]
+                         x_end = coord_range[2]/coord_range[1]
+                         y_end = coord_range[3]/coord_range[1]
                          x0_center = x_end*(1-(voxelcoord[[voxelcoord_index]][2]*(1/coord_range[2])))
                          x_additive = x_end*(crosshair_length_multiplier/coord_range[2])
                          y0_center = y_end*(voxelcoord[[voxelcoord_index]][3]*(1/coord_range[3]))
                          y_additive = y_end*(crosshair_length_multiplier/coord_range[3])
                        } else if (view == 2) {
-                         x_end = dim(bss_data@atlas_image)[1]/dim(bss_data@atlas_image)[1]
-                         y_end = dim(bss_data@atlas_image)[3]/dim(bss_data@atlas_image)[1]
+                         x_end = coord_range[1]/coord_range[1]
+                         y_end = coord_range[3]/coord_range[1]
                          x0_center = x_end*(1-(voxelcoord[[voxelcoord_index]][1]*(1/coord_range[1])))
                          x_additive = x_end*(crosshair_length_multiplier/coord_range[1])
                          y0_center = y_end*(voxelcoord[[voxelcoord_index]][3]*(1/coord_range[3]))
                          y_additive = y_end*(crosshair_length_multiplier/coord_range[3])
                        } else {
-                         x_end = dim(bss_data@atlas_image)[1]/dim(bss_data@atlas_image)[1]
-                         y_end = dim(bss_data@atlas_image)[2]/dim(bss_data@atlas_image)[1]
+                         x_end = coord_range[1]/coord_range[1]
+                         y_end = coord_range[2]/coord_range[1]
                          x0_center = x_end*(1-(voxelcoord[[voxelcoord_index]][1]*(1/coord_range[1])))
                          x_additive = x_end*(crosshair_length_multiplier/coord_range[1])
                          y0_center = y_end*(voxelcoord[[voxelcoord_index]][2]*(1/coord_range[2]))
@@ -259,7 +259,7 @@ BssRmdVolumeOutput <-
                        }
                        temp_image <- png::readPNG(get_render_image_filename(outdir,voxelcoord,name[name_index], view, voxelcoord_index))
                        png(get_render_image_filename(outdir,voxelcoord,name[name_index], view, voxelcoord_index))
-                       plot(0:1, 0:1, type='n', axes = F, ann = F)
+                       plot(x=c(0,x_end), y=c(0,y_end), type='n', axes = F, ann = F)
                        par(mar = c(0,0,0,0))
                        rasterImage(temp_image, 0, 0, x_end, y_end)
                        # Add horizontal crosshair
@@ -339,6 +339,11 @@ BssRmdVolumeOutput <-
                     cbar <- vector("list",2)
                     for (cbar_index in 1:length(cbar)){
                       cbar[[cbar_index]] <- paste0(paste(bss_model@model_type, bss_model@corr_var, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), overlay[4+cbar_index], sep = '_'), '_cbar.png')
+                    }
+                  } else if (bss_model@model_type == "pairedttest" || bss_model@model_type == "unpairedttest"){
+                    cbar <- vector("list",4)
+                    for (cbar_index in 1:length(cbar)){
+                      cbar[[cbar_index]] <- paste0(paste(bss_model@model_type, bss_model@group_var, tools::file_path_sans_ext(basename(bss_data@atlas_filename)), overlay[cbar_index], sep = '_'), '_cbar.png')
                     }
                   } else {
                     cbar <- vector("list",4)

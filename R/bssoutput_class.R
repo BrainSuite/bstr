@@ -230,7 +230,12 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
          }
   )
 
-  save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
+  if (bss_model@model_type == "bss_corr") {
+    save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, corr_values, corr_values_masked_adjusted,
+                       var_name, bss_data, bss_model, outdir)
+  } else {
+    save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
+  }
 
   voxelcoord <- get_voxelcoord(bss_out, bss_data, bss_model, outdir, nclusters)
 
@@ -315,7 +320,12 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
          }
   )
 
-  save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
+  if (bss_model@model_type == "bss_corr") {
+    save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, corr_values, corr_values_masked_adjusted,
+                       var_name, bss_data, bss_model, outdir)
+  } else {
+    save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
+  }
 
   voxelcoord <- get_voxelcoord(bss_out, bss_data, bss_model, outdir, nclusters)
 
@@ -682,6 +692,8 @@ save_bss_rds <- function(measure, var_name, label, bss_data, bss_model, outdir) 
 #' @param log_pvalues_adjusted log transformed adjusted p-values
 #' @param tvalues t-values
 #' @param tvalues_adjusted adjusted t-values
+#' @param corr_values correlation values
+#' @param corr_values_masked_adjusted adjusted, masked correlation values
 #' @param var_name string denoting name of variable used by the function
 #' @param bss_data object of type \code{BssData}
 #' @param bss_model object of type \code{BssModel}
@@ -689,7 +701,7 @@ save_bss_rds <- function(measure, var_name, label, bss_data, bss_model, outdir) 
 #' @export
 
 save_vol_stats_out <- function(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted,
-                               var_name, bss_data, bss_model, outdir) {
+                               corr_values = NULL, corr_values_masked_adjusted = NULL, var_name, bss_data, bss_model, outdir) {
 
   bss_cmap <- save_bss_color_files(log_pvalues, var_name, "log_pvalues", bss_data, bss_model, outdir)
   save_bss_out_nifti_image(log_pvalues, var_name, bss_cmap, bss_data, bss_model, outdir)
@@ -706,11 +718,11 @@ save_vol_stats_out <- function(log_pvalues, log_pvalues_adjusted, tvalues, tvalu
 
   switch(bss_model@model_type,
          bss_corr = {
-           bss_cmap <- save_bss_color_files(bss_model@corr_values, var_name, "corr_values", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(bss_model@corr_values, var_name, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(corr_values, var_name, "corr_values", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(corr_values, var_name, bss_cmap, bss_data, bss_model, outdir)
 
-           bss_cmap <- save_bss_color_files(bss_model@corr_values_masked_adjusted, var_name, "corr_values_masked_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(bss_model@corr_values_masked_adjusted, var_name, bss_cmap, bss_data, bss_model, outdir)
+           bss_cmap <- save_bss_color_files(corr_values_masked_adjusted, var_name, "corr_values_masked_adjusted", bss_data, bss_model, outdir)
+           save_bss_out_nifti_image(corr_values_masked_adjusted, var_name, bss_cmap, bss_data, bss_model, outdir)
          }
   )
 }

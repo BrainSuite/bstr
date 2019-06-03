@@ -166,7 +166,7 @@ bss_lm <- function(main_effect="", covariates="", bss_data, mult_comp = "fdr", n
          fdr={
            bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
            bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
-           #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+           bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
            bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
            bss_model@tvalues_adjusted <- bss_model@tvalues
            bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
@@ -441,7 +441,7 @@ bss_ttest <- function(group_var, bss_data, paired = FALSE, mult_comp="fdr") {
   pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
   bss_model@pvalues <- pvalues
   bss_model@tvalues <- tvalues
-  #bss_model@tvalues[abs(pvalues) >= 0.05] <- 0
+  bss_model@tvalues[abs(pvalues) >= 0.05] <- 0
   bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
   # bss_model@pvalues_adjusted <- p.adjust(abs(bss_model@pvalues), 'BH')
   bss_model@tvalues_adjusted <- bss_model@tvalues

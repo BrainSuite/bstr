@@ -214,11 +214,11 @@ BssRmdVolumeOutput <-
                          pairedttest = {var_name = bss_model@group_var},
                          unpairedttest = {var_name = bss_model@group_var}
                   )
-                  for (lut_index in 1:length(lutpaths)){
-                    json_file <- paste0("lut2cbar -i ",lutpaths[lut_index]," -o ",outdir,"/",bss_model@model_type,"_",var_name,"_mri.bfc.nii_",name[lut_index],".cbar",
-                                        " --min ",min_vals[lut_index], " --max ",max_vals[lut_index])
-                    system(json_file,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-                  }
+                  # for (lut_index in 1:length(lutpaths)){
+                  #   json_file <- paste0("lut2cbar -i ",lutpaths[lut_index]," -o ",outdir,"/",bss_model@model_type,"_",var_name,"_mri.bfc.nii_",name[lut_index],".cbar",
+                  #                       " --min ",min_vals[lut_index], " --max ",max_vals[lut_index])
+                  #   system(json_file,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
+                  # }
                   for (stats_measure_index in 1:length(overlaypath)) {
                     if (min_vals[stats_measure_index]==0 & max_vals[stats_measure_index]==0){next}
                     crosshair_length_multiplier <- 15
@@ -227,12 +227,12 @@ BssRmdVolumeOutput <-
                        current_view_with_crosshairs <- paste0("statmap -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images_crosshairs/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
                                                               ".png --atlas ", atlaspath," --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view],
                                                               " --max ", max_vals[name_index], " --min ", min_vals[name_index],
-                                                              " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_mri.bfc.nii_",name[name_index],".cbar")
+                                                              " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),"_",name[name_index],".cbar")
                        system(current_view_with_crosshairs,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                        current_view <- paste0("statmap -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
                                               ".png --atlas ", atlaspath, " --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view],
                                               " --max ", max_vals[name_index], " --min ", min_vals[name_index],
-                                              " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_mri.bfc.nii_",name[name_index],".cbar")
+                                              " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),"_",name[name_index],".cbar")
                        system(current_view,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                        coord_range <- c(dim(bss_data@atlas_image)[1],dim(bss_data@atlas_image)[2],dim(bss_data@atlas_image)[3])
                        if (view == 1){

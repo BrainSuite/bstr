@@ -85,23 +85,23 @@ BssRmdVolumeOutput <-
                     )
                     adjp_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", "log_pvalues_adjusted.ini")
-                    adjp_min <- as.numeric(substr(read.table(adjp_ini)[5,],9,nchar(adjp_ini)))
+                    adjp_min <- as.numeric(ini::read.ini(adjp_ini)$colormap$cnegmax)
                     adjt_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", "tvalues_adjusted.ini")
-                    adjt_min <- as.numeric(substr(read.table(adjt_ini)[5,],9,nchar(adjt_ini)))
+                    adjt_min <- as.numeric(ini::read.ini(adjt_ini)$colormap$cnegmax)
                     p_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", "log_pvalues.ini")
-                    p_min <- as.numeric(substr(read.table(p_ini)[5,],9,nchar(p_ini)))
+                    p_min <- as.numeric(ini::read.ini(p_ini)$colormap$cnegmax)
                     t_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", "tvalues.ini")
-                    t_min <- as.numeric(substr(read.table(t_ini)[5,],9,nchar(t_ini)))
+                    t_min <- as.numeric(ini::read.ini(t_ini)$colormap$cnegmax)
                     if (bss_model@model_type == "bss_corr"){
                       corr_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
                         basename(bss_data@atlas_filename)),"_", "corr_values.ini")
-                      corr_min <- as.numeric(substr(read.table(corr_ini)[5,],9,nchar(corr_ini)))
+                      corr_min <- as.numeric(ini::read.ini(corr_ini)$colormap$cnegmax)
                       adjcorr_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
                         basename(bss_data@atlas_filename)),"_", "corr_values_masked_adjusted.ini")
-                      adjcorr_min <- as.numeric(substr(read.table(adjcorr_ini)[5,],9,nchar(adjcorr_ini)))
+                      adjcorr_min <- as.numeric(ini::read.ini(adjcorr_ini)$colormap$cnegmax)
                       return(c(adjp_min,adjt_min,p_min,t_min,corr_min,adjcorr_min))
                     }
                     return(c(adjp_min,adjt_min,p_min,t_min))
@@ -117,23 +117,23 @@ BssRmdVolumeOutput <-
                     )
                     adjp_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", "log_pvalues_adjusted.ini")
-                    adjp_max <- as.numeric(substr(read.table(adjp_ini)[7,],9,nchar(adjp_ini)))
+                    adjp_max <- as.numeric(ini::read.ini(adjp_ini)$colormap$cposmax)
                     adjt_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", "tvalues_adjusted.ini")
-                    adjt_max <- as.numeric(substr(read.table(adjt_ini)[7,],9,nchar(adjt_ini)))
+                    adjt_max <- as.numeric(ini::read.ini(adjt_ini)$colormap$cposmax)
                     p_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", "log_pvalues.ini")
-                    p_max <- as.numeric(substr(read.table(p_ini)[7,],9,nchar(p_ini)))
+                    p_max <- as.numeric(ini::read.ini(p_ini)$colormap$cposmax)
                     t_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
                       basename(bss_data@atlas_filename)),"_", "tvalues.ini")
-                    t_max <- as.numeric(substr(read.table(t_ini)[7,],9,nchar(t_ini)))
+                    t_max <- as.numeric(ini::read.ini(t_ini)$colormap$cposmax)
                     if (bss_model@model_type == "bss_corr"){
                       corr_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
                         basename(bss_data@atlas_filename)),"_", "corr_values.ini")
-                      corr_max <- as.numeric(substr(read.table(corr_ini)[7,],9,nchar(corr_ini)))
+                      corr_max <- as.numeric(ini::read.ini(corr_ini)$colormap$cposmax)
                       adjcorr_ini <- paste0(outdir, "/", bss_model@model_type, "_", var_name,"_",tools::file_path_sans_ext(
                         basename(bss_data@atlas_filename)),"_", "corr_values_masked_adjusted.ini")
-                      adjcorr_max <- as.numeric(substr(read.table(adjcorr_ini)[7,],9,nchar(adjcorr_ini)))
+                      adjcorr_max <- as.numeric(ini::read.ini(adjcorr_ini)$colormap$cposmax)
                       return(c(adjp_max,adjt_max,p_max,t_max,corr_max,adjcorr_max))
                     }
                     return(c(adjp_max,adjt_max,p_max,t_max))
@@ -227,12 +227,12 @@ BssRmdVolumeOutput <-
                        current_view_with_crosshairs <- paste0("statmap -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images_crosshairs/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
                                                               ".png --atlas ", atlaspath," --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view],
                                                               " --max ", max_vals[name_index], " --min ", min_vals[name_index],
-                                                              " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),"_",name[name_index],".cbar")
+                                                              " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),"_",name[name_index],".cbar --isotropic")
                        system(current_view_with_crosshairs,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                        current_view <- paste0("statmap -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
                                               ".png --atlas ", atlaspath, " --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view],
                                               " --max ", max_vals[name_index], " --min ", min_vals[name_index],
-                                              " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),"_",name[name_index],".cbar")
+                                              " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),"_",name[name_index],".cbar --isotropic")
                        system(current_view,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                        coord_range <- c(dim(bss_data@atlas_image)[1],dim(bss_data@atlas_image)[2],dim(bss_data@atlas_image)[3])
                        if (view == 1){
@@ -259,7 +259,7 @@ BssRmdVolumeOutput <-
                        }
                        temp_image <- png::readPNG(get_render_image_filename(outdir,voxelcoord,name[name_index], view, voxelcoord_index))
                        png(get_render_image_filename(outdir,voxelcoord,name[name_index], view, voxelcoord_index))
-                       plot(x=c(0,x_end), y=c(0,y_end), type='n', axes = F, ann = F)
+                       plot(0:1, 0:1, type='n', axes = F, ann = F)
                        par(mar = c(0,0,0,0))
                        rasterImage(temp_image, 0, 0, x_end, y_end)
                        # Add horizontal crosshair

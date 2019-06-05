@@ -224,49 +224,49 @@ BssRmdVolumeOutput <-
                     crosshair_length_multiplier <- 15
                     for (view in 1:3){
                        name_index <- ifelse(bss_model@model_type == "bss_corr",stats_measure_index+4, stats_measure_index)
-                       current_view_with_crosshairs <- paste0("statmap -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images_crosshairs/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
-                                                              ".png --atlas ", atlaspath," --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view],
-                                                              " --max ", max_vals[name_index], " --min ", min_vals[name_index],
-                                                              " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),"_",name[name_index],".cbar --isotropic")
-                       system(current_view_with_crosshairs,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
+                       # current_view_with_crosshairs <- paste0("statmap -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images_crosshairs/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
+                       #                                        ".png --atlas ", atlaspath," --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view],
+                       #                                        " --max ", max_vals[name_index], " --min ", min_vals[name_index],
+                       #                                        " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),"_",name[name_index],".cbar --isotropic")
+                       # system(current_view_with_crosshairs,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                        current_view <- paste0("statmap -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
-                                              ".png --atlas ", atlaspath, " --slice ", voxelcoord[[voxelcoord_index]][view], " --", view_order[view],
-                                              " --max ", max_vals[name_index], " --min ", min_vals[name_index],
-                                              " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),"_",name[name_index],".cbar --isotropic")
+                                              ".png --atlas ", atlaspath, " --xhair ",outdir,"/png_images_crosshairs/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
+                                              ".png -p ", voxelcoord[[voxelcoord_index]][1]," ",voxelcoord[[voxelcoord_index]][2]," ",voxelcoord[[voxelcoord_index]][3]," ", " --", view_order[view], " --isotropic",
+                                              " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),"_",name[name_index],".cbar")
                        system(current_view,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-                       coord_range <- c(dim(bss_data@atlas_image)[1],dim(bss_data@atlas_image)[2],dim(bss_data@atlas_image)[3])
-                       if (view == 1){
-                         x_end = coord_range[2]/coord_range[1]
-                         y_end = coord_range[3]/coord_range[1]
-                         x0_center = x_end*(1-(voxelcoord[[voxelcoord_index]][2]*(1/coord_range[2])))
-                         x_additive = x_end*(crosshair_length_multiplier/coord_range[2])
-                         y0_center = y_end*(voxelcoord[[voxelcoord_index]][3]*(1/coord_range[3]))
-                         y_additive = y_end*(crosshair_length_multiplier/coord_range[3])
-                       } else if (view == 2) {
-                         x_end = coord_range[1]/coord_range[1]
-                         y_end = coord_range[3]/coord_range[1]
-                         x0_center = x_end*(1-(voxelcoord[[voxelcoord_index]][1]*(1/coord_range[1])))
-                         x_additive = x_end*(crosshair_length_multiplier/coord_range[1])
-                         y0_center = y_end*(voxelcoord[[voxelcoord_index]][3]*(1/coord_range[3]))
-                         y_additive = y_end*(crosshair_length_multiplier/coord_range[3])
-                       } else {
-                         x_end = coord_range[1]/coord_range[1]
-                         y_end = coord_range[2]/coord_range[1]
-                         x0_center = x_end*(1-(voxelcoord[[voxelcoord_index]][1]*(1/coord_range[1])))
-                         x_additive = x_end*(crosshair_length_multiplier/coord_range[1])
-                         y0_center = y_end*(voxelcoord[[voxelcoord_index]][2]*(1/coord_range[2]))
-                         y_additive = y_end*(crosshair_length_multiplier/coord_range[2])
-                       }
-                       temp_image <- png::readPNG(get_render_image_filename(outdir,voxelcoord,name[name_index], view, voxelcoord_index))
-                       png(get_render_image_filename(outdir,voxelcoord,name[name_index], view, voxelcoord_index))
-                       plot(0:1, 0:1, type='n', axes = F, ann = F)
-                       par(mar = c(0,0,0,0))
-                       rasterImage(temp_image, 0, 0, x_end, y_end)
-                       # Add horizontal crosshair
-                       segments(x0 = x0_center - x_additive, y0 = y0_center, x1 = x0_center + x_additive , y1 = y0_center, col="black", lwd=3)
-                       # Add vertical crosshair
-                       segments(x0 = x0_center, y0 = y0_center - y_additive, x1 = x0_center, y1 = y0_center + y_additive, col="black", lwd=3)
-                       dev.off()
+                       # coord_range <- c(dim(bss_data@atlas_image)[1],dim(bss_data@atlas_image)[2],dim(bss_data@atlas_image)[3])
+                       # if (view == 1){
+                       #   x_end = coord_range[2]/coord_range[1]
+                       #   y_end = coord_range[3]/coord_range[1]
+                       #   x0_center = x_end*(1-(voxelcoord[[voxelcoord_index]][2]*(1/coord_range[2])))
+                       #   x_additive = x_end*(crosshair_length_multiplier/coord_range[2])
+                       #   y0_center = y_end*(voxelcoord[[voxelcoord_index]][3]*(1/coord_range[3]))
+                       #   y_additive = y_end*(crosshair_length_multiplier/coord_range[3])
+                       # } else if (view == 2) {
+                       #   x_end = coord_range[1]/coord_range[1]
+                       #   y_end = coord_range[3]/coord_range[1]
+                       #   x0_center = x_end*(1-(voxelcoord[[voxelcoord_index]][1]*(1/coord_range[1])))
+                       #   x_additive = x_end*(crosshair_length_multiplier/coord_range[1])
+                       #   y0_center = y_end*(voxelcoord[[voxelcoord_index]][3]*(1/coord_range[3]))
+                       #   y_additive = y_end*(crosshair_length_multiplier/coord_range[3])
+                       # } else {
+                       #   x_end = coord_range[1]/coord_range[1]
+                       #   y_end = coord_range[2]/coord_range[1]
+                       #   x0_center = x_end*(1-(voxelcoord[[voxelcoord_index]][1]*(1/coord_range[1])))
+                       #   x_additive = x_end*(crosshair_length_multiplier/coord_range[1])
+                       #   y0_center = y_end*(voxelcoord[[voxelcoord_index]][2]*(1/coord_range[2]))
+                       #   y_additive = y_end*(crosshair_length_multiplier/coord_range[2])
+                       # }
+                       # temp_image <- png::readPNG(get_render_image_filename(outdir,voxelcoord,name[name_index], view, voxelcoord_index))
+                       # png(get_render_image_filename(outdir,voxelcoord,name[name_index], view, voxelcoord_index))
+                       # plot(0:1, 0:1, type='n', axes = F, ann = F)
+                       # par(mar = c(0,0,0,0))
+                       # rasterImage(temp_image, 0, 0, x_end, y_end)
+                       # # Add horizontal crosshair
+                       # segments(x0 = x0_center - x_additive, y0 = y0_center, x1 = x0_center + x_additive , y1 = y0_center, col="black", lwd=3)
+                       # # Add vertical crosshair
+                       # segments(x0 = x0_center, y0 = y0_center - y_additive, x1 = x0_center, y1 = y0_center + y_additive, col="black", lwd=3)
+                       # dev.off()
                     }
                   }
                   return(0)

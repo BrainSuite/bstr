@@ -344,7 +344,7 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
 
   # Create a new R6 class object here
   bssrmd_volout <- BssRmdVolumeOutput$new()
-  bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = get_voxelcoord(bss_out, bss_data, bss_model, outdir, nclusters), outdir)
+  bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = voxelcoord, outdir)
 
   # Copy modelspec file to the output directory
   file.copy(bss_model@mspec_file, bss_out@outdir)

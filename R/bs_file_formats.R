@@ -41,6 +41,14 @@ bs_atlas_files <- list(
   rh_atlas_BCIDNI_cbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.right.mid.cortex.dfs'
 )
 
+#' List of binaries used in BrainSuite analysis
+#' @export
+bs_binary_files <- list(
+  clustermap = 'bin/clustermap',
+  statmap = 'bin/statmap',
+  volblend = 'bin/volblend'
+)
+
 #' List of suffixes for atlas files used in BrainSuite
 bs_atlas_files_suffix <- list(
 

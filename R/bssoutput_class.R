@@ -321,8 +321,8 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
   )
 
   if (bss_model@model_type == "bss_corr") {
-    save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, corr_values, corr_values_masked_adjusted,
-                       var_name, bss_data, bss_model, outdir)
+    save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted,
+                       var_name, bss_data, bss_model, outdir, corr_values, corr_values_masked_adjusted)
   } else {
     save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
   }

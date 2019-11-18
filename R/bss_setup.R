@@ -76,7 +76,7 @@ get_brainsuite_path_on_macOS <- function(quiet = TRUE, raise_error = FALSE) {
   # Test bs_paths for valid installations
   valid_bs_path = ""
   for (path in bs_paths) {
-    if (check_bs_atlas_binaries_exist(path, quiet = FALSE, raise_error = FALSE)) {
+    if (check_bs_atlas_binaries_exist(path, quiet = FALSE, raise_error = raise_error)) {
       valid_bs_path = path
       break
     }

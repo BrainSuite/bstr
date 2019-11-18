@@ -99,8 +99,7 @@ setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", f
 
   log_pvalues <- log10_transform(bss_model@pvalues)
   outdir <- bss_out@outdir
-  log_pvalues_adjusted <- log10_transform(sign(bss_model@pvalues) * p.adjust(abs(bss_model@pvalues),
-                                                                             method = 'BY'))
+  log_pvalues_adjusted <- log10_transform(bss_model@pvalues_adjusted)
   bss_model@tvalues[abs(log_pvalues) <= -1*log10(0.05)] <- 0
 
   switch(bss_model@model_type,
@@ -192,7 +191,7 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
   dim(log_pvalues) <- dim(bss_data@atlas_image)
 
   log_pvalues_adjusted <- rep(1, length(bss_data@atlas_image))
-  log_pvalues_adjusted[bss_data@mask_idx] <- log10_transform(sign(bss_model@pvalues) * p.adjust(abs(bss_model@pvalues), method = 'BY'))
+  log_pvalues_adjusted[bss_data@mask_idx] <- log10_transform(bss_model@pvalues_adjusted)
   dim(log_pvalues_adjusted) <- dim(bss_data@atlas_image)
   outdir <- bss_out@outdir
 
@@ -282,7 +281,7 @@ setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", f
   dim(log_pvalues) <- dim(bss_data@atlas_image)
 
   log_pvalues_adjusted <- rep(1, length(bss_data@atlas_image))
-  log_pvalues_adjusted[bss_data@mask_idx] <- log10_transform(sign(bss_model@pvalues) * p.adjust(abs(bss_model@pvalues), method = 'BY'))
+  log_pvalues_adjusted[bss_data@mask_idx] <- log10_transform(bss_model@pvalues_adjusted)
   dim(log_pvalues_adjusted) <- dim(bss_data@atlas_image)
   outdir <- bss_out@outdir
 

@@ -752,7 +752,7 @@ get_voxelcoord <- function(bss_out, bss_data, bss_model, outdir, nclusters){
          pairedttest = {var_name = bss_model@group_var},
          unpairedttest = {var_name = bss_model@group_var}
   )
-  voxelcoord_call <- paste0(file.path(get_brainsuite_install_path(),bs_binary_files[[1]])," -i ", outdir,"/",bss_model@model_type,
+  voxelcoord_call <- paste0(file.path(get_brainsuite_install_path(),bs_binary_files$clustermap)," -i ", outdir,"/",bss_model@model_type,
                             "_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),
                             "_tvalues_adjusted.nii.gz"," -m ", bss_data@maskfile, " -o ", outdir, "/cluster.tsv", " -n ", nclusters)
 
@@ -768,7 +768,7 @@ get_voxelcoord <- function(bss_out, bss_data, bss_model, outdir, nclusters){
   }
   # Use tvalues instead of adjusted tvalues if no clusters are found
   if (file.info(paste0(outdir, "/cluster.tsv"))$size==0){
-    voxelcoord_call <- paste0(file.path(get_brainsuite_install_path(),bs_binary_files[[1]])," -i ", outdir,"/",bss_model@model_type,
+    voxelcoord_call <- paste0(file.path(get_brainsuite_install_path(),bs_binary_files$clustermap)," -i ", outdir,"/",bss_model@model_type,
                               "_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)), "_tvalues.nii.gz",
                               " -m ", bss_data@maskfile, " -o ", outdir, "/cluster.tsv", " -n ", nclusters)
 

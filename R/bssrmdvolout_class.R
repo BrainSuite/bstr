@@ -229,9 +229,9 @@ BssRmdVolumeOutput <-
                        #                                        " --max ", max_vals[name_index], " --min ", min_vals[name_index],
                        #                                        " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),"_",name[name_index],".cbar --isotropic")
                        # system(current_view_with_crosshairs,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-                       current_view <- paste0(file.path(get_brainsuite_install_path(),bs_binary_files[[2]])," -i ",overlaypath[stats_measure_index], " -o ",outdir,"/png_images/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
-                                              ".png --atlas ", atlaspath, " --xhair ",outdir,"/png_images_crosshairs/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
-                                              ".png -p ", voxelcoord[[voxelcoord_index]][1]," ",voxelcoord[[voxelcoord_index]][2]," ",voxelcoord[[voxelcoord_index]][3]," ", " --", view_order[view], " --isotropic",
+                       current_view <- paste0(file.path(get_brainsuite_install_path(),bs_binary_files$statmap)," --atlas ",atlaspath, " -o ",outdir,"/png_images/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
+                                              ".png --stat ", overlaypath[stats_measure_index], " --xhair ",outdir,"/png_images_crosshairs/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
+                                              ".png -p ", voxelcoord[[voxelcoord_index]][1]," ",voxelcoord[[voxelcoord_index]][2]," ",voxelcoord[[voxelcoord_index]][3]," --", view_order[view], " --isotropic",
                                               " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),"_",name[name_index],".cbar")
                        system_call_output <- system(current_view,intern=TRUE, ignore.stdout=FALSE, ignore.stderr=TRUE, wait=TRUE, input=NULL)
                        if (!is.null(attributes(system_call_output))){
@@ -278,7 +278,9 @@ BssRmdVolumeOutput <-
                   view_name <- c("ax","cor","sag")
                   view_order <- c(3,2,1)
                   for (view_iter in 1:3){
-                    current_view <- paste0(file.path(get_brainsuite_install_path(),bs_binary_files[[3]])," -i ",atlaspath," --view ", view_iter," --slice ",voxelcoord[[voxelcoord_index]][view_order[view_iter]]," --flop -o ", outdir,"/PNG_images/",view_name[view_iter], voxelcoord[[voxelcoord_index]][view_order[view_iter]],"_atlas.png")
+                    current_view <- paste0(file.path(get_brainsuite_install_path(),bs_binary_files$statmap)," --atlas ",atlaspath," -o ", outdir,"/png_images/",view_name[view_iter],voxelcoord[[voxelcoord_index]][view_order[view_iter]],
+                                           "_atlas.png"," --xhair ",outdir,"/png_images_crosshairs/",view_name[view_iter],voxelcoord[[voxelcoord_index]][view_order[view_iter]],
+                                           ".png -p ", voxelcoord[[voxelcoord_index]][1]," ",voxelcoord[[voxelcoord_index]][2]," ",voxelcoord[[voxelcoord_index]][3]," --", view_name[view_iter], " --isotropic")
                     system(current_view,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                   }
                   return(0)
@@ -289,8 +291,8 @@ BssRmdVolumeOutput <-
                   load_library <- "library(bssr)"
                   data_command_1 <- paste0("bss_data <- load_bss_data(type = '",bss_data@analysis_type,"', subjdir = '",bss_data@subjdir,"', csv = '", bss_data@csv,"', measure = '", bss_data@measure,"', smooth = ",bss_data@smooth,")")
                   data_command_2 <- ifelse(bss_model@model_type=="bss_corr",
-                                           paste0("bss_model <- ,",bss_model@model_type,",(corr_var = '",bss_model@corr_var,"', bss_data = bss_data, mult_comp = '",bss_model@mult_comp,"')"),
-                                           paste0("bss_model <- ,",bss_model@model_type,",(main_effect = '",bss_model@main_effect,"', covariates = '", bss_model@covariates,"', bss_data = bss_data)"))
+                                           paste0("bss_model <- ",bss_model@model_type,"(corr_var = '",bss_model@corr_var,"', bss_data = bss_data, mult_comp = '",bss_model@mult_comp,"')"),
+                                           paste0("bss_model <- ",bss_model@model_type,"(main_effect = '",bss_model@main_effect,"', covariates = '", bss_model@covariates,"', bss_data = bss_data)"))
                   data_command_3 <- "bs_stat_overlays = list(log_pvalues_adjusted = 'log_pvalues_adjusted', tvalues_adjusted = 'tvalues_adjusted', log_pvalues = 'log_pvalues', tvalues = 'tvalues', pvalues = 'pvalues', corr_values = 'corr_values')"
                   user_input <- paste0(load_library,"\n",data_command_1,"\n",data_command_2,"\n",data_command_3,"\n")
                   templines <- deparse(private$render_html)
@@ -367,16 +369,19 @@ BssRmdVolumeOutput <-
                   }
 
                   # Function to return a shiny image object
-                  shiny_image = function(outdir, voxelcoord, index_brain_sector, overlay_type, width, height, voxelcoord_index){
+                  shiny_image = function(outdir, voxelcoord, index_brain_sector, overlay_type, width, voxelcoord_index){
                     align <- "left"
-                    return(paste0("shiny::img(src='",get_render_image_filename(outdir, voxelcoord,overlay_type, index_brain_sector, voxelcoord_index),"', align = '", align, "', width = '", width,"', height = '", height,"')"))
+                    return(paste0("shiny::img(src='",get_render_image_filename(outdir, voxelcoord,overlay_type, index_brain_sector, voxelcoord_index),"', align = '", align, "', width = '", width,"')"))
                   }
 
                   # Function that creates a tabPanel
                   tab_panel = function(panel_type, voxelcoord_index){
-                    #width <- c("34.5%","28.8%","24%","11%")
-                    width <- c("36.5%","30.5%","25.5%", "7%")
-                    height <- c("100%","45%","30%")
+                    #width <- c("36.5%","30.5%","25.5%", "7%")
+                    dim_sum <- dim(bss_data@atlas_image)[1]+dim(bss_data@atlas_image)[2]+dim(bss_data@atlas_image)[3]
+                    dim1 <- dim(bss_data@atlas_image)[2]/dim_sum*93
+                    dim2 <- dim(bss_data@atlas_image)[1]/dim_sum*93
+                    dim3 <- dim(bss_data@atlas_image)[1]/dim_sum*93
+                    width <- c(paste0(dim1,"%"),paste0(dim2,"%"),paste0(dim3,"%"),"7%")
                     if (bss_model@model_type=="bss_corr"){
                       panel_names<- c("Correlation Values","Adjusted Correlation Values")
                       overlay <- c(bs_stat_overlays$corr_values,bs_stat_overlays$corr_values_masked_adjusted)
@@ -387,7 +392,7 @@ BssRmdVolumeOutput <-
                     }
                     images <- ""
                     for (inner_coord_index in 1:3) {
-                      images <- paste0(images, shiny_image(outdir, voxelcoord, inner_coord_index,overlay[panel_type], width[inner_coord_index], height[inner_coord_index], voxelcoord_index), ",")
+                      images <- paste0(images, shiny_image(outdir, voxelcoord, inner_coord_index,overlay[panel_type], width[inner_coord_index], voxelcoord_index), ",")
                     }
                     images <- paste0(images, "shiny::img(src=paste0('", cbar[panel_type], "'), align='left', width = '", width[4], "'),")
                     images <- substr(images,1,nchar(images)-1)

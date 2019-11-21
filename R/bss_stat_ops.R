@@ -361,6 +361,8 @@ bss_corr <- function(corr_var, bss_data, mult_comp="fdr") {
   corr_coeff <- corr_result$corr_coeff
   bss_model@tvalues <- corr_result$tvalues
   bss_model@pvalues <- corr_result$pvalues
+  tvalues_sign <- sign_tvalues(bss_model@tvalues)
+  bss_model@tvalues_sign <- tvalues_sign
 
   bss_model@pvalues <- sign(corr_coeff)*bss_model@pvalues
   bss_model@pvalues[abs(bss_model@pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps

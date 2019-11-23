@@ -119,7 +119,7 @@ bs_volume_jacobian_file_string <- function(smooth = 0) {
 #'
 bs_diffusion_file_string <- function(measure = "FA", smooth = 0, eddy = TRUE) {
 
-  valid_diffusion_measures <- c('FA', 'MD', 'AD', 'RD', 'ADC', 'GFA')
+  valid_diffusion_measures <- c('FA', 'MD', 'axial', 'radial', 'mADC', 'FRT_GFA')
   if (! measure %in% valid_diffusion_measures)
     stop(sprintf('Invalid diffusion measure: %s. Valid measures are %s.', measure, paste(valid_diffusion_measures, collapse = ', ')))
 
@@ -200,6 +200,10 @@ get_tbm_file_list <- function(bss_data, smooth = 0) {
 #'
 get_dbm_file_list <- function(bss_data, measure, smooth = 0, eddy = TRUE) {
 
+  valid_dbm_measures <- c('FA', 'MD', 'axial', 'radial', 'mADC', 'FRT_GFA')
+  if (! measure %in% valid_dbm_measures) {
+    stop(sprintf("Valid dbm measures are %s.", paste(valid_dbm_measures, collapse = ', ')), call. = FALSE)
+  }
   dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_diffusion_file_string(measure, smooth, eddy), bss_data@demographics$subjID))
   # Check if all subjects have nii.gz files
   if ( !all(file.exists(dbm_filelist)) ) {

@@ -164,7 +164,7 @@ setMethod("load_data", signature = "BssDBMData", function(bss_data, atlas_filena
 
   bss_data@atlas_filename <- atlas_filename
   bss_data@atlas_image <- RNifti::readNifti(atlas_filename)
-  bss_data@filelist <- get_dbm_file_list(bss_data, measure = "FA", smooth, eddy)
+  bss_data@filelist <- get_dbm_file_list(bss_data, measure, smooth, eddy)
   bss_data@smooth <- smooth
   bss_data@measure <- measure
   attrib_siz <- length(bss_data@atlas_image)
@@ -402,7 +402,8 @@ check_files <- function(object){
 #'
 #' @export
 package_data <- function(type="cbm", subjdir=NULL, csv="", hemi="left",
-                         smooth=0.0, measure="FA", atlas="", eddy=TRUE, outdir=NULL) {
+                         cbmsmooth=0.0, tbmsmooth=0.0,
+                         dbmsmooth=0.0, measure="FA", atlas="", eddy=TRUE, outdir=NULL) {
 
   valid_types <- c("cbm", "tbm", "roi","dbm","nca", "all")
   if (! type %in% valid_types)
@@ -421,17 +422,17 @@ package_data <- function(type="cbm", subjdir=NULL, csv="", hemi="left",
     stop("Output directory exists. Please specify a new output directory that does not exist.", call.=FALSE)
 
   switch(type,
-         cbm = { copy_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth, outdir=outdir) },
-         tbm = { copy_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth, atlas=atlas, outdir=outdir) },
+         cbm = { copy_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = cbmsmooth, outdir=outdir) },
+         tbm = { copy_tbm_data(subjdir=subjdir, csv=csv, smooth=tbmsmooth, atlas=atlas, outdir=outdir) },
          dbm = { copy_dbm_data(subjdir=subjdir, csv=csv, measure=measure,
-                                           smooth=smooth, atlas=atlas, eddy=eddy, outdir=outdir) },
+                                           smooth=dbmsmooth, atlas=atlas, eddy=eddy, outdir=outdir) },
          roi = { copy_roi_data(subjdir, csv, outdir=outdir) },
          all = {
-           copy_cbm_data(subjdir=subjdir, csv=csv, hemi="left", smooth = smooth, outdir=outdir)
-           copy_cbm_data(subjdir=subjdir, csv=csv, hemi="right", smooth = smooth, outdir=outdir)
-           copy_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth, atlas=atlas, outdir=outdir)
+           copy_cbm_data(subjdir=subjdir, csv=csv, hemi="left", smooth = cbmsmooth, outdir=outdir)
+           copy_cbm_data(subjdir=subjdir, csv=csv, hemi="right", smooth = cbmsmooth, outdir=outdir)
+           copy_tbm_data(subjdir=subjdir, csv=csv, smooth=tbmsmooth, atlas=atlas, outdir=outdir)
            copy_dbm_data(subjdir=subjdir, csv=csv, measure=measure,
-                         smooth=smooth, atlas=atlas, eddy=eddy, outdir=outdir)
+                         smooth=dbmsmooth, atlas=atlas, eddy=eddy, outdir=outdir)
            copy_roi_data(subjdir, csv, outdir=outdir)
          }
   )
@@ -465,7 +466,7 @@ copy_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, outdir) {
   dest_filelist <- c(dest_filelist, file.path(outdir, bss_data@demographics$subjID, basename(logfilenames)),
                      file.path(outdir, basename(cbm_atlas_filename)))
   # Copy files
-  file_copy(src_filelist, dest_filelist)
+  file_copy(src_filelist, dest_filelist, messg = "Copying cbm data")
 }
 
 #' Package tensor-based morphometry data for reproducible statistical analysis.
@@ -496,6 +497,7 @@ copy_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas, outdir) {
                      file.path(outdir, basename(tbm_atlas_mask_filename$nii_atlas_mask))
                      )
   # Copy files
+  message("Copying tbm data", appendLF = FALSE)
   file_copy(src_filelist, dest_filelist)
 }
 
@@ -517,19 +519,24 @@ copy_dbm_data <- function(subjdir="", csv="", measure="FA", atlas="", eddy=TRUE,
   logfilenames <- get_brainsuite_logfilename_for_all_subjects(subjdir, csv)
   brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
   dbm_atlas_mask_filename <- get_dbm_atlas_and_mask(brainsuite_atlas_id)
-  dbm_filelist <- get_dbm_file_list(bss_data, measure=measure, smooth = smooth, eddy = TRUE)
-  src_filelist <- c(dbm_filelist, logfilenames, dbm_atlas_mask_filename$nii_atlas, dbm_atlas_mask_filename$nii_atlas_mask)
 
-  # Create subdirectories for subject IDs in outdir
-  dir.create(file.path(outdir), showWarnings = FALSE)
-  Vectorize(dir.create)(file.path(outdir, bss_data@demographics$subjID), showWarnings = FALSE)
-  dest_filelist <- file.path(outdir, bss_data@demographics$subjID, basename(dbm_filelist))
-  dest_filelist <- c(dest_filelist, file.path(outdir, bss_data@demographics$subjID, basename(logfilenames)),
-                     file.path(outdir, basename(dbm_atlas_mask_filename$nii_atlas)),
-                     file.path(outdir, basename(dbm_atlas_mask_filename$nii_atlas_mask))
-  )
-  # Copy files
-  file_copy(src_filelist, dest_filelist)
+  message("Copying dbm data", appendLF = FALSE)
+  valid_diffusion_measures <- c('FA', 'MD', 'axial', 'radial', 'mADC', 'FRT_GFA')
+  for (jj in valid_diffusion_measures) {
+    dbm_filelist <- get_dbm_file_list(bss_data, measure=jj, smooth = smooth, eddy = TRUE)
+    src_filelist <- c(dbm_filelist, logfilenames, dbm_atlas_mask_filename$nii_atlas, dbm_atlas_mask_filename$nii_atlas_mask)
+
+    # Create subdirectories for subject IDs in outdir
+    dir.create(file.path(outdir), showWarnings = FALSE)
+    Vectorize(dir.create)(file.path(outdir, bss_data@demographics$subjID), showWarnings = FALSE)
+    dest_filelist <- file.path(outdir, bss_data@demographics$subjID, basename(dbm_filelist))
+    dest_filelist <- c(dest_filelist, file.path(outdir, bss_data@demographics$subjID, basename(logfilenames)),
+                       file.path(outdir, basename(dbm_atlas_mask_filename$nii_atlas)),
+                       file.path(outdir, basename(dbm_atlas_mask_filename$nii_atlas_mask))
+    )
+    # Copy files
+    file_copy(src_filelist, dest_filelist)
+  }
 }
 
 #' Package ROI data for reproducible statistical analysis.
@@ -551,6 +558,7 @@ copy_roi_data <- function(subjdir="", csv="", outdir) {
   Vectorize(dir.create)(file.path(outdir, bss_data@demographics$subjID), showWarnings = FALSE)
 
   # Copy files
+  message("Copying ROI data", appendLF = FALSE)
   file_copy(roiwise_file_list, dest_filelist)
 }
 
@@ -558,11 +566,12 @@ copy_roi_data <- function(subjdir="", csv="", outdir) {
 #' @param src_filelist list of source files
 #' @param dest_filelist list of destination files
 #'
-file_copy <- function(src_filelist, dest_filelist, progress = TRUE) {
+file_copy <- function(src_filelist, dest_filelist, messg="Copying ", progress = TRUE) {
 
   if (length(src_filelist) != length(dest_filelist))
     stop(sprintf('The lengths of the source and the destination files do not match.'), call. = FALSE)
 
+  message(messg, appendLF = FALSE)
   # If progress == TRUE, then display progressbar
   if (progress == TRUE) {
     pb <- txtProgressBar(max = length(src_filelist), style = 3)

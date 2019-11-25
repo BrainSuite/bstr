@@ -550,7 +550,13 @@ paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m]))), "_roi",
 
 
 
-  rmdfileconn<-file(file.path(outdir, "report.Rmd"))
+  rmdfileconn<-file(file.path(outdir, sprintf("report_%s_%s.Rmd", bss_model@model_type, switch(bss_model@model_type,
+                                                                                               bss_corr = {bss_model@corr_var},
+                                                                                               unpairedttest = {bss_model@group_var},
+                                                                                               pairedttest = {bss_model@group_var},
+                                                                                               bss_anova = {bss_model@main_effect},
+                                                                                               bss_lm = {bss_model@main_effect},
+                                                                                               bss_lmer = {bss_model@main_effect}))))
   if (bss_model@model_type == 'bss_corr'){
     writeLines(c(nb_header, nb_libraries, nb_data_header_one, nb_data_command_one,
                  nb_load_data, nb_data_header_two, nb_data_command_two,
@@ -565,7 +571,20 @@ paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m]))), "_roi",
   close(rmdfileconn)
 
   # Render the markdown
-  rmarkdown::render(file.path(outdir, "report.Rmd"), output_file=file.path(outdir, "report.html"), quiet = TRUE)
+  rmarkdown::render(file.path(outdir, sprintf("report_%s_%s.Rmd", bss_model@model_type, switch(bss_model@model_type,
+                                                                                               bss_corr = {bss_model@corr_var},
+                                                                                               unpairedttest = {bss_model@group_var},
+                                                                                               pairedttest = {bss_model@group_var},
+                                                                                               bss_anova = {bss_model@main_effect},
+                                                                                               bss_lm = {bss_model@main_effect},
+                                                                                               bss_lmer = {bss_model@main_effect}))),
+                    output_file=file.path(outdir, sprintf("report_%s_%s.html", bss_model@model_type, switch(bss_model@model_type,
+                                                                                                           bss_corr = {bss_model@corr_var},
+                                                                                                           unpairedttest = {bss_model@group_var},
+                                                                                                           pairedttest = {bss_model@group_var},
+                                                                                                           bss_anova = {bss_model@main_effect},
+                                                                                                           bss_lm = {bss_model@main_effect},
+                                                                                                           bss_lmer = {bss_model@main_effect}))), quiet = TRUE)
 
   # Copy modelspec file to the output directory
   file.copy(bss_model@mspec_file, bss_out@outdir)
@@ -747,7 +766,7 @@ get_voxelcoord <- function(bss_out, bss_data, bss_model, outdir, nclusters){
   switch(bss_model@model_type,
          bss_anova = {var_name = bss_model@main_effect},
          bss_lm = {var_name = bss_model@main_effect},
-         bss_lme = {var_name = bss_model@main_effect},
+         bss_lmer = {var_name = bss_model@main_effect},
          bss_corr = {var_name = bss_model@corr_var},
          pairedttest = {var_name = bss_model@group_var},
          unpairedttest = {var_name = bss_model@group_var}

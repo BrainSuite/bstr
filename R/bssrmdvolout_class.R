@@ -50,7 +50,7 @@ BssRmdVolumeOutput <-
                     switch(bss_model@model_type,
                            bss_anova = {var_name = bss_model@main_effect},
                            bss_lm = {var_name = bss_model@main_effect},
-                           bss_lme = {var_name = bss_model@main_effect},
+                           bss_lmer = {var_name = bss_model@main_effect},
                            bss_corr = {var_name = bss_model@corr_var},
                            pairedttest = {var_name = bss_model@group_var},
                            unpairedttest = {var_name = bss_model@group_var}
@@ -78,7 +78,7 @@ BssRmdVolumeOutput <-
                     switch(bss_model@model_type,
                            bss_anova = {var_name = bss_model@main_effect},
                            bss_lm = {var_name = bss_model@main_effect},
-                           bss_lme = {var_name = bss_model@main_effect},
+                           bss_lmer = {var_name = bss_model@main_effect},
                            bss_corr = {var_name = bss_model@corr_var},
                            pairedttest = {var_name = bss_model@group_var},
                            unpairedttest = {var_name = bss_model@group_var}
@@ -110,7 +110,7 @@ BssRmdVolumeOutput <-
                     switch(bss_model@model_type,
                            bss_anova = {var_name = bss_model@main_effect},
                            bss_lm = {var_name = bss_model@main_effect},
-                           bss_lme = {var_name = bss_model@main_effect},
+                           bss_lmer = {var_name = bss_model@main_effect},
                            bss_corr = {var_name = bss_model@corr_var},
                            pairedttest = {var_name = bss_model@group_var},
                            unpairedttest = {var_name = bss_model@group_var}
@@ -187,7 +187,7 @@ BssRmdVolumeOutput <-
                                                                                                                         pairedttest = {bss_model@group_var},
                                                                                                                         bss_anova = {bss_model@main_effect},
                                                                                                                         bss_lm = {bss_model@main_effect},
-                                                                                                                        bss_lme = {bss_model@main_effect}))),
+                                                                                                                        bss_lmer = {bss_model@main_effect}))),
                                             outdir,
                                             voxelcoord,
                                             overlay_name = "c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues,bs_stat_overlays$corr_values)")
@@ -198,7 +198,7 @@ BssRmdVolumeOutput <-
                                                                                                                 pairedttest = {bss_model@group_var},
                                                                                                                 bss_anova = {bss_model@main_effect},
                                                                                                                 bss_lm = {bss_model@main_effect},
-                                                                                                                bss_lme = {bss_model@main_effect}))))
+                                                                                                                bss_lmer = {bss_model@main_effect}))))
                 }
               ),
 
@@ -209,7 +209,7 @@ BssRmdVolumeOutput <-
                   switch(bss_model@model_type,
                          bss_anova = {var_name = bss_model@main_effect},
                          bss_lm = {var_name = bss_model@main_effect},
-                         bss_lme = {var_name = bss_model@main_effect},
+                         bss_lmer = {var_name = bss_model@main_effect},
                          bss_corr = {var_name = bss_model@corr_var},
                          pairedttest = {var_name = bss_model@group_var},
                          unpairedttest = {var_name = bss_model@group_var}

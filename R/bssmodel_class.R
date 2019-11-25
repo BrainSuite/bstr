@@ -27,7 +27,7 @@
 #' @slot group_var Categorical variable name. This should be present in the demographics csv file associated
 #' with \code{bss_data}.
 #' @slot model_type character string denoting the type of model. Should be one of \code{"bss_anova"},
-#' \code{"bss_corr"}, \code{"bss_corr"}, \code{"pairedttest"}, \code{"unpairedttest"} or \code{"bss_lme"}
+#' \code{"bss_corr"}, \code{"bss_corr"}, \code{"pairedttest"}, \code{"unpairedttest"} or \code{"bss_lmer"}
 #' @slot fullmodel character string like an R formula denoting the full model including both
 #' the main effect and covariates.
 #' @slot nullmodel character string like an R formula denoting the null model including covariates
@@ -261,7 +261,7 @@ setMethod("initialize_lm", signature("BssModel", "character", "character", "data
 model_type_list <- list(
   bss_anova = 'bss_anova',
   bss_lm = 'bss_lm',
-  bss_lme = 'bss_lme',
+  bss_lmer = 'bss_lmer',
   bss_corr = 'bss_corr',
   pairedttest = 'pairedttest',
   unpairedttest = 'unpairedttest'

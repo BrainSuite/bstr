@@ -339,7 +339,7 @@ BssRmdVolumeOutput <-
                 ## another function will generate the names for the pngs
 
                 render_html = function(outdir, voxelcoord, overlay_name) {
-                  overlay <- c(bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues_adjusted, bs_stat_overlays$log_pvalues, bs_stat_overlays$tvalues, bs_stat_overlays$corr_values, bs_stat_overlays$corr_values_masked_adjusted)
+                  overlay <- c(bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues_adjusted, bs_stat_overlays$log_pvalues, bs_stat_overlays$tvalues, bs_stat_overlays$corr_values_masked_adjusted, bs_stat_overlays$corr_values)
                   if (bss_model@model_type=="bss_corr"){
                     cbar <- vector("list",2)
                     for (cbar_index in 1:length(cbar)){
@@ -383,8 +383,8 @@ BssRmdVolumeOutput <-
                     dim3 <- dim(bss_data@atlas_image)[1]/dim_sum*93
                     width <- c(paste0(dim1,"%"),paste0(dim2,"%"),paste0(dim3,"%"),"7%")
                     if (bss_model@model_type=="bss_corr"){
-                      panel_names<- c("Correlation Values","Adjusted Correlation Values")
-                      overlay <- c(bs_stat_overlays$corr_values,bs_stat_overlays$corr_values_masked_adjusted)
+                      panel_names<- c("Adjusted Correlation Values","Correlation Values")
+                      overlay <- c(bs_stat_overlays$corr_values_masked_adjusted,bs_stat_overlays$corr_values)
                     } else {
                       panel_names <- c("Adjusted P-Values","Adjusted T-Values","P-Values","T-Values")
                       overlay <- c(bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues_adjusted,
@@ -402,7 +402,7 @@ BssRmdVolumeOutput <-
                   # Function that creates clusters for each panel
                   cluster_panels = function(voxelcoord){
                     if (bss_model@model_type=="bss_corr"){
-                      panel_names<- c("Correlation Values","Adjusted Correlation Values")
+                      panel_names<- c("Adjusted Correlation Values","Correlation Values")
                     } else {
                       panel_names <- c("Adjusted P-Values","Adjusted T-Values","P-Values","T-Values")
                     }

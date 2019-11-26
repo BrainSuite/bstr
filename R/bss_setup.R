@@ -136,8 +136,14 @@ check_bs_atlas_binaries_exist <- function(brainsuite_path, quiet=FALSE, raise_er
   }
   for (i in bs_binary_files ) {
     errmesg <- sprintf('Binary file %s does not exist. \nPlease check if BrainSuite is installed correctly.', file.path(brainsuite_path, i))
-    if (!check_file_exists(file.path(brainsuite_path, i), raise_error = raise_error,
-                           errmesg = errmesg)) {
+    if (get_os()=="windows"){
+      check_for_file <- check_file_exists(paste0(file.path(brainsuite_path, i),".exe"), raise_error = raise_error,
+                                          errmesg = errmesg)
+    } else {
+      check_for_file <- check_file_exists(file.path(brainsuite_path, i), raise_error = raise_error,
+                                          errmesg = errmesg)
+    }
+    if (!check_for_file) {
       if (!quiet) message(errmesg, appendLF = TRUE)
       return(FALSE)
     }

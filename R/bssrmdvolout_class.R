@@ -229,10 +229,10 @@ BssRmdVolumeOutput <-
                        #                                        " --max ", max_vals[name_index], " --min ", min_vals[name_index],
                        #                                        " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),"_",name[name_index],".cbar --isotropic")
                        # system(current_view_with_crosshairs,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
-                       current_view <- paste0(file.path(get_brainsuite_install_path(),bs_binary_files$statmap)," --atlas ",atlaspath, " -o ",outdir,"/png_images/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
-                                              ".png --stat ", overlaypath[stats_measure_index], " --xhair ",outdir,"/png_images_crosshairs/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
-                                              ".png -p ", voxelcoord[[voxelcoord_index]][1]," ",voxelcoord[[voxelcoord_index]][2]," ",voxelcoord[[voxelcoord_index]][3]," --", view_order[view], " --isotropic",
-                                              " -a ", alpha, " --cbar ", outdir,"/",bss_model@model_type,"_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),"_",name[name_index],".cbar")
+                       current_view <- paste0("\"",file.path(get_brainsuite_install_path(),bs_binary_files$statmap),"\" --atlas \"",atlaspath, "\" -o \"",outdir,"/png_images/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
+                                              ".png\" --stat \"", overlaypath[stats_measure_index], "\" --xhair \"",outdir,"/png_images_crosshairs/",view_order[view],voxelcoord[[voxelcoord_index]][view], "_",name[name_index], "_cluster",voxelcoord_index,
+                                              ".png\" -p ", voxelcoord[[voxelcoord_index]][1]," ",voxelcoord[[voxelcoord_index]][2]," ",voxelcoord[[voxelcoord_index]][3]," --", view_order[view], " --isotropic",
+                                              " -a ", alpha, " --cbar \"", outdir,"/",bss_model@model_type,"_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),"_",name[name_index],".cbar\"")
                        system_call_output <- system(current_view,intern=TRUE, ignore.stdout=FALSE, ignore.stderr=TRUE, wait=TRUE, input=NULL)
                        if (!is.null(attributes(system_call_output))){
                          warning(paste0("Statmap error. Status ",attributes(system_call_output)$status, " returned."),call. = FALSE)
@@ -278,9 +278,9 @@ BssRmdVolumeOutput <-
                   view_name <- c("ax","cor","sag")
                   view_order <- c(3,2,1)
                   for (view_iter in 1:3){
-                    current_view <- paste0(file.path(get_brainsuite_install_path(),bs_binary_files$statmap)," --atlas ",atlaspath," -o ", outdir,"/png_images/",view_name[view_iter],voxelcoord[[voxelcoord_index]][view_order[view_iter]],
-                                           "_atlas.png"," --xhair ",outdir,"/png_images_crosshairs/",view_name[view_iter],voxelcoord[[voxelcoord_index]][view_order[view_iter]],
-                                           ".png -p ", voxelcoord[[voxelcoord_index]][1]," ",voxelcoord[[voxelcoord_index]][2]," ",voxelcoord[[voxelcoord_index]][3]," --", view_name[view_iter], " --isotropic")
+                    current_view <- paste0("\"",file.path(get_brainsuite_install_path(),bs_binary_files$statmap),"\" --atlas \"",atlaspath,"\" -o \"", outdir,"/png_images/",view_name[view_iter],voxelcoord[[voxelcoord_index]][view_order[view_iter]],
+                                           "_atlas.png\""," --xhair \"",outdir,"/png_images_crosshairs/",view_name[view_iter],voxelcoord[[voxelcoord_index]][view_order[view_iter]],
+                                           ".png\" -p ", voxelcoord[[voxelcoord_index]][1]," ",voxelcoord[[voxelcoord_index]][2]," ",voxelcoord[[voxelcoord_index]][3]," --", view_name[view_iter], " --isotropic")
                     system(current_view,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
                   }
                   return(0)

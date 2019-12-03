@@ -25,9 +25,9 @@ save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues,
 
 \item{outdir}{string specifying output directory to save the results in}
 
-\item{corr_values}{optional argument used for the correlation output only}
+\item{corr_values}{correlation values}
 
-\item{corr_values_masked_adjusted}{optional argument used for the adjusted correlation output only}
+\item{corr_values_masked_adjusted}{adjusted, masked correlation values}
 }
 \description{
 Save the volume statistics

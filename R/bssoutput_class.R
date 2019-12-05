@@ -647,8 +647,13 @@ save_bss_color_files <- function(measure, var_name, cmap_title, bss_data, bss_mo
   save_BrainSuiteLUT(file.path(outdir, lut_fileprefix), bss_cmap@lut)
 
   # save the cbar json file with colormap for BrainSuite statmap
-  cbarlist <- list("colorbar", bss_cmap@vmin, bss_cmap@vmax, t(col2rgb(bss_cmap@lut)/255))
-  names(cbarlist) <- c("jsonid", "cbarmin", "cbarmax", "colormap")
+  #cbarlist <- list("colorbar", bss_cmap@vmin, bss_cmap@vmax, t(col2rgb(bss_cmap@lut)/255))
+
+
+
+  cbarlist <- list("colorbar", bss_cmap@cnegmax, bss_cmap@cnegmin, bss_cmap@cposmin, bss_cmap@cposmax, t(col2rgb(bss_cmap@lut)/255))
+  #names(cbarlist) <- c("jsonid", "cbarmin", "cbarmax", "colormap")
+  names(cbarlist) <- c("jsonid", "cbarmin", "cbarlowerthresh", "cbarupperthresh", "cbarmax", "colormap")
   cbar_json <- jsonlite::toJSON(cbarlist, pretty = TRUE, auto_unbox=TRUE)
   cbar_json_filename <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
     basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.cbar', sep = '')

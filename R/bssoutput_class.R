@@ -389,7 +389,7 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
   csvfilename <- paste0(file.path(bss_out@outdir, tools::file_path_sans_ext(basename(bss_data@csv))),".csv")
   write.csv(bss_data@demographics, csvfilename)
 
-  nb_header <- "### BrainSuite ROI statistical analysis report"
+  nb_header <- "---\ntitle: 'BrainSuite ROI statistical analysis report'\noutput: html_document\n---"
 
   nb_libraries <-"```{r librar_cmds, echo=FALSE}\n"
   nb_libraries <- paste(nb_libraries, "\nlibrary('bssr')\nlibrary('ggplot2')\n", sep="")

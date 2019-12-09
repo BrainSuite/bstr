@@ -4,7 +4,8 @@
 \alias{file_copy}
 \title{Copy files from the inputted source to the inputted destination}
 \usage{
-file_copy(src_filelist, dest_filelist, progress = TRUE)
+file_copy(src_filelist, dest_filelist, messg = "Copying ",
+  progress = TRUE)
 }
 \arguments{
 \item{src_filelist}{list of source files}

@@ -5,8 +5,8 @@
 \title{Package data for reproducible statistical analysis.}
 \usage{
 package_data(type = "cbm", subjdir = NULL, csv = "", hemi = "left",
-  smooth = 0, measure = "FA", atlas = "", eddy = TRUE,
-  outdir = NULL)
+  cbmsmooth = 0, tbmsmooth = 0, dbmsmooth = 0, measure = "FA",
+  atlas = "", eddy = TRUE, outdir = NULL)
 }
 \arguments{
 \item{type}{character string denoting type of analysis. Should be cbm, tbm, or roi.}
@@ -20,8 +20,6 @@ and should be exactly equal to the individual subject directory name.}
 
 \item{hemi}{chaaracter string denoting the brain hemisphere. Should either be "left" or "right".}
 
-\item{smooth}{numeric value denoting the smoothing level.}
-
 \item{measure}{character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".}
 
 \item{atlas}{path name to the atlas}
@@ -29,6 +27,8 @@ and should be exactly equal to the individual subject directory name.}
 \item{eddy}{boolean for specifying if the diffusion images were eddy-current corrected or not.}
 
 \item{outdir}{output directory that will contain the copied data}
+
+\item{smooth}{numeric value denoting the smoothing level.}
 }
 \description{
 Takes same parameters as \code{\link{load_bss_data}} and copies the data to a new directory specified by outdir. You can repeatedly call this function to copy data of different types (tbm -- nii.gz, cbm -- .dfs files etc.) to the same output directory.

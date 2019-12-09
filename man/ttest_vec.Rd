@@ -4,12 +4,15 @@
 \alias{ttest_vec}
 \title{Vectorized t-test for for brain imaging phenotypes}
 \usage{
-ttest_vec(X1, X2, paired = FALSE)
+ttest_vec(X1, X2, group_var, paired = FALSE)
 }
 \arguments{
 \item{X1}{matrix of dimensions (\eqn{N1 x T}), where \eqn{N1} = number of subjects and \eqn{T} = number of vertices/voxels.}
 
 \item{X2}{matrix of dimensions (\eqn{N2 x T}), where \eqn{N2} = number of subjects and \eqn{T} = number of vertices/voxels.}
+
+\item{group_var}{Categorical variable name. This should be present in the demographics csv file associated
+with \code{bss_data}.}
 
 \item{paired}{logical; is TRUE if \code{group_var} contains matching (dependent) samples. The default value is \code{FALSE}.}
 }

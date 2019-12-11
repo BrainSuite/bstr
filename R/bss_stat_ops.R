@@ -37,37 +37,42 @@ bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr", 
   if (class(bss_data) == "BssROIData") {
     return(bss_roi_anova(main_effect = main_effect, covariates = covariates, bss_data = bss_data))
   }
-
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
   bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
   bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
   bss_model <- anova_vec(bss_lm_full, bss_lm_null, bss_data)
 
   switch(mult_comp,
-    perm={
-      cl <- parallel::makeCluster(parallel::detectCores())
-      registerDoParallel(cl)
-      options(warn=-1)
-      pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
-      bss_model@pvalues <- pvalue_and_nulldist[[1]]
-      bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
-      bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
-      bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
-      nulldist <- pvalue_and_nulldist[[2]]
-      bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
-      stopCluster(cl)
-      options(warn=0)
-    },
-    fdr={
-      bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
-      bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
-      bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
-      bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
-    }
-  )
+         perm={
+           cl <- parallel::makeCluster(parallel::detectCores())
+           registerDoParallel(cl)
+           options(warn=-1)
+           pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
+           bss_model@pvalues <- pvalue_and_nulldist[[1]]
+           bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+           bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+           bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+           nulldist <- pvalue_and_nulldist[[2]]
+           bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
+           bss_model@tvalues_adjusted <- bss_model@tvalues
+           bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+           stopCluster(cl)
+           options(warn=0)
+         },
+         fdr={
+           bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+           bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+           bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+           bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)*bss_model@tvalues_sign
+           bss_model@tvalues_adjusted <- bss_model@tvalues
+           bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+         }
+ )
 
-  message('Done.')
-  return(bss_model)
+ message('Done.')
+ return(bss_model)
+
+
 }
 
 #' A vectorized version of analysis of variance (ANOVA).
@@ -112,21 +117,66 @@ anova_vec <- function(bss_lm_full, bss_lm_null, bss_data) {
   return(bss_model)
 }
 
-# linear regression
-bss_lm <- function(main_effect="", covariates="", bss_data) {
+#' Linear regression for brain imaging data.
+#'
+#' This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and performs
+#' a linear regression including \code{main_effect + covariates}.
+#'
+#' Slightly different from the standard R \code{lm} function, \code{bss_lm} currently does not directly accept an R formula.
+#' This could be accomodated in the future versions.
+#' Also currently, this function returns the p-values and the t-statistics for the \code{main_effect}
+#' only. Returning the statistics for all variables could be accomodated in the future versions.
+#' @param main_effect Character string containing an independent variable whose effect you want to measure.
+#' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
+#' either a categorical or a continuous variable.
+#' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
+#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
+#' @param  bss_data Object of type \code{\link{BssData}}
+#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.
+#' @param  niter numeric variable for the number of iterations for permutations test. Will be ignored if mult_comp="fdr"
+#'
+#' @export
+bss_lm <- function(main_effect="", covariates="", bss_data, mult_comp = "fdr", niter=5000) {
 
-  # if (class(bss_data) == "BssROIData") {
-  #   return(bss_roi_lm(main_effect = main_effect, covariates = covariates, bss_data = bss_data))
-  # }
-  #
+  if (class(bss_data) == "BssROIData") {
+    return(bss_roi_anova(main_effect = main_effect, covariates = covariates, bss_data = bss_data))
+  }
+  message('Running the statistical model. This may take a while...', appendLF = FALSE)
+  bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
+  bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
+  bss_model <- anova_vec(bss_lm_full, bss_lm_null, bss_data)
+
+  switch(mult_comp,
+         perm={
+           cl <- parallel::makeCluster(parallel::detectCores())
+           registerDoParallel(cl)
+           options(warn=-1)
+           pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
+           bss_model@pvalues <- pvalue_and_nulldist[[1]]
+           bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+           bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+           #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+           nulldist <- pvalue_and_nulldist[[2]]
+           bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
+           bss_model@tvalues_adjusted <- bss_model@tvalues
+           bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+           stopCluster(cl)
+           options(warn=0)
+         },
+         fdr={
+           bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+           bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+           bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+           bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)*bss_model@tvalues_sign
+           bss_model@tvalues_adjusted <- bss_model@tvalues
+           bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+         }
+ )
+
+ message('Done.')
+ return(bss_model)
+
   # # Check the model type and call the appropriate method
-  # bss_model <- new("BssModel", model_type="bss_lm", main_effect = main_effect, covariates = covariates,
-  #                  demographics = bss_data@demographics, mspec_file="")
-  # message('Running the statistical model. This may take a while...', appendLF = FALSE)
-  # bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
-  # browser()
-  # bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
-  #
   # Xtemp <- solve(t(bss_model@X_design_full) %*% bss_model@X_design_full) %*% t(bss_model@X_design_full) # Pre Hat matrix
   # beta_full <- Xtemp %*% bss_data@data_array  # beta coefficients
   # y_full <- bss_model@X_design_full %*% beta_full  # Predicted response
@@ -156,8 +206,7 @@ bss_lm <- function(main_effect="", covariates="", bss_data) {
   # bss_model@tvalues <- tvalues
   # bss_model@tvalues[abs(pvalues) >= 0.05] <- 0
   # bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
-  # message('Done.')
-  # return(bss_model)
+
 }
 
 #' Vectorized linear regression for brain imaging phenotypes.
@@ -199,8 +248,8 @@ lm_vec <- function(main_effect = "", covariates = "", bss_data) {
     main_effect = "(Intercept)" # If main_effect is empty, return the parameters of the Intercept
 
   se <- sqrt(diag(solve(t(X) %*% X)))[[main_effect]] * sqrt(rss / (N-Np-1)) # standard error
-  tvalues <- as.numeric(beta_coeff[main_effect, ]/(se + .Machine$double.eps)) # tvalue
-  pvalues <- 2*pt(abs(tvalues), N-Np-1, lower.tail = FALSE) # pvalu
+  tvalues <- as.numeric(beta_coeff[main_effect, ]/(se + .Machine$double.eps)) # tvalues
+  pvalues <- 2*pt(abs(tvalues), N-Np-1, lower.tail = FALSE) # pvalues
   residuals <- bss_data@data_array - Y
   pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
   bss_model@pvalues <- pvalues
@@ -210,6 +259,18 @@ lm_vec <- function(main_effect = "", covariates = "", bss_data) {
   bss_model@residuals <- residuals
   return(bss_model)
 }
+
+
+#' This function performs the ANOVA analysis for ROIs
+#'
+#' @param main_effect Character string containing an independent variable whose effect you want to measure.
+#' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
+#' either a categorical or a continuous variable.
+#' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
+#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
+#' @param  bss_data Object of type \code{\link{BssData}}
+#'
+#' @export
 
 bss_roi_anova <- function(main_effect="", covariates="", bss_data=bss_data) {
   # Check the model type and call the appropriate method
@@ -230,9 +291,9 @@ bss_roi_anova <- function(main_effect="", covariates="", bss_data=bss_data) {
 
   for (i in 1:length(bss_data@roiids)){
     cmd1[[i]] <- sprintf("lm_full_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids[i]),
-                  paste('`',as.character(selected_col[i]),'`', ' ~ ', bss_model@fullmodel, sep = ''))
+                         paste('`',as.character(selected_col[i]),'`', ' ~ ', bss_model@fullmodel, sep = ''))
     cmd2[[i]] <- sprintf("lm_null_%s <- lm(%s, data = bss_data@demographics)",as.character(bss_data@roiids[i]),
-                  paste('`',as.character(selected_col[i]),'`', ' ~ ', bss_model@nullmodel, sep = ''))
+                         paste('`',as.character(selected_col[i]),'`', ' ~ ', bss_model@nullmodel, sep = ''))
     cmd3[[i]] <- sprintf("pander::pander(anova(lm_full_%s, lm_null_%s))",as.character(bss_data@roiids[i]),as.character(bss_data@roiids[i]))
     stats_commands[[i]] <- c(cmd1[[i]], cmd2[[i]], cmd3[[i]])
   }
@@ -250,6 +311,7 @@ bss_roi_anova <- function(main_effect="", covariates="", bss_data=bss_data) {
   return(bss_model)
 
 }
+
 
 # bss_roi_lm <- function(main_effect="", covariates="", bss_data=bss_data) {
 #   # Check the model type and call the appropriate method
@@ -299,16 +361,27 @@ bss_corr <- function(corr_var, bss_data, mult_comp="fdr") {
   corr_coeff <- corr_result$corr_coeff
   bss_model@tvalues <- corr_result$tvalues
   bss_model@pvalues <- corr_result$pvalues
+  tvalues_sign <- sign_tvalues(bss_model@tvalues)
+  bss_model@tvalues_sign <- tvalues_sign
 
   bss_model@pvalues <- sign(corr_coeff)*bss_model@pvalues
   bss_model@pvalues[abs(bss_model@pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
   bss_model@pvalues[is.na(bss_model@pvalues)] <- 1 # Set the p-values with the NA correlations to 1
   bss_model@corr_values <- corr_coeff
-  bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
+  bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)*bss_model@tvalues_sign
   # bss_model@pvalues_adjusted <- p.adjust(bss_model@pvalues, 'BH')
   bss_model@corr_values[abs(bss_model@pvalues) >= 0.05] <- 0
+  bss_model@corr_values_masked_adjusted <- bss_model@corr_values
+  bss_model@corr_values_masked_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+  bss_model@tvalues_adjusted <- bss_model@tvalues
+  bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+
+  bss_model@load_data_command <- sprintf("bss_model <- bss_corr(corr_var = '%s', bss_data = bss_data, mult_comp= '%s')",
+                                         corr_var, mult_comp)
+
   message('Done.')
   return(bss_model)
+
 }
 
 #' Vectorized correlation between a variable and brain imaging data.
@@ -361,18 +434,22 @@ bss_ttest <- function(group_var, bss_data, paired = FALSE, mult_comp="fdr") {
   message(sprintf("The 2 groups are %s and %s", group1, group2), appendLF = TRUE)
   message('Running t-tests...', appendLF = FALSE)
 
-  test_result <- ttest_vec(bss_data@data_array[idx_group1,], bss_data@data_array[idx_group2,], paired)
-  pvalues <- test_result$pvalues
-  tvalues <- test_result$tvalues
+  test_result <- ttest_vec(bss_data@data_array[idx_group1,], bss_data@data_array[idx_group2,], group_var, paired)
 
-  pvalues[is.na(pvalues)] <- 1
-  pvalues <- pvalues*sign_tvalues(tvalues)
-  pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
-  bss_model@pvalues <- pvalues
-  bss_model@tvalues <- tvalues
-  bss_model@tvalues[abs(pvalues) >= 0.05] <- 0
-  bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
+  bss_model@pvalues <- test_result$pvalues
+  bss_model@tvalues <- test_result$tvalues
+  bss_model@tvalues_sign <- sign_tvalues(bss_model@tvalues)
+
+  bss_model@pvalues[is.na(bss_model@pvalues)] <- 1
+  bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+  bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+  bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)*bss_model@tvalues_sign
   # bss_model@pvalues_adjusted <- p.adjust(abs(bss_model@pvalues), 'BH')
+  bss_model@tvalues_adjusted <- bss_model@tvalues
+  bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+
+  bss_model@load_data_command <- sprintf("bss_model <- bss_ttest(group_var = '%s', bss_data = bss_data, paired = %s, mult_comp= '%s')",
+                                         group_var, paired,mult_comp)
 
   message('Done.')
   return(bss_model)
@@ -386,6 +463,8 @@ bss_ttest <- function(group_var, bss_data, paired = FALSE, mult_comp="fdr") {
 #' will be called internally from \code{\link{bss_ttest}}
 #' @param X1 matrix of dimensions (\eqn{N1 x T}), where \eqn{N1} = number of subjects and \eqn{T} = number of vertices/voxels.
 #' @param  X2 matrix of dimensions (\eqn{N2 x T}), where \eqn{N2} = number of subjects and \eqn{T} = number of vertices/voxels.
+#' @param group_var Categorical variable name. This should be present in the demographics csv file associated
+#' with \code{bss_data}.
 #' @param  paired logical; is TRUE if \code{group_var} contains matching (dependent) samples. The default value is \code{FALSE}.
 #' @details
 #' For an independent samples t-test \eqn{N1} not equal to \eqn{N2}.
@@ -394,7 +473,7 @@ bss_ttest <- function(group_var, bss_data, paired = FALSE, mult_comp="fdr") {
 #' \code{bss_data} can be of the type "cbm", "tbm", or "roi".
 #'
 #' @export
-ttest_vec <- function(X1, X2, paired=FALSE) {
+ttest_vec <- function(X1, X2, group_var, paired=FALSE) {
 
   n1 <- dim(X1)[1]
   n2 <- dim(X2)[1]
@@ -563,4 +642,168 @@ perm_p_adjust <- function(main_effect = "", covariates = "", bss_data, tvalues_n
   return(pvalues_sort[,1])
 }
 
+#' Linear mixed-effects model for brain imaging data.
+#'
+#' Linear regression for brain imaging data.
+#'
+#' This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and performs
+#' a linear regression including \code{main_effect + covariates}.
+#'
+#' Slightly different from the standard R \code{lmer} function, \code{bss_lmer} currently does not directly accept an R formula.
+#' This could be accomodated in the future versions.
+#' Also currently, this function returns the p-values and the t-statistics for the \code{main_effect}
+#' only. Returning the statistics for all variables could be accomodated in the future versions.
+#' @param group_var Categorical variable name. This should be present in the demographics csv file associated
+#' with \code{bss_data}.
+#' @param main_effect Character string containing an independent variable whose effect you want to measure.
+#' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
+#' either a categorical or a continuous variable.
+#' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
+#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
+#' @param  bss_data Object of type \code{\link{BssData}}
+#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.
+#'
+#' @export
+bss_lmer <- function(group_var, main_effect="", covariates="", bss_data, mult_comp = "fdr") {
 
+  if (class(bss_data) == "BssROIData") {
+    return(bss_roi_lmer_anova(group_var, main_effect = main_effect, covariates = covariates, bss_data = bss_data))
+  }
+  message('Running the statistical model. This may take a while...', appendLF = FALSE)
+  bss_model <- lmer_vec(group_var, main_effect = main_effect, covariates = covariates, bss_data = bss_data)
+  # switch(mult_comp,
+  #        perm={
+  #          cl <- parallel::makeCluster(parallel::detectCores())
+  #          registerDoParallel(cl)
+  #          options(warn=-1)
+  #          pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
+  #          bss_model@pvalues <- pvalue_and_nulldist[[1]]
+  #          bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+  #          bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+  #         #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+  #          nulldist <- pvalue_and_nulldist[[2]]
+  #          bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
+  #          bss_model@tvalues_adjusted <- bss_model@tvalues
+  #          bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+  #          stopCluster(cl)
+  #          options(warn=0)
+  #        },
+  #        fdr={
+  #          bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+  #          bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+  #          #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+  #          bss_model@pvalues_adjusted <- bss_p_adjust(bss_model@pvalues, mult_comp)
+  #          bss_model@tvalues_adjusted <- bss_model@tvalues
+  #          bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+  #        }
+  # )
+
+  message('Done.')
+  return(bss_model)
+}
+
+#' Vectorized linear mixed-effects regression for brain imaging phenotypes.
+#'
+#' This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and performs
+#' a linear regression including \code{main_effect + covariates}.
+#'
+#' Slightly different from the standard R \code{lmer} function, \code{lmer_vec} currently does not directly accept an R formula.
+#' This could be accomodated in the future versions.
+#' Also currently, this function returns the p-values and the t-statistics for the \code{main_effect}
+#' only. Returning the statistics for all variables could be accomodated in the future versions.
+#' @param group_var Categorical variable name. This should be present in the demographics csv file associated
+#' with \code{bss_data}.
+#' @param main_effect Character string containing an independent variable whose effect you want to measure.
+#' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
+#' either a categorical or a continuous variable.
+#' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
+#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
+#' @param  bss_data Object of type \code{\link{BssData}}
+#'
+#' @export
+lmer_vec <- function(group_var, main_effect = "", covariates = "", bss_data) {
+
+  bss_model <- new("BssModel", model_type="bss_lmer", main_effect = main_effect, covariates = covariates,
+                   group_var = group_var, demographics = bss_data@demographics, mspec_file="")
+
+  # Mass Univariate Linear Mixed Effects Analysis (still in progress)
+  #lm_formula <- formula(sprintf('~ %s', paste(main_effect, '+', covariates)))
+  #lmer_formula <- bss_model@lm_formula
+
+  # Fit model
+  N <- dim(bss_data@data_array)[1]
+  # Np <- length(unlist(strsplit(as.character(covariates), '\\+'))) + 1
+  #
+  # X <- model.matrix(lm_formula, data = bss_data@demographics)
+  # X_hat <- solve(t(X) %*% X) %*% t(X) # pre hat matrix
+  # beta_coeff <- X_hat %*% bss_data@data_array  # beta coefficients
+  # Y <- X %*% beta_coeff  # predicted response
+  # rss <- colSums((bss_data@data_array - Y)^2) # residual sum of squares
+  #
+  # if (main_effect == "")
+  #   main_effect = "(Intercept)" # If main_effect is empty, return the parameters of the Intercept
+  #
+  # se <- sqrt(diag(solve(t(X) %*% X)))[[main_effect]] * sqrt(rss / (N-Np-1)) # standard error
+  # tvalues <- as.numeric(beta_coeff[main_effect, ]/(se + .Machine$double.eps)) # tvalue
+  # pvalues <- 2*pt(abs(tvalues), N-Np-1, lower.tail = FALSE) # pvalu
+  # residuals <- bss_data@data_array - Y
+  # pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
+  # bss_model@pvalues <- pvalues
+  # bss_model@tvalues <- tvalues
+  # bss_model@beta_coeff <- beta_coeff
+  # bss_model@rss <- rss
+  # bss_model@residuals <- residuals
+
+  return(bss_model)
+}
+
+#' This function performs the ANOVA Linear Mixed Effects analysis for ROIs
+#'
+#' @param group_var Categorical variable name. This should be present in the demographics csv file associated
+#' with \code{bss_data}.
+#' @param main_effect Character string containing an independent variable whose effect you want to measure.
+#' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
+#' either a categorical or a continuous variable.
+#' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
+#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
+#' @param  bss_data Object of type \code{\link{BssData}}
+#'
+#' @export
+
+bss_roi_lmer_anova <- function(group_var, main_effect="", covariates="", bss_data){
+
+  bss_model <- new("BssModel", model_type="bss_lmer", main_effect = main_effect, covariates = covariates,
+                   group_var = group_var, demographics = bss_data@demographics, mspec_file="")
+  message('Running the statistical model. This may take a while...', appendLF = FALSE)
+
+  # For univariate lmer
+  selected_col <- rep(NA, length(bss_data@roiids))
+  for (i in 1:length(bss_data@roiids)){
+    selected_col[i] <- paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")")
+  }
+
+  cmd1 <- list()
+  cmd2 <- list()
+  cmd3 <- list()
+  stats_commands <- list()
+
+  for (i in 1:length(bss_data@roiids)){
+    bss_lmer_full_formula <- paste0("`",as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")`"," ~ ",bss_model@main_effect," + (",bss_model@main_effect,"|",bss_model@group_var,") + ",bss_model@covariates)
+    bss_lmer_null_formula <- paste0("`",as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")`"," ~ (1|",bss_model@group_var,") + ",bss_model@covariates)
+
+    cmd1[[i]] <- sprintf("lmer_full_%s <- lme4::lmer(%s, data = bss_data@demographics,control=lme4::lmerControl(check.nobs.vs.nRE='ignore'))",
+                         as.character(bss_data@roiids[i]),bss_lmer_full_formula)
+    cmd2[[i]] <- sprintf("lmer_null_%s <- lme4::lmer(%s, data = bss_data@demographics,control=lme4::lmerControl(check.nobs.vs.nRE='ignore'))",
+                         as.character(bss_data@roiids[i]),bss_lmer_null_formula)
+    cmd3[[i]] <- sprintf("pander::pander(anova(lmer_full_%s, lmer_null_%s))",as.character(bss_data@roiids[i]),as.character(bss_data@roiids[i]))
+    stats_commands[[i]] <- c(cmd1[[i]], cmd2[[i]], cmd3[[i]])
+  }
+
+  eval(parse(text = stats_commands))
+  bss_model@stats_commands <- stats_commands
+  bss_model@load_data_command <- sprintf("bss_model <- bss_lmer(group_var = '%s', main_effect = '%s', covariates = '%s', bss_data = bss_data) ",
+                                         group_var, main_effect, covariates)
+
+  message('Done.')
+  return (bss_model)
+}

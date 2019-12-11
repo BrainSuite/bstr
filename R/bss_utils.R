@@ -55,3 +55,33 @@ check_multiple_files_exists <- function(filelist, errmesg=NULL) {
   }
   return (TRUE)
 }
+
+#' Delete and recreate directory
+#'
+#' @param dir Name of directory.
+#'
+#' @export
+delete_and_recreate_dir <- function(dir){
+  unlink(dir,recursive=TRUE)
+  dir.create(dir)
+}
+
+#' Convert a 3D coordinate from an image to a linear vector index
+#' Equivalent to sub2ind from MATLAB(R)
+#' Does not perform error checking for bounds
+#' @param coord vector of 3D coordinates
+#' @param dimI vector of image dimensions
+#' @export
+coord2ind <- function(coord, dimI) {
+  return (coord[1] + (coord[2]-1)*dimI[1] + (coord[3]-1)*dimI[1]*dimI[2])
+}
+
+#' Convert a linear array index to a 3D coordinate in an image
+#' Equivalent to ind2sub from MATLAB(R)
+#' Does not perform error checking for bounds
+#' @param idx numeric index in a linear vector
+#' @param dimI vector of image dimensions
+#' @export
+ind2coord <- function(idx, dimI) {
+  return (as.vector(arrayInd(idx, dimI)))
+}

@@ -4,7 +4,7 @@
 \name{bs_stat_overlays}
 \alias{bs_stat_overlays}
 \title{List of statistical and other overlay types used in BrainSuite}
-\format{An object of class \code{list} of length 4.}
+\format{An object of class \code{list} of length 7.}
 \usage{
 bs_stat_overlays
 }

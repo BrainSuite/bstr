@@ -13,7 +13,7 @@
 # if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #' An S4 class for representing colormaps
-#' @slot cmap_type A character string for the type of colormap. Valid values are "corr_values", "tvalues", "log_pvalues", "log_pvalues_adjusted"
+#' @slot cmap_type A character string for the type of colormap. Valid values are "corr_values", "corr_values_masked_adjusted", "tvalues", "tvalues_adjusted", "log_pvalues", "log_pvalues_adjusted"
 #' @slot cmap_name A character string for the title of the colormap. This string will be displayed on the colorbar.
 #' @slot values A numeric vector containing the values or measures to be mapped.
 #' @slot cex Maximum absolute value of the measure to be mapped.
@@ -60,7 +60,9 @@ setMethod("initialize", valueClass = "BssColormap", signature = "BssColormap",
 
             switch(.Object@cmap_type,
                    corr_values = { cmap <- get_tvalue_colors(cmap_name, values)}, # Use tvalue cmap for correlations
+                   corr_values_masked_adjusted = { cmap <- get_tvalue_colors(cmap_name, values)},
                    tvalues = { cmap <- get_tvalue_colors(cmap_name, values)},
+                   tvalues_adjusted = { cmap <- get_tvalue_colors(cmap_name, values)},
                    log_pvalues = { cmap <- get_logpvalue_colors(cmap_name, values)},
                    log_pvalues_adjusted = { cmap <- get_logpvalue_colors(cmap_name, values)}
             )
@@ -79,7 +81,10 @@ setMethod("initialize", valueClass = "BssColormap", signature = "BssColormap",
 setGeneric("get_colors", valueClass = "matrix",function(bss_cmap) {
   standardGeneric("get_colors")
 })
-
+#' Get log pvalue colormap
+#' @param cmap_name name of the colormap
+#' @param values log-transformed p-values
+#' @export
 get_logpvalue_colormap <- function(cmap_name, values) {
   hexcolrs <- RColorBrewer::brewer.pal(11, cmap_name)
   hexcolrs[6] <- hexcolrstr$gray
@@ -114,7 +119,10 @@ setMethod("get_colors", valueClass = "matrix", signature = "BssColormap", functi
   return(bss_cmap@rgbcolors)
 
 })
-
+#' Get log pvalue colors, generate lut, and calculate min/max values
+#' @param cmap_name name of the colormap
+#' @param values log-transformed p-values
+#' @export
 get_logpvalue_colors <- function(cmap_name, values) {
 
   #                   log10(0.05)/1.0001   -log10(0.05)/1.0001
@@ -154,7 +162,10 @@ get_logpvalue_colors <- function(cmap_name, values) {
   return(list("rgbcolors"=rgbcolors, "lut"=lut, "vmin"=-1*pex, "vmax"=pex,
               "cnegmin"=cnegmin, "cnegmax"=cnegmax, "cposmin"=cposmin, "cposmax"=cposmax))
 }
-
+#' Get tvalue colors, generate lut, and calculate min/max values
+#' @param cmap_name name of the colormap
+#' @param values t-values
+#' @export
 get_tvalue_colors <- function(cmap_name, values) {
 
   # |---------------|-----------|------------|-------------------|
@@ -175,9 +186,9 @@ get_tvalue_colors <- function(cmap_name, values) {
     lut <- get_color_palette('gray', N)
   }
   else {
-    negcolors <- get_color_palette('rev_winter', round(neglen/(1.001*totlen)*N))
-    zerocolors <- get_color_palette('gray', round(zerolen/(1.001*totlen)*N))
-    poscolors <- get_color_palette('spring', round(poslen/(1.001*totlen)*N))
+    negcolors <- get_color_palette('rev_winter', round(neglen*N/(1.001*totlen)))
+    zerocolors <- get_color_palette('gray', round(zerolen*N/(1.001*totlen)))
+    poscolors <- get_color_palette('spring', round(poslen*N/(1.001*totlen)))
     lut <- c(negcolors, zerocolors, poscolors)
   }
   lut <- colorRampPalette(lut)(256) # Set the length of the lut to 256
@@ -189,7 +200,14 @@ get_tvalue_colors <- function(cmap_name, values) {
   return(list("rgbcolors"=rgbcolors, "lut"=lut, "vmin"=tnegmax, "vmax"=tposmax,
               "cnegmin"=tnegmin, "cnegmax"=tnegmax, "cposmin"=tposmin, "cposmax"=tposmax))
 }
-
+#' Generates the components of a colorbar for an individual voxelcoordinate and overlay
+#' @param lut previously generated lut file
+#' @param min minimum value for the colorbar
+#' @param max maximum value for the colorbar (default is the negative of the minimum)
+#' @param ticks vector of ticks
+#' @param nticks number of desired tick marks
+#' @param title title of the colorbar
+#' @export
 colorbar <- function(lut, min, max=-min, nticks=11, ticks=seq(min, max, len=nticks), title='') {
   scale = (length(lut)-1)/(max-min)
 
@@ -201,7 +219,13 @@ colorbar <- function(lut, min, max=-min, nticks=11, ticks=seq(min, max, len=ntic
     rect(0,y,10,y+1/scale, col=lut[i], border=NA)
   }
 }
-
+#' Creates the display of a colorbar for an individual voxelcoordinate and overlay
+#' @param filename name of the file
+#' @param lut previously generated lut file
+#' @param vmin minimum value for the colorbar
+#' @param vmax maximum value for the colorbar
+#' @param labeltxt the label for the colorbar
+#' @export
 save_colorbar <- function(filename, lut, vmin, vmax, labeltxt) {
   df <- data.frame(
     y=seq(vmin, vmax, length=256)
@@ -221,7 +245,7 @@ save_colorbar <- function(filename, lut, vmin, vmax, labeltxt) {
     ggplot2::scale_x_continuous(expand = c(0, 0)) +
     ggplot2::theme(plot.background = ggplot2::element_blank()) +
     ggplot2::theme(panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1)) +
-    ggplot2::ggsave(filename, device = "pdf", width = 1.3, height = 3.5, dpi = 600)
+    ggplot2::ggsave(filename, width = 1.3, height = 3.5, dpi = 600)
 
 }
 
@@ -252,7 +276,10 @@ get_color_palette <- function(cmap_name, N) {
          }
         )
 }
-
+#' Saves the colormap values for min and max to an ini file
+#' @param filename name of the file
+#' @param bss_cmap BssColormap object
+#' @export
 save_colormap_to_ini <- function(filename, bss_cmap) {
   cmap_to_save <- list()
   cmap_to_save[["colormap"]] <- list(cmap_type=bss_cmap@cmap_type,
@@ -263,7 +290,10 @@ save_colormap_to_ini <- function(filename, bss_cmap) {
                                      cposmax = bss_cmap@cposmax)
   ini::write.ini(cmap_to_save, filename)
 }
-
+#' Saves and writes the lut for BrainSuite use
+#' @param filename name of the file
+#' @param lut previously generated lut
+#' @export
 save_BrainSuiteLUT <- function(filename, lut) {
   write(col2rgb(lut)/255, file=filename, sep = " ", ncolumns = 3)
 }

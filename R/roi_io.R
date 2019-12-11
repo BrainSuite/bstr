@@ -59,7 +59,13 @@ read_roistats_txt <- function(roiwise_txt_filename, roiids, roimeas = 'gmthickne
 
 }
 
-
+#' Reads the BrainSuite ROI data file saved for each subject and returns the filenames
+#' @param roi_filelist filenames for the ROIwise stats in the individual subject directory
+#' @param demographics data frame containing the demographics of all subjects
+#' @param roiids vector of numeric label identifiers for the region of interest (ROI) type analysis.
+#' @param roimeas character string for the ROI measure. Should either be "gmthickness",
+#' "gmvolume", or "wmvolume".
+#' @export
 read_roi_data_for_all_subjects <- function(roi_filelist, demographics,roiids, roimeas = 'gmthickness') {
 
   roi_data_frame <- data.frame(matrix(nrow=length(roi_filelist),ncol=length(roiids)))

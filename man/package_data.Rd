@@ -5,7 +5,8 @@
 \title{Package data for reproducible statistical analysis.}
 \usage{
 package_data(type = "cbm", subjdir = NULL, csv = "", hemi = "left",
-  smooth = 0, measure = "FA", atlas = "", eddy = TRUE, outdir = NULL)
+  cbmsmooth = 0, tbmsmooth = 0, dbmsmooth = 0, measure = "FA",
+  atlas = "", eddy = TRUE, outdir = NULL)
 }
 \arguments{
 \item{type}{character string denoting type of analysis. Should be cbm, tbm, or roi.}
@@ -19,7 +20,11 @@ and should be exactly equal to the individual subject directory name.}
 
 \item{hemi}{chaaracter string denoting the brain hemisphere. Should either be "left" or "right".}
 
-\item{smooth}{numeric value denoting the smoothing level.}
+\item{cbmsmooth}{numeric value denoting the smoothing level for cbm.}
+
+\item{tbmsmooth}{numeric value denoting the smoothing level for tbm.}
+
+\item{dbmsmooth}{numeric value denoting the smoothing level for dbm.}
 
 \item{measure}{character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".}
 

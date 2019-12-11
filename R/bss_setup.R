@@ -33,8 +33,8 @@ setup <- function(brainsuite_path = NULL, quiet = FALSE, raise_error = TRUE) {
     brainsuite_path <- get_brainsuite_install_path(quiet, raise_error)
   }
 
-  # Check if BrainSuite atlas files are present in the user specified location
-  if (check_bs_atlas_exists(brainsuite_path, quiet = quiet, raise_error = raise_error)) {
+  # Check if BrainSuite atlas files and binaries are present in the user specified location
+  if (check_bs_atlas_binaries_exist(brainsuite_path, quiet = quiet, raise_error = raise_error)) {
     # At this point, a valid brainsuite_path should exist
     # Write it to the bssr.ini file
     bs_settings$path$brainsuite_path <- brainsuite_path
@@ -42,6 +42,7 @@ setup <- function(brainsuite_path = NULL, quiet = FALSE, raise_error = TRUE) {
     ini::write.ini(bs_settings, bssr_ini_file)
     message('bssr setup is complete.', appendLF = TRUE)
   }
+
   else
     message(paste('bssr setup is not complete.\n',
                   'After making sure BrainSuite is installed, please run bssr::setup("/path/to/brainsuite/") manually.', sep = ""), appendLF = TRUE)
@@ -75,7 +76,7 @@ get_brainsuite_path_on_macOS <- function(quiet = TRUE, raise_error = FALSE) {
   # Test bs_paths for valid installations
   valid_bs_path = ""
   for (path in bs_paths) {
-    if (check_bs_atlas_exists(path, quiet = FALSE, raise_error = FALSE)) {
+    if (check_bs_atlas_binaries_exist(path, quiet = FALSE, raise_error = raise_error)) {
       valid_bs_path = path
       break
     }
@@ -96,7 +97,7 @@ get_brainsuite_path_on_unix <- function(quiet = TRUE, raise_error = FALSE) {
   # Test bs_paths for valid installations
   valid_bs_path = ""
   for (path in bs_paths) {
-    if (check_bs_atlas_exists(path, quiet = FALSE, raise_error = FALSE)) {
+    if (check_bs_atlas_binaries_exist(path, quiet = FALSE, raise_error = FALSE)) {
       valid_bs_path = path
       break
     }
@@ -114,7 +115,7 @@ get_brainsuite_path_on_windows <- function(quiet = TRUE, raise_error = FALSE) {
   # Test bs_paths for valid installations
   valid_bs_path = ""
   for (path in bs_paths) {
-    if (check_bs_atlas_exists(path, quiet = FALSE, raise_error = FALSE)) {
+    if (check_bs_atlas_binaries_exist(path, quiet = FALSE, raise_error = FALSE)) {
       valid_bs_path = path
       break
     }
@@ -122,13 +123,27 @@ get_brainsuite_path_on_windows <- function(quiet = TRUE, raise_error = FALSE) {
   return(valid_bs_path)
 }
 
-check_bs_atlas_exists <- function(brainsuite_path, quiet=FALSE, raise_error = TRUE) {
+check_bs_atlas_binaries_exist <- function(brainsuite_path, quiet=FALSE, raise_error = TRUE) {
 
   if (!quiet) message('Finding BrainSuite atlas file paths...', appendLF = FALSE)
   for (i in bs_atlas_files ) {
     errmesg <- sprintf('Atlas file %s does not exist. \nPlease check if BrainSuite is installed correctly.', file.path(brainsuite_path, i))
     if (!check_file_exists(file.path(brainsuite_path, i), raise_error = raise_error,
                           errmesg = errmesg)) {
+      if (!quiet) message(errmesg, appendLF = TRUE)
+      return(FALSE)
+    }
+  }
+  for (i in bs_binary_files ) {
+    errmesg <- sprintf('Binary file %s does not exist. \nPlease check if BrainSuite is installed correctly.', file.path(brainsuite_path, i))
+    if (get_os()=="windows"){
+      check_for_file <- check_file_exists(paste0(file.path(brainsuite_path, i),".exe"), raise_error = raise_error,
+                                          errmesg = errmesg)
+    } else {
+      check_for_file <- check_file_exists(file.path(brainsuite_path, i), raise_error = raise_error,
+                                          errmesg = errmesg)
+    }
+    if (!check_for_file) {
       if (!quiet) message(errmesg, appendLF = TRUE)
       return(FALSE)
     }
@@ -152,7 +167,7 @@ is_brainsute_installed <- function(quiet = FALSE, raise_error = FALSE) {
   bssr_ini_file <- get_bssr_ini_path()
   if (check_file_exists(bssr_ini_file, raise_error = raise_error)) {
     bs_settings <- ini::read.ini(bssr_ini_file)
-    if (check_bs_atlas_exists(bs_settings$path$brainsuite_path, quiet = quiet, raise_error = raise_error))
+    if (check_bs_atlas_binaries_exist(bs_settings$path$brainsuite_path, quiet = quiet, raise_error = raise_error))
       return(TRUE)
     else
       return(FALSE)
@@ -173,7 +188,7 @@ get_bssr_ini_path <- function() {
 #'
 #' @export
 get_labeldesc_path <- function() {
-  labeldesc_file <- file.path(get_brainsuite_install_path(), "labeldesc", "brainsuite_labeldescriptions_14May2014.xml")
+  labeldesc_file <- file.path(get_brainsuite_install_path(), "labeldesc", "brainsuite_labeldescriptions_30March2018.xml")
   if (check_file_exists(labeldesc_file, raise_error = TRUE)) return(labeldesc_file) else return("")
 }
 
@@ -208,5 +223,5 @@ get_brainsuite_path_from_bssr_ini <- function() {
 #' @param brainsuite_path path to the BrainSuite installation
 #' @export
 is_valid_brainsute_install_path <- function(brainsuite_path="") {
-  return(check_bs_atlas_exists(brainsuite_path, quiet = TRUE, raise_error = FALSE))
+  return(check_bs_atlas_binaries_exist(brainsuite_path, quiet = TRUE, raise_error = FALSE))
 }

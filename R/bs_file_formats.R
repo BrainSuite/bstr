@@ -41,6 +41,13 @@ bs_atlas_files <- list(
   rh_atlas_BCIDNI_cbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.right.mid.cortex.dfs'
 )
 
+#' List of binaries used in BrainSuite analysis
+#' @export
+bs_binary_files <- list(
+  clustermap = 'bin/clustermap',
+  statmap = 'bin/statmap'
+)
+
 #' List of suffixes for atlas files used in BrainSuite
 bs_atlas_files_suffix <- list(
 
@@ -65,12 +72,29 @@ bs_data_types <- list(
 
 #' List of statistical and other overlay types used in BrainSuite
 bs_stat_overlays <- list(
-  log_pvalues <- "log_pvalues",
-  log_pvalues_adjusted <- "log_pvalues_adjusted",
-  tvalues <- "tvalues",
-  pvalues <- "pvalues"
+  log_pvalues_adjusted = "log_pvalues_adjusted",
+  tvalues_adjusted = "tvalues_adjusted",
+  log_pvalues = "log_pvalues",
+  tvalues = "tvalues",
+  pvalues = "pvalues",
+  corr_values = "corr_values",
+  corr_values_masked_adjusted = "corr_values_masked_adjusted"
 )
-
+#' Returns the filename for the designated image
+#' @param outdir string denoting the output directory
+#' @param voxelcoord all outputted voxelcoordinates
+#' @param overlay_name string denoting the name of the overlay
+#' @param brain_sector_index numeric value denoting which brain slice is desired
+#' @param voxelcoord_index numeric value denoting desired voxel coordinate
+#'
+get_render_image_filename <- function(outdir,voxelcoord, overlay_name, brain_sector_index, voxelcoord_index) {
+  view_order <- c("sag","cor","ax")
+  return(paste0(outdir, "/png_images_crosshairs/", view_order[brain_sector_index], voxelcoord[[voxelcoord_index]][brain_sector_index],"_",overlay_name,"_cluster",voxelcoord_index,".png"))
+}
+#' Generate the designated cortical surface file
+#' @param hemi string denoting which hemisphere of the brain is desired
+#' @param smooth numeric value designating the smoothing used (default is 0)
+#'
 bs_surface_file_string <- function(hemi="left", smooth = 0) {
 
   if (smooth != 0)
@@ -78,7 +102,9 @@ bs_surface_file_string <- function(hemi="left", smooth = 0) {
   else
     return(paste('atlas.pvc-thickness_0-6mm.', hemi, '.mid.cortex.dfs', sep = ''))
 }
-
+#' Generate the designated tensor-based morphometry file
+#' @param smooth numeric value designating the smoothing used (default is 0)
+#'
 bs_volume_jacobian_file_string <- function(smooth = 0) {
 
   if (smooth != 0)
@@ -86,23 +112,29 @@ bs_volume_jacobian_file_string <- function(smooth = 0) {
   else
     return('%s.svreg.inv.jacobian.nii.gz')
 }
-
+#' Generate the designated diffusion surface file
+#' @param measure string designating the type of diffusion measure used
+#' @param smooth numeric value designating the smoothing used (default is 0)
+#' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
+#'
 bs_diffusion_file_string <- function(measure = "FA", smooth = 0, eddy = TRUE) {
 
-  valid_diffusion_measures <- c('FA', 'MD', 'AD', 'RD', 'ADC', 'GFA')
+  valid_diffusion_measures <- c('FA', 'MD', 'axial', 'radial', 'mADC', 'FRT_GFA')
   if (! measure %in% valid_diffusion_measures)
     stop(sprintf('Invalid diffusion measure: %s. Valid measures are %s.', measure, paste(valid_diffusion_measures, collapse = ', ')))
 
   if (eddy == TRUE && smooth != 0)
-    return(paste('%s.dwi.RAS.correct.', measure, sprintf('.atlas.smooth%2.1fmm.nii.gz', smooth), sep = ''))
+    return(paste0('%s.dwi.RAS.correct.atlas.', measure, sprintf('.smooth%2.1fmm.nii.gz', smooth)))
   if (eddy == FALSE && smooth != 0)
-    return(paste('%s.dwi.RAS.', measure, sprintf('.atlas.smooth%2.1fmm.nii.gz', smooth), sep = ''))
+    return(paste0('%s.dwi.RAS.atlas.', measure, sprintf('.smooth%2.1fmm.nii.gz', smooth)))
   if (eddy == TRUE && smooth == 0)
-    return(paste('%s.dwi.RAS.correct.', measure, '.atlas.nii.gz', sep = ''))
+    return(paste0('%s.dwi.RAS.correct.atlas.', measure, '.nii.gz'))
   if (eddy == FALSE && smooth == 0)
-    return(paste('%s.dwi.RAS.', measure, '.atlas.nii.gz', sep = ''))
+    return(paste0('%s.dwi.RAS.atlas.', measure, '.nii.gz'))
 }
-
+#' Stops analysis if desired type of analysis is not a valid analysis type
+#' @param analysis_type string denoting desired type of analysis to be performed
+#'
 get_bs_file_list <- function(analysis_type) {
   valid_analysis_types <- unlist(analysis_type_list, use.names = FALSE)
   if (!(analysis_type %in% valid_analysis_types)) {
@@ -112,7 +144,9 @@ get_bs_file_list <- function(analysis_type) {
 
 
 }
-
+#' Returns a list of all ROI files for all subjects
+#' @param bss_data object of type \code{BssData}
+#'
 get_roi_file_list <- function(bss_data) {
 
   roi_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID,
@@ -126,7 +160,11 @@ get_roi_file_list <- function(bss_data) {
   }
   return(roi_filelist)
 }
-
+#' Returns a list of the cortical surface files for all subjects
+#' @param bss_data object of type \code{BssData}
+#' @param hemi designates which hemisphere is of interest
+#' @param smooth numeric value designating the smoothing used (default is 0)
+#'
 get_cbm_file_list <- function(bss_data, hemi, smooth = 0) {
 
   cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_surface_file_string(hemi, smooth))
@@ -139,7 +177,10 @@ get_cbm_file_list <- function(bss_data, hemi, smooth = 0) {
   }
   return(cbm_filelist)
 }
-
+#' Returns a list of the tensor-based files for all subjects
+#' @param bss_data object of type \code{BssData}
+#' @param smooth numeric value designating the smoothing used (default is 0)
+#'
 get_tbm_file_list <- function(bss_data, smooth = 0) {
 
   tbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_volume_jacobian_file_string(smooth), bss_data@demographics$subjID))
@@ -151,9 +192,18 @@ get_tbm_file_list <- function(bss_data, smooth = 0) {
   }
   return(tbm_filelist)
 }
-
+#' Returns a list of the diffusion files for all subjects
+#' @param bss_data object of type \code{BssData}
+#' @param measure numeric value denoting the measures used to create the output
+#' @param smooth numeric value designating the smoothing used (default is 0)
+#' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
+#'
 get_dbm_file_list <- function(bss_data, measure, smooth = 0, eddy = TRUE) {
 
+  valid_dbm_measures <- c('FA', 'MD', 'axial', 'radial', 'mADC', 'FRT_GFA')
+  if (! measure %in% valid_dbm_measures) {
+    stop(sprintf("Valid dbm measures are %s.", paste(valid_dbm_measures, collapse = ', ')), call. = FALSE)
+  }
   dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_diffusion_file_string(measure, smooth, eddy), bss_data@demographics$subjID))
   # Check if all subjects have nii.gz files
   if ( !all(file.exists(dbm_filelist)) ) {
@@ -163,7 +213,9 @@ get_dbm_file_list <- function(bss_data, measure, smooth = 0, eddy = TRUE) {
   }
   return(dbm_filelist)
 }
-
+#' Read the BrainSuite atlas prefix from the atlas
+#' @param atlas filepath for atlas
+#'
 get_brainsute_custom_volume_atlas_prefix <- function(atlas) {
 
   # Check if the parent directory exists for the atlas
@@ -181,7 +233,9 @@ get_brainsute_custom_volume_atlas_prefix <- function(atlas) {
   stop(sprintf('Invalid custom atlas prefix/path: %s', atlas), call. = FALSE)
 
 }
-
+#' Read the BrainSuite atlas path from the svreg log file.
+#' @param logfile path to the svreg.log file present in an individual subject directory
+#'
 get_brainsuite_atlas_path_from_logfile <- function(logfile) {
   fid = file(logfile, "rt")
   log_lines <- readLines(fid, n=2)
@@ -193,7 +247,7 @@ get_brainsuite_atlas_path_from_logfile <- function(logfile) {
 #' Read the BrainSuite atlas identifier from the svreg log file.
 #' @param logfile path to the svreg.log file present in an individual subject directory
 #' @details Valid atlases are BrainSuiteAtlas1 or BCI-DNI_brain_atlas
-#' @export
+#'
 get_brainsuite_atlas_id_from_logfile <- function(logfile) {
   fid = file(logfile, "rt")
   log_lines <- readLines(fid, n=2)
@@ -207,6 +261,10 @@ get_brainsuite_atlas_id_from_logfile <- function(logfile) {
                "Please check the log file ", logfile, ", and check if the subject directory is valid. If using a custom atlas, supply the path in the atlas= argument.", sep = ""), call. = FALSE)
 }
 
+#' Gets the BraisSuite svreg.log file's filepath
+#' @param subjdir individual subject directory that the svreg.log file exists in
+#' @param csv csv file for the svreg.log file
+#' @export
 get_brainsuite_logfilename <- function(subjdir, csv) {
   # Open the svreg.log file and get the atlas file name
   if ( identical(tools::file_ext(csv), 'tsv') | identical(tools::file_ext(csv), 'csv')  ) {
@@ -226,6 +284,10 @@ get_brainsuite_logfilename <- function(subjdir, csv) {
     return(tools::file_path_as_absolute(svreg_log_file))
 }
 
+#' Get the svreg log file for each subject
+#' @param subjdir individual subject directory that the svreg.log file exists in
+#' @param csv csv file for the svreg.log file
+#' @export
 get_brainsuite_logfilename_for_all_subjects <- function(subjdir, csv) {
   # Open the svreg.log file and get the atlas file name
   if ( identical(tools::file_ext(csv), 'tsv') | identical(tools::file_ext(csv), 'csv')  ) {
@@ -245,6 +307,10 @@ get_brainsuite_logfilename_for_all_subjects <- function(subjdir, csv) {
   }
 }
 
+#' Get the desired cortical surface atlas
+#' @param brainsuite_atlas_id individual subject directory that the svreg.log file exists in
+#' @param hemi designates which hemisphere of the brain
+#'
 get_cbm_atlas <- function(brainsuite_atlas_id, hemi) {
 
   if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
@@ -280,7 +346,9 @@ get_cbm_atlas <- function(brainsuite_atlas_id, hemi) {
     }
   }
 }
-
+#' Get the tensor based morphometry atlas and mask
+#' @param brainsuite_atlas_id individual subject directory that the svreg.log file exists in
+#'
 get_tbm_atlas_and_mask <- function(brainsuite_atlas_id) {
 
   if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
@@ -299,12 +367,18 @@ get_tbm_atlas_and_mask <- function(brainsuite_atlas_id) {
   return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
 }
 
+#' Check that cortical surface atlas exists
+#' @param atlas filepath for cbm atlas
+#' @param maskfile filepath for the atlas mask file
+#'
 get_custom_cbm_atlas_and_mask <- function(atlas, maskfile="") {
   #TODO Only the atlas file is implemented
   check_file_exists(atlas, raise_error = TRUE)
   return(atlas)
 }
-
+#' Get the custom tensor based morphometry atlas and mask
+#' @param brainsuite_custom_atlas_prefix file prefix for atlas
+#'
 get_custom_tbm_atlas_and_mask <- function(brainsuite_custom_atlas_prefix) {
 
   brainsuite_custom_atlas_prefix <- get_brainsute_custom_volume_atlas_prefix(brainsuite_custom_atlas_prefix)
@@ -314,7 +388,9 @@ get_custom_tbm_atlas_and_mask <- function(brainsuite_custom_atlas_prefix) {
   check_file_exists(nii_atlas_mask, raise_error = TRUE)
   return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
 }
-
+#' Get the diffusion atlas and mask
+#' @param brainsuite_atlas_id individual subject directory that the svreg.log file exists in
+#'
 get_dbm_atlas_and_mask <- function(brainsuite_atlas_id) {
 
   if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
@@ -332,7 +408,9 @@ get_dbm_atlas_and_mask <- function(brainsuite_atlas_id) {
   check_file_exists(nii_atlas_mask, raise_error = TRUE)
   return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
 }
-
+#' Get the diffusion custom atlas and mask
+#' @param brainsuite_custom_atlas_prefix file prefix for atlas
+#'
 get_custom_dbm_atlas_and_mask <- function(brainsuite_custom_atlas_prefix) {
 
   brainsuite_custom_atlas_prefix <- get_brainsute_custom_volume_atlas_prefix(brainsuite_custom_atlas_prefix)
@@ -342,7 +420,8 @@ get_custom_dbm_atlas_and_mask <- function(brainsuite_custom_atlas_prefix) {
   check_file_exists(nii_atlas_mask, raise_error = TRUE)
   return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
 }
-
+#' Reads the demographics from an inputted csv file
+#' @param csvfile csv file containing the demographics
 read_demographics <- function(csvfile) {
 
   switch(tools::file_ext(csvfile),

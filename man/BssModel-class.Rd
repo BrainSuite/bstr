@@ -25,11 +25,13 @@ with \code{bss_data}.}
 
 \item{\code{corr_values}}{numeric vector to store correlation coefficients}
 
+\item{\code{corr_values_masked_adjusted}}{numeric vector storing the masked correlation coefficients corresponding to the adjusted p-values}
+
 \item{\code{group_var}}{Categorical variable name. This should be present in the demographics csv file associated
 with \code{bss_data}.}
 
 \item{\code{model_type}}{character string denoting the type of model. Should be one of \code{"bss_anova"},
-\code{"bss_corr"}, \code{"bss_corr"}, \code{"pairedttest"} or \code{"unpairedttest"}}
+\code{"bss_corr"}, \code{"bss_corr"}, \code{"pairedttest"}, \code{"unpairedttest"} or \code{"bss_lmer"}}
 
 \item{\code{fullmodel}}{character string like an R formula denoting the full model including both
 the main effect and covariates.}
@@ -69,7 +71,11 @@ only}
 
 \item{\code{se}}{numeric vector storing the standard error}
 
+\item{\code{mult_comp}}{character type of multiple comparison adjustment. Takes values of "fdr" or "perm"}
+
 \item{\code{pvalues_adjusted}}{numeric vector storing the adjusted p-values}
+
+\item{\code{tvalues_adjusted}}{numeric vector storing the t-values corresponding to the adjusted p-values}
 
 \item{\code{stats_commands}}{list of R commands (primarily for ROI analysis)}
 

@@ -23,10 +23,11 @@
 #' @slot corr_var character variable name. This should be present in the demographics csv file associated
 #' with \code{bss_data}.
 #' @slot corr_values numeric vector to store correlation coefficients
+#' @slot corr_values_masked_adjusted numeric vector storing the masked correlation coefficients corresponding to the adjusted p-values
 #' @slot group_var Categorical variable name. This should be present in the demographics csv file associated
 #' with \code{bss_data}.
 #' @slot model_type character string denoting the type of model. Should be one of \code{"bss_anova"},
-#' \code{"bss_corr"}, \code{"bss_corr"}, \code{"pairedttest"} or \code{"unpairedttest"}
+#' \code{"bss_corr"}, \code{"bss_corr"}, \code{"pairedttest"}, \code{"unpairedttest"} or \code{"bss_lmer"}
 #' @slot fullmodel character string like an R formula denoting the full model including both
 #' the main effect and covariates.
 #' @slot nullmodel character string like an R formula denoting the null model including covariates
@@ -47,7 +48,9 @@
 #' @slot rss numeric vector storing the residual sum of squares
 #' @slot residuals numeric vector storing residuals # TODO: Check if this variable can be eliminated
 #' @slot se numeric vector storing the standard error
+#' @slot mult_comp character type of multiple comparison adjustment. Takes values of "fdr" or "perm"
 #' @slot pvalues_adjusted numeric vector storing the adjusted p-values
+#' @slot tvalues_adjusted numeric vector storing the t-values corresponding to the adjusted p-values
 #' @slot stats_commands list of R commands (primarily for ROI analysis)
 #' @slot load_data_command character string for the command used to load the data
 #'
@@ -60,7 +63,9 @@ BssModel <- setClass(
     covariates = "character",
     corr_var = "character",
     corr_values = "numeric",
+    corr_values_masked_adjusted = "numeric",
     group_var = "character",
+    mult_comp = "character",
     model_type = "character",
     fullmodel = "character",
     fullvars = "character",
@@ -81,10 +86,19 @@ BssModel <- setClass(
     residuals = "matrix",
     se = "numeric",
     pvalues_adjusted = "numeric",
+    tvalues_adjusted = "numeric",
     stats_commands = "vector",
     load_data_command = "character"
   )
 )
+#' Returns an error if necessary elements are missing in the model
+#' @param main_effect string designating which column of demographics is the main effect
+#' @param covariates string designating which column of demographics is the covariates
+#' @param corr_var string designating which column of demographics is the correlation variable
+#' @param group_var string designating which column of demographics is the group variable
+#' @param model_type string designating the type of model
+#' @param demographics data frame of the demographics
+#'
 
 parse_lm <- function(main_effect="", covariates="", corr_var="", group_var = "", model_type="", demographics) {
   main_effect_present <- !(main_effect == "")
@@ -111,7 +125,14 @@ parse_lm <- function(main_effect="", covariates="", corr_var="", group_var = "",
 
 }
 
-
+#' Returns a list denoting which elements are present in the model
+#' @param main_effect string designating which column of demographics is the main effect
+#' @param covariates string designating which column of demographics is the covariates
+#' @param corr_var string designating which column of demographics is the correlation variable
+#' @param group_var string designating which column of demographics is the group variable
+#' @param model_type string designating the type of model
+#' @param demographics data frame of the demographics
+#'
 
 parse_model <- function(main_effect="", covariates="", corr_var="", group_var = "", model_type="", demographics) {
 
@@ -165,12 +186,12 @@ parse_model <- function(main_effect="", covariates="", corr_var="", group_var = 
       stop(sprintf("group_var *%s* doesn't occur in the demographics csv file.\n", group_var), call. = FALSE)
     }
     demographics[[group_var]] <- as.factor(demographics[[group_var]])
-    # Check if group_var is a factor having exactly 2 levels
-    if( nlevels(demographics[[group_var]]) != 2)
-      stop("group_var should be a factor having exactly 2 levels.\n", call. = FALSE)
 
     # If model_type is pairedttest group_var should have is a factor having exactly 2 levels
     if( model_type == "pairedttest") {
+      # Check if group_var is a factor having exactly 2 levels
+      if( nlevels(demographics[[group_var]]) != 2)
+        stop("group_var should be a factor having exactly 2 levels.\n", call. = FALSE)
       group1 <- levels(demographics[[group_var]])[1]
       group2 <- levels(demographics[[group_var]])[2]
       group1_elems <- demographics[[group_var]][demographics[[group_var]] == group1]
@@ -188,7 +209,7 @@ parse_model <- function(main_effect="", covariates="", corr_var="", group_var = 
 
 # TODO: Call read_modelspec from within initialize
 setMethod("initialize", valueClass = "BssModel", signature = "BssModel",
-          function(.Object, model_type, main_effect="", covariates="", corr_var="", group_var="", demographics, mspec_file) {
+          function(.Object, model_type, main_effect="", covariates="", corr_var="", group_var="", mult_comp="", demographics, mspec_file) {
 
           if (model_type == "bss_lm" || model_type == "bss_anova")
             parse_model_result <- parse_lm(main_effect, covariates, corr_var, group_var, model_type, demographics)
@@ -200,6 +221,7 @@ setMethod("initialize", valueClass = "BssModel", signature = "BssModel",
           .Object@corr_var <- corr_var
           .Object@group_var <- group_var
           .Object@model_type <- model_type
+          .Object@mult_comp <- mult_comp
 
           if (parse_model_result$main_effect_present || parse_model_result$covariates_present) {
             .Object <- initialize_lm(.Object, main_effect, covariates, demographics)
@@ -240,6 +262,7 @@ setMethod("initialize_lm", signature("BssModel", "character", "character", "data
 model_type_list <- list(
   bss_anova = 'bss_anova',
   bss_lm = 'bss_lm',
+  bss_lmer = 'bss_lmer',
   bss_corr = 'bss_corr',
   pairedttest = 'pairedttest',
   unpairedttest = 'unpairedttest'

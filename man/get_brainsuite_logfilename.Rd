@@ -7,9 +7,9 @@
 get_brainsuite_logfilename(subjdir, csv)
 }
 \arguments{
-\item{csv}{csv file for the svreg.log file}
+\item{subjdir}{individual subject directory that the svreg.log file exists in}
 
-\item{subj}{individual subject directory that the svreg.log file exists in}
+\item{csv}{csv file for the svreg.log file}
 }
 \description{
 Gets the BraisSuite svreg.log file's filepath

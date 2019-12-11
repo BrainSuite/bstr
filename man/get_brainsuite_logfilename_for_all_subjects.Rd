@@ -7,9 +7,9 @@
 get_brainsuite_logfilename_for_all_subjects(subjdir, csv)
 }
 \arguments{
-\item{csv}{csv file for the svreg.log file}
+\item{subjdir}{individual subject directory that the svreg.log file exists in}
 
-\item{subj}{individual subject directory that the svreg.log file exists in}
+\item{csv}{csv file for the svreg.log file}
 }
 \description{
 Get the svreg log file for each subject

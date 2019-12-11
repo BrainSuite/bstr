@@ -262,7 +262,7 @@ get_brainsuite_atlas_id_from_logfile <- function(logfile) {
 }
 
 #' Gets the BraisSuite svreg.log file's filepath
-#' @param subj individual subject directory that the svreg.log file exists in
+#' @param subjdir individual subject directory that the svreg.log file exists in
 #' @param csv csv file for the svreg.log file
 #' @export
 get_brainsuite_logfilename <- function(subjdir, csv) {
@@ -285,7 +285,7 @@ get_brainsuite_logfilename <- function(subjdir, csv) {
 }
 
 #' Get the svreg log file for each subject
-#' @param subj individual subject directory that the svreg.log file exists in
+#' @param subjdir individual subject directory that the svreg.log file exists in
 #' @param csv csv file for the svreg.log file
 #' @export
 get_brainsuite_logfilename_for_all_subjects <- function(subjdir, csv) {
@@ -369,6 +369,7 @@ get_tbm_atlas_and_mask <- function(brainsuite_atlas_id) {
 
 #' Check that cortical surface atlas exists
 #' @param atlas filepath for cbm atlas
+#' @param maskfile filepath for the atlas mask file
 #'
 get_custom_cbm_atlas_and_mask <- function(atlas, maskfile="") {
   #TODO Only the atlas file is implemented

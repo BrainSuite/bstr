@@ -11,6 +11,10 @@ file_copy(src_filelist, dest_filelist, messg = "Copying ",
 \item{src_filelist}{list of source files}
 
 \item{dest_filelist}{list of destination files}
+
+\item{messg}{character string of displayed message}
+
+\item{progress}{logical flag set TRUE to display progress bar in terminal}
 }
 \description{
 Copy files from the inputted source to the inputted destination

@@ -14,7 +14,9 @@ colorbar(lut, min, max = -min, nticks = 11, ticks = seq(min, max, len
 
 \item{max}{maximum value for the colorbar (default is the negative of the minimum)}
 
-\item{ticks}{number of desired tick marks}
+\item{nticks}{number of desired tick marks}
+
+\item{ticks}{vector of ticks}
 
 \item{title}{title of the colorbar}
 }

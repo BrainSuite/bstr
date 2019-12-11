@@ -20,6 +20,12 @@ and should be exactly equal to the individual subject directory name.}
 
 \item{hemi}{chaaracter string denoting the brain hemisphere. Should either be "left" or "right".}
 
+\item{cbmsmooth}{numeric value denoting the smoothing level for cbm.}
+
+\item{tbmsmooth}{numeric value denoting the smoothing level for tbm.}
+
+\item{dbmsmooth}{numeric value denoting the smoothing level for dbm.}
+
 \item{measure}{character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".}
 
 \item{atlas}{path name to the atlas}
@@ -27,8 +33,6 @@ and should be exactly equal to the individual subject directory name.}
 \item{eddy}{boolean for specifying if the diffusion images were eddy-current corrected or not.}
 
 \item{outdir}{output directory that will contain the copied data}
-
-\item{smooth}{numeric value denoting the smoothing level.}
 }
 \description{
 Takes same parameters as \code{\link{load_bss_data}} and copies the data to a new directory specified by outdir. You can repeatedly call this function to copy data of different types (tbm -- nii.gz, cbm -- .dfs files etc.) to the same output directory.

@@ -669,9 +669,9 @@ save_bss_color_files <- function(measure, var_name, cmap_title, bss_data, bss_mo
 #' Save the surface output to the given ouput directory
 #' @param measure numeric value denoting the measures used to create the output
 #' @param var_name string denoting name of variable used by the function
-#' @param cmap_title string denoting the type of color map
 #' @param bss_data object of type \code{BssData}
 #' @param bss_model object of type \code{BssModel}
+#' @param bss_cmap object of type \code{BssColormap}
 #' @param outdir string specifying output directory to save the results in
 #' @export
 
@@ -689,9 +689,9 @@ save_bss_out_surface <- function(measure, var_name, bss_cmap, bss_data, bss_mode
 #' Save the nifti image to the output file
 #' @param measure denotes the measure used to create the output
 #' @param var_name string denoting name of variable used by the function
-#' @param cmap_title string denoting the type of color map
 #' @param bss_data object of type \code{BssData}
 #' @param bss_model object of type \code{BssModel}
+#' @param bss_cmap object of type \code{BssColormap}
 #' @param outdir string specifying output directory to save the results in
 #' @export
 

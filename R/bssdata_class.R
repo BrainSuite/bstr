@@ -365,18 +365,19 @@ load_roi_data <- function(subjdir="", csv="", roiids="", roimeas="") {
   bss_roi_data <- load_data(bss_roi_data, roiids = roiids, roimeas = roimeas)
   return(bss_roi_data)
 }
-#' Check that subject directory and demographics csv files exist
-#' @param object object of type \code{BssData}
-#'
-check_files <- function(object){
-  if (!dir.exists(object@subjdir)) {
-    stop(sprintf("Subjects directory %s does not exist.\n", object@subjdir), call. = FALSE)
-  }
 
-  if (!file.exists(object@csv)) {
-    stop(sprintf("Demographics csv file %s does not exist.\n", object@csv), call. = FALSE)
-  }
-}
+# #' Check that subject directory and demographics csv files exist
+# #' @param object object of type \code{BssData}
+# #'
+# check_files <- function(object){
+#   if (!dir.exists(object@subjdir)) {
+#     stop(sprintf("Subjects directory %s does not exist.\n", object@subjdir), call. = FALSE)
+#   }
+#
+#   if (!file.exists(object@csv)) {
+#     stop(sprintf("Demographics csv file %s does not exist.\n", object@csv), call. = FALSE)
+#   }
+# }
 
 #' Package data for reproducible statistical analysis.
 #'
@@ -394,7 +395,9 @@ check_files <- function(object){
 #' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
 #' and should be exactly equal to the individual subject directory name.
 #' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
-#' @param smooth numeric value denoting the smoothing level.
+#' @param cbmsmooth numeric value denoting the smoothing level for cbm.
+#' @param tbmsmooth numeric value denoting the smoothing level for tbm.
+#' @param dbmsmooth numeric value denoting the smoothing level for dbm.
 #' @param measure character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".
 #' @param atlas path name to the atlas
 #' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
@@ -565,6 +568,8 @@ copy_roi_data <- function(subjdir="", csv="", outdir) {
 #' Copy files from the inputted source to the inputted destination
 #' @param src_filelist list of source files
 #' @param dest_filelist list of destination files
+#' @param messg character string of displayed message
+#' @param progress logical flag set TRUE to display progress bar in terminal
 #'
 file_copy <- function(src_filelist, dest_filelist, messg="Copying ", progress = TRUE) {
 

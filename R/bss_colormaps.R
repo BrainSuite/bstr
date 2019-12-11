@@ -204,7 +204,8 @@ get_tvalue_colors <- function(cmap_name, values) {
 #' @param lut previously generated lut file
 #' @param min minimum value for the colorbar
 #' @param max maximum value for the colorbar (default is the negative of the minimum)
-#' @param ticks number of desired tick marks
+#' @param ticks vector of ticks
+#' @param nticks number of desired tick marks
 #' @param title title of the colorbar
 #' @export
 colorbar <- function(lut, min, max=-min, nticks=11, ticks=seq(min, max, len=nticks), title='') {

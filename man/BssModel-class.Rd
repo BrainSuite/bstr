@@ -71,6 +71,8 @@ only}
 
 \item{\code{se}}{numeric vector storing the standard error}
 
+\item{\code{mult_comp}}{character type of multiple comparison adjustment. Takes values of "fdr" or "perm"}
+
 \item{\code{pvalues_adjusted}}{numeric vector storing the adjusted p-values}
 
 \item{\code{tvalues_adjusted}}{numeric vector storing the t-values corresponding to the adjusted p-values}

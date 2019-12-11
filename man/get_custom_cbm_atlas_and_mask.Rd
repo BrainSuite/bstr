@@ -8,6 +8,8 @@ get_custom_cbm_atlas_and_mask(atlas, maskfile = "")
 }
 \arguments{
 \item{atlas}{filepath for cbm atlas}
+
+\item{maskfile}{filepath for the atlas mask file}
 }
 \description{
 Check that cortical surface atlas exists

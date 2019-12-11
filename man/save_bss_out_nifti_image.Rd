@@ -12,13 +12,13 @@ save_bss_out_nifti_image(measure, var_name, bss_cmap, bss_data, bss_model,
 
 \item{var_name}{string denoting name of variable used by the function}
 
+\item{bss_cmap}{object of type \code{BssColormap}}
+
 \item{bss_data}{object of type \code{BssData}}
 
 \item{bss_model}{object of type \code{BssModel}}
 
 \item{outdir}{string specifying output directory to save the results in}
-
-\item{cmap_title}{string denoting the type of color map}
 }
 \description{
 Save the nifti image to the output file

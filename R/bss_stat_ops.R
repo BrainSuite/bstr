@@ -419,6 +419,13 @@ corr_vec <- function(X, Y) {
 #' @export
 bss_ttest <- function(group_var, bss_data, paired = FALSE, mult_comp="fdr") {
 
+  if (paired == FALSE)
+    bss_model <- new("BssModel", model_type="unpairedttest", group_var = group_var,
+                     demographics = bss_data@demographics, mspec_file="")
+  else
+    bss_model <- new("BssModel", model_type="pairedttest", group_var = group_var,
+                     demographics = bss_data@demographics, mspec_file="")
+
   group1 <- levels(as.factor(bss_data@demographics[[group_var]]))[1]
   group2 <- levels(as.factor(bss_data@demographics[[group_var]]))[2]
   idx_group1 <- which(bss_data@demographics[[group_var]] == group1)
@@ -427,7 +434,11 @@ bss_ttest <- function(group_var, bss_data, paired = FALSE, mult_comp="fdr") {
   message(sprintf("The 2 groups are %s and %s", group1, group2), appendLF = TRUE)
   message('Running t-tests...', appendLF = FALSE)
 
-  bss_model <- ttest_vec(bss_data@data_array[idx_group1,], bss_data@data_array[idx_group2,], group_var, paired)
+  test_result <- ttest_vec(bss_data@data_array[idx_group1,], bss_data@data_array[idx_group2,], group_var, paired)
+
+  bss_model@pvalues <- test_result$pvalues
+  bss_model@tvalues <- test_result$tvalues
+  bss_model@tvalues_sign <- sign_tvalues(bss_model@tvalues)
 
   bss_model@pvalues[is.na(bss_model@pvalues)] <- 1
   bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
@@ -496,17 +507,7 @@ ttest_vec <- function(X1, X2, group_var, paired=FALSE) {
     pvalues <- 2*pt(abs(tvalues), deg, lower.tail = FALSE)
     pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
   }
-  if (paired == FALSE)
-    bss_model <- new("BssModel", model_type="unpairedttest", group_var = group_var,
-                     demographics = bss_data@demographics, mspec_file="")
-  else
-    bss_model <- new("BssModel", model_type="pairedttest", group_var = group_var,
-                     demographics = bss_data@demographics, mspec_file="")
-
-  bss_model@pvalues <- pvalues
-  bss_model@tvalues <- tvalues
-  bss_model@tvalues_sign <- sign_tvalues(tvalues)
-  return(bss_model)
+  return(list("tvalues"=tvalues, "pvalues"=pvalues))
 }
 
 #' Adjust p-values for multiple comparisons testing

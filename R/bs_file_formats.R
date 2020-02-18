@@ -151,14 +151,18 @@ get_roi_file_list <- function(bss_data) {
 
   roi_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID,
                             sprintf('%s%s', bss_data@demographics$subjID, bs_file_formats$roi_txt))
-
+  roi_bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat',
+                            sprintf('%s%s', bss_data@demographics$subjID, bs_file_formats$roi_txt))
   # Check if all subjects have roi text files
-  if ( !all(file.exists(roi_filelist)) ) {
+  if ( !all(file.exists(roi_filelist)) & !all(file.exists(roi_bids_filelist))) {
     message('Following subjects have missing roi text files')
     print(roi_filelist[which(!file.exists(roi_filelist))], row.names = FALSE)
     stop('\nCheck if svreg was run succesfully and if roiwise.txt are present in all the subjects.', call. = FALSE)
   }
-  return(roi_filelist)
+  if(all(file.exists(roi_filelist)))
+    return(roi_filelist)
+  else
+    return(roi_bids_filelist)
 }
 #' Returns a list of the cortical surface files for all subjects
 #' @param bss_data object of type \code{BssData}
@@ -168,14 +172,18 @@ get_roi_file_list <- function(bss_data) {
 get_cbm_file_list <- function(bss_data, hemi, smooth = 0) {
 
   cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_surface_file_string(hemi, smooth))
+  cbm_bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat', bs_surface_file_string(hemi, smooth))
   # Check if all subjects have dfs files
-  if ( !all(file.exists(cbm_filelist)) ) {
+  if ( !all(file.exists(cbm_filelist)) & !all(file.exists(cbm_bids_filelist))) {
     message('Following subjects have missing dfs files')
     print(cbm_filelist[which(!file.exists(cbm_filelist))], row.names = FALSE)
     stop('\nCheck if svreg was run succesfully on all the subjects. Also check the smoothing level (smooth= under [subject]).\nIt is possible that surface files at the specified smoothing level do not exist.',
          call. = FALSE)
   }
-  return(cbm_filelist)
+  if(all(file.exists(cbm_filelist)))
+    return(cbm_filelist)
+  else
+    return(cbm_bids_filelist)
 }
 #' Returns a list of the tensor-based files for all subjects
 #' @param bss_data object of type \code{BssData}
@@ -184,13 +192,17 @@ get_cbm_file_list <- function(bss_data, hemi, smooth = 0) {
 get_tbm_file_list <- function(bss_data, smooth = 0) {
 
   tbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_volume_jacobian_file_string(smooth), bss_data@demographics$subjID))
+  tbm_bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat', sprintf(bs_volume_jacobian_file_string(smooth), bss_data@demographics$subjID))
   # Check if all subjects have nii.gz files
-  if ( !all(file.exists(tbm_filelist)) ) {
+  if ( !all(file.exists(tbm_filelist)) & !all(file.exists(tbm_bids_filelist))) {
     message('Following subjects have missing nii.gz files')
     print(tbm_filelist[which(!file.exists(tbm_filelist))], row.names = FALSE)
     stop('\nCheck if svreg was run succesfully and if jacobian* files exist for all the subjects.\nAlso check if smoothing was performed.', call. = FALSE)
   }
-  return(tbm_filelist)
+  if(all(file.exists(tbm_filelist)))
+    return(tbm_filelist)
+  else
+    return(tbm_bids_filelist)
 }
 #' Returns a list of the diffusion files for all subjects
 #' @param bss_data object of type \code{BssData}
@@ -205,13 +217,17 @@ get_dbm_file_list <- function(bss_data, measure, smooth = 0, eddy = TRUE) {
     stop(sprintf("Valid dbm measures are %s.", paste(valid_dbm_measures, collapse = ', ')), call. = FALSE)
   }
   dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_diffusion_file_string(measure, smooth, eddy), bss_data@demographics$subjID))
+  dbm_bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'dwi', sprintf(bs_diffusion_file_string(measure, smooth, eddy), bss_data@demographics$subjID))
   # Check if all subjects have nii.gz files
-  if ( !all(file.exists(dbm_filelist)) ) {
+  if ( !all(file.exists(dbm_filelist)) & !all(file.exists(dbm_bids_filelist))) {
     message('Following subjects have missing nii.gz files')
     print(dbm_filelist[which(!file.exists(dbm_filelist))], row.names = FALSE)
     stop('\nCheck if svreg_apply_map was run succesfully and if the *.dwi.*.atlas.*.nii.gz files exist for all the subjects.\nAlso check if smoothing was performed.', call. = FALSE)
   }
-  return(dbm_filelist)
+  if(all(file.exists(dbm_filelist)))
+    return(dbm_filelist)
+  else
+    return(dbm_bids_filelist)
 }
 #' Read the BrainSuite atlas prefix from the atlas
 #' @param atlas filepath for atlas

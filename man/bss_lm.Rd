@@ -4,8 +4,13 @@
 \alias{bss_lm}
 \title{Linear regression for brain imaging data.}
 \usage{
-bss_lm(main_effect = "", covariates = "", bss_data,
-  mult_comp = "fdr", niter = 5000)
+bss_lm(
+  main_effect = "",
+  covariates = "",
+  bss_data,
+  mult_comp = "fdr",
+  niter = 5000
+)
 }
 \arguments{
 \item{main_effect}{Character string containing an independent variable whose effect you want to measure.

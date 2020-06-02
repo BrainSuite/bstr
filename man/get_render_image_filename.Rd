@@ -4,8 +4,13 @@
 \alias{get_render_image_filename}
 \title{Returns the filename for the designated image}
 \usage{
-get_render_image_filename(outdir, voxelcoord, overlay_name,
-  brain_sector_index, voxelcoord_index)
+get_render_image_filename(
+  outdir,
+  voxelcoord,
+  overlay_name,
+  brain_sector_index,
+  voxelcoord_index
+)
 }
 \arguments{
 \item{outdir}{string denoting the output directory}

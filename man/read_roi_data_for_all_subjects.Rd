@@ -4,8 +4,12 @@
 \alias{read_roi_data_for_all_subjects}
 \title{Reads the BrainSuite ROI data file saved for each subject and returns the filenames}
 \usage{
-read_roi_data_for_all_subjects(roi_filelist, demographics, roiids,
-  roimeas = "gmthickness")
+read_roi_data_for_all_subjects(
+  roi_filelist,
+  demographics,
+  roiids,
+  roimeas = "gmthickness"
+)
 }
 \arguments{
 \item{roi_filelist}{filenames for the ROIwise stats in the individual subject directory}

@@ -4,8 +4,14 @@
 \alias{save_bss_out_nifti_image}
 \title{Save the nifti image to the output file}
 \usage{
-save_bss_out_nifti_image(measure, var_name, bss_cmap, bss_data, bss_model,
-  outdir)
+save_bss_out_nifti_image(
+  measure,
+  var_name,
+  bss_cmap,
+  bss_data,
+  bss_model,
+  outdir
+)
 }
 \arguments{
 \item{measure}{denotes the measure used to create the output}

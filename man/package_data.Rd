@@ -4,9 +4,19 @@
 \alias{package_data}
 \title{Package data for reproducible statistical analysis.}
 \usage{
-package_data(type = "cbm", subjdir = NULL, csv = "", hemi = "left",
-  cbmsmooth = 0, tbmsmooth = 0, dbmsmooth = 0, measure = "FA",
-  atlas = "", eddy = TRUE, outdir = NULL)
+package_data(
+  type = "cbm",
+  subjdir = NULL,
+  csv = "",
+  hemi = "left",
+  cbmsmooth = 0,
+  tbmsmooth = 0,
+  dbmsmooth = 0,
+  measure = "FA",
+  atlas = "",
+  eddy = TRUE,
+  outdir = NULL
+)
 }
 \arguments{
 \item{type}{character string denoting type of analysis. Should be cbm, tbm, or roi.}

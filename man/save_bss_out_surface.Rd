@@ -4,8 +4,7 @@
 \alias{save_bss_out_surface}
 \title{Save the surface output to the given ouput directory}
 \usage{
-save_bss_out_surface(measure, var_name, bss_cmap, bss_data, bss_model,
-  outdir)
+save_bss_out_surface(measure, var_name, bss_cmap, bss_data, bss_model, outdir)
 }
 \arguments{
 \item{measure}{numeric value denoting the measures used to create the output}

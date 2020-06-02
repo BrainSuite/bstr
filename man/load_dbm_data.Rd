@@ -4,8 +4,14 @@
 \alias{load_dbm_data}
 \title{Load diffusion data for statistical analysis.}
 \usage{
-load_dbm_data(subjdir = "", csv = "", measure = "", smooth = 0,
-  atlas = "", eddy = TRUE)
+load_dbm_data(
+  subjdir = "",
+  csv = "",
+  measure = "",
+  smooth = 0,
+  atlas = "",
+  eddy = TRUE
+)
 }
 \arguments{
 \item{subjdir}{subject directory containing BrainSuite processed data.}

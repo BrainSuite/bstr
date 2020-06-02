@@ -4,8 +4,15 @@
 \alias{copy_dbm_data}
 \title{Package diffusion data for reproducible statistical analysis.}
 \usage{
-copy_dbm_data(subjdir = "", csv = "", measure = "FA", atlas = "",
-  eddy = TRUE, smooth = 0, outdir)
+copy_dbm_data(
+  subjdir = "",
+  csv = "",
+  measure = "FA",
+  atlas = "",
+  eddy = TRUE,
+  smooth = 0,
+  outdir
+)
 }
 \arguments{
 \item{subjdir}{subject directory containing BrainSuite processed data.}

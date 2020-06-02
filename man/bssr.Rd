@@ -3,7 +3,6 @@
 \docType{package}
 \name{bssr}
 \alias{bssr}
-\alias{bssr-package}
 \title{bssr: BrainSuite Statistics toolbox}
 \description{
 The BrainSuite Statistics toolbox allows the application of advanced

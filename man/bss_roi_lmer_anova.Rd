@@ -4,8 +4,7 @@
 \alias{bss_roi_lmer_anova}
 \title{This function performs the ANOVA Linear Mixed Effects analysis for ROIs}
 \usage{
-bss_roi_lmer_anova(group_var, main_effect = "", covariates = "",
-  bss_data)
+bss_roi_lmer_anova(group_var, main_effect = "", covariates = "", bss_data)
 }
 \arguments{
 \item{group_var}{Categorical variable name. This should be present in the demographics csv file associated

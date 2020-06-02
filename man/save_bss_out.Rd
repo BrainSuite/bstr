@@ -4,8 +4,7 @@
 \alias{save_bss_out}
 \title{Save the statistical analysis output}
 \usage{
-save_bss_out(bss_data, bss_model, outdir = "", overwrite = F,
-  nclusters = 10)
+save_bss_out(bss_data, bss_model, outdir = "", overwrite = F, nclusters = 10)
 }
 \arguments{
 \item{bss_data}{object of type \code{BssData}}

@@ -4,8 +4,14 @@
 \alias{parse_model}
 \title{Returns a list denoting which elements are present in the model}
 \usage{
-parse_model(main_effect = "", covariates = "", corr_var = "",
-  group_var = "", model_type = "", demographics)
+parse_model(
+  main_effect = "",
+  covariates = "",
+  corr_var = "",
+  group_var = "",
+  model_type = "",
+  demographics
+)
 }
 \arguments{
 \item{main_effect}{string designating which column of demographics is the main effect}

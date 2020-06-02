@@ -4,8 +4,14 @@
 \alias{colorbar}
 \title{Generates the components of a colorbar for an individual voxelcoordinate and overlay}
 \usage{
-colorbar(lut, min, max = -min, nticks = 11, ticks = seq(min, max, len
-  = nticks), title = "")
+colorbar(
+  lut,
+  min,
+  max = -min,
+  nticks = 11,
+  ticks = seq(min, max, len = nticks),
+  title = ""
+)
 }
 \arguments{
 \item{lut}{previously generated lut file}

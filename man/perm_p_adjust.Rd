@@ -4,8 +4,7 @@
 \alias{perm_p_adjust}
 \title{Adjust p-values for multiple comparisons testing}
 \usage{
-perm_p_adjust(main_effect = "", covariates = "", bss_data,
-  tvalues_null)
+perm_p_adjust(main_effect = "", covariates = "", bss_data, tvalues_null)
 }
 \arguments{
 \item{main_effect}{Character string containing an independent variable whose effect you want to measure.

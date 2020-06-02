@@ -4,9 +4,18 @@
 \alias{save_vol_stats_out}
 \title{Save the volume statistics}
 \usage{
-save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues,
-  tvalues_adjusted, var_name, bss_data, bss_model, outdir,
-  corr_values = NULL, corr_values_masked_adjusted = NULL)
+save_vol_stats_out(
+  log_pvalues,
+  log_pvalues_adjusted,
+  tvalues,
+  tvalues_adjusted,
+  var_name,
+  bss_data,
+  bss_model,
+  outdir,
+  corr_values = NULL,
+  corr_values_masked_adjusted = NULL
+)
 }
 \arguments{
 \item{log_pvalues}{log transformed p-values}

@@ -4,8 +4,13 @@
 \alias{bss_lmer}
 \title{Linear mixed-effects model for brain imaging data.}
 \usage{
-bss_lmer(group_var, main_effect = "", covariates = "", bss_data,
-  mult_comp = "fdr")
+bss_lmer(
+  group_var,
+  main_effect = "",
+  covariates = "",
+  bss_data,
+  mult_comp = "fdr"
+)
 }
 \arguments{
 \item{group_var}{Categorical variable name. This should be present in the demographics csv file associated

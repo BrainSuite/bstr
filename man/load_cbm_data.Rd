@@ -4,8 +4,7 @@
 \alias{load_cbm_data}
 \title{Load cortical surface data for statistical analysis.}
 \usage{
-load_cbm_data(subjdir = "", csv = "", hemi = "left", smooth = 0,
-  atlas = "")
+load_cbm_data(subjdir = "", csv = "", hemi = "left", smooth = 0, atlas = "")
 }
 \arguments{
 \item{subjdir}{subject directory containing BrainSuite processed data.}

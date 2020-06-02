@@ -4,8 +4,7 @@
 \alias{copy_cbm_data}
 \title{Package cortical surface data for reproducible statistical analysis.}
 \usage{
-copy_cbm_data(subjdir = "", csv = "", hemi = "left", smooth = 0,
-  outdir)
+copy_cbm_data(subjdir = "", csv = "", hemi = "left", smooth = 0, outdir)
 }
 \arguments{
 \item{subjdir}{subject directory containing BrainSuite processed data.}

@@ -4,7 +4,9 @@
 \name{bs_atlas_files_suffix}
 \alias{bs_atlas_files_suffix}
 \title{List of suffixes for atlas files used in BrainSuite}
-\format{An object of class \code{list} of length 4.}
+\format{
+An object of class \code{list} of length 4.
+}
 \usage{
 bs_atlas_files_suffix
 }

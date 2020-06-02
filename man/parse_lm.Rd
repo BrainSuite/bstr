@@ -4,8 +4,14 @@
 \alias{parse_lm}
 \title{Returns an error if necessary elements are missing in the model}
 \usage{
-parse_lm(main_effect = "", covariates = "", corr_var = "",
-  group_var = "", model_type = "", demographics)
+parse_lm(
+  main_effect = "",
+  covariates = "",
+  corr_var = "",
+  group_var = "",
+  model_type = "",
+  demographics
+)
 }
 \arguments{
 \item{main_effect}{string designating which column of demographics is the main effect}

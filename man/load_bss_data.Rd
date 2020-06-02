@@ -4,9 +4,18 @@
 \alias{load_bss_data}
 \title{Load data for statistical analysis.}
 \usage{
-load_bss_data(type = "cbm", subjdir = "", csv = "", hemi = "left",
-  smooth = 0, roiids = 0, roimeas = "gmthickness", measure = "",
-  atlas = "", eddy = TRUE)
+load_bss_data(
+  type = "cbm",
+  subjdir = "",
+  csv = "",
+  hemi = "left",
+  smooth = 0,
+  roiids = 0,
+  roimeas = "gmthickness",
+  measure = "",
+  atlas = "",
+  eddy = TRUE
+)
 }
 \arguments{
 \item{type}{character string denoting type of analysis. Should be cbm, tbm, or roi.}

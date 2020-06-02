@@ -4,7 +4,9 @@
 \name{bs_binary_files}
 \alias{bs_binary_files}
 \title{List of binaries used in BrainSuite analysis}
-\format{An object of class \code{list} of length 2.}
+\format{
+An object of class \code{list} of length 2.
+}
 \usage{
 bs_binary_files
 }

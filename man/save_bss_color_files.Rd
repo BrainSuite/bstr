@@ -4,8 +4,14 @@
 \alias{save_bss_color_files}
 \title{Save the color LUT and ini colormap images}
 \usage{
-save_bss_color_files(measure, var_name, cmap_title, bss_data, bss_model,
-  outdir)
+save_bss_color_files(
+  measure,
+  var_name,
+  cmap_title,
+  bss_data,
+  bss_model,
+  outdir
+)
 }
 \arguments{
 \item{measure}{numeric value denoting the measures used to create the color file}

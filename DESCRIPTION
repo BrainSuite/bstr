@@ -1,9 +1,10 @@
 Package: bssr
 Type: Package
 Title: BrainSuite Statistics Toolbox
-Version: 0.2.2
+Version: 0.2.3
 Authors@R: c(person(given="Shantanu", family="Joshi", role=c("cre","aut"), email="shjoshi@ieee.org"),
              person("Yeun", "Kim", role="aut"),
+             person("Kayla", "Schroeder", role="aut"),
              person("David", "Shattuck", role="ctb")
              )
 Description: The BrainSuite Statistics toolbox allows the application of advanced 
@@ -38,6 +39,6 @@ Imports:
     R6,
     shinyjs,
     lme4
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
 URL: http://brainsuite.org/bssr
 Suggests: testthat

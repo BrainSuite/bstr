@@ -431,7 +431,8 @@ bss_ttest <- function(group_var, bss_data, paired = FALSE, mult_comp="fdr") {
   idx_group1 <- which(bss_data@demographics[[group_var]] == group1)
   idx_group2 <- which(bss_data@demographics[[group_var]] == group2)
 
-  message(sprintf("The 2 groups are %s and %s", group1, group2), appendLF = TRUE)
+  message(sprintf("The group variable is %s with two levels (%s, %s).", group_var, group1, group2), appendLF = TRUE)
+  message(sprintf("Testing for the difference between the %s groups (%s - %s).", group_var, group1, group2), appendLF = TRUE)
   message('Running t-tests...', appendLF = FALSE)
 
   test_result <- ttest_vec(bss_data@data_array[idx_group1,], bss_data@data_array[idx_group2,], group_var, paired)

@@ -146,6 +146,8 @@ BssRmdVolumeOutput <-
                   for(cluster_iter in 1:length(voxelcoord)) {
                     if (bss_model@model_type=="bss_corr"){
                       private$render_overlay(
+                        bss_data,
+                        bss_model,
                         cluster_iter,
                         voxelcoord,
                         atlaspath = bss_data@atlas_filename,
@@ -158,6 +160,8 @@ BssRmdVolumeOutput <-
                         name = c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues,bs_stat_overlays$corr_values,bs_stat_overlays$corr_values_masked_adjusted), alpha = 120)
                     } else {
                     private$render_overlay(
+                      bss_data,
+                      bss_model,
                       cluster_iter,
                       voxelcoord,
                       atlaspath = bss_data@atlas_filename,
@@ -174,14 +178,16 @@ BssRmdVolumeOutput <-
                                          outdir)
                     # }
 
-                    private$render_html(outdir,
+                    private$render_html(bss_data,
+                                        bss_model,
+                                        outdir,
                                         voxelcoord,
                                         overlay_name = c(bs_stat_overlays$log_pvalues_adjusted,bs_stat_overlays$tvalues_adjusted,bs_stat_overlays$log_pvalues,bs_stat_overlays$tvalues,bs_stat_overlays$corr_values,bs_stat_overlays$corr_values_masked_adjusted))
 
 
                   }
 
-                  private$save_rmd_preamble(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, switch(bss_model@model_type,
+                  private$save_rmd_preamble(bss_data, bss_model, file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, switch(bss_model@model_type,
                                                                                                                         bss_corr = {bss_model@corr_var},
                                                                                                                         unpairedttest = {bss_model@group_var},
                                                                                                                         pairedttest = {bss_model@group_var},
@@ -204,7 +210,7 @@ BssRmdVolumeOutput <-
 
               private = list(
 
-                render_overlay = function(voxelcoord_index,voxelcoord,atlaspath,overlaypath,outdir,name,alpha,lutpaths,min_vals,max_vals) {
+                render_overlay = function(bss_data, bss_model, voxelcoord_index,voxelcoord,atlaspath,overlaypath,outdir,name,alpha,lutpaths,min_vals,max_vals) {
                   view_order <- c("sag","cor","ax")
                   switch(bss_model@model_type,
                          bss_anova = {var_name = bss_model@main_effect},
@@ -286,7 +292,7 @@ BssRmdVolumeOutput <-
                   return(0)
                 },
 
-                save_rmd_preamble = function(rmdfile, outdir, voxelcoord, overlay_name) {
+                save_rmd_preamble = function(bss_data, bss_model, rmdfile, outdir, voxelcoord, overlay_name) {
 
                   load_library <- "library(bssr)"
                   data_command_1 <- paste0("bss_data <- load_bss_data(type = '",bss_data@analysis_type,"', subjdir = '",bss_data@subjdir,"', csv = '", bss_data@csv,"', measure = '", bss_data@measure,"', smooth = ",bss_data@smooth,")")
@@ -296,7 +302,7 @@ BssRmdVolumeOutput <-
                   data_command_3 <- "bs_stat_overlays = list(log_pvalues_adjusted = 'log_pvalues_adjusted', tvalues_adjusted = 'tvalues_adjusted', log_pvalues = 'log_pvalues', tvalues = 'tvalues', pvalues = 'pvalues', corr_values = 'corr_values')"
                   user_input <- paste0(load_library,"\n",data_command_1,"\n",data_command_2,"\n",data_command_3,"\n")
                   templines <- deparse(private$render_html)
-                  templines[1] <- "render_html = function(outdir, voxelcoord, overlay_name)"
+                  templines[1] <- "render_html = function(bss_data, bss_model, outdir, voxelcoord, overlay_name)"
                   sink(rmdfile, append=TRUE, type = "output")
                   cat("---\n")
                   cat("title: bssr report\n")
@@ -330,7 +336,7 @@ BssRmdVolumeOutput <-
                     voxelcoord_char <- paste0(substr(voxelcoord_char,1,nchar(voxelcoord_char)-1),"),")
                   }
                   voxelcoord_char <- paste0(substr(voxelcoord_char,1,nchar(voxelcoord_char)-1),")")
-                  cat("render_html('",outdir,"', ", voxelcoord_char, ", ",overlay_name,")\n")
+                  cat("render_html( bss_data, bss_model,  '",outdir,"', ", voxelcoord_char, ", ",overlay_name,")\n")
                   cat("```\n")
                   sink()
 
@@ -338,7 +344,7 @@ BssRmdVolumeOutput <-
 
                 ## another function will generate the names for the pngs
 
-                render_html = function(outdir, voxelcoord, overlay_name) {
+                render_html = function(bss_data, bss_model, outdir, voxelcoord, overlay_name) {
                   overlay <- c(bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues_adjusted, bs_stat_overlays$log_pvalues, bs_stat_overlays$tvalues, bs_stat_overlays$corr_values_masked_adjusted, bs_stat_overlays$corr_values)
                   if (bss_model@model_type=="bss_corr"){
                     cbar <- vector("list",2)

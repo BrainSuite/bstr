@@ -12,7 +12,7 @@
 # You should have received a copy of the GNU General Public License along with this program;
 # if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#' Load ROI data
+#' Load ROI data from subjects (BIDS compatible)
 #'
 #' Loads the ROI measure for statistical analysis.
 #' @param subjects_dir character string for subject directory.
@@ -34,7 +34,7 @@ bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas) {
 
   demographics$subjID <- as.character(demographics$subjID)
   roi_bids_filelist <- file.path(subjects_dir, demographics$subjID, 'anat',
-                                 sprintf('%s%s', demographics$subjID, bs_file_formats$roi_txt))
+                                 sprintf('%s%s%s', demographics$subjID, '_T1w', bs_file_formats$roi_txt))
   if(all(file.exists(roi_bids_filelist)))
     additional_dir <- 'anat'
   else

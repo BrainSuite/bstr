@@ -112,6 +112,18 @@ bs_volume_jacobian_file_string <- function(smooth = 0) {
   else
     return('%s.svreg.inv.jacobian.nii.gz')
 }
+
+#' Generate the designated BIDS compatible (T1w) tensor-based morphometry file
+#' @param smooth numeric value designating the smoothing used (default is 0)
+#'
+bs_BIDS_volume_jacobian_file_string <- function(smooth = 0) {
+
+  if (smooth != 0)
+    return(paste('%s_T1w.svreg.inv.jacobian.', sprintf('smooth%2.1fmm.nii.gz', smooth), sep = ''))
+  else
+    return('%s_T1w.svreg.inv.jacobian.nii.gz')
+}
+
 #' Generate the designated diffusion surface file
 #' @param measure string designating the type of diffusion measure used
 #' @param smooth numeric value designating the smoothing used (default is 0)
@@ -132,6 +144,28 @@ bs_diffusion_file_string <- function(measure = "FA", smooth = 0, eddy = TRUE) {
   if (eddy == FALSE && smooth == 0)
     return(paste0('%s.dwi.RAS.atlas.', measure, '.nii.gz'))
 }
+
+#' Generate the BIDS designated diffusion surface file
+#' @param measure string designating the type of diffusion measure used
+#' @param smooth numeric value designating the smoothing used (default is 0)
+#' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
+#'
+bs_BIDS_diffusion_file_string <- function(measure = "FA", smooth = 0, eddy = TRUE) {
+
+  valid_diffusion_measures <- c('FA', 'MD', 'axial', 'radial', 'mADC', 'FRT_GFA')
+  if (! measure %in% valid_diffusion_measures)
+    stop(sprintf('Invalid diffusion measure: %s. Valid measures are %s.', measure, paste(valid_diffusion_measures, collapse = ', ')))
+
+  if (eddy == TRUE && smooth != 0)
+    return(paste0('%s_dwi.dwi.RAS.correct.atlas.', measure, sprintf('.smooth%2.1fmm.nii.gz', smooth)))
+  if (eddy == FALSE && smooth != 0)
+    return(paste0('%s_dwi.dwi.RAS.atlas.', measure, sprintf('.smooth%2.1fmm.nii.gz', smooth)))
+  if (eddy == TRUE && smooth == 0)
+    return(paste0('%s_dwi.dwi.RAS.correct.atlas.', measure, '.nii.gz'))
+  if (eddy == FALSE && smooth == 0)
+    return(paste0('%s_dwi.dwi.RAS.atlas.', measure, '.nii.gz'))
+}
+
 #' Stops analysis if desired type of analysis is not a valid analysis type
 #' @param analysis_type string denoting desired type of analysis to be performed
 #'
@@ -192,7 +226,7 @@ get_cbm_file_list <- function(bss_data, hemi, smooth = 0) {
 get_tbm_file_list <- function(bss_data, smooth = 0) {
 
   tbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_volume_jacobian_file_string(smooth), bss_data@demographics$subjID))
-  tbm_bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat', sprintf(bs_volume_jacobian_file_string(smooth), bss_data@demographics$subjID))
+  tbm_bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat', sprintf(bs_BIDS_volume_jacobian_file_string(smooth), bss_data@demographics$subjID))
   # Check if all subjects have nii.gz files
   if ( !all(file.exists(tbm_filelist)) & !all(file.exists(tbm_bids_filelist))) {
     message('Following subjects have missing nii.gz files')
@@ -204,6 +238,7 @@ get_tbm_file_list <- function(bss_data, smooth = 0) {
   else
     return(tbm_bids_filelist)
 }
+
 #' Returns a list of the diffusion files for all subjects
 #' @param bss_data object of type \code{BssData}
 #' @param measure numeric value denoting the measures used to create the output
@@ -217,7 +252,7 @@ get_dbm_file_list <- function(bss_data, measure, smooth = 0, eddy = TRUE) {
     stop(sprintf("Valid dbm measures are %s.", paste(valid_dbm_measures, collapse = ', ')), call. = FALSE)
   }
   dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_diffusion_file_string(measure, smooth, eddy), bss_data@demographics$subjID))
-  dbm_bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'dwi', sprintf(bs_diffusion_file_string(measure, smooth, eddy), bss_data@demographics$subjID))
+  dbm_bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'dwi', sprintf(bs_BIDS_diffusion_file_string(measure, smooth, eddy), bss_data@demographics$subjID))
   # Check if all subjects have nii.gz files
   if ( !all(file.exists(dbm_filelist)) & !all(file.exists(dbm_bids_filelist))) {
     message('Following subjects have missing nii.gz files')

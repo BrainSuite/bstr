@@ -17,13 +17,20 @@
 BssRmdOutput <-
   R6::R6Class("BssRmdOutput",
               public = list(
+                #' @field outdir output directory
                 outdir = NULL,
+                #' @description initialize function
+                #' @param outdir path to the output directory
                 initialize = function(outdir = NULL){
                   self$outdir <- outdir
                 },
-                save_out = function(){
+                #' @description Save results as Rmd
+                #' @param bss_data object of type \code{BssData}
+                #' @param bss_model object of type \code{BssModel}
+                save_out = function(bss_data, bss_model){
 
                 },
+                #' @description finalize function
                 finalize = function(){
 
                 }

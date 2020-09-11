@@ -2,7 +2,7 @@
 % Please edit documentation in R/bss_load_roi_data.R
 \name{bss_load_roi_data}
 \alias{bss_load_roi_data}
-\title{Load ROI data}
+\title{Load ROI data from subjects (BIDS compatible)}
 \usage{
 bss_load_roi_data(subjects_dir, csv, roiids, roimeas)
 }

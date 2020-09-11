@@ -8,6 +8,13 @@ R6 super class for Rmd output functionality
 
 R6 super class for Rmd output functionality
 }
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{outdir}}{output directory}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -21,24 +28,43 @@ R6 super class for Rmd output functionality
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
+initialize function
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{BssRmdOutput$new(outdir = NULL)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{outdir}}{path to the output directory}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-save_out"></a>}}
 \if{latex}{\out{\hypertarget{method-save_out}{}}}
 \subsection{Method \code{save_out()}}{
+Save results as Rmd
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BssRmdOutput$save_out()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BssRmdOutput$save_out(bss_data, bss_model)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{bss_data}}{object of type \code{BssData}}
+
+\item{\code{bss_model}}{object of type \code{BssModel}}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-finalize"></a>}}
 \if{latex}{\out{\hypertarget{method-finalize}{}}}
 \subsection{Method \code{finalize()}}{
+finalize function
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{BssRmdOutput$finalize()}\if{html}{\out{</div>}}
 }

@@ -79,13 +79,13 @@ BssDBMData <- setClass(
   contains = "BssData"
 )
 
-setMethod("initialize", valueClass = "BssData", signature = "BssData", function(.Object, subjdir, csv) {
+setMethod("initialize", valueClass = "BssData", signature = "BssData", function(.Object, subjdir, csv, exclude_col="") {
 
   check_file_exists(subjdir, raise_error = TRUE)
   check_file_exists(csv, raise_error = TRUE)
   .Object@subjdir = subjdir
   .Object@csv <- csv
-  .Object@demographics <- read_demographics(csv)
+  .Object@demographics <- read_demographics(csv, exclude_col = exclude_col)
   return(.Object)
 })
 
@@ -261,17 +261,17 @@ setMethod ("load_demographics", "BssData", function(object) {
 #'
 #' @export
 load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left",
-                          smooth=0.0, roiids=0, roimeas="gmthickness", measure="", atlas="", eddy=TRUE) {
+                          smooth=0.0, roiids=0, roimeas="gmthickness", measure="", atlas="", maskfile = "", eddy=TRUE, exclude_col = "") {
 
   valid_types <- c("cbm", "tbm", "roi","dbm","nca")
   if (! type %in% valid_types)
     stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
 
   switch(type,
-         cbm = { bss_data <- load_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth, atlas=atlas) },
-         tbm = { bss_data <- load_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth, atlas=atlas) },
-         dbm = { bss_data <- load_dbm_data(subjdir=subjdir, csv=csv, measure=measure, smooth=smooth, atlas=atlas, eddy=eddy) },
-         roi = { bss_data <- load_roi_data(subjdir, csv, roiids, roimeas) }
+         cbm = { bss_data <- load_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth, atlas=atlas, exclude_col=exclude_col) },
+         tbm = { bss_data <- load_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth, atlas=atlas, exclude_col=exclude_col) },
+         dbm = { bss_data <- load_dbm_data(subjdir=subjdir, csv=csv, measure=measure, smooth=smooth, atlas=atlas, maskfile=maskfile, eddy=eddy, exclude_col=exclude_col) },
+         roi = { bss_data <- load_roi_data(subjdir, csv, roiids, roimeas, exclude_col=exclude_col) }
   )
   return(bss_data)
 }
@@ -286,9 +286,9 @@ load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left",
 #' @param smooth numeric value denoting the smoothing level.
 #' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
 #' Otherwise, for example, if the atlas for tensor based morphometry is located at /path/to/atlas/myatlas.mri.bfc.nii.gz, then specify atlas="/path/to/atlas/myatlas".
-load_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="") {
+load_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="", exclude_col) {
 
-  bss_cbm_data <- new("BssCBMData", subjdir, csv)
+  bss_cbm_data <- new("BssCBMData", subjdir, csv, exclude_col)
   if (atlas == "") {
     brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
     cbm_surf_atlas <- get_cbm_atlas(brainsuite_atlas_id, hemi)
@@ -310,16 +310,19 @@ load_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="")
 #' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
 #' Otherwise, for example, if the atlas for tensor based morphometry is located at /path/to/atlas/myatlas.mri.bfc.nii.gz, then specify atlas="/path/to/atlas/myatlas".
 #'
-load_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas="") {
+load_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas="", maskfile="", exclude_col) {
 
-  bss_tbm_data <- new("BssTBMData", subjdir, csv)
-  if (atlas == "") {
-    brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
-    tbm_atlas_and_mask <- get_tbm_atlas_and_mask(brainsuite_atlas_id)
+  bss_tbm_data <- new("BssTBMData", subjdir, csv, exclude_col)
+  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+  tbm_atlas_and_mask <- get_tbm_atlas_and_mask(brainsuite_atlas_id)
+
+  if (maskfile != "") {
+    check_file_exists(maskfile, raise_error = TRUE)
+    tbm_atlas_and_mask$nii_atlas_mask <- maskfile
   }
-  else
-    tbm_atlas_and_mask <- get_custom_tbm_atlas_and_mask(atlas)
-
+  if (atlas!= "") {
+    stop(sprintf('Both atlas and maskfile are provided. Currently, only a custom maskfile is supported. The maskfile has to be in the atlas space %s used to register the subjects.', brainsuite_atlas_id), call. = FALSE)
+  }
   bss_tbm_data <- load_data(bss_tbm_data, atlas_filename = tbm_atlas_and_mask$nii_atlas, maskfile = tbm_atlas_and_mask$nii_atlas_mask, smooth=smooth)
   bss_tbm_data@data_type <- bs_data_types$nifti_image
   return(bss_tbm_data)
@@ -337,15 +340,19 @@ load_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas="") {
 #' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
 #'
 
-load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0, atlas="", eddy=TRUE) {
+load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0, atlas="", eddy=TRUE, maskfile="", exclude_col) {
 
-  bss_dbm_data <- new("BssDBMData", subjdir, csv)
-  if (atlas == "") {
-    brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
-    dbm_atlas_and_mask <- get_dbm_atlas_and_mask(brainsuite_atlas_id)
+  bss_dbm_data <- new("BssDBMData", subjdir, csv, exclude_col)
+  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+  dbm_atlas_and_mask <- get_dbm_atlas_and_mask(brainsuite_atlas_id)
+
+  if (maskfile != "") {
+    check_file_exists(maskfile, raise_error = TRUE)
+    dbm_atlas_and_mask$nii_atlas_mask <- maskfile
   }
-  else
-    dbm_atlas_and_mask <- get_custom_tbm_atlas_and_mask(atlas)
+  if (atlas!= "") {
+    stop(sprintf('Both atlas and maskfile are provided. Currently only a custom maskfile is supported. The maskfile has to be in the atlas space %s used to register the subjects.', brainsuite_atlas_id), call. = FALSE)
+  }
   bss_dbm_data <- load_data(bss_dbm_data, atlas_filename = dbm_atlas_and_mask$nii_atlas, maskfile = dbm_atlas_and_mask$nii_atlas_mask, measure=measure, smooth=smooth, eddy=eddy)
   bss_dbm_data@data_type <- bs_data_types$nifti_image
   return(bss_dbm_data)
@@ -360,8 +367,8 @@ load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0, atlas="", 
 #' @param roiids numeric label identifiers for the regions of interest (ROI) type analysis.
 #' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
 #'
-load_roi_data <- function(subjdir="", csv="", roiids="", roimeas="") {
-  bss_roi_data <- new("BssROIData", subjdir, csv)
+load_roi_data <- function(subjdir="", csv="", roiids="", roimeas="", exclude_col) {
+  bss_roi_data <- new("BssROIData", subjdir, csv, exclude_col)
   bss_roi_data <- load_data(bss_roi_data, roiids = roiids, roimeas = roimeas)
   return(bss_roi_data)
 }

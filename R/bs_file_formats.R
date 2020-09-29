@@ -473,12 +473,17 @@ get_custom_dbm_atlas_and_mask <- function(brainsuite_custom_atlas_prefix) {
 }
 #' Reads the demographics from an inputted csv file
 #' @param csvfile csv file containing the demographics
-read_demographics <- function(csvfile) {
+read_demographics <- function(csvfile, exclude_col="") {
 
   switch(tools::file_ext(csvfile),
          "tsv" = {demo <- read.table(file = csvfile, sep = "\t", header = T)},
          "csv" = {demo <- read.csv(csvfile)})
   # demo <- read.csv(csvfile)
   colnames(demo)[1] <- "subjID"
+  if (exclude_col != "") {
+    if (! exclude_col %in% colnames(demo))
+      stop(sprintf("Exclude column specified as %s does not exist in %s.", exclude_col, csvfile), call. = FALSE)
+    demo <- subset(demo, demo[[exclude_col]] == 1)
+  }
   return(demo)
 }

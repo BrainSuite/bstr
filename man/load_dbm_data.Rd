@@ -10,7 +10,9 @@ load_dbm_data(
   measure = "",
   smooth = 0,
   atlas = "",
-  eddy = TRUE
+  eddy = TRUE,
+  maskfile = "",
+  exclude_col
 )
 }
 \arguments{
@@ -29,6 +31,10 @@ and should be exactly equal to the individual subject directory name.}
 Otherwise, for example, if the atlas for tensor based morphometry is located at /path/to/atlas/myatlas.mri.bfc.nii.gz, then specify atlas="/path/to/atlas/myatlas".}
 
 \item{eddy}{boolean for specifying if the diffusion images were eddy-current corrected or not.}
+
+\item{maskfile}{filename of the mask for tbm or diffusion parameter analysis. The mask has to be in the atlas space.}
+
+\item{exclude_col}{character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.}
 }
 \description{
 Load diffusion data for statistical analysis.

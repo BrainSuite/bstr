@@ -4,10 +4,12 @@
 \alias{read_demographics}
 \title{Reads the demographics from an inputted csv file}
 \usage{
-read_demographics(csvfile)
+read_demographics(csvfile, exclude_col = "")
 }
 \arguments{
 \item{csvfile}{csv file containing the demographics}
+
+\item{exclude_col}{character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.}
 }
 \description{
 Reads the demographics from an inputted csv file

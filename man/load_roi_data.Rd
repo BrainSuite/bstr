@@ -4,7 +4,7 @@
 \alias{load_roi_data}
 \title{Load ROI data for statistical analysis.}
 \usage{
-load_roi_data(subjdir = "", csv = "", roiids = "", roimeas = "")
+load_roi_data(subjdir = "", csv = "", roiids = "", roimeas = "", exclude_col)
 }
 \arguments{
 \item{subjdir}{subject directory containing BrainSuite processed data.}
@@ -17,6 +17,8 @@ and should be exactly equal to the individual subject directory name.}
 \item{roiids}{numeric label identifiers for the regions of interest (ROI) type analysis.}
 
 \item{roimeas}{character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".}
+
+\item{exclude_col}{character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.}
 }
 \description{
 Load ROI data for statistical analysis.

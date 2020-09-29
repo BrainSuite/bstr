@@ -473,6 +473,7 @@ get_custom_dbm_atlas_and_mask <- function(brainsuite_custom_atlas_prefix) {
 }
 #' Reads the demographics from an inputted csv file
 #' @param csvfile csv file containing the demographics
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 read_demographics <- function(csvfile, exclude_col="") {
 
   switch(tools::file_ext(csvfile),

@@ -14,7 +14,9 @@ load_bss_data(
   roimeas = "gmthickness",
   measure = "",
   atlas = "",
-  eddy = TRUE
+  maskfile = "",
+  eddy = TRUE,
+  exclude_col = ""
 )
 }
 \arguments{
@@ -40,7 +42,11 @@ and should be exactly equal to the individual subject directory name.}
 \item{atlas}{character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
 Otherwise, for example, if the atlas for tensor based morphometry is located at /path/to/atlas/myatlas.mri.bfc.nii.gz, then specify atlas="/path/to/atlas/myatlas".}
 
+\item{maskfile}{filename of the mask for tbm or diffusion parameter analysis. The mask has to be in the atlas space.}
+
 \item{eddy}{boolean for specifying if the diffusion images were eddy-current corrected or not.}
+
+\item{exclude_col}{character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.}
 }
 \description{
 Loading data is usually the first step before running any statistical analysis.

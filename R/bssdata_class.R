@@ -250,6 +250,8 @@ setMethod ("load_demographics", "BssData", function(object) {
 #' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
 #' Otherwise, for example, if the atlas for tensor based morphometry is located at /path/to/atlas/myatlas.mri.bfc.nii.gz, then specify atlas="/path/to/atlas/myatlas".
 #' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
+#' @param maskfile filename of the mask for tbm or diffusion parameter analysis. The mask has to be in the atlas space.
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 #' @examples
 #' \dontrun{
 #' my_cbm_data <- load_bss_data(type="cbm", subjdir = "/path/to/my/subjectdirectory",
@@ -286,6 +288,7 @@ load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left",
 #' @param smooth numeric value denoting the smoothing level.
 #' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
 #' Otherwise, for example, if the atlas for tensor based morphometry is located at /path/to/atlas/myatlas.mri.bfc.nii.gz, then specify atlas="/path/to/atlas/myatlas".
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 load_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="", exclude_col) {
 
   bss_cbm_data <- new("BssCBMData", subjdir, csv, exclude_col)
@@ -309,6 +312,8 @@ load_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="",
 #' @param smooth numeric value denoting the smoothing level.
 #' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
 #' Otherwise, for example, if the atlas for tensor based morphometry is located at /path/to/atlas/myatlas.mri.bfc.nii.gz, then specify atlas="/path/to/atlas/myatlas".
+#' @param maskfile filename of the mask for tbm or diffusion parameter analysis. The mask has to be in the atlas space.
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 #'
 load_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas="", maskfile="", exclude_col) {
 
@@ -338,6 +343,8 @@ load_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas="", maskfile="",
 #' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
 #' Otherwise, for example, if the atlas for tensor based morphometry is located at /path/to/atlas/myatlas.mri.bfc.nii.gz, then specify atlas="/path/to/atlas/myatlas".
 #' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
+#' @param maskfile filename of the mask for tbm or diffusion parameter analysis. The mask has to be in the atlas space.
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 #'
 
 load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0, atlas="", eddy=TRUE, maskfile="", exclude_col) {
@@ -366,6 +373,7 @@ load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0, atlas="", 
 #' and should be exactly equal to the individual subject directory name.
 #' @param roiids numeric label identifiers for the regions of interest (ROI) type analysis.
 #' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 #'
 load_roi_data <- function(subjdir="", csv="", roiids="", roimeas="", exclude_col) {
   bss_roi_data <- new("BssROIData", subjdir, csv, exclude_col)

@@ -25,6 +25,7 @@ read_roistats_txt <- function(roiwise_txt_filename, roiids, roimeas = 'gmthickne
   measure_dict <- list(gmthickness = "Mean_Thickness(mm)",
                        gmvolume = "GM_Volume(mm^3)",
                        area = "Cortical_Area_pial(mm^2)",
+                       wmvolume = "WM_Volume(mm^3)",
                        swmFA = "swmFA",
                        swmMD = "swmMD",
                        swmRD = "swmRD",

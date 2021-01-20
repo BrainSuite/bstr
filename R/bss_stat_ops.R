@@ -44,7 +44,8 @@ bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr", 
 
   switch(mult_comp,
          perm={
-           cl <- parallel::makeCluster(parallel::detectCores())
+           cores <- 1 #parallel::detectCores()
+           cl <- parallel::makeCluster(cores)
            registerDoParallel(cl)
            options(warn=-1)
            pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
@@ -148,7 +149,8 @@ bss_lm <- function(main_effect="", covariates="", bss_data, mult_comp = "fdr", n
 
   switch(mult_comp,
          perm={
-           cl <- parallel::makeCluster(parallel::detectCores())
+           cores <- 1 #parallel::detectCores()
+           cl <- parallel::makeCluster(cores)
            registerDoParallel(cl)
            options(warn=-1)
            pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)

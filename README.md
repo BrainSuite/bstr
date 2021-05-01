@@ -9,7 +9,7 @@ bssr is licensed under an GPLv2-only license (https://spdx.org/licenses/GPL-2.0-
 Please see the enclosed LICENSE file for more details.
 
 ---------
-The BrainSuite Statistics toolbox in R (bssr) is a software package developed in R that performs statistical analysis of population-level neuroimaging data processed using BrainSuite [1]. Specically, it provides statistical tools for conducting cortical thickness analysis, tensor based morphometry, and analysis of diffusion measures.
+The BrainSuite Statistics toolbox in R (bssr) is a software package developed in R that performs statistical analysis of population-level neuroimaging data processed using BrainSuite [1]. Specifically, it provides statistical tools for conducting cortical thickness analysis, tensor based morphometry, and analysis of diffusion measures.
 
 Methods:
 A subject-level BrainSuite workow prior to conducting statistical analysis involves T1-weighted MRI image processing and registration steps, including cortical surface extraction [1] and alignment to a reference atlas using SVReg [2]. SVReg performs surface-constrained volumetric registration of triangular meshes and image intensities. Bssr is then used to perform population level statistical analysis of various neuroimaging measures.

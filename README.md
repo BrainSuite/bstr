@@ -2,6 +2,7 @@
 bssr: BrainSuite Statistics Toolbox in R
 
 Copyright (C) 2021 The Regents of the University of California
+
 Created by Shantanu H. Joshi, Yeun Kim, Kayla A. Schroeder, David W. Shattuck
 
 bssr is licensed under an GPLv2-only license (https://spdx.org/licenses/GPL-2.0-only.html).
@@ -14,8 +15,7 @@ Methods:
 A subject-level BrainSuite workow prior to conducting statistical analysis involves T1-weighted MRI image processing and registration steps, including cortical surface extraction [1] and alignment to a reference atlas using SVReg [2]. SVReg performs surface-constrained volumetric registration of triangular meshes and image intensities. Bssr is then used to perform population level statistical analysis of various neuroimaging measures.
 
 Bssr supports the following analysis methods:
-* tensor based morphometry (TBM) analysis of voxel-wise magnitudes of the 3D deformation
-fields of MRI images registered to the atlas
+* tensor based morphometry (TBM) analysis of voxel-wise magnitudes of the 3D deformation fields of MRI images registered to the atlas
 * cortical surface analysis of the vertex-wise thickness in the atlas space
 * diffusion parameter maps analysis (e.g., fractional anisotropy, mean diffusivity, radial diffusivity). The statistical analysis is performed in a common coordinate space of an atlas by resampling the data from subject coordinates to a common atlas space using SVReg [2,3]; 
 * region of interest (ROI)-based analysis of average gray matter thickness, surface area, and gray matter volume within cortical ROIs. It also offers tools for correcting for multiple comparisons using false discovery rate (FDR) or permutation testing methods.

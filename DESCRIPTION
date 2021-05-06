@@ -1,7 +1,7 @@
 Package: bssr
 Type: Package
 Title: BrainSuite Statistics Toolbox
-Version: 0.2.7
+Version: 0.2.8
 Authors@R: c(person(given="Shantanu", family="Joshi", role=c("cre","aut"), email="shjoshi@ieee.org"),
              person("Yeun", "Kim", role="aut"),
              person("Kayla", "Schroeder", role="aut"),

@@ -11,7 +11,8 @@ copy_dbm_data(
   atlas = "",
   eddy = TRUE,
   smooth = 0,
-  outdir
+  outdir,
+  exclude_col = ""
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ and should be exactly equal to the individual subject directory name.}
 \item{smooth}{numeric value denoting the smoothing level.}
 
 \item{outdir}{output directory that will contain the copied data}
+
+\item{exclude_col}{character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.}
 }
 \description{
 Package diffusion data for reproducible statistical analysis.

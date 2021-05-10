@@ -4,7 +4,7 @@
 \alias{copy_roi_data}
 \title{Package ROI data for reproducible statistical analysis.}
 \usage{
-copy_roi_data(subjdir = "", csv = "", outdir)
+copy_roi_data(subjdir = "", csv = "", outdir, exclude_col = "")
 }
 \arguments{
 \item{subjdir}{subject directory containing BrainSuite processed data.}
@@ -15,6 +15,8 @@ should be "subjID" and should have subject identifiers you wish to analyze. subj
 and should be exactly equal to the individual subject directory name.}
 
 \item{outdir}{output directory that will contain the copied data}
+
+\item{exclude_col}{character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.}
 }
 \description{
 Package ROI data for reproducible statistical analysis.

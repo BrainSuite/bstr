@@ -15,7 +15,8 @@ package_data(
   measure = "FA",
   atlas = "",
   eddy = TRUE,
-  outdir = NULL
+  outdir = NULL,
+  exclude_col = ""
 )
 }
 \arguments{
@@ -43,6 +44,8 @@ and should be exactly equal to the individual subject directory name.}
 \item{eddy}{boolean for specifying if the diffusion images were eddy-current corrected or not.}
 
 \item{outdir}{output directory that will contain the copied data}
+
+\item{exclude_col}{character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.}
 }
 \description{
 Takes same parameters as \code{\link{load_bss_data}} and copies the data to a new directory specified by outdir. You can repeatedly call this function to copy data of different types (tbm -- nii.gz, cbm -- .dfs files etc.) to the same output directory.

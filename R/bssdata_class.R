@@ -293,7 +293,7 @@ load_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="",
 
   bss_cbm_data <- new("BssCBMData", subjdir, csv, exclude_col)
   if (atlas == "") {
-    brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+    brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
     cbm_surf_atlas <- get_cbm_atlas(brainsuite_atlas_id, hemi)
   }
   else
@@ -318,7 +318,7 @@ load_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="",
 load_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas="", maskfile="", exclude_col) {
 
   bss_tbm_data <- new("BssTBMData", subjdir, csv, exclude_col)
-  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
   tbm_atlas_and_mask <- get_tbm_atlas_and_mask(brainsuite_atlas_id)
 
   if (maskfile != "") {
@@ -350,7 +350,7 @@ load_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas="", maskfile="",
 load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0, atlas="", eddy=TRUE, maskfile="", exclude_col) {
 
   bss_dbm_data <- new("BssDBMData", subjdir, csv, exclude_col)
-  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
   dbm_atlas_and_mask <- get_dbm_atlas_and_mask(brainsuite_atlas_id)
 
   if (maskfile != "") {
@@ -417,11 +417,12 @@ load_roi_data <- function(subjdir="", csv="", roiids="", roimeas="", exclude_col
 #' @param atlas path name to the atlas
 #' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
 #' @param outdir output directory that will contain the copied data
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 #'
 #' @export
 package_data <- function(type="cbm", subjdir=NULL, csv="", hemi="left",
                          cbmsmooth=0.0, tbmsmooth=0.0,
-                         dbmsmooth=0.0, measure="FA", atlas="", eddy=TRUE, outdir=NULL) {
+                         dbmsmooth=0.0, measure="FA", atlas="", eddy=TRUE, outdir=NULL, exclude_col="") {
 
   valid_types <- c("cbm", "tbm", "roi","dbm","nca", "all")
   if (! type %in% valid_types)
@@ -440,18 +441,18 @@ package_data <- function(type="cbm", subjdir=NULL, csv="", hemi="left",
     stop("Output directory exists. Please specify a new output directory that does not exist.", call.=FALSE)
 
   switch(type,
-         cbm = { copy_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = cbmsmooth, outdir=outdir) },
-         tbm = { copy_tbm_data(subjdir=subjdir, csv=csv, smooth=tbmsmooth, atlas=atlas, outdir=outdir) },
+         cbm = { copy_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = cbmsmooth, outdir=outdir, exclude_col=exclude_col) },
+         tbm = { copy_tbm_data(subjdir=subjdir, csv=csv, smooth=tbmsmooth, atlas=atlas, outdir=outdir, exclude_col=exclude_col) },
          dbm = { copy_dbm_data(subjdir=subjdir, csv=csv, measure=measure,
-                                           smooth=dbmsmooth, atlas=atlas, eddy=eddy, outdir=outdir) },
-         roi = { copy_roi_data(subjdir, csv, outdir=outdir) },
+                                           smooth=dbmsmooth, atlas=atlas, eddy=eddy, outdir=outdir, exclude_col=exclude_col) },
+         roi = { copy_roi_data(subjdir, csv, outdir=outdir, exclude_col=exclude_col) },
          all = {
-           copy_cbm_data(subjdir=subjdir, csv=csv, hemi="left", smooth = cbmsmooth, outdir=outdir)
-           copy_cbm_data(subjdir=subjdir, csv=csv, hemi="right", smooth = cbmsmooth, outdir=outdir)
-           copy_tbm_data(subjdir=subjdir, csv=csv, smooth=tbmsmooth, atlas=atlas, outdir=outdir)
+           copy_cbm_data(subjdir=subjdir, csv=csv, hemi="left", smooth = cbmsmooth, outdir=outdir, exclude_col=exclude_col)
+           copy_cbm_data(subjdir=subjdir, csv=csv, hemi="right", smooth = cbmsmooth, outdir=outdir, exclude_col=exclude_col)
+           copy_tbm_data(subjdir=subjdir, csv=csv, smooth=tbmsmooth, atlas=atlas, outdir=outdir, exclude_col=exclude_col)
            copy_dbm_data(subjdir=subjdir, csv=csv, measure=measure,
-                         smooth=dbmsmooth, atlas=atlas, eddy=eddy, outdir=outdir)
-           copy_roi_data(subjdir, csv, outdir=outdir)
+                         smooth=dbmsmooth, atlas=atlas, eddy=eddy, outdir=outdir, exclude_col=exclude_col)
+           copy_roi_data(subjdir, csv, outdir=outdir, exclude_col=exclude_col)
          }
   )
   # Copy the spreadsheet
@@ -467,12 +468,13 @@ package_data <- function(type="cbm", subjdir=NULL, csv="", hemi="left",
 #' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
 #' @param smooth numeric value denoting the smoothing level.
 #' @param outdir output directory that will contain the copied data
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 #'
-copy_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, outdir) {
+copy_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, outdir, exclude_col="") {
 
-  bss_data <- new("BssCBMData", subjdir, csv)
-  logfilenames <- get_brainsuite_logfilename_for_all_subjects(subjdir, csv)
-  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+  bss_data <- new("BssCBMData", subjdir, csv, exclude_col )
+  logfilenames <- get_brainsuite_logfilename_for_all_subjects(subjdir, csv, exclude_col)
+  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
   cbm_atlas_filename <- get_cbm_atlas(brainsuite_atlas_id, hemi)
   cbm_filelist <- get_cbm_file_list(bss_data, hemi, smooth)
   src_filelist <- c(cbm_filelist, logfilenames, cbm_atlas_filename)
@@ -496,12 +498,13 @@ copy_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, outdir) {
 #' @param smooth numeric value denoting the smoothing level.
 #' @param atlas path name to the atlas
 #' @param outdir output directory that will contain the copied data
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 #'
-copy_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas, outdir) {
+copy_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas, outdir, exclude_col="") {
 
-  bss_data <- new("BssTBMData", subjdir, csv)
-  logfilenames <- get_brainsuite_logfilename_for_all_subjects(subjdir, csv)
-  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+  bss_data <- new("BssTBMData", subjdir, csv, exclude_col)
+  logfilenames <- get_brainsuite_logfilename_for_all_subjects(subjdir, csv, exclude_col)
+  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
   tbm_atlas_mask_filename <- get_tbm_atlas_and_mask(brainsuite_atlas_id)
   tbm_filelist <- get_tbm_file_list(bss_data, smooth)
   src_filelist <- c(tbm_filelist, logfilenames, tbm_atlas_mask_filename$nii_atlas, tbm_atlas_mask_filename$nii_atlas_mask)
@@ -530,12 +533,13 @@ copy_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas, outdir) {
 #' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
 #' @param smooth numeric value denoting the smoothing level.
 #' @param outdir output directory that will contain the copied data
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 #'
-copy_dbm_data <- function(subjdir="", csv="", measure="FA", atlas="", eddy=TRUE, smooth=0.0, outdir) {
+copy_dbm_data <- function(subjdir="", csv="", measure="FA", atlas="", eddy=TRUE, smooth=0.0, outdir, exclude_col="") {
 
-  bss_data <- new("BssDBMData", subjdir, csv)
-  logfilenames <- get_brainsuite_logfilename_for_all_subjects(subjdir, csv)
-  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv))
+  bss_data <- new("BssDBMData", subjdir, csv, exclude_col)
+  logfilenames <- get_brainsuite_logfilename_for_all_subjects(subjdir, csv, exclude_col)
+  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
   dbm_atlas_mask_filename <- get_dbm_atlas_and_mask(brainsuite_atlas_id)
 
   message("Copying dbm data", appendLF = FALSE)
@@ -564,10 +568,11 @@ copy_dbm_data <- function(subjdir="", csv="", measure="FA", atlas="", eddy=TRUE,
 #' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
 #' and should be exactly equal to the individual subject directory name.
 #' @param outdir output directory that will contain the copied data
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 #'
-copy_roi_data <- function(subjdir="", csv="", outdir) {
+copy_roi_data <- function(subjdir="", csv="", outdir, exclude_col="") {
 
-  bss_data <- new("BssROIData", subjdir, csv)
+  bss_data <- new("BssROIData", subjdir, csv, exclude_col)
   roiwise_file_list <- get_roi_file_list(bss_data)
   dest_filelist <- file.path(outdir, bss_data@demographics$subjID, basename(roiwise_file_list))
 

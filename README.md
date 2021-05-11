@@ -16,13 +16,13 @@ The BrainSuite Statistics toolbox in R (bssr) is a software package developed in
 For more detailed installation instructions, usage examples, or to check for updated versions of bssr, please visit the bssr website: http://brainsuite.org/bssr.
 
 ### Prerequisites
-* Ensure BrainSuite is installed on your computer <http://brainsuite.org/download>
-* Ensure R is installed on your computer: [https://cran.r-project.org/](https://cran.r-project.org/)
+* Ensure BrainSuite is installed on your computer: <http://brainsuite.org/download>
+* Ensure R is installed on your computer: https://cran.r-project.org/
 * Install RStudio: https://www.rstudio.com/products/rstudio/#Desktop
 * Windows only: Install Rtools, available at https://cran.r-project.org/bin/windows/Rtools/
 
 ### Steps for installation
-* Open RStudio and enter the following two commands to install **bssr version 0.2.9**
+* Open RStudio and enter the following two commands to install **bssr version 0.2.9**.
 * You can install from the bssr_0.2.9.tar.gz file in the BrainSuite21a folder, or you can pull directly from the BrainSuite server.
 * You do not need to untar bssr_0.2.9.tar.gz -- the installer needs it in this format.
 * The following examples assume you have installed BrainSuite21a in the default location for your operating system. If you have used a different path, you will need to specify it in the installation call.
@@ -72,16 +72,17 @@ This should display the BrainSuite installation path.
 
 
 ## Methods
-A subject-level BrainSuite workow prior to conducting statistical analysis involves T1-weighted MRI image processing and registration steps, including cortical surface extraction [1] and alignment to a reference atlas using SVReg [2]. SVReg performs surface-constrained volumetric registration of triangular meshes and image intensities. Bssr is then used to perform population level statistical analysis of various neuroimaging measures.
+Bssr performs statistical analysis on the outputs of the BrainSuite structural workflow, which performs cortical surface extraction [1], alignment to a reference atlas using surface-constrained volumetric registration (SVReg) [2], and, optionally, processing of diffusion MRI data using the BrainSuite diffusion pipeline (BDP) [3]. SVReg performs surface registration of triangular meshes based on curvature and volumetric registration based on image intensities. BDP performs distortion correction, alignment of diffusion MRI to T1-weighted MRI, and fitting of various diffusion models to the corrected diffusion data. Bssr is used to perform population-level statistical analysis of various neuroimaging measures produced by these components. Statistical analysis of voxel-wise and surface-based data is performed in the common coordinate space of the atlas by resampling the data from subject coordinates to a the atlas space using SVReg.
 
 Bssr supports the following analysis methods:
 
 * tensor based morphometry (TBM) analysis of voxel-wise magnitudes of the 3D deformation fields of MRI images registered to the atlas
 * cortical surface analysis of the vertex-wise thickness in the atlas space
-* diffusion parameter maps analysis (e.g., fractional anisotropy, mean diffusivity, radial diffusivity). The statistical analysis is performed in a common coordinate space of an atlas by resampling the data from subject coordinates to a common atlas space using SVReg [2,3]; 
-* region of interest (ROI)-based analysis of average gray matter thickness, surface area, and gray matter volume within cortical ROIs. It also offers tools for correcting for multiple comparisons using false discovery rate (FDR) or permutation testing methods.
+* diffusion parameter maps analysis (e.g., fractional anisotropy, mean diffusivity, radial diffusivity) 
+* region of interest (ROI)-based analysis of average gray matter thickness, surface area, and gray matter volume within cortical ROIs
+* correction for multiple comparisons using false discovery rate (FDR) or permutation testing methods
 
-Bssr is cross-platform and is available on macOS, Windows,and Linux based systems (all platforms with R support).  Bssr is distributed under an open source license (GPLv2-only). Bssr supports functionality for automated report generation to visualize statistical results using R-shiny and R markdown. The volumetric analysis report contains the cluster table, visualizations of clusters on image slices, and shows both the unadjusted and the adjusted versions of p-values and t statistics, respectively. The ROI analysis report shows the demographic spreadsheet, automatic bar plots for ANOVA and regressions, and scatter plot for correlation analyses. Bssr also exports an R markdown report that contains reproducible R commands in both the Rmd file and in the html document [4]. This enables complete reproducibility of statistical results and only requires packaging the R markdown file along with the data.
+Bssr is cross-platform and is available on macOS, Windows,and Linux based systems (all platforms with R support). Bssr is distributed under an open source license (GPLv2-only). Bssr supports functionality for automated report generation to visualize statistical results using R-shiny and R markdown. The volumetric analysis report contains the cluster table, visualizations of clusters on image slices, and shows both the unadjusted and the adjusted versions of p-values and t statistics, respectively. The ROI analysis report shows the demographic spreadsheet, automatic bar plots for ANOVA and regressions, and scatter plot for correlation analyses. Bssr also exports an R markdown report that contains reproducible R commands in both the Rmd file and in the html document [4]. This enables complete reproducibility of statistical results and only requires packaging the R markdown file along with the data.
 
 ---
 

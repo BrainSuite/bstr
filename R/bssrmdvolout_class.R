@@ -382,12 +382,12 @@ BssRmdVolumeOutput <-
 
                   # Function that creates a tabPanel
                   tab_panel = function(panel_type, voxelcoord_index){
-                    dims_mm <- dim(atlas_image)[1:3]*RNifti::pixdim(atlas_image)[1:3]
+                    dims_mm <- dim(bss_data@atlas_image)[1:3]*RNifti::pixdim(bss_data@atlas_image)[1:3]
                     # output PNG dimensions for each axis -- this is the dimension's length in mm divided by the smallest voxel edge
                     # this scales the image so that the width/height of one pixel is equal to the smallest dimension of a voxel
                     # so that it doesn't shrink to < 1 pixel, i.e., anisotropic voxels get stretched across two or more pixels rather
                     # than compressed
-                    scaledPNGdimensions<-round(dims_mm/min(RNifti::pixdim(atlas_image)[1:3]))
+                    scaledPNGdimensions<-round(dims_mm/min(RNifti::pixdim(bss_data@atlas_image)[1:3]))
                     # the rounding when the png changes the aspect ratio slightly, so this uses the new aspect ratio
                     # to compute the relative widths based on the height of the images so that images with the same height
                     # are displayed that way. scaling based on the width alone would not maintain that.

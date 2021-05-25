@@ -382,43 +382,26 @@ BssRmdVolumeOutput <-
 
                   # Function that creates a tabPanel
                   tab_panel = function(panel_type, voxelcoord_index){
-# These computations are in the volume space. they determine the aspect ratio,
-# relative to the smallest resolution dimension, of each axis in 3D
-                    dims <- dim(bss_data@atlas_image)
-                    minres<-min(RNifti::pixdim(bss_data@atlas_image)[1:3])
-                    scalefactor<-RNifti::pixdim(bss_data@atlas_image)[1:3]/minres
-# Yhese are then mapped to the sagittal, coronal, and axial images that are generated
-# by the statmap command line program. These are the relative scales of each png image
-# dimension (x,y) to the smallest voxel dimension -- basically the relative scale.
-# At least 2 images will have the minimum as one of their dimensions.
-# For an isotropic image (e.g., BSA1), these will all be 1
-                    sagScale<-c(scalefactor[2],scalefactor[3])
-                    corScale<-c(scalefactor[1],scalefactor[3])
-                    axScale<-c(scalefactor[1],scalefactor[2])
-# These can then be used to determine the dimensions of the final output png files.
-                    sagDim<-round(c(dims[2],dims[3])*sagScale)
-                    corDim<-round(c(dims[1],dims[3])*corScale)
-                    axDim<-round(c(dims[1],dims[2])*axScale)
-# Finally, we compute the aspect ratio for each png.
-                    sagAspect<-sagDim[1]/sagDim[2];
-                    corAspect<-corDim[1]/corDim[2];
-                    axAspect<-axDim[1]/axDim[2];
-# We then determine the height of the row, given by the max height of the three images
-                    dims_mm <- dim(bss_data@atlas_image)[1:3]*RNifti::pixdim(bss_data@atlas_image)[1:3] # this computes the dims in mm instead of voxels
-                    maxH <- max(dims_mm[2],dims_mm[3])
-# A width scale factor is then determined based on the ratio of the height of the png
-# and the max height, times the aspect ratio for image
-                    sagWScale <- dims_mm[3]/maxH * sagAspect
-                    corWScale <- dims_mm[3]/maxH * corAspect
-                    axWScale  <- dims_mm[2]/maxH * axAspect
-# This scales images with the same height, but different widths, so that they are 
-# rendered with the same height regardless of any rounding in the image dimensions.
-# The widths are scaled proportionally so that they total to 93%.
-                    totalWidth <- sagWScale + corWScale + axWScale
-                    sagWidth <- 93 * sagWScale / totalWidth
-                    corWidth <- 93 * corWScale / totalWidth
-                    axWidth <- 93 * axWScale / totalWidth
-# This leaves 7% for the color bar.
+                    dims_mm <- dim(atlas_image)[1:3]*RNifti::pixdim(atlas_image)[1:3]
+                    # output PNG dimensions for each axis -- this is the dimension's length in mm divided by the smallest voxel edge
+                    # this scales the image so that the width/height of one pixel is equal to the smallest dimension of a voxel
+                    # so that it doesn't shrink to < 1 pixel, i.e., anisotropic voxels get stretched across two or more pixels rather
+                    # than compressed
+                    scaledPNGdimensions<-round(dims_mm/min(RNifti::pixdim(atlas_image)[1:3]))
+                    # the rounding when the png changes the aspect ratio slightly, so this uses the new aspect ratio
+                    # to compute the relative widths based on the height of the images so that images with the same height
+                    # are displayed that way. scaling based on the width alone would not maintain that.
+                    # so we take the physical height of the image and multiply it by the aspect ratio of the png
+                    # to compute the physical width of the resampled image
+                    sagWidth <- dims_mm[3] * scaledPNGdimensions[2]/scaledPNGdimensions[3];
+                    corWidth <- dims_mm[3] * scaledPNGdimensions[1]/scaledPNGdimensions[3];
+                    axWidth  <- dims_mm[2] * scaledPNGdimensions[1]/scaledPNGdimensions[2];
+                    # we then rescale this physical width relative to the total width and multiply by 93 to leave 7% space for the colorbar
+                    totalWidth <- sagWidth + corWidth + axWidth
+                    sagWidth <- 93 * sagWidth / totalWidth
+                    corWidth <- 93 * corWidth / totalWidth
+                    axWidth <- 93 * axWidth / totalWidth
+                    # This leaves 7% for the color bar.
                     width <- c(paste0(sagWidth,"%"),paste0(corWidth,"%"),paste0(axWidth,"%"),"7%")
                     
                     if (bss_model@model_type=="bss_corr"){

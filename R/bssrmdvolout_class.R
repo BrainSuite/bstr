@@ -383,11 +383,40 @@ BssRmdVolumeOutput <-
                   # Function that creates a tabPanel
                   tab_panel = function(panel_type, voxelcoord_index){
                     #width <- c("36.5%","30.5%","25.5%", "7%")
-                    dim_sum <- dim(bss_data@atlas_image)[1]+dim(bss_data@atlas_image)[2]+dim(bss_data@atlas_image)[3]
-                    dim1 <- dim(bss_data@atlas_image)[2]/dim_sum*93
-                    dim2 <- dim(bss_data@atlas_image)[1]/dim_sum*93
-                    dim3 <- dim(bss_data@atlas_image)[1]/dim_sum*93
-                    width <- c(paste0(dim1,"%"),paste0(dim2,"%"),paste0(dim3,"%"),"7%")
+                    #dim_sum <- dim(bss_data@atlas_image)[1]+dim(bss_data@atlas_image)[2]+dim(bss_data@atlas_image)[3]
+                    #dim1 <- dim(bss_data@atlas_image)[2]/dim_sum*93
+                    #dim2 <- dim(bss_data@atlas_image)[1]/dim_sum*93
+                    #dim3 <- dim(bss_data@atlas_image)[1]/dim_sum*93
+                    dims <- dim(bss_data@atlas_image)
+                    minres<-min(RNifti::pixdim(bss_data@atlas_image)[1:3])
+                    scalefactor<-RNifti::pixdim(bss_data@atlas_image)[1:3]/minres
+
+                    sagScale<-c(scalefactor[2],scalefactor[3])
+                    corScale<-c(scalefactor[1],scalefactor[3])
+                    axScale<-c(scalefactor[1],scalefactor[2])
+
+                    sagDim<-trunc(c(dims[2],dims[3])*sagScale)
+                    corDim<-trunc(c(dims[1],dims[3])*corScale)
+                    axDim<-trunc(c(dims[1],dims[2])*axScale)
+
+                    sagAspect<-sagDim[1]/sagDim[2];
+                    corAspect<-corDim[1]/corDim[2];
+                    axAspect<-axDim[1]/axDim[2];
+
+                    dims_mm <- dim(bss_data@atlas_image)[1:3]*RNifti::pixdim(bss_data@atlas_image)[1:3] # this computes the dims in mm instead of voxels
+                    maxH <- max(dims_mm[2],dims_mm[3])
+
+                    sagWScale <- dims_mm[3]/maxH * sagAspect
+                    corWScale <- dims_mm[3]/maxH * corAspect
+                    axWScale  <- dims_mm[2]/maxH * axAspect
+
+                    totalWidth <- sagWScale + corWScale + axWScale
+                    sagWidth <- 93 * sagWScale / totalWidth
+                    corWidth <- 93 * corWScale / totalWidth
+                    axWidth <- 93 * axWScale / totalWidth
+
+                    width <- c(paste0(sagWidth,"%"),paste0(corWidth,"%"),paste0(axWidth,"%"),"7%")
+                    
                     if (bss_model@model_type=="bss_corr"){
                       panel_names<- c("Adjusted Correlation Values","Correlation Values")
                       overlay <- c(bs_stat_overlays$corr_values_masked_adjusted,bs_stat_overlays$corr_values)

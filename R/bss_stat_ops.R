@@ -44,10 +44,7 @@ bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr", 
 
   switch(mult_comp,
          perm={
-           cores <- 1 #parallel::detectCores()
-           cl <- parallel::makeCluster(cores)
-           registerDoParallel(cl)
-           options(warn=-1)
+
            pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
            bss_model@pvalues <- pvalue_and_nulldist[[1]]
            bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
@@ -57,8 +54,8 @@ bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr", 
            bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
            bss_model@tvalues_adjusted <- bss_model@tvalues
            bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
-           stopCluster(cl)
-           options(warn=0)
+           bss_model@pvalues_adjusted <- bss_model@pvalues_adjusted*bss_model@tvalues_sign
+
          },
          fdr={
            bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
@@ -149,10 +146,7 @@ bss_lm <- function(main_effect="", covariates="", bss_data, mult_comp = "fdr", n
 
   switch(mult_comp,
          perm={
-           cores <- 1 #parallel::detectCores()
-           cl <- parallel::makeCluster(cores)
-           registerDoParallel(cl)
-           options(warn=-1)
+
            pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
            bss_model@pvalues <- pvalue_and_nulldist[[1]]
            bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
@@ -162,8 +156,8 @@ bss_lm <- function(main_effect="", covariates="", bss_data, mult_comp = "fdr", n
            bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
            bss_model@tvalues_adjusted <- bss_model@tvalues
            bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
-           stopCluster(cl)
-           options(warn=0)
+           bss_model@pvalues_adjusted <- bss_model@pvalues_adjusted*bss_model@tvalues_sign
+
          },
          fdr={
            bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
@@ -574,44 +568,38 @@ maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
   # (3) compute a set of permuted data Y
   bss_data_cp <- bss_data
 
-  j <- 1 # Initialize j to avoid "no visible binding" warning
-  tvalues_all <- foreach(j=1:(num_of_perm-1), .export=c('T0', 'maxT0', 'N', 'bss_lm_null','bss_data_cp',
-                                                     'main_effect', 'covariates', 'lm_vec'), .packages=c('Matrix', 'bit')) %dopar% {
-                                                       set.seed(j)
-                                                       pmatrix <- as(sample(N), "pMatrix")
-                                                       Y_j <- (pmatrix %*% bss_lm_null@residuals) + (bss_lm_null@X_design_null %*% bss_lm_null@beta_coeff)
+  t_bin_int <- rep(0, dim(bss_data@data_array)[2])
+  t_max_per_perm <- rep(0, num_of_perm-1)
+  # rewrote into for loop, single core
+  for (j in 1:(num_of_perm-1)){
+    set.seed(j)
+    pmatrix <- as(sample(N), "pMatrix")
+    Y_j <- (pmatrix %*% bss_lm_null@residuals) + (bss_lm_null@X_design_null %*% bss_lm_null@beta_coeff)
 
-                                                       # (4) regress permuted data Y_j against the full model
-                                                       bss_data_cp@data_array <- Y_j
-                                                       bss_lm_full_perm <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data_cp )
+    # (4) regress permuted data Y_j against the full model
+    bss_data_cp@data_array <- Y_j
+    bss_lm_full_perm <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data_cp )
 
-                                                       ## binarize vector after comparing permuted T and observed T
-                                                       idx <- which( abs(T0) <= abs(bss_lm_full_perm@tvalues) )
+    ## binarize vector after comparing permuted T and observed T, where T0 is the vector containing
+    # all t values from the observed model
+    idx <- which( abs(T0) <= abs(bss_lm_full_perm@tvalues) )
 
-                                                       t_bin <- as.bit(rep(FALSE, dim(bss_data_cp@data_array)[2]))
-                                                       t_bin[idx] <- TRUE
+    t_bin_int[idx] <- t_bin_int[idx] + 1
 
-                                                       tvalue_j <- bss_lm_full_perm@tvalues[ which.max( abs(bss_lm_full_perm@tvalues) ) ]
+    # t_bin <- as.bit(rep(FALSE, dim(bss_data_cp@data_array)[2]))
+    # t_bin[idx] <- TRUE
 
-                                                       return(list(t_bin, tvalue_j))
+    t_max_per_perm[j] <- bss_lm_full_perm@tvalues[ which.max( abs(bss_lm_full_perm@tvalues) ) ] # max tvalue from perm
 
-                                                     }
-  tvalues_all[[num_of_perm]] <- list(as.bit(rep(TRUE, dim(bss_data@data_array)[2])), maxT0)
-
-  n <- 1# Initialize i to avoid "no visible binding" warning
-  pvalues <- foreach(n=1:dim(bss_data@data_array)[2], .export=c('tvalues_all', 'num_of_perm')) %dopar% {
-    count <- sum(sapply( seq(1, num_of_perm), function(x) (tvalues_all[[x]][[1]][n])) == TRUE)
-    pvalue <- as.double(count/num_of_perm)
-    pvalue_widx <- array(c(pvalue, n), dim=c(1,2))
-    # pvalue_widx <- list(pvalue, n)
   }
 
-  p_sort <- do.call('rbind', pvalues)
-  pvalues_sort <- p_sort[order(p_sort[,2]), ]
+  pvalues <- rep(0, dim(bss_data@data_array)[2])
+  for (n in 1:dim(bss_data@data_array)[2]){
+    count <- t_bin_int[n]
+    pvalues[n] <- as.double((count+1)/num_of_perm)
+  }
 
-  tvalues_null <- sapply( seq(1, num_of_perm), function(x) tvalues_all[[x]][[2]])
-
-  return(list(pvalues_sort[,1], tvalues_null))
+  return(list(pvalues, t_max_per_perm))
 
 }
 
@@ -633,16 +621,13 @@ perm_p_adjust <- function(main_effect = "", covariates = "", bss_data, tvalues_n
   bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
 
   tvalues <- bss_lm_full@tvalues
+  pvalues_adj <- rep(0, length(tvalues))
 
-  i <- 1  # Initialize i to avoid "no visible binding" warning
-  pvalues <- foreach(i=1:length(tvalues), .export=c('tvalues_null', 'tvalues')) %dopar% {
-    p <- sum(abs(tvalues_null) >= abs(tvalues[i])) / length(tvalues_null)
-    pvalue_widx <- array(c(p,i), dim = c(1,2))
+  for (i in 1:length(tvalues)){
+    p <- (sum(abs(tvalues_null) >= abs(tvalues[i]))+1) / (length(tvalues_null)+1)
+    pvalues_adj[i] <- p
   }
-
-  p_sort <- do.call('rbind', pvalues)
-  pvalues_sort <- p_sort[order(p_sort[,2]), ]
-  return(pvalues_sort[,1])
+  return(pvalues_adj)
 }
 
 #' Linear mixed-effects model for brain imaging data.

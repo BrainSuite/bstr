@@ -4,7 +4,14 @@
 \alias{copy_tbm_data}
 \title{Package tensor-based morphometry data for reproducible statistical analysis.}
 \usage{
-copy_tbm_data(subjdir = "", csv = "", smooth = 0, atlas, outdir)
+copy_tbm_data(
+  subjdir = "",
+  csv = "",
+  smooth = 0,
+  atlas,
+  outdir,
+  exclude_col = ""
+)
 }
 \arguments{
 \item{subjdir}{subject directory containing BrainSuite processed data.}
@@ -19,6 +26,8 @@ and should be exactly equal to the individual subject directory name.}
 \item{atlas}{path name to the atlas}
 
 \item{outdir}{output directory that will contain the copied data}
+
+\item{exclude_col}{character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.}
 }
 \description{
 Package tensor-based morphometry data for reproducible statistical analysis.

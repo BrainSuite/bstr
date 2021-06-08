@@ -183,20 +183,9 @@ get_bs_file_list <- function(analysis_type) {
 #'
 get_roi_file_list <- function(bss_data) {
 
-  roi_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID,
-                            sprintf('%s%s', bss_data@demographics$subjID, bs_file_formats$roi_txt))
-  roi_bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat',
-                            sprintf('%s%s', bss_data@demographics$subjID, bs_file_formats$roi_txt))
-  # Check if all subjects have roi text files
-  if ( !all(file.exists(roi_filelist)) & !all(file.exists(roi_bids_filelist))) {
-    message('Following subjects have missing roi text files')
-    print(roi_filelist[which(!file.exists(roi_filelist))], row.names = FALSE)
-    stop('\nCheck if svreg was run succesfully and if roiwise.txt are present in all the subjects.', call. = FALSE)
-  }
-  if(all(file.exists(roi_filelist)))
-    return(roi_filelist)
-  else
-    return(roi_bids_filelist)
+  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bss_data, type="roi", hemi="", smooth="", measure="")
+  return(bids_flag_and_filelist$filelist)
+
 }
 #' Returns a list of the cortical surface files for all subjects
 #' @param bss_data object of type \code{BssData}
@@ -205,19 +194,8 @@ get_roi_file_list <- function(bss_data) {
 #'
 get_cbm_file_list <- function(bss_data, hemi, smooth = 0) {
 
-  cbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_surface_file_string(hemi, smooth))
-  cbm_bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat', bs_surface_file_string(hemi, smooth))
-  # Check if all subjects have dfs files
-  if ( !all(file.exists(cbm_filelist)) & !all(file.exists(cbm_bids_filelist))) {
-    message('Following subjects have missing dfs files')
-    print(cbm_filelist[which(!file.exists(cbm_filelist))], row.names = FALSE)
-    stop('\nCheck if svreg was run succesfully on all the subjects. Also check the smoothing level (smooth= under [subject]).\nIt is possible that surface files at the specified smoothing level do not exist.',
-         call. = FALSE)
-  }
-  if(all(file.exists(cbm_filelist)))
-    return(cbm_filelist)
-  else
-    return(cbm_bids_filelist)
+  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bss_data, type="cbm", hemi, smooth)
+  return(bids_flag_and_filelist$filelist)
 }
 #' Returns a list of the tensor-based files for all subjects
 #' @param bss_data object of type \code{BssData}
@@ -225,18 +203,8 @@ get_cbm_file_list <- function(bss_data, hemi, smooth = 0) {
 #'
 get_tbm_file_list <- function(bss_data, smooth = 0) {
 
-  tbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_volume_jacobian_file_string(smooth), bss_data@demographics$subjID))
-  tbm_bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat', sprintf(bs_BIDS_volume_jacobian_file_string(smooth), bss_data@demographics$subjID))
-  # Check if all subjects have nii.gz files
-  if ( !all(file.exists(tbm_filelist)) & !all(file.exists(tbm_bids_filelist))) {
-    message('Following subjects have missing nii.gz files')
-    print(tbm_filelist[which(!file.exists(tbm_filelist))], row.names = FALSE)
-    stop('\nCheck if svreg was run succesfully and if jacobian* files exist for all the subjects.\nAlso check if smoothing was performed.', call. = FALSE)
-  }
-  if(all(file.exists(tbm_filelist)))
-    return(tbm_filelist)
-  else
-    return(tbm_bids_filelist)
+  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bss_data, type="tbm", hemi="left", smooth)
+  return(bids_flag_and_filelist$filelist)
 }
 
 #' Returns a list of the diffusion files for all subjects
@@ -247,22 +215,8 @@ get_tbm_file_list <- function(bss_data, smooth = 0) {
 #'
 get_dbm_file_list <- function(bss_data, measure, smooth = 0, eddy = TRUE) {
 
-  valid_dbm_measures <- c('FA', 'MD', 'axial', 'radial', 'mADC', 'FRT_GFA')
-  if (! measure %in% valid_dbm_measures) {
-    stop(sprintf("Valid dbm measures are %s.", paste(valid_dbm_measures, collapse = ', ')), call. = FALSE)
-  }
-  dbm_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_diffusion_file_string(measure, smooth, eddy), bss_data@demographics$subjID))
-  dbm_bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'dwi', sprintf(bs_BIDS_diffusion_file_string(measure, smooth, eddy), bss_data@demographics$subjID))
-  # Check if all subjects have nii.gz files
-  if ( !all(file.exists(dbm_filelist)) & !all(file.exists(dbm_bids_filelist))) {
-    message('Following subjects have missing nii.gz files')
-    print(dbm_filelist[which(!file.exists(dbm_filelist))], row.names = FALSE)
-    stop('\nCheck if svreg_apply_map was run succesfully and if the *.dwi.*.atlas.*.nii.gz files exist for all the subjects.\nAlso check if smoothing was performed.', call. = FALSE)
-  }
-  if(all(file.exists(dbm_filelist)))
-    return(dbm_filelist)
-  else
-    return(dbm_bids_filelist)
+  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bss_data, type="dbm", hemi="left", smooth, measure)
+  return(bids_flag_and_filelist$filelist)
 }
 #' Read the BrainSuite atlas prefix from the atlas
 #' @param atlas filepath for atlas
@@ -315,19 +269,20 @@ get_brainsuite_atlas_id_from_logfile <- function(logfile) {
 #' Gets the BraisSuite svreg.log file's filepath
 #' @param subjdir individual subject directory that the svreg.log file exists in
 #' @param csv csv file for the svreg.log file
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 #' @export
-get_brainsuite_logfilename <- function(subjdir, csv) {
+get_brainsuite_logfilename <- function(subjdir, csv, exclude_col="") {
   # Open the svreg.log file and get the atlas file name
   if ( identical(tools::file_ext(csv), 'tsv') | identical(tools::file_ext(csv), 'csv')  ) {
-    demo <- read_demographics(csv)
+    demog <- read_demographics(csv, exclude_col)
   }
   # The first column has to contain subject IDs which are same as subject directories
-  first_subjid <- demo[[1]][1]
+  first_subjid <- demog[[1]][1]
   # Get atlas names from log files.
-  svreg_log_file <- Sys.glob(file.path(subjdir, first_subjid, "*", '*.svreg.log'))
+  svreg_log_file <- Sys.glob(file.path(subjdir, first_subjid, "*", '*.svreg.log')) #Extra * due to BIDS compatibility (extra dir anat or dwi)
 
   if (length(svreg_log_file) == 0){
-    svreg_log_file <- Sys.glob(file.path(subjdir, first_subjid, '*.svreg.log'))
+    svreg_log_file <- Sys.glob(file.path(subjdir, first_subjid, '*.svreg.log'))  #If subject data is not BIDS compatible
   }
   # svreg_log_file <- file.path(subjdir, first_subjid, sprintf('%s.svreg.log', first_subjid))
   if (check_file_exists(svreg_log_file, raise_error = TRUE,
@@ -338,19 +293,20 @@ get_brainsuite_logfilename <- function(subjdir, csv) {
 #' Get the svreg log file for each subject
 #' @param subjdir individual subject directory that the svreg.log file exists in
 #' @param csv csv file for the svreg.log file
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 #' @export
-get_brainsuite_logfilename_for_all_subjects <- function(subjdir, csv) {
+get_brainsuite_logfilename_for_all_subjects <- function(subjdir, csv, exclude_col="") {
   # Open the svreg.log file and get the atlas file name
   if ( identical(tools::file_ext(csv), 'tsv') | identical(tools::file_ext(csv), 'csv')  ) {
-    demo <- read_demographics(csv)
+    demog <- read_demographics(csv, exclude_col)
   }
   # The first column has to contain subject IDs which are same as subject directories
-  first_subjid <- demo[[1]][1]
+  first_subjid <- demog[[1]][1]
   # Get atlas names from log files.
-  svreg_log_files <- Sys.glob(file.path(subjdir, demo[[1]], "*", '*.svreg.log'))
+  svreg_log_files <- Sys.glob(file.path(subjdir, demog[[1]], "*", '*.svreg.log'))
 
   if (length(svreg_log_files) == 0){
-    svreg_log_files <- Sys.glob(file.path(subjdir, demo[[1]], '*.svreg.log'))
+    svreg_log_files <- Sys.glob(file.path(subjdir, demog[[1]], '*.svreg.log'))
   }
   # svreg_log_file <- file.path(subjdir, first_subjid, sprintf('%s.svreg.log', first_subjid))
   if (check_multiple_files_exists(svreg_log_files, errmesg = 'Could not find svreg.log in a few subject directories.')) {
@@ -477,14 +433,73 @@ get_custom_dbm_atlas_and_mask <- function(brainsuite_custom_atlas_prefix) {
 read_demographics <- function(csvfile, exclude_col="") {
 
   switch(tools::file_ext(csvfile),
-         "tsv" = {demo <- read.table(file = csvfile, sep = "\t", header = T)},
-         "csv" = {demo <- read.csv(csvfile)})
+         "tsv" = {demog <- read.table(file = csvfile, sep = "\t", header = T)},
+         "csv" = {demog <- read.csv(csvfile)})
   # demo <- read.csv(csvfile)
-  colnames(demo)[1] <- "subjID"
+  colnames(demog)[1] <- "subjID"
   if (exclude_col != "") {
-    if (! exclude_col %in% colnames(demo))
+    if (! exclude_col %in% colnames(demog))
       stop(sprintf("Exclude column specified as %s does not exist in %s.", exclude_col, csvfile), call. = FALSE)
-    demo <- subset(demo, demo[[exclude_col]] == 1)
+    demog <- demog[demog[, exclude_col] == 0,]
   }
-  return(demo)
+  return(demog)
+}
+
+check_bids_compatibility_and_get_filelist <- function(bss_data, type="cbm", hemi, smooth = 0, measure="FA", eddy = TRUE) {
+
+  valid_types <- c("cbm", "tbm", "roi", "dbm")
+  if (! type %in% valid_types)
+    stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
+
+  if (type == "cbm") {
+    filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_surface_file_string(hemi, smooth))
+    bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat', bs_surface_file_string(hemi, smooth))
+  }
+  else if (type == "tbm") {
+    filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_volume_jacobian_file_string(smooth), bss_data@demographics$subjID))
+    bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat', sprintf(bs_BIDS_volume_jacobian_file_string(smooth), bss_data@demographics$subjID))
+  }
+  else if (type == "dbm") {
+    valid_dbm_measures <- c('FA', 'MD', 'axial', 'radial', 'mADC', 'FRT_GFA')
+    if (! measure %in% valid_dbm_measures) {
+      stop(sprintf("Valid dbm measures are %s.", paste(valid_dbm_measures, collapse = ', ')), call. = FALSE)
+    }
+    filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_diffusion_file_string(measure, smooth, eddy), bss_data@demographics$subjID))
+    bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'dwi', sprintf(bs_BIDS_diffusion_file_string(measure, smooth, eddy), bss_data@demographics$subjID))
+
+  }
+  else if (type == "roi") {
+    filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID,
+                              sprintf('%s%s', bss_data@demographics$subjID, bs_file_formats$roi_txt))
+    bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat',
+                                   sprintf('%s%s', bss_data@demographics$subjID, bs_file_formats$roi_txt))
+  }
+
+  # Check BIDS compatibility
+  if (any(file.exists(filelist))) {
+    bids_compatible = FALSE
+  }
+  else if (any(file.exists(bids_filelist))) {
+    bids_compatible = TRUE
+    filelist <- bids_filelist
+  }
+  else {
+    message('Following subjects have missing files')
+    print(filelist[which(!file.exists(filelist))], row.names = FALSE)
+    stop('\nCheck if SVREG was run succesfully on all the subjects. Also check the smoothing level (smooth= under [subject]).\nIt is possible that surface or volume files at the specified smoothing level do not exist.',
+         call. = FALSE)
+
+#    stop('\nCould not understand the directory hierarchy. Check if svreg was run succesfully on all the subjects. Also check the smoothing level (smooth= under [subject]).\nIt is possible that surface files at the specified smoothing level do not exist.',
+#         call. = FALSE)
+  }
+
+  # Check if all files exist
+  if ( !all(file.exists(filelist))) {
+    message('Following subjects have missing files')
+    print(filelist[which(!file.exists(filelist))], row.names = FALSE)
+    stop('\nCheck if SVREG was run succesfully on all the subjects. Also check the smoothing level (smooth= under [subject]).\nIt is possible that surface or volume files at the specified smoothing level do not exist.',
+         call. = FALSE)
+  }
+  return (list("bids_compatible" = bids_compatible, "filelist" = filelist))
+
 }

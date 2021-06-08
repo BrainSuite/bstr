@@ -382,12 +382,28 @@ BssRmdVolumeOutput <-
 
                   # Function that creates a tabPanel
                   tab_panel = function(panel_type, voxelcoord_index){
-                    #width <- c("36.5%","30.5%","25.5%", "7%")
-                    dim_sum <- dim(bss_data@atlas_image)[1]+dim(bss_data@atlas_image)[2]+dim(bss_data@atlas_image)[3]
-                    dim1 <- dim(bss_data@atlas_image)[2]/dim_sum*93
-                    dim2 <- dim(bss_data@atlas_image)[1]/dim_sum*93
-                    dim3 <- dim(bss_data@atlas_image)[1]/dim_sum*93
-                    width <- c(paste0(dim1,"%"),paste0(dim2,"%"),paste0(dim3,"%"),"7%")
+                    dims_mm <- dim(bss_data@atlas_image)[1:3]*RNifti::pixdim(bss_data@atlas_image)[1:3]
+                    # output PNG dimensions for each axis -- this is the dimension's length in mm divided by the smallest voxel edge
+                    # this scales the image so that the width/height of one pixel is equal to the smallest dimension of a voxel
+                    # so that it doesn't shrink to < 1 pixel, i.e., anisotropic voxels get stretched across two or more pixels rather
+                    # than compressed
+                    scaledPNGdimensions<-round(dims_mm/min(RNifti::pixdim(bss_data@atlas_image)[1:3]))
+                    # the rounding when the png changes the aspect ratio slightly, so this uses the new aspect ratio
+                    # to compute the relative widths based on the height of the images so that images with the same height
+                    # are displayed that way. scaling based on the width alone would not maintain that.
+                    # so we take the physical height of the image and multiply it by the aspect ratio of the png
+                    # to compute the physical width of the resampled image
+                    sagWidth <- dims_mm[3] * scaledPNGdimensions[2]/scaledPNGdimensions[3];
+                    corWidth <- dims_mm[3] * scaledPNGdimensions[1]/scaledPNGdimensions[3];
+                    axWidth  <- dims_mm[2] * scaledPNGdimensions[1]/scaledPNGdimensions[2];
+                    # we then rescale this physical width relative to the total width and multiply by 93 to leave 7% space for the colorbar
+                    totalWidth <- sagWidth + corWidth + axWidth
+                    sagWidth <- 93 * sagWidth / totalWidth
+                    corWidth <- 93 * corWidth / totalWidth
+                    axWidth <- 93 * axWidth / totalWidth
+                    # This leaves 7% for the color bar.
+                    width <- c(paste0(sagWidth,"%"),paste0(corWidth,"%"),paste0(axWidth,"%"),"7%")
+                    
                     if (bss_model@model_type=="bss_corr"){
                       panel_names<- c("Adjusted Correlation Values","Correlation Values")
                       overlay <- c(bs_stat_overlays$corr_values_masked_adjusted,bs_stat_overlays$corr_values)

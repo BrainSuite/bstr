@@ -4,7 +4,14 @@
 \alias{copy_cbm_data}
 \title{Package cortical surface data for reproducible statistical analysis.}
 \usage{
-copy_cbm_data(subjdir = "", csv = "", hemi = "left", smooth = 0, outdir)
+copy_cbm_data(
+  subjdir = "",
+  csv = "",
+  hemi = "left",
+  smooth = 0,
+  outdir,
+  exclude_col = ""
+)
 }
 \arguments{
 \item{subjdir}{subject directory containing BrainSuite processed data.}
@@ -19,6 +26,8 @@ and should be exactly equal to the individual subject directory name.}
 \item{smooth}{numeric value denoting the smoothing level.}
 
 \item{outdir}{output directory that will contain the copied data}
+
+\item{exclude_col}{character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.}
 }
 \description{
 Package cortical surface data for reproducible statistical analysis.

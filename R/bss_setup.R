@@ -76,7 +76,7 @@ get_brainsuite_path_on_macOS <- function(quiet = TRUE, raise_error = FALSE) {
   # Test bs_paths for valid installations
   valid_bs_path = ""
   for (path in bs_paths) {
-    if (check_bs_atlas_binaries_exist(path, quiet = FALSE, raise_error = raise_error)) {
+    if (check_bs_atlas_binaries_exist(path, quiet = quiet, raise_error = raise_error)) {
       valid_bs_path = path
       break
     }
@@ -97,7 +97,7 @@ get_brainsuite_path_on_unix <- function(quiet = TRUE, raise_error = FALSE) {
   # Test bs_paths for valid installations
   valid_bs_path = ""
   for (path in bs_paths) {
-    if (check_bs_atlas_binaries_exist(path, quiet = FALSE, raise_error = FALSE)) {
+    if (check_bs_atlas_binaries_exist(path, quiet = quiet, raise_error = FALSE)) {
       valid_bs_path = path
       break
     }
@@ -115,7 +115,7 @@ get_brainsuite_path_on_windows <- function(quiet = TRUE, raise_error = FALSE) {
   # Test bs_paths for valid installations
   valid_bs_path = ""
   for (path in bs_paths) {
-    if (check_bs_atlas_binaries_exist(path, quiet = FALSE, raise_error = FALSE)) {
+    if (check_bs_atlas_binaries_exist(path, quiet = quiet, raise_error = FALSE)) {
       valid_bs_path = path
       break
     }
@@ -167,6 +167,8 @@ is_brainsute_installed <- function(quiet = FALSE, raise_error = FALSE) {
   bssr_ini_file <- get_bssr_ini_path()
   if (check_file_exists(bssr_ini_file, raise_error = raise_error)) {
     bs_settings <- ini::read.ini(bssr_ini_file)
+    if (bs_settings$path$brainsuite_path=='////')
+      return (FALSE)
     if (check_bs_atlas_binaries_exist(bs_settings$path$brainsuite_path, quiet = quiet, raise_error = raise_error))
       return(TRUE)
     else
@@ -199,13 +201,29 @@ get_labeldesc_path <- function() {
 #' @export
 get_brainsuite_install_path <- function(quiet = TRUE, raise_error = FALSE) {
   brainsuite_path_bssr_ini <- get_brainsuite_path_from_bssr_ini()
-  if (is_valid_brainsute_install_path(brainsuite_path_bssr_ini))
-    return(brainsuite_path_bssr_ini)
   switch(get_os(),
          macOS = {brainsuite_path <- get_brainsuite_path_on_macOS(quiet, raise_error)},
          unix = {brainsuite_path <- get_brainsuite_path_on_unix(quiet, raise_error)},
          windows = {brainsuite_path <- get_brainsuite_path_on_windows(quiet, raise_error)}
   )
+
+  if (is_valid_brainsute_install_path(brainsuite_path_bssr_ini))
+  {
+    bs_paths = sort(c(brainsuite_path_bssr_ini, brainsuite_path), decreasing = TRUE)
+    if (bs_paths[1] == brainsuite_path_bssr_ini)
+      return(brainsuite_path_bssr_ini)
+    else #bs_path[1] points to an upgraded version of BrainSuite
+    {
+      message('A new version of BrainSuite is detected.', appendLF = TRUE)
+      message(sprintf('Previous BrainSuite install path was %s', brainsuite_path_bssr_ini), appendLF = TRUE)
+      message(sprintf('Updating BrainSuite install path to the new location %s', bs_paths[1]), appendLF = TRUE)
+      set_brainsuite_path_in_bssr_ini(bs_paths[1])
+      brainsuite_path = bs_paths[1]
+    }
+  }
+  else
+    set_brainsuite_path_in_bssr_ini(brainsuite_path)
+
   return(brainsuite_path)
 }
 
@@ -217,6 +235,25 @@ get_brainsuite_path_from_bssr_ini <- function() {
   bs_settings <- ini::read.ini(bssr_ini_file)
   return(bs_settings$path$brainsuite_path)
 }
+
+#' Set BrainSuite installation path in bssr.ini
+#' @param brainsuite_path path to the BrainSuite installation
+#' @export
+set_brainsuite_path_in_bssr_ini <- function(brainsuite_path) {
+  if (is_valid_brainsute_install_path(brainsuite_path))
+  {
+    bssr_ini_file <- get_bssr_ini_path()
+    bs_settings <- ini::read.ini(bssr_ini_file)
+    bs_settings$path$brainsuite_path <- brainsuite_path
+    ini::write.ini(bs_settings, bssr_ini_file)
+    message(sprintf('BrainSuite installation path in bssr points to %s.', brainsuite_path), appendLF = TRUE)
+  }
+  else
+  {
+    message(sprintf('Invalid BrainSuite installation path %s.', brainsuite_path), appendLF = TRUE)
+  }
+}
+
 
 #' Check if a given BrainSuite path is valid
 #'

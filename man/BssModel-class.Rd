@@ -71,7 +71,7 @@ only}
 
 \item{\code{se}}{numeric vector storing the standard error}
 
-\item{\code{mult_comp}}{character type of multiple comparison adjustment. Takes values of "fdr" or "perm"}
+\item{\code{mult_comp}}{character type of multiple comparison adjustment. Takes values of "fdr"}
 
 \item{\code{pvalues_adjusted}}{numeric vector storing the adjusted p-values}
 

@@ -4,13 +4,7 @@
 \alias{bss_lm}
 \title{Linear regression for brain imaging data.}
 \usage{
-bss_lm(
-  main_effect = "",
-  covariates = "",
-  bss_data,
-  mult_comp = "fdr",
-  niter = 5000
-)
+bss_lm(main_effect = "", covariates = "", bss_data, mult_comp = "fdr")
 }
 \arguments{
 \item{main_effect}{Character string containing an independent variable whose effect you want to measure.
@@ -23,8 +17,6 @@ one covariates are included, they should be separated by a \code{+} operator sim
 \item{bss_data}{Object of type \code{\link{BssData}}}
 
 \item{mult_comp}{method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.}
-
-\item{niter}{numeric variable for the number of iterations for permutations test. Will be ignored if mult_comp="fdr"}
 }
 \description{
 This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and performs

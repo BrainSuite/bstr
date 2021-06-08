@@ -28,11 +28,12 @@
 #' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
 #' @param  bss_data Object of type \code{\link{BssData}}
 #' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.
-#' @param  niter numeric variable for the number of iterations for permutations test. Will be ignored if mult_comp="fdr"
 #' @seealso \code{\link{lm_vec}} for linear regression, \code{\link{bss_ttest}} for independent sample and paired t-tests.
 #'
 #' @export
-bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr", niter=5000) {
+
+# param niter numeric variable for the number of iterations for permutations test. Will be ignored if mult_comp="fdr"
+bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr") { #, niter=5000
 
   if (class(bss_data) == "BssROIData") {
     return(bss_roi_anova(main_effect = main_effect, covariates = covariates, bss_data = bss_data))
@@ -43,20 +44,19 @@ bss_anova <- function(main_effect="", covariates="", bss_data, mult_comp="fdr", 
   bss_model <- anova_vec(bss_lm_full, bss_lm_null, bss_data)
 
   switch(mult_comp,
-         perm={
+         # perm={
+         #   pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
+         #   bss_model@pvalues <- pvalue_and_nulldist[[1]]
+         #   bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+         #   bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+         #   bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+         #   nulldist <- pvalue_and_nulldist[[2]]
+         #   bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
+         #   bss_model@tvalues_adjusted <- bss_model@tvalues
+         #   bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+         #   bss_model@pvalues_adjusted <- bss_model@pvalues_adjusted*bss_model@tvalues_sign
+         # },
 
-           pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
-           bss_model@pvalues <- pvalue_and_nulldist[[1]]
-           bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
-           bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
-           bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
-           nulldist <- pvalue_and_nulldist[[2]]
-           bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
-           bss_model@tvalues_adjusted <- bss_model@tvalues
-           bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
-           bss_model@pvalues_adjusted <- bss_model@pvalues_adjusted*bss_model@tvalues_sign
-
-         },
          fdr={
            bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
            bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
@@ -131,10 +131,11 @@ anova_vec <- function(bss_lm_full, bss_lm_null, bss_data) {
 #' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
 #' @param  bss_data Object of type \code{\link{BssData}}
 #' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.
-#' @param  niter numeric variable for the number of iterations for permutations test. Will be ignored if mult_comp="fdr"
 #'
 #' @export
-bss_lm <- function(main_effect="", covariates="", bss_data, mult_comp = "fdr", niter=5000) {
+
+# param  niter numeric variable for the number of iterations for permutations test. Will be ignored if mult_comp="fdr"
+bss_lm <- function(main_effect="", covariates="", bss_data, mult_comp = "fdr") { #, niter=5000
 
   if (class(bss_data) == "BssROIData") {
     return(bss_roi_anova(main_effect = main_effect, covariates = covariates, bss_data = bss_data))
@@ -145,20 +146,19 @@ bss_lm <- function(main_effect="", covariates="", bss_data, mult_comp = "fdr", n
   bss_model <- anova_vec(bss_lm_full, bss_lm_null, bss_data)
 
   switch(mult_comp,
-         perm={
+         # perm={
+         #   pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
+         #   bss_model@pvalues <- pvalue_and_nulldist[[1]]
+         #   bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
+         #   bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
+         #   #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
+         #   nulldist <- pvalue_and_nulldist[[2]]
+         #   bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
+         #   bss_model@tvalues_adjusted <- bss_model@tvalues
+         #   bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
+         #   bss_model@pvalues_adjusted <- bss_model@pvalues_adjusted*bss_model@tvalues_sign
+         # },
 
-           pvalue_and_nulldist <- maxTperm(main_effect = main_effect, covariates = covariates, bss_data = bss_data, niter)
-           bss_model@pvalues <- pvalue_and_nulldist[[1]]
-           bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
-           bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
-           #bss_model@tvalues[abs(bss_model@pvalues) >= 0.05] <- 0
-           nulldist <- pvalue_and_nulldist[[2]]
-           bss_model@pvalues_adjusted <- perm_p_adjust(main_effect = main_effect, covariates = covariates, bss_data, nulldist)
-           bss_model@tvalues_adjusted <- bss_model@tvalues
-           bss_model@tvalues_adjusted[abs(bss_model@pvalues_adjusted) >= 0.05] <- 0
-           bss_model@pvalues_adjusted <- bss_model@pvalues_adjusted*bss_model@tvalues_sign
-
-         },
          fdr={
            bss_model@pvalues[is.nan(bss_model@pvalues)] <- 1
            bss_model@pvalues <- bss_model@pvalues*bss_model@tvalues_sign
@@ -517,7 +517,7 @@ ttest_vec <- function(X1, X2, group_var, paired=FALSE) {
 #' @export
 bss_p_adjust <- function(pvalues, method='fdr') {
 
-  valid_methods <- c(p.adjust.methods, "perm")
+  valid_methods <- c(p.adjust.methods) #, "perm"
   if ( !(method  %in% valid_methods) ) {
     warning(sprintf("%s is not a valid multiple comparisons method. Using no correction.", method), call. = FALSE)
     return(pvalues)
@@ -534,101 +534,101 @@ bss_p_adjust <- function(pvalues, method='fdr') {
 
 }
 
-#' Calculate p-values for vanilla permutation test and determine null distribution for max-t permutation test.
-#'
-#' Perform permutation tests using Freedman-Lane method.
-#' @param main_effect Character string containing an independent variable whose effect you want to measure.
-#' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
-#' either a categorical or a continuous variable.
-#' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
-#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-#' @param bss_data Object of type \code{\link{BssData}}
-#' @param num_of_perm Number of iterations/shuffles for permutation test.
-#' @details
-#' The permutation test handles the exchangeability assumption with Freedman-Lane Method. This function also
-#' utilizes multiprocessing to reduce computing time.
-#' \code{bss_data} can be of the type "cbm", "tbm", or "roi".
-#'
-#' @export
-maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
+# Calculate p-values for vanilla permutation test and determine null distribution for max-t permutation test.
+#
+# Perform permutation tests using Freedman-Lane method.
+# @param main_effect Character string containing an independent variable whose effect you want to measure.
+# It could be disease status, age, gender etc. This should strictly be a single variable. This can be
+# either a categorical or a continuous variable.
+# @param covariates Character string containing a set of other predictors (variables) in the model. If more than
+# one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
+# @param bss_data Object of type \code{\link{BssData}}
+# @param num_of_perm Number of iterations/shuffles for permutation test.
+# @details
+# The permutation test handles the exchangeability assumption with Freedman-Lane Method. This function also
+# utilizes multiprocessing to reduce computing time.
+# \code{bss_data} can be of the type "cbm", "tbm", or "roi".
+#
+# @export
+# maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){
+#
+#   N <- dim(bss_data@data_array)[1]
+#
+#   bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
+#   bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
+#
+#   # (1) compute full model t-statistic
+#   T0 <- bss_lm_full@tvalues
+#   maxT0 <- T0[ which.max( abs(T0) ) ]
+#
+#   # (2) compute estimated gamma_hat and estimated residuals from reduced model
+#   # gamma_hat <- bss_lm_null@beta_coeff
+#   # residuals_null <- bss_lm_null@residuals
+#
+#   # (3) compute a set of permuted data Y
+#   bss_data_cp <- bss_data
+#
+#   t_bin_int <- rep(0, dim(bss_data@data_array)[2])
+#   t_max_per_perm <- rep(0, num_of_perm-1)
+#   # rewrote into for loop, single core
+#   for (j in 1:(num_of_perm-1)){
+#     set.seed(j)
+#     pmatrix <- as(sample(N), "pMatrix")
+#     Y_j <- (pmatrix %*% bss_lm_null@residuals) + (bss_lm_null@X_design_null %*% bss_lm_null@beta_coeff)
+#
+#     # (4) regress permuted data Y_j against the full model
+#     bss_data_cp@data_array <- Y_j
+#     bss_lm_full_perm <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data_cp )
+#
+#     ## binarize vector after comparing permuted T and observed T, where T0 is the vector containing
+#     # all t values from the observed model
+#     idx <- which( abs(T0) <= abs(bss_lm_full_perm@tvalues) )
+#
+#     t_bin_int[idx] <- t_bin_int[idx] + 1
+#
+#     # t_bin <- as.bit(rep(FALSE, dim(bss_data_cp@data_array)[2]))
+#     # t_bin[idx] <- TRUE
+#
+#     t_max_per_perm[j] <- bss_lm_full_perm@tvalues[ which.max( abs(bss_lm_full_perm@tvalues) ) ] # max tvalue from perm
+#
+#   }
+#
+#   pvalues <- rep(0, dim(bss_data@data_array)[2])
+#   for (n in 1:dim(bss_data@data_array)[2]){
+#     count <- t_bin_int[n]
+#     pvalues[n] <- as.double((count+1)/num_of_perm)
+#   }
+#
+#   return(list(pvalues, t_max_per_perm))
+#
+# }
 
-  N <- dim(bss_data@data_array)[1]
 
-  bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
-  bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
-
-  # (1) compute full model t-statistic
-  T0 <- bss_lm_full@tvalues
-  maxT0 <- T0[ which.max( abs(T0) ) ]
-
-  # (2) compute estimated gamma_hat and estimated residuals from reduced model
-  # gamma_hat <- bss_lm_null@beta_coeff
-  # residuals_null <- bss_lm_null@residuals
-
-  # (3) compute a set of permuted data Y
-  bss_data_cp <- bss_data
-
-  t_bin_int <- rep(0, dim(bss_data@data_array)[2])
-  t_max_per_perm <- rep(0, num_of_perm-1)
-  # rewrote into for loop, single core
-  for (j in 1:(num_of_perm-1)){
-    set.seed(j)
-    pmatrix <- as(sample(N), "pMatrix")
-    Y_j <- (pmatrix %*% bss_lm_null@residuals) + (bss_lm_null@X_design_null %*% bss_lm_null@beta_coeff)
-
-    # (4) regress permuted data Y_j against the full model
-    bss_data_cp@data_array <- Y_j
-    bss_lm_full_perm <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data_cp )
-
-    ## binarize vector after comparing permuted T and observed T, where T0 is the vector containing
-    # all t values from the observed model
-    idx <- which( abs(T0) <= abs(bss_lm_full_perm@tvalues) )
-
-    t_bin_int[idx] <- t_bin_int[idx] + 1
-
-    # t_bin <- as.bit(rep(FALSE, dim(bss_data_cp@data_array)[2]))
-    # t_bin[idx] <- TRUE
-
-    t_max_per_perm[j] <- bss_lm_full_perm@tvalues[ which.max( abs(bss_lm_full_perm@tvalues) ) ] # max tvalue from perm
-
-  }
-
-  pvalues <- rep(0, dim(bss_data@data_array)[2])
-  for (n in 1:dim(bss_data@data_array)[2]){
-    count <- t_bin_int[n]
-    pvalues[n] <- as.double((count+1)/num_of_perm)
-  }
-
-  return(list(pvalues, t_max_per_perm))
-
-}
-
-
-#' Adjust p-values for multiple comparisons testing
-#'
-#' Perform multiple comparisons correction for mass univariate tests using the max-t method.
-#' @param main_effect Character string containing an independent variable whose effect you want to measure.
-#' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
-#' either a categorical or a continuous variable.
-#' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
-#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-#' @param bss_data Object of type \code{\link{BssData}}
-#' @param tvalues_null Null distribution output from \code{\link{maxTperm}}. Statistics drawn from each
-#' shuffle are the maximum t-statistic within ROI.
-#'
-#' @export
-perm_p_adjust <- function(main_effect = "", covariates = "", bss_data, tvalues_null){
-  bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
-
-  tvalues <- bss_lm_full@tvalues
-  pvalues_adj <- rep(0, length(tvalues))
-
-  for (i in 1:length(tvalues)){
-    p <- (sum(abs(tvalues_null) >= abs(tvalues[i]))+1) / (length(tvalues_null)+1)
-    pvalues_adj[i] <- p
-  }
-  return(pvalues_adj)
-}
+# Adjust p-values for multiple comparisons testing
+#
+# Perform multiple comparisons correction for mass univariate tests using the max-t method.
+# @param main_effect Character string containing an independent variable whose effect you want to measure.
+# It could be disease status, age, gender etc. This should strictly be a single variable. This can be
+# either a categorical or a continuous variable.
+# @param covariates Character string containing a set of other predictors (variables) in the model. If more than
+# one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
+# @param bss_data Object of type \code{\link{BssData}}
+# @param tvalues_null Null distribution output from \code{\link{maxTperm}}. Statistics drawn from each
+# shuffle are the maximum t-statistic within ROI.
+#
+# @export
+# perm_p_adjust <- function(main_effect = "", covariates = "", bss_data, tvalues_null){
+#   bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
+#
+#   tvalues <- bss_lm_full@tvalues
+#   pvalues_adj <- rep(0, length(tvalues))
+#
+#   for (i in 1:length(tvalues)){
+#     p <- (sum(abs(tvalues_null) >= abs(tvalues[i]))+1) / (length(tvalues_null)+1)
+#     pvalues_adj[i] <- p
+#   }
+#   return(pvalues_adj)
+# }
 
 #' Linear mixed-effects model for brain imaging data.
 #'

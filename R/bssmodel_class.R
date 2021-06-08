@@ -48,7 +48,7 @@
 #' @slot rss numeric vector storing the residual sum of squares
 #' @slot residuals numeric vector storing residuals # TODO: Check if this variable can be eliminated
 #' @slot se numeric vector storing the standard error
-#' @slot mult_comp character type of multiple comparison adjustment. Takes values of "fdr" or "perm"
+#' @slot mult_comp character type of multiple comparison adjustment. Takes values of "fdr"
 #' @slot pvalues_adjusted numeric vector storing the adjusted p-values
 #' @slot tvalues_adjusted numeric vector storing the t-values corresponding to the adjusted p-values
 #' @slot stats_commands list of R commands (primarily for ROI analysis)

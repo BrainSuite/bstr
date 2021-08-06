@@ -18,10 +18,11 @@ load_data(
   smooth = 0,
   eddy = TRUE,
   roiids = NULL,
-  roimeas = NULL
+  roimeas = NULL,
+  exclude_col
 )
 
-\S4method{load_data}{BssData}(bss_data, roiids = NULL, roimeas = NULL)
+\S4method{load_data}{BssData}(bss_data, roiids = NULL, roimeas = NULL, exclude_col)
 
 \S4method{load_data}{BssCBMData}(bss_data, atlas_filename, hemi, smooth)
 
@@ -29,7 +30,7 @@ load_data(
 
 \S4method{load_data}{BssDBMData}(bss_data, atlas_filename, maskfile = NULL, measure, smooth, eddy)
 
-\S4method{load_data}{BssROIData}(bss_data, roiids = NULL, roimeas = NULL)
+\S4method{load_data}{BssROIData}(bss_data, roiids = NULL, roimeas = NULL, exclude_col)
 }
 \arguments{
 \item{bss_data}{object of type \code{\link{BssData}}}
@@ -49,6 +50,8 @@ load_data(
 \item{roiids}{numeric label identifier for the region of interest (ROI) type analysis.}
 
 \item{roimeas}{character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".}
+
+\item{exclude_col}{character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.}
 }
 \description{
 A generic function to load data for statistical analysis.

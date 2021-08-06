@@ -79,7 +79,7 @@ BssDBMData <- setClass(
   contains = "BssData"
 )
 
-setMethod("initialize", valueClass = "BssData", signature = "BssData", function(.Object, subjdir, csv, exclude_col="") {
+setMethod("initialize", valueClass = "BssData", signature = "BssData", function(.Object, subjdir, csv, exclude_col) {
 
   check_file_exists(subjdir, raise_error = TRUE)
   check_file_exists(csv, raise_error = TRUE)
@@ -99,13 +99,14 @@ setMethod("initialize", valueClass = "BssData", signature = "BssData", function(
 #' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
 #' @param roiids numeric label identifier for the region of interest (ROI) type analysis.
 #' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 #' @details
 #' For the most part, the user will never have to call this function directly.
 #' Instead the user should call \code{\link{load_bss_data}}.
 #' @seealso \code{\link{load_bss_data}}
 #'
 #' @export
-setGeneric("load_data", valueClass = "BssData", function(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = "left", measure = "", smooth = 0.0, eddy = TRUE, roiids = NULL, roimeas = NULL) {
+setGeneric("load_data", valueClass = "BssData", function(bss_data, atlas_filename = NULL, maskfile = NULL, hemi = "left", measure = "", smooth = 0.0, eddy = TRUE, roiids = NULL, roimeas = NULL, exclude_col) {
   standardGeneric("load_data")
 })
 
@@ -114,7 +115,7 @@ setGeneric("load_demographics", valueClass = "BssData", function(object) {
 })
 
 #' @rdname load_data
-setMethod("load_data", signature = "BssData", function(bss_data, roiids = NULL, roimeas = NULL) {
+setMethod("load_data", signature = "BssData", function(bss_data, roiids = NULL, roimeas = NULL, exclude_col) {
   return(bss_data)
 })
 
@@ -186,7 +187,7 @@ setMethod("load_data", signature = "BssDBMData", function(bss_data, atlas_filena
 })
 
 #' @rdname load_data
-setMethod("load_data", signature = "BssROIData", function(bss_data, roiids = NULL, roimeas = NULL) {
+setMethod("load_data", signature = "BssROIData", function(bss_data, roiids = NULL, roimeas = NULL, exclude_col) {
 
   bss_data@analysis_type <- "roi"
   bss_data@roiids <- roiids
@@ -194,7 +195,8 @@ setMethod("load_data", signature = "BssROIData", function(bss_data, roiids = NUL
   all_subjects <- bss_load_roi_data(subjects_dir = bss_data@subjdir,
                     csv = bss_data@csv,
                     roiids = bss_data@roiids,
-                    roimeas = bss_data@roimeas)
+                    roimeas = bss_data@roimeas,
+                    exclude_col)
 
   bss_data@demographics <- as.data.frame(all_subjects[[1]])
   bss_data@data_array <- matrix(nrow=nrow(bss_data@demographics),ncol = length(bss_data@roiids))
@@ -202,8 +204,8 @@ setMethod("load_data", signature = "BssROIData", function(bss_data, roiids = NUL
     current_col <- which(colnames(bss_data@demographics) == paste0(bssr:::get_roi_tag(label_desc_df = bssr:::read_label_desc(),roiid=bss_data@roiids[col])[[1]],"(",bss_data@roiids[col],")"))
     bss_data@data_array[,col] <- bss_data@demographics[,current_col]
   }
-  bss_data@load_data_command <- sprintf("bss_data <- load_bss_data(type= 'roi',subjdir = '%s',csv= '%s',roiids= c( %s), roimeas= '%s')",
-                                        bss_data@subjdir, bss_data@csv, paste(bss_data@roiids,collapse = ", "), bss_data@roimeas)
+  bss_data@load_data_command <- sprintf("bss_data <- load_bss_data(type= 'roi',subjdir = '%s',csv= '%s',roiids= c( %s), roimeas= '%s', exclude_col='%s')",
+                                        bss_data@subjdir, bss_data@csv, paste(bss_data@roiids,collapse = ", "), bss_data@roimeas, exclude_col)
 
 
   return(bss_data)
@@ -377,7 +379,7 @@ load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0, atlas="", 
 #'
 load_roi_data <- function(subjdir="", csv="", roiids="", roimeas="", exclude_col) {
   bss_roi_data <- new("BssROIData", subjdir, csv, exclude_col)
-  bss_roi_data <- load_data(bss_roi_data, roiids = roiids, roimeas = roimeas)
+  bss_roi_data <- load_data(bss_roi_data, roiids = roiids, roimeas = roimeas, exclude_col=exclude_col)
   return(bss_roi_data)
 }
 

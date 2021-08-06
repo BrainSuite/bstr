@@ -63,7 +63,7 @@ test_that("lm_vec is same as R lm", {
   lm_full <- lm(formula(sprintf('V1000 ~ %s', paste(main_effect, '+', covariates))), data = data)
 
   # Fit model using lm_vec
-  bss_data <- new("BssData", getwd(), system.file("extdata/testdata", "design.csv", package = 'bssr'))
+  bss_data <- new("BssData", getwd(), system.file("extdata/testdata", "design.csv", package = 'bssr'), exclude_col="")
 
   bss_data@data_array <- as.matrix(data[, "V1000"])
   bss_model <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data)
@@ -87,7 +87,7 @@ test_that("bss_anova is same as R model comparison using anova", {
   # Compare full and null in R
   R_model_cmp <- anova(lm_full, lm_null)
 
-  bss_data <- new("BssData", getwd(), system.file("extdata/testdata", "design.csv", package = 'bssr'))
+  bss_data <- new("BssData", getwd(), system.file("extdata/testdata", "design.csv", package = 'bssr'), exclude_col="")
   bss_data@data_array <- as.matrix(data[, "V1000"])
   # Fit full model using bss first
   bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)

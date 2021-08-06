@@ -19,15 +19,16 @@
 #' @param csv filename of a comma separated (csv) file containing the subject demographic information.
 #' @param roiids vector of numeric label identifiers for the region of interest (ROI) type analysis.
 #' @param roimeas character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 #' @export
 #'
-bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas) {
+bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas, exclude_col) {
 
   if (!dir.exists(subjects_dir)) {
     stop(sprintf("Subjects directory %s does not exist.\n", subjects_dir), call. = FALSE)
   }
 
-  demographics <- read_demographics(csv)
+  demographics <- read_demographics(csv, exclude_col)
   if("File_roi" %in% colnames(demographics)){
     warning(sprintf("The file %s already contains a File_roi column.\nWill overwrite this column.\n", csv), call.=FALSE)
   }
@@ -60,8 +61,8 @@ bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas) {
 
   # Finally also include the command to load the data
   pasted_roiids <- paste(roiids,collapse = ", ")
-  bss_data$load_data_command <- sprintf("bss_data <- bss_load_roi_data( '%s', '%s', c( %s), '%s') ",
-                                        subjects_dir, csv, pasted_roiids, roimeas)
+  bss_data$load_data_command <- sprintf("bss_data <- bss_load_roi_data( '%s', '%s', c( %s), '%s', '%s') ",
+                                        subjects_dir, csv, pasted_roiids, roimeas, exclude_col)
 
   return(bss_data)
 }

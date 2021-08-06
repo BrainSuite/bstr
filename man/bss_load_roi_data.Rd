@@ -4,7 +4,7 @@
 \alias{bss_load_roi_data}
 \title{Load ROI data from subjects (BIDS compatible)}
 \usage{
-bss_load_roi_data(subjects_dir, csv, roiids, roimeas)
+bss_load_roi_data(subjects_dir, csv, roiids, roimeas, exclude_col)
 }
 \arguments{
 \item{subjects_dir}{character string for subject directory.}
@@ -14,6 +14,8 @@ bss_load_roi_data(subjects_dir, csv, roiids, roimeas)
 \item{roiids}{vector of numeric label identifiers for the region of interest (ROI) type analysis.}
 
 \item{roimeas}{character string for the ROI measure. Should either be "gmthickness", "gmvolume", or "wmvolume".}
+
+\item{exclude_col}{character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.}
 }
 \description{
 Loads the ROI measure for statistical analysis.

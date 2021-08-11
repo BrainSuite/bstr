@@ -451,12 +451,12 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
                                        "\np_val_",bss_data@roiids[m],"<- round(anova_table$`Pr(>",comparison_stat,")`[2],digits=4)\n",
                                        "pval_string <- paste('pvalue:', as.character(p_val_",bss_data@roiids[m],"))\n```\n\n")
       }
-      if (class(bss_data@demographics[,gsub("([A-Za-z]+).*", "\\1", bss_model@fullmodel)])=="integer"|class(bss_data@demographics[,gsub("([A-Za-z]+).*", "\\1", bss_model@fullmodel)])=="double"|bss_model@model_type == 'bss_corr'){
+      if (class(bss_data@demographics[,gsub("([[:alnum:]_]+).*", "\\1", bss_model@fullmodel)])=="integer"|class(bss_data@demographics[,gsub("([[:alnum:]_]+).*", "\\1", bss_model@fullmodel)])=="double"|bss_model@model_type == 'bss_corr'){
         if (bss_model@model_type == "bss_corr"){
           x_var = bss_model@corr_var
           annotate_label = paste0("paste('corr val:',",round(bss_model@corr_values[m],5),")")
         } else {
-          x_var = gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel)
+          x_var = gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel)
           annotate_label = paste0("paste('pvalue:', as.character(p_val_",bss_data@roiids[m],"))")
         }
         nb_plots[[m]]<-paste0(nb_plots[[m]],"ggplot2::ggplot(data=bss_data@demographics, ggplot2::aes(x=",
@@ -475,22 +475,22 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
                               paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m]))), "_roi",bss_data@roiids[m],
                               "_", bss_data@roimeas,
                               "_vs_", x_var, ".pdf',device='pdf')\n```\n")
-      } else if (class(bss_data@demographics[,gsub("([A-Za-z]+).*", "\\1", bss_model@fullmodel)])=="factor"){
+      } else if (class(bss_data@demographics[,gsub("([[:alnum:]_]+).*", "\\1", bss_model@fullmodel)])=="factor"){
         nb_plots[[m]]<-paste0(nb_plots[[m]],
-                              "mean_lengths <- rep(NA, length(levels(bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),")))
-                              std_devs <- rep(NA, length(levels(bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),")))
-                              for (i in 1:length(levels(bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),"))){
-                              mean_lengths[i] <-  mean(bss_data@demographics[bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),
-                              " == levels(bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),")[i],]$`",
+                              "mean_lengths <- rep(NA, length(levels(bss_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),")))
+                              std_devs <- rep(NA, length(levels(bss_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),")))
+                              for (i in 1:length(levels(bss_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),"))){
+                              mean_lengths[i] <-  mean(bss_data@demographics[bss_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),
+                              " == levels(bss_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),")[i],]$`",
                               selected_col[m],"`)
-                              std_devs[i] <- sd (bss_data@demographics[bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),
-                              " == levels(bss_data@demographics$",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),")[i],]$`",
+                              std_devs[i] <- sd (bss_data@demographics[bss_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),
+                              " == levels(bss_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),")[i],]$`",
                               selected_col[m],"`)
                               } \n",
-"modified_df <- data.frame(len = mean_lengths, sd = std_devs,",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel)," = levels(bss_data@demographics$",
-gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),"))\n",
-"ggplot2::ggplot(data=modified_df, ggplot2::aes(x = ",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),
-", y = len, color = ",gsub('([A-Za-z]+).*', '\\1', bss_model@fullmodel),
+"modified_df <- data.frame(len = mean_lengths, sd = std_devs,",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel)," = levels(bss_data@demographics$",
+gsub('([A-Z_a-z]+).*', '\\1', bss_model@fullmodel),"))\n",
+"ggplot2::ggplot(data=modified_df, ggplot2::aes(x = ",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),
+", y = len, color = ",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),
 ")) +
 ggplot2::geom_bar(stat = 'identity') + ggplot2::ggtitle('",
 as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),

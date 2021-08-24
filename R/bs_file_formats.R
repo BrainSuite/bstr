@@ -18,6 +18,7 @@
 bs_file_formats <- list(
   jacdet = '*.svreg.inv.map.jacdet.*.nii.gz',
   roi_txt = '.roiwise.stats.txt',
+  bdp_roi_txt = '.bdpstats.tsv',
   svreg_log = '*.svreg.log',
   surf_atlas_left = 'mri.left.mid.cortex.dfs',
   surf_atlas_right = 'mri.right.mid.cortex.dfs',

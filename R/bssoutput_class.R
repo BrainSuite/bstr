@@ -91,11 +91,12 @@ setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", f
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
   if (overwrite == TRUE){
     delete_and_recreate_dir(bss_out@outdir)
-  } else {
-    if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
-      stop(sprintf("Output directory %s is not empty.\n", bss_out@outdir), call. = FALSE)
-    }
   }
+  # else {
+  #   if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+  #     stop(sprintf("Output directory %s is not empty.\n", bss_out@outdir), call. = FALSE)
+  #   }
+  # }
 
   log_pvalues <- log10_transform(bss_model@pvalues)
   outdir <- bss_out@outdir

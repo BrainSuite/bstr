@@ -541,7 +541,7 @@ paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m]))), "_roi",
                             as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[i])[[1]]),
                             "', colour = '",bss_model@group_var,"') +
                             ggplot2::theme(axis.title=ggplot2::element_text(size=16,face='bold')) +
-                            ggplot2::theme(plot.title=ggplot2::element_text(size=18,face='bold')) +\n
+                            ggplot2::theme(plot.title=ggplot2::element_text(size=18,face='bold')) \n
                             ggplot2::ggsave(filename='",
                             paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i]))), "_roi",bss_data@roiids[i],
                             "_", bss_data@roimeas,

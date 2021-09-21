@@ -244,7 +244,7 @@ save_colorbar <- function(filename, lut, vmin, vmax, labeltxt) {
     ggplot2::scale_y_continuous(expand = c(0, 0), breaks= scales::pretty_breaks(n=10), position='right') +
     ggplot2::scale_x_continuous(expand = c(0, 0)) +
     ggplot2::theme(plot.background = ggplot2::element_blank()) +
-    ggplot2::theme(panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1)) +
+    ggplot2::theme(panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1))
     ggplot2::ggsave(filename, width = 1.3, height = 3.5, dpi = 600)
 
 }

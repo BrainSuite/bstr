@@ -721,21 +721,21 @@ save_bss_out_surface_both_hemi <- function(measure, var_name, bss_cmap, bss_data
 
     bss_data_lh <- bss_data
     bss_data_lh@atlas_filename = bss_data@atlas_filename_lh
-    bss_data_lh@atlas_surface <- bss_data_both@atlas_surface_lh
+    bss_data_lh@atlas_surface <- bss_data@atlas_surface_lh
     measure_lh <- measure[idx_lh]
     bss_cmap_lh <- bss_cmap
     bss_cmap_lh@values <- bss_cmap@values[idx_lh]
     bss_cmap_lh@rgbcolors <- bss_cmap@rgbcolors[idx_lh,1:3]
-    save_bss_out_surface(measure_lh, var_name, bss_cmap, bss_data_lh, bss_model, outdir)
+    save_bss_out_surface(measure_lh, var_name, bss_cmap_lh, bss_data_lh, bss_model, outdir)
 
     bss_data_rh <- bss_data
     bss_data_rh@atlas_filename = bss_data@atlas_filename_rh
-    bss_data_rh@atlas_surface <- bss_data_both@atlas_surface_rh
+    bss_data_rh@atlas_surface <- bss_data@atlas_surface_rh
     measure_rh <- measure[idx_rh]
     bss_cmap_rh <- bss_cmap
     bss_cmap_rh@values <- bss_cmap@values[idx_rh]
     bss_cmap_rh@rgbcolors <- bss_cmap@rgbcolors[idx_rh,1:3]
-    save_bss_out_surface(measure_rh, var_name, bss_cmap, bss_data_rh, bss_model, outdir)
+    save_bss_out_surface(measure_rh, var_name, bss_cmap_rh, bss_data_rh, bss_model, outdir)
 
   }
   else {

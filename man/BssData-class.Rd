@@ -34,5 +34,11 @@ S4 class for storing data for statistical analysis
 \item{\code{filelist}}{list of files belonging to N subjects.}
 
 \item{\code{load_data_command}}{character string for the command used to load the data}
+
+\item{\code{hemi}}{character string to specifiy the hemisphere. Valid values are "left" or "right" or "both"}
+
+\item{\code{nvertices_lh}}{numeric value containing the number of vertices for the left cortical surface atlas}
+
+\item{\code{nvertices_rh}}{numeric value containing the number of vertices for the right cortical surface atlas}
 }}
 

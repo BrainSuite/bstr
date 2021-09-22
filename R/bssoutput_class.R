@@ -106,62 +106,62 @@ setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", f
   switch(bss_model@model_type,
          bss_anova = {
            bss_cmap <- save_bss_color_files(log_pvalues, bss_model@main_effect, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface(log_pvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(log_pvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@main_effect, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface(log_pvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(log_pvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(bss_model@tvalues, bss_model@main_effect, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface(bss_model@tvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(bss_model@tvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(bss_model@tvalues_adjusted, bss_model@main_effect, "tvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface(bss_model@tvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(bss_model@tvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
            save_bss_rds(bss_model@pvalues, bss_model@main_effect, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
          },
          bss_lm = {
            bss_cmap <- save_bss_color_files(log_pvalues, bss_model@main_effect, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface(log_pvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(log_pvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@main_effect, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface(log_pvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(log_pvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(bss_model@tvalues, bss_model@main_effect, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface(bss_model@tvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(bss_model@tvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(bss_model@tvalues_adjusted, bss_model@main_effect, "tvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface(bss_model@tvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(bss_model@tvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
            save_bss_rds(bss_model@pvalues, bss_model@main_effect, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
            },
          bss_corr = {
            bss_model@corr_values[abs(log_pvalues) <= -1*log10(0.05)] <- 0
            bss_cmap <- save_bss_color_files(log_pvalues, bss_model@corr_var, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface(log_pvalues, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(log_pvalues, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@corr_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface(log_pvalues_adjusted, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(log_pvalues_adjusted, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(bss_model@tvalues, bss_model@corr_var, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface(bss_model@tvalues, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(bss_model@tvalues, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(bss_model@tvalues_adjusted, bss_model@corr_var, "tvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface(bss_model@tvalues_adjusted, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(bss_model@tvalues_adjusted, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(bss_model@corr_values, bss_model@corr_var, "corr_values", bss_data, bss_model, outdir)
-           save_bss_out_surface(bss_model@corr_values, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(bss_model@corr_values, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(bss_model@corr_values_masked_adjusted, bss_model@corr_var, "corr_values_masked_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface(bss_model@corr_values_masked_adjusted, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(bss_model@corr_values_masked_adjusted, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
            save_bss_rds(bss_model@pvalues, bss_model@corr_var, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
            },
          pairedttest = {
            bss_cmap <- save_bss_color_files(log_pvalues, bss_model@group_var, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface(log_pvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(log_pvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@group_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(bss_model@tvalues, bss_model@group_var, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface(bss_model@tvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(bss_model@tvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(bss_model@tvalues_adjusted, bss_model@group_var, "tvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface(bss_model@tvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(bss_model@tvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
            save_bss_rds(bss_model@pvalues, bss_model@group_var, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
          },
          unpairedttest = {
            bss_cmap <- save_bss_color_files(log_pvalues, bss_model@group_var, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface(log_pvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(log_pvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@group_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(bss_model@tvalues, bss_model@group_var, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface(bss_model@tvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(bss_model@tvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
            bss_cmap <- save_bss_color_files(bss_model@tvalues_adjusted, bss_model@group_var, "tvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface(bss_model@tvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
+           save_bss_out_surface_both_hemi(bss_model@tvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
            save_bss_rds(bss_model@pvalues, bss_model@group_var, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
          }
   )
@@ -615,9 +615,35 @@ save_bss_out <- function(bss_data, bss_model, outdir="", overwrite = F, ncluster
   if (bss_data@analysis_type == "tbm" | bss_data@analysis_type == "dbm"){
     bss_out <- save_out(bss_out, bss_data, bss_model, overwrite = overwrite, nclusters = nclusters)
     invisible(bss_out)
-  } else {
+  # } else if (bss_data@analysis_type == "cbm") {
+  #   bss_out <- save_bss_out_cbm_both_hemi(bss_out, bss_data, bss_model, overwrite = overwrite)
+  #   invisible(bss_out)
+  }
+  else {
     bss_out <- save_out(bss_out, bss_data, bss_model, overwrite = overwrite)
     invisible(bss_out)
+  }
+}
+
+
+save_bss_out_cbm_both_hemi <- function(bss_out, bss_data, bss_model, outdir="", overwrite = F) {
+
+  if (bss_data@hemi == "both") {
+    # Split the data array, model and all variables into left and right hemispheres
+    save_out(bss_out, bss_data, bss_model, overwrite = overwrite)
+    # bss_data_lh <- bss_data
+    # bss_data_lh@atlas_filename = bss_data@atlas_filename_lh
+    # bss_data_lh@atlas_surface <- bss_data_both@atlas_surface_lh
+    # save_out(bss_out, bss_data_lh, bss_model, overwrite = T)
+    #
+    # bss_data_rh <- bss_data
+    # bss_data_rh@atlas_filename = bss_data@atlas_filename_rh
+    # bss_data_rh@atlas_surface <- bss_data_both@atlas_surface_rh
+    # save_out(bss_out, bss_data_rh, bss_model, overwrite = F)
+
+  }
+  else {
+    save_out(bss_out, bss_data, bss_model, overwrite = overwrite)
   }
 }
 
@@ -687,6 +713,35 @@ save_bss_out_surface <- function(measure, var_name, bss_cmap, bss_data, bss_mode
   writedfs(file.path(outdir, outprefix), s1)
 }
 
+save_bss_out_surface_both_hemi <- function(measure, var_name, bss_cmap, bss_data, bss_model, outdir) {
+
+  if (bss_data@hemi == "both") {
+    idx_lh <- 1:bss_data@nvertices_lh
+    idx_rh <- (bss_data@nvertices_lh+1):(bss_data@nvertices_lh+bss_data@nvertices_rh)
+
+    bss_data_lh <- bss_data
+    bss_data_lh@atlas_filename = bss_data@atlas_filename_lh
+    bss_data_lh@atlas_surface <- bss_data@atlas_surface_lh
+    measure_lh <- measure[idx_lh]
+    bss_cmap_lh <- bss_cmap
+    bss_cmap_lh@values <- bss_cmap@values[idx_lh]
+    bss_cmap_lh@rgbcolors <- bss_cmap@rgbcolors[idx_lh,1:3]
+    save_bss_out_surface(measure_lh, var_name, bss_cmap_lh, bss_data_lh, bss_model, outdir)
+
+    bss_data_rh <- bss_data
+    bss_data_rh@atlas_filename = bss_data@atlas_filename_rh
+    bss_data_rh@atlas_surface <- bss_data@atlas_surface_rh
+    measure_rh <- measure[idx_rh]
+    bss_cmap_rh <- bss_cmap
+    bss_cmap_rh@values <- bss_cmap@values[idx_rh]
+    bss_cmap_rh@rgbcolors <- bss_cmap@rgbcolors[idx_rh,1:3]
+    save_bss_out_surface(measure_rh, var_name, bss_cmap_rh, bss_data_rh, bss_model, outdir)
+
+  }
+  else {
+      save_bss_out_surface(measure, var_name, bss_cmap, bss_data, bss_model, outdir)
+  }
+}
 #' Save the nifti image to the output file
 #' @param measure denotes the measure used to create the output
 #' @param var_name string denoting name of variable used by the function

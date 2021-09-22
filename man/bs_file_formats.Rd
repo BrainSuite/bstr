@@ -5,7 +5,7 @@
 \alias{bs_file_formats}
 \title{List of file formats used in BrainSuite}
 \format{
-An object of class \code{list} of length 7.
+An object of class \code{list} of length 8.
 }
 \usage{
 bs_file_formats

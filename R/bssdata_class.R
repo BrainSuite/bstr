@@ -25,6 +25,9 @@
 #' @slot measure character string denoting the type of measure used.
 #' @slot filelist list of files belonging to N subjects.
 #' @slot load_data_command character string for the command used to load the data
+#' @slot hemi character string to specifiy the hemisphere. Valid values are "left" or "right" or "both"
+#' @slot nvertices_lh numeric value containing the number of vertices for the left cortical surface atlas
+#' @slot nvertices_rh numeric value containing the number of vertices for the right cortical surface atlas
 #'
 #' @export
 BssData <- setClass(
@@ -41,7 +44,10 @@ BssData <- setClass(
     smooth = "numeric",
     measure = "character",
     filelist = "character",
-    load_data_command = "character"
+    load_data_command = "character",
+    hemi = "character",
+    nvertices_lh = "numeric",
+    nvertices_rh = "numeric"
   )
 )
 
@@ -55,7 +61,11 @@ BssROIData <- setClass(
 BssCBMData <- setClass(
   "BssCBMData",
   slots = list(atlas_filename = "character",
-               atlas_surface = 'list'),
+               atlas_filename_lh = "character",
+               atlas_filename_rh = "character",
+               atlas_surface = 'list',
+               atlas_surface_lh = 'list',
+               atlas_surface_rh = 'list'),
   contains = "BssData"
 )
 
@@ -272,7 +282,7 @@ load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left",
     stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
 
   switch(type,
-         cbm = { bss_data <- load_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth, atlas=atlas, exclude_col=exclude_col) },
+         cbm = { bss_data <- load_cbm_data_both_hemi(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth, atlas=atlas, exclude_col=exclude_col) },
          tbm = { bss_data <- load_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth, atlas=atlas, exclude_col=exclude_col) },
          dbm = { bss_data <- load_dbm_data(subjdir=subjdir, csv=csv, measure=measure, smooth=smooth, atlas=atlas, maskfile=maskfile, eddy=eddy, exclude_col=exclude_col) },
          roi = { bss_data <- load_roi_data(subjdir, csv, roiids, roimeas, exclude_col=exclude_col) }
@@ -303,8 +313,32 @@ load_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="",
 
   bss_cbm_data <- load_data(bss_cbm_data, atlas_filename = cbm_surf_atlas, hemi = hemi, smooth=smooth)
   bss_cbm_data@data_type <- bs_data_types$surface
+  bss_cbm_data@hemi <- hemi
   return(bss_cbm_data)
 }
+
+load_cbm_data_both_hemi <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="", exclude_col) {
+    if (hemi == "both") {
+      bss_data_lh <- load_cbm_data(subjdir=subjdir, csv=csv, hemi="left", smooth = smooth, atlas=atlas, exclude_col=exclude_col)
+      bss_data_rh <- load_cbm_data(subjdir=subjdir, csv=csv, hemi="right", smooth = smooth, atlas=atlas, exclude_col=exclude_col)
+      bss_cbm_data_both_hemi <- bss_data_lh
+      bss_cbm_data_both_hemi@data_array <- cbind(bss_data_lh@data_array, bss_data_rh@data_array)
+      bss_cbm_data_both_hemi@nvertices_lh <- dim(bss_data_lh@data_array)[2]
+      bss_cbm_data_both_hemi@nvertices_rh <- dim(bss_data_rh@data_array)[2]
+      bss_cbm_data_both_hemi@atlas_surface_lh <- bss_data_lh@atlas_surface
+      bss_cbm_data_both_hemi@atlas_surface_rh <- bss_data_rh@atlas_surface
+      bss_cbm_data_both_hemi@hemi <- "both"
+      bss_cbm_data_both_hemi@atlas_filename_lh <- bss_data_lh@atlas_filename
+      bss_cbm_data_both_hemi@atlas_filename_rh <- bss_data_rh@atlas_filename
+      return(bss_cbm_data_both_hemi)
+    }
+    else {
+      bss_data <- load_cbm_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth, atlas=atlas, exclude_col=exclude_col)
+      return(bss_data)
+    }
+}
+
+
 #' Load tensor-based morphometry data for statistical analysis.
 #' @param subjdir subject directory containing BrainSuite processed data.
 #' @param csv filename of a comma separated (csv) file containing the subject demographic information.

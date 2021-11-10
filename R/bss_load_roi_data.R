@@ -34,19 +34,35 @@ bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas, exclude_col) {
   }
 
   demographics$subjID <- as.character(demographics$subjID)
-  roi_bids_filelist <- file.path(subjects_dir, demographics$subjID, 'anat',
-                                 sprintf('%s%s%s', demographics$subjID, '_T1w', bs_file_formats$roi_txt))
+  if (roimeas %in% roi_types$svreg_roi_types || roimeas %in% roi_types$swm_roi_types) {
+    roi_bids_filelist <- file.path(subjects_dir, demographics$subjID, 'anat',
+                                   sprintf('%s%s%s', demographics$subjID, '_T1w', bs_file_formats$roi_txt))
+  }
+  else if (roimeas %in% roi_types$wm_roi_types) {
+    roi_bids_filelist <- file.path(subjects_dir, demographics$subjID, 'dwi',
+                                   sprintf('%s%s%s', demographics$subjID, '_T1w', bs_file_formats$wm_roi_txt))
+  }
+
   if(all(file.exists(roi_bids_filelist)))
     additional_dir <- 'anat'
   else
     additional_dir <- '/'
-  # for subjID in demographic_data['subjID'].astype('str')]
-  roiwise_file_list <- lapply(demographics$subjID,
+  if (roimeas %in% roi_types$svreg_roi_types || roimeas %in% roi_types$swm_roi_types) {
+    roiwise_file_list <- lapply(demographics$subjID,
                               function(i) {
                                 Sys.glob(file.path(subjects_dir, i, additional_dir, "*roiwise.stats.txt"))[1]
                               })
+  }
+  else if (roimeas %in% roi_types$wm_roi_types) {
+    roiwise_file_list <- lapply(demographics$subjID,
+                              function(i) {
+                                Sys.glob(file.path(subjects_dir, i, additional_dir, "*wm.stats.tsv"))[1]
+                              })
+  }
+
+
   if (any(is.na(roiwise_file_list))) {
-    stop(sprintf("Subject %s is missing the roiwise.stats.txt file.\n",
+    stop(sprintf("Subject %s is either missing the roiwise.stats.txt or the wm.stats.tsv file depending on the ROI measure used.\n",
                  demographics$subjID[which(is.na(roiwise_file_list))]), call. = FALSE)
   }
 

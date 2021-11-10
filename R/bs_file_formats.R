@@ -18,12 +18,20 @@
 bs_file_formats <- list(
   jacdet = '*.svreg.inv.map.jacdet.*.nii.gz',
   roi_txt = '.roiwise.stats.txt',
-  bdp_roi_txt = '.bdpstats.tsv',
+  wm_roi_txt = '.wm.stats.tsv',
   svreg_log = '*.svreg.log',
   surf_atlas_left = 'mri.left.mid.cortex.dfs',
   surf_atlas_right = 'mri.right.mid.cortex.dfs',
   nii_atlas = 'mri.bfc.nii.gz',
   nii_maskfile = 'mri.cerebrum.mask.nii.gz'
+)
+
+#' List ofROI types
+#' @export
+roi_types <- list(
+  svreg_roi_types = c("gmthickness", "gmvolume", "area", "wmvolume"),
+  swm_roi_types = c("swmFA", "swmMD", "swmRD", "swmAD"),
+  wm_roi_types = c("axial_WM", "FA_WM", "FRT_GFA_WM", "L2_WM", "L3_WM", "mADC_WM", "MD_WM", "radial_WM")
 )
 
 #' List of atlas files used in BrainSuite

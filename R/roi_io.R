@@ -29,7 +29,15 @@ read_roistats_txt <- function(roiwise_txt_filename, roiids, roimeas = 'gmthickne
                        swmFA = "swmFA",
                        swmMD = "swmMD",
                        swmRD = "swmRD",
-                       swmAD = "swmAD"
+                       swmAD = "swmAD",
+                       axial_WM = "axial_WM",
+                       FA_WM = "FA_WM",
+                       FRT_GFA_WM = "FRT_GFA_WM",
+                       L2_WM = "L2_WM",
+                       L3_WM = "L3_WM",
+                       mADC_WM = "mADC_WM",
+                       MD_WM = "MD_WM",
+                       radial_WM = "radial_WM"
   )
 
   if (!file.exists(roiwise_txt_filename)) {

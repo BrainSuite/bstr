@@ -22,41 +22,41 @@ For more detailed installation instructions, usage examples, or to check for upd
 * Windows only: Install Rtools, available at https://cran.r-project.org/bin/windows/Rtools/
 
 ### Steps for installation
-* Open RStudio and enter the following two commands to install **bssr version 0.3.1**.
-* You can install from the bssr_0.3.1.tar.gz file in the BrainSuite21a folder, or you can pull directly from the BrainSuite server.
-* You do not need to untar bssr_0.3.1.tar.gz -- the installer needs it in this format.
+* Open RStudio and enter the following two commands to install **bssr version 0.3.2**.
+* You can install from the bssr_0.3.2.tar.gz file in the BrainSuite21a folder, or you can pull directly from the BrainSuite server.
+* You do not need to untar bssr_0.3.2.tar.gz -- the installer needs it in this format.
 * The following examples assume you have installed BrainSuite21a in the default location for your operating system. If you have used a different path, you will need to specify it in the installation call.
 
 ### Mac OS - Install from folder
 ```
 install.packages('devtools')
-devtools::install_local('/Applications/BrainSuite21a/bssr/bssr_0.3.1.tar.gz')
+devtools::install_local('/Applications/BrainSuite21a/bssr/bssr_0.3.2.tar.gz')
 ```
 
 ### Windows - Install from folder
 Note that on Windows, you will need to use double backslashes (\\) in the path because backslash is an escape character. You can also replace the backslashes with forward slashes.
 ```
 install.packages('devtools')
-devtools::install_local('C:\\Program Files\\BrainSuite21a\\bssr\\bssr_0.3.1.tar.gz')
+devtools::install_local('C:\\Program Files\\BrainSuite21a\\bssr\\bssr_0.3.2.tar.gz')
 ```
 or
 ```
 install.packages('devtools')
-devtools::install_local('C:/Program Files/BrainSuite21a/bssr/bssr_0.3.1.tar.gz')
+devtools::install_local('C:/Program Files/BrainSuite21a/bssr/bssr_0.3.2.tar.gz')
 ```
 
 
 ### Linux - Install from folder
 ```
 install.packages('devtools')
-devtools::install_local('/opt/BrainSuite21a/bssr/bssr_0.3.1.tar.gz')
+devtools::install_local('/opt/BrainSuite21a/bssr/bssr_0.3.2.tar.gz')
 ```
 
 
 ### Online Installation
 ```
 install.packages('devtools')
-devtools::install_url('http://brainsuite.org/wp-content/uploads/2021/05/bssr_0.3.1.tar.gz')
+devtools::install_url('http://brainsuite.org/wp-content/uploads/2021/05/bssr_0.3.2.tar.gz')
 ```
 
 ### Check your installation

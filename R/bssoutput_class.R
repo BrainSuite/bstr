@@ -660,17 +660,28 @@ save_bss_color_files <- function(measure, var_name, cmap_title, bss_data, bss_mo
 
   measure <- as.numeric(measure)
   bss_cmap <- new("BssColormap", cmap_title, "RdYlBu", measure)
-  cbar_filename <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
+  if (bss_data@hemi == "both")
+    cbar_filename <- paste(paste(bss_model@model_type, var_name, 'both_hemi', bss_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
+  else
+      cbar_filename <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
+      basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
   save_colorbar(file.path(outdir,cbar_filename), bss_cmap@lut, bss_cmap@vmin, bss_cmap@vmax, cmap_title)
 
-  cbar_filename <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '_cbar.png', sep = '')
+  if (bss_data@hemi == "both")
+    cbar_filename <- paste(paste(bss_model@model_type, var_name, 'both_hemi', bss_cmap@cmap_type, sep = '_'), '_cbar.png', sep = '')
+  else
+    cbar_filename <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
+      basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '_cbar.png', sep = '')
+
   save_colorbar(file.path(outdir,cbar_filename), bss_cmap@lut, bss_cmap@vmin, bss_cmap@vmax, cmap_title)
 
   # save the color LUT
-  lut_fileprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.lut', sep = '')
+  if (bss_data@hemi == "both")
+    lut_fileprefix <- paste(paste(bss_model@model_type, var_name, 'both_hemi', bss_cmap@cmap_type, sep = '_'), '.lut', sep = '')
+  else
+    lut_fileprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
+      basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.lut', sep = '')
+
   save_BrainSuiteLUT(file.path(outdir, lut_fileprefix), bss_cmap@lut)
 
   # save the cbar json file with colormap for BrainSuite statmap
@@ -682,13 +693,21 @@ save_bss_color_files <- function(measure, var_name, cmap_title, bss_data, bss_mo
   #names(cbarlist) <- c("jsonid", "cbarmin", "cbarmax", "colormap")
   names(cbarlist) <- c("jsonid", "cbarmin", "cbarlowerthresh", "cbarupperthresh", "cbarmax", "colormap")
   cbar_json <- jsonlite::toJSON(cbarlist, pretty = TRUE, auto_unbox=TRUE)
-  cbar_json_filename <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.cbar', sep = '')
+  if (bss_data@hemi == "both")
+    cbar_json_filename <- paste(paste(bss_model@model_type, var_name, 'both_hemi', bss_cmap@cmap_type, sep = '_'), '.cbar', sep = '')
+  else
+    cbar_json_filename <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
+      basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.cbar', sep = '')
+
   write(cbar_json, file.path(outdir,cbar_json_filename))
 
   # save ini colormap with ranges
-  ini_fileprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.ini', sep = '')
+  if (bss_data@hemi == "both")
+    ini_fileprefix <- paste(paste(bss_model@model_type, var_name, 'both_hemi', bss_cmap@cmap_type, sep = '_'), '.ini', sep = '')
+  else
+    ini_fileprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
+      basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.ini', sep = '')
+
   save_colormap_to_ini(file.path(outdir, ini_fileprefix), bss_cmap)
   return(bss_cmap)
 }

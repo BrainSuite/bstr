@@ -31,7 +31,8 @@ bs_file_formats <- list(
 roi_types <- list(
   svreg_roi_types = c("gmthickness", "gmvolume", "area", "wmvolume"),
   swm_roi_types = c("swmFA", "swmMD", "swmRD", "swmAD"),
-  wm_roi_types = c("axial_WM", "FA_WM", "FRT_GFA_WM", "L2_WM", "L3_WM", "mADC_WM", "MD_WM", "radial_WM")
+  wm_roi_types = c("FA", "FRT_GFA",	"L2",	"L3",	"MD",	"axial",	"mADC",	"radial")
+
 )
 
 #' List of atlas files used in BrainSuite

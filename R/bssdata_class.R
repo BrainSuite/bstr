@@ -290,6 +290,45 @@ load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left",
   return(bss_data)
 }
 
+#' Load data for statistical analysis from a filelist
+#'
+#' Loading data is usually the first step before running any statistical analysis.
+#' Prior to using this function, BrainSuite and svreg should be run on all subjects.
+#' If required, smoothing should be performed on cortical surface or volumetric image based measures.
+#' Unlike \code{\link{load_bss_data}}, this function loads data from a csv that contains a column for filelist
+#' A csv file containing subject demographic information should exist. The first column of this csv file
+#' should have the subject identifiers. Subject identifiers can be alphanumeric
+#' and should be exactly equal to the individual subject directory names.
+#' This csv file should also contain a column that contains a full path to the data file to be loaded.
+#' @param csv filename of a comma separated (csv) file containing the subject demographic information.
+#' The first column of this csv file
+#' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
+#' and should be exactly equal to the individual subject directory name.
+#' @param subjdir subject directory containing BrainSuite processed data.
+#' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
+#' @param type character string denoting type of analysis. Should be cbm, tbm, or roi.
+#' @param file_col character string for the full file path.
+#' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
+#' Otherwise, for example, if the atlas for tensor based morphometry is located at /path/to/atlas/myatlas.mri.bfc.nii.gz, then specify atlas="/path/to/atlas/myatlas".
+#' @param maskfile optional filename of the mask for tbm or diffusion parameter analysis. The mask has to be in the atlas space.
+#' @examples
+#' \dontrun{
+#' my_data <- load_bss_data_from_filelist(csv = "/path/to/my/demographics.csv",
+#' type="cbm", file_col = "COL_NAME", atlast = "/path/to/atlas",
+#' maskfile = "/path/to/maskfile")
+#' }
+#'
+#' @export
+load_bss_data_from_filelist <- function(csv="", subjdir="", hemi = "left", type="cbm", file_col="", atlas="", maskfile = "") {
+
+#  bss_cbm_data <- new("BssCBMData", subjdir=subjdir, csv=csv, exclude_col="")
+
+  switch(type,
+         cbm = { bss_data <- load_cbm_data_from_filelist(subjdir=subjdir, csv=csv, hemi = hemi, file_col = file_col, atlas=atlas) }
+  )
+  return(bss_data)
+}
+
 #' Load cortical surface data for statistical analysis.
 #' @param subjdir subject directory containing BrainSuite processed data.
 #' @param csv filename of a comma separated (csv) file containing the subject demographic information.
@@ -315,6 +354,32 @@ load_cbm_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="",
   bss_cbm_data@data_type <- bs_data_types$surface
   bss_cbm_data@hemi <- hemi
   return(bss_cbm_data)
+}
+
+#' Load cortical surface data for statistical analysis.
+#' @param subjdir subject directory containing BrainSuite processed data.
+#' @param csv filename of a comma separated (csv) file containing the subject demographic information.
+#' The first column of this csv file
+#' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
+#' and should be exactly equal to the individual subject directory name.
+#' @param file_col character string for the full file path.
+#' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
+#' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
+load_cbm_data_from_filelist <- function(subjdir="", csv="", file_col="", atlas="", hemi="left") {
+
+  bss_data <- new("BssCBMData", subjdir, csv, exclude_col="")
+
+  bss_data@atlas_filename <- atlas
+  bss_data@atlas_surface <- readdfs(atlas)
+  cbm_filelist <- bss_data@demographics[, file_col]
+  attrib_siz <- bss_data@atlas_surface$hdr$nVertices
+  bss_data@data_array <- read_dfs_attributes_for_all_subjects(cbm_filelist, attrib_siz)
+  bss_data@filelist <- cbm_filelist
+  bss_data@analysis_type <- "cbm"
+  bss_data@smooth <- 0.0
+  bss_data@data_type <- bs_data_types$surface
+  bss_data@hemi <- hemi
+  return(bss_data)
 }
 
 load_cbm_data_both_hemi <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="", exclude_col) {

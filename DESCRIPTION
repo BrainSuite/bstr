@@ -39,6 +39,6 @@ Imports:
     R6,
     shinyjs,
     lme4
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 URL: http://brainsuite.org/bssr
 Suggests: testthat

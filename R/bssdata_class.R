@@ -103,7 +103,7 @@ setMethod("initialize", valueClass = "BssData", signature = "BssData", function(
 #' @param bss_data object of type \code{\link{BssData}}
 #' @param atlas_filename path name to the atlas
 #' @param maskfile path name to the mask file
-#' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
+#' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right" or "both".
 #' @param measure character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".
 #' @param smooth numeric value denoting the smoothing level.
 #' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
@@ -167,6 +167,7 @@ setMethod("load_data", signature = "BssTBMData", function(bss_data, atlas_filena
   bss_data@data_array <- read_nii_images_for_all_subjects(bss_data@filelist, attrib_siz, bss_data@mask_idx)
   bss_data@analysis_type <- "tbm"
   bss_data@data_type <- bs_data_types$nifti_image
+  bss_data@hemi <- "NA"
   return(bss_data)
 })
 
@@ -193,6 +194,7 @@ setMethod("load_data", signature = "BssDBMData", function(bss_data, atlas_filena
   bss_data@data_array <- read_nii_images_for_all_subjects(bss_data@filelist, attrib_siz, bss_data@mask_idx)
   bss_data@analysis_type <- "dbm"
   bss_data@data_type <- bs_data_types$nifti_image
+  bss_data@hemi <- "NA"
   return(bss_data)
 })
 

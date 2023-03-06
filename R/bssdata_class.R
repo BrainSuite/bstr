@@ -164,6 +164,12 @@ setMethod("load_data", signature = "BssTBMData", function(bss_data, atlas_filena
   else
     bss_data@mask_idx = 1:attrib_siz
 
+  first_subject_file <- as.vector(RNifti::readNifti(bss_data@filelist[1]))
+  # Check if the dimensions of first subject file and atlas match (the dimensions of atlas and mask are already checked above)
+  if ( length(first_subject_file) != attrib_siz) {
+    stop(sprintf('Dimensions of the atlas file %s and subject %s do not match. Check if you are using the correct atlas', atlas_filename, bss_data@filelist[1]), call. = FALSE)
+  }
+
   bss_data@data_array <- read_nii_images_for_all_subjects(bss_data@filelist, attrib_siz, bss_data@mask_idx)
   bss_data@analysis_type <- "tbm"
   bss_data@data_type <- bs_data_types$nifti_image
@@ -190,6 +196,12 @@ setMethod("load_data", signature = "BssDBMData", function(bss_data, atlas_filena
   }
   else
     bss_data@mask_idx = 1:attrib_siz
+
+  first_subject_file <- as.vector(RNifti::readNifti(bss_data@filelist[1]))
+  # Check if the dimensions of first subject file and atlas match (the dimensions of atlas and mask are already checked above)
+  if ( length(first_subject_file) != attrib_siz) {
+    stop(sprintf('Dimensions of the atlas file %s and subject %s do not match', atlas_filename, bss_data@filelist[1]), call. = FALSE)
+  }
 
   bss_data@data_array <- read_nii_images_for_all_subjects(bss_data@filelist, attrib_siz, bss_data@mask_idx)
   bss_data@analysis_type <- "dbm"
@@ -279,13 +291,17 @@ setMethod ("load_demographics", "BssData", function(object) {
 load_bss_data <- function(type="cbm", subjdir="", csv="", hemi="left",
                           smooth=0.0, roiids=0, roimeas="gmthickness", measure="", atlas="", maskfile = "", eddy=TRUE, exclude_col = "") {
 
+  atlas <- path.expand(atlas)
+  maskfile <- path.expand(maskfile)
+  subjdir <- path.expand(subjdir)
+
   valid_types <- c("cbm", "tbm", "roi","dbm","nca")
   if (! type %in% valid_types)
     stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
 
   switch(type,
          cbm = { bss_data <- load_cbm_data_both_hemi(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth, atlas=atlas, exclude_col=exclude_col) },
-         tbm = { bss_data <- load_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth, atlas=atlas, exclude_col=exclude_col) },
+         tbm = { bss_data <- load_tbm_data(subjdir=subjdir, csv=csv, smooth=smooth, atlas=atlas, maskfile=maskfile, exclude_col=exclude_col) },
          dbm = { bss_data <- load_dbm_data(subjdir=subjdir, csv=csv, measure=measure, smooth=smooth, atlas=atlas, maskfile=maskfile, eddy=eddy, exclude_col=exclude_col) },
          roi = { bss_data <- load_roi_data(subjdir, csv, roiids, roimeas, exclude_col=exclude_col) }
   )
@@ -421,15 +437,29 @@ load_cbm_data_both_hemi <- function(subjdir="", csv="", hemi="left", smooth=0.0,
 load_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas="", maskfile="", exclude_col) {
 
   bss_tbm_data <- new("BssTBMData", subjdir, csv, exclude_col)
-  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
-  tbm_atlas_and_mask <- get_tbm_atlas_and_mask(brainsuite_atlas_id)
-
-  if (maskfile != "") {
-    check_file_exists(maskfile, raise_error = TRUE)
-    tbm_atlas_and_mask$nii_atlas_mask <- maskfile
+  tbm_atlas_and_mask = list()
+  if (maskfile == ""  && atlas == "") {
+    brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
+    tbm_atlas_and_mask <- get_tbm_atlas_and_mask(brainsuite_atlas_id)
   }
-  if (atlas!= "") {
-    stop(sprintf('Both atlas and maskfile are provided. Currently, only a custom maskfile is supported. The maskfile has to be in the atlas space %s used to register the subjects.', brainsuite_atlas_id), call. = FALSE)
+  else {
+    if (maskfile != "" && atlas == "") {
+      brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
+      check_file_exists(maskfile, raise_error = TRUE)
+      tbm_atlas_and_mask$nii_atlas_mask <- maskfile
+      tbm_atlas_and_mask$nii_atlas <- get_tbm_atlas(brainsuite_atlas_id)
+    }
+    else if (maskfile== "" && atlas != "") {
+      brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
+      check_file_exists(atlas, raise_error = TRUE)
+      tbm_atlas_and_mask$nii_atlas <- atlas
+      tbm_atlas_and_mask$nii_atlas_mask <- get_tbm_mask(brainsuite_atlas_id)
+    }
+    else if (maskfile!= "" && atlas != "") {
+      check_file_exists(maskfile, raise_error = TRUE)
+      check_file_exists(atlas, raise_error = TRUE)
+      tbm_atlas_and_mask <- list("nii_atlas" = atlas, "nii_atlas_mask" = maskfile)
+    }
   }
   bss_tbm_data <- load_data(bss_tbm_data, atlas_filename = tbm_atlas_and_mask$nii_atlas, maskfile = tbm_atlas_and_mask$nii_atlas_mask, smooth=smooth)
   bss_tbm_data@data_type <- bs_data_types$nifti_image
@@ -453,16 +483,34 @@ load_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas="", maskfile="",
 load_dbm_data <- function(subjdir="", csv="", measure="", smooth=0.0, atlas="", eddy=TRUE, maskfile="", exclude_col) {
 
   bss_dbm_data <- new("BssDBMData", subjdir, csv, exclude_col)
-  brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
-  dbm_atlas_and_mask <- get_dbm_atlas_and_mask(brainsuite_atlas_id)
+  dbm_atlas_and_mask = list()
 
-  if (maskfile != "") {
-    check_file_exists(maskfile, raise_error = TRUE)
-    dbm_atlas_and_mask$nii_atlas_mask <- maskfile
+  dbm_atlas_and_mask = list()
+  if (maskfile == ""  && atlas == "") {
+    brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
+    dbm_atlas_and_mask <- get_dbm_atlas_and_mask(brainsuite_atlas_id)
   }
-  if (atlas!= "") {
-    stop(sprintf('Both atlas and maskfile are provided. Currently only a custom maskfile is supported. The maskfile has to be in the atlas space %s used to register the subjects.', brainsuite_atlas_id), call. = FALSE)
+  else {
+    if (maskfile != "" && atlas == "") {
+      brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
+      check_file_exists(maskfile, raise_error = TRUE)
+      dbm_atlas_and_mask$nii_atlas_mask <- maskfile
+      dbm_atlas_and_mask$nii_atlas <- get_dbm_atlas(brainsuite_atlas_id)
+    }
+    else if (maskfile== "" && atlas != "") {
+      brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
+      check_file_exists(atlas, raise_error = TRUE)
+      dbm_atlas_and_mask$nii_atlas <- atlas
+      dbm_atlas_and_mask$nii_atlas_mask <- get_dbm_mask(brainsuite_atlas_id)
+    }
+    else if (maskfile!= "" && atlas != "") {
+      check_file_exists(maskfile, raise_error = TRUE)
+      check_file_exists(atlas, raise_error = TRUE)
+      dbm_atlas_and_mask <- list("nii_atlas" = atlas, "nii_atlas_mask" = maskfile)
+    }
   }
+
+
   bss_dbm_data <- load_data(bss_dbm_data, atlas_filename = dbm_atlas_and_mask$nii_atlas, maskfile = dbm_atlas_and_mask$nii_atlas_mask, measure=measure, smooth=smooth, eddy=eddy)
   bss_dbm_data@data_type <- bs_data_types$nifti_image
   return(bss_dbm_data)

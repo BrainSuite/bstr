@@ -602,6 +602,7 @@ paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m]))), "_roi",
 #' @export
 save_bss_out <- function(bss_data, bss_model, outdir="", overwrite = F, nclusters = 10) {
 
+  outdir <- path.expand(outdir)
   valid_types <- c("cbm", "tbm", "roi", "dbm", "nca")
   if (! bss_data@analysis_type %in% valid_types)
     stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)

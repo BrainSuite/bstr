@@ -384,6 +384,43 @@ get_tbm_atlas_and_mask <- function(brainsuite_atlas_id) {
   return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
 }
 
+#' Get the BrainSuite tensor based morphometry atlas
+#' @param brainsuite_atlas_id individual subject directory that the svreg.log file exists in
+#'
+get_tbm_atlas <- function(brainsuite_atlas_id) {
+
+  if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
+    stop('Valid values for atlas are BrainSuiteAtlas1 or BCI-DNI_brain_atlas.', call. = FALSE)
+  brainsuite_install_path <- get_brainsuite_install_path()
+  if (brainsuite_atlas_id == "BrainSuiteAtlas1") {
+    nii_atlas <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BS1_tbm)
+  }
+  if (brainsuite_atlas_id == "BCI-DNI_brain_atlas") {
+    nii_atlas <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_tbm)
+  }
+  check_file_exists(nii_atlas, raise_error = TRUE)
+  return(nii_atlas)
+}
+
+#' Get the BrainSuite tensor based morphometry mask
+#' @param brainsuite_atlas_id individual subject directory that the svreg.log file exists in
+#'
+get_tbm_mask <- function(brainsuite_atlas_id) {
+
+  if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
+    stop('Valid values for atlas are BrainSuiteAtlas1 or BCI-DNI_brain_atlas.', call. = FALSE)
+  brainsuite_install_path <- get_brainsuite_install_path()
+  if (brainsuite_atlas_id == "BrainSuiteAtlas1") {
+    nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BS1_mask_tbm)
+  }
+  if (brainsuite_atlas_id == "BCI-DNI_brain_atlas") {
+    nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_mask_tbm)
+  }
+  check_file_exists(nii_atlas_mask, raise_error = TRUE)
+  return(nii_atlas_mask)
+}
+
+
 #' Check that cortical surface atlas exists
 #' @param atlas filepath for cbm atlas
 #' @param maskfile filepath for the atlas mask file
@@ -425,6 +462,45 @@ get_dbm_atlas_and_mask <- function(brainsuite_atlas_id) {
   check_file_exists(nii_atlas_mask, raise_error = TRUE)
   return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
 }
+
+#' Get the BrainSuite tensor based morphometry atlas
+#' @param brainsuite_atlas_id individual subject directory that the svreg.log file exists in
+#'
+get_dbm_atlas <- function(brainsuite_atlas_id) {
+
+  if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
+    stop('Valid values for atlas are BrainSuiteAtlas1 or BCI-DNI_brain_atlas.', call. = FALSE)
+  brainsuite_install_path <- get_brainsuite_install_path()
+  if (brainsuite_atlas_id == "BrainSuiteAtlas1") {
+    nii_atlas <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BS1_tbm)
+  }
+  if (brainsuite_atlas_id == "BCI-DNI_brain_atlas") {
+    nii_atlas <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_tbm)
+  }
+  check_file_exists(nii_atlas, raise_error = TRUE)
+  return(nii_atlas)
+}
+
+#' Get the BrainSuite tensor based morphometry mask
+#' @param brainsuite_atlas_id individual subject directory that the svreg.log file exists in
+#'
+get_dbm_mask <- function(brainsuite_atlas_id) {
+
+  if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
+    stop('Valid values for atlas are BrainSuiteAtlas1 or BCI-DNI_brain_atlas.', call. = FALSE)
+  brainsuite_install_path <- get_brainsuite_install_path()
+  if (brainsuite_atlas_id == "BrainSuiteAtlas1") {
+    nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BS1_mask_dbm)
+  }
+  if (brainsuite_atlas_id == "BCI-DNI_brain_atlas") {
+    nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_mask_dbm)
+  }
+  check_file_exists(nii_atlas_mask, raise_error = TRUE)
+  return(nii_atlas_mask)
+}
+
+
+
 #' Get the diffusion custom atlas and mask
 #' @param brainsuite_custom_atlas_prefix file prefix for atlas
 #'

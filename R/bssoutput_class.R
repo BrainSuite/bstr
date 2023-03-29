@@ -13,7 +13,7 @@
 # if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #' Check that subject directory and demographics files exist
-#' @param object object of type \code{BssOutput}
+#' @param object object of type \code{BstrOutput}
 #'
 check_files <- function(object){
   if (!dir.exists(object@subjdir)) {
@@ -28,15 +28,15 @@ check_files <- function(object){
 #' S4 class for saving results of statistical analysis
 #' @slot outdir output directory to save the results
 #'
-BssOutput <- setClass(
-  "BssOutput",
+BstrOutput <- setClass(
+  "BstrOutput",
   slots = list(
     outdir = "character"
   ),
   validity = check_files
 )
 
-setMethod("initialize", valueClass = "BssOutput", signature = "BssOutput", function(.Object, outdir) {
+setMethod("initialize", valueClass = "BstrOutput", signature = "BstrOutput", function(.Object, outdir) {
   if (!dir.exists(outdir)) {
     dir.create(outdir)
     .Object@outdir <- outdir
@@ -48,10 +48,10 @@ setMethod("initialize", valueClass = "BssOutput", signature = "BssOutput", funct
   return(.Object)
 })
 
-#' Generic save function for \code{BssOutput}
-#' @param bstr_out object of type \code{BssOutput}
-#' @param bstr_data object of type \code{BssData}
-#' @param bstr_model object of type \code{BssModel}
+#' Generic save function for \code{BstrOutput}
+#' @param bstr_out object of type \code{BstrOutput}
+#' @param bstr_data object of type \code{BstrData}
+#' @param bstr_model object of type \code{BstrModel}
 #' @param overwrite logical parameter denoting if existing output directory should be overwritten or not (default is FALSE)
 #' @param ... Extra named arguments passed to save_out
 #' @details
@@ -59,34 +59,34 @@ setMethod("initialize", valueClass = "BssOutput", signature = "BssOutput", funct
 #' Instead the user should call \code{\link{save_bstr_out}}.
 #' @seealso \code{\link{save_bstr_out}}
 #' @export
-setGeneric("save_out", valueClass = "BssOutput", function(bstr_out, bstr_data, bstr_model, overwrite = FALSE, ...) {
+setGeneric("save_out", valueClass = "BstrOutput", function(bstr_out, bstr_data, bstr_model, overwrite = FALSE, ...) {
   standardGeneric("save_out")
 })
 
-BssSBAOutput <- setClass(
-  "BssSBAOutput",
-  contains = "BssOutput"
+BstrSBAOutput <- setClass(
+  "BstrSBAOutput",
+  contains = "BstrOutput"
 )
 
-BssTBMOutput <- setClass(
-  "BssTBMOutput",
-  contains = "BssOutput"
+BstrTBMOutput <- setClass(
+  "BstrTBMOutput",
+  contains = "BstrOutput"
 )
 
-BssDBAOutput <- setClass(
-  "BssDBAOutput",
-  contains = "BssOutput"
+BstrDBAOutput <- setClass(
+  "BstrDBAOutput",
+  contains = "BstrOutput"
 )
 
-BssROIOutput <- setClass(
-  "BssROIOutput",
-  contains = "BssOutput"
+BstrROIOutput <- setClass(
+  "BstrROIOutput",
+  contains = "BstrOutput"
 )
 
 
 #' @rdname save_out
 #' @inheritParams save_out
-setMethod("save_out", valueClass = "BssSBAOutput", signature = "BssSBAOutput", function(bstr_out, bstr_data, bstr_model, overwrite = F) {
+setMethod("save_out", valueClass = "BstrSBAOutput", signature = "BstrSBAOutput", function(bstr_out, bstr_data, bstr_model, overwrite = F) {
 
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
   if (overwrite == TRUE){
@@ -176,7 +176,7 @@ setMethod("save_out", valueClass = "BssSBAOutput", signature = "BssSBAOutput", f
 #' @rdname save_out
 #' @inheritParams save_out
 #' @param nclusters numeric parameter denoting number of clusters (default is 10)
-setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", function(bstr_out, bstr_data, bstr_model, overwrite = F, nclusters = 10) {
+setMethod("save_out", valueClass = "BstrTBMOutput", signature = "BstrTBMOutput", function(bstr_out, bstr_data, bstr_model, overwrite = F, nclusters = 10) {
 
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
   if (overwrite == TRUE){
@@ -253,7 +253,7 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
   }
 
   # add create an R6 class function from here
-  bstrmd_volout <- BssRmdVolumeOutput$new()
+  bstrmd_volout <- BstrRmdVolumeOutput$new()
   bstrmd_volout$save_out(bstr_data, bstr_model, voxelcoord = voxelcoord, outdir)
 
 
@@ -266,7 +266,7 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
 
 #' @rdname save_out
 #' @inheritParams save_out
-setMethod("save_out", valueClass = "BssDBAOutput", signature = "BssDBAOutput", function(bstr_out, bstr_data, bstr_model, overwrite = F, nclusters = 10) {
+setMethod("save_out", valueClass = "BstrDBAOutput", signature = "BstrDBAOutput", function(bstr_out, bstr_data, bstr_model, overwrite = F, nclusters = 10) {
 
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
   if (overwrite == TRUE){
@@ -343,7 +343,7 @@ setMethod("save_out", valueClass = "BssDBAOutput", signature = "BssDBAOutput", f
   }
 
   # Create a new R6 class object here
-  bstrmd_volout <- BssRmdVolumeOutput$new()
+  bstrmd_volout <- BstrRmdVolumeOutput$new()
   bstrmd_volout$save_out(bstr_data, bstr_model, voxelcoord = voxelcoord, outdir)
 
   # Copy modelspec file to the output directory
@@ -354,7 +354,7 @@ setMethod("save_out", valueClass = "BssDBAOutput", signature = "BssDBAOutput", f
 
 #' @rdname save_out
 #' @inheritParams save_out
-setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", function(bstr_out, bstr_data, bstr_model, overwrite = F) {
+setMethod("save_out", valueClass = "BstrROIOutput", signature = "BstrROIOutput", function(bstr_out, bstr_data, bstr_model, overwrite = F) {
 
   # # Create the output directory
   # if (is.null(outdir)) {
@@ -594,8 +594,8 @@ paste0(as.character(get_roi_tag(read_label_desc(),bstr_data@roiids[m]))), "_roi"
 )
 
 #' Save the statistical analysis output
-#' @param bstr_data object of type \code{BssData}
-#' @param bstr_model object of type \code{BssModel}
+#' @param bstr_data object of type \code{BstrData}
+#' @param bstr_model object of type \code{BstrModel}
 #' @param outdir output directory to save the results
 #' @param overwrite logical parameter denoting if existing output directory should be overwritten or not (default is FALSE)
 #' @param nclusters numeric value denoting number of clusters (default is 10)
@@ -608,10 +608,10 @@ save_bstr_out <- function(bstr_data, bstr_model, outdir="", overwrite = F, nclus
     stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
 
   switch(bstr_data@analysis_type,
-         sba = { bstr_out <- new("BssSBAOutput", outdir)},
-         tbm = { bstr_out <- new("BssTBMOutput", outdir) },
-         dba = { bstr_out <- new("BssDBAOutput", outdir) },
-         roi = { bstr_out <- new("BssROIOutput", outdir) }
+         sba = { bstr_out <- new("BstrSBAOutput", outdir)},
+         tbm = { bstr_out <- new("BstrTBMOutput", outdir) },
+         dba = { bstr_out <- new("BstrDBAOutput", outdir) },
+         roi = { bstr_out <- new("BstrROIOutput", outdir) }
   )
   if (bstr_data@analysis_type == "tbm" | bstr_data@analysis_type == "dba"){
     bstr_out <- save_out(bstr_out, bstr_data, bstr_model, overwrite = overwrite, nclusters = nclusters)
@@ -652,15 +652,15 @@ save_bstr_out_sba_both_hemi <- function(bstr_out, bstr_data, bstr_model, outdir=
 #' @param measure numeric value denoting the measures used to create the color file
 #' @param var_name string denoting name of variable that the color file is being created for
 #' @param cmap_title string denoting the type of color map
-#' @param bstr_data object of type \code{BssData}
-#' @param bstr_model object of type \code{BssModel}
+#' @param bstr_data object of type \code{BstrData}
+#' @param bstr_model object of type \code{BstrModel}
 #' @param outdir string specifying output directory to save the results in
 #' @export
 
 save_bstr_color_files <- function(measure, var_name, cmap_title, bstr_data, bstr_model, outdir) {
 
   measure <- as.numeric(measure)
-  bstr_cmap <- new("BssColormap", cmap_title, "RdYlBu", measure)
+  bstr_cmap <- new("BstrColormap", cmap_title, "RdYlBu", measure)
   if (bstr_data@hemi == "both")
     cbar_filename <- paste(paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
   else
@@ -716,9 +716,9 @@ save_bstr_color_files <- function(measure, var_name, cmap_title, bstr_data, bstr
 #' Save the surface output to the given ouput directory
 #' @param measure numeric value denoting the measures used to create the output
 #' @param var_name string denoting name of variable used by the function
-#' @param bstr_data object of type \code{BssData}
-#' @param bstr_model object of type \code{BssModel}
-#' @param bstr_cmap object of type \code{BssColormap}
+#' @param bstr_data object of type \code{BstrData}
+#' @param bstr_model object of type \code{BstrModel}
+#' @param bstr_cmap object of type \code{BstrColormap}
 #' @param outdir string specifying output directory to save the results in
 #' @export
 
@@ -765,9 +765,9 @@ save_bstr_out_surface_both_hemi <- function(measure, var_name, bstr_cmap, bstr_d
 #' Save the nifti image to the output file
 #' @param measure denotes the measure used to create the output
 #' @param var_name string denoting name of variable used by the function
-#' @param bstr_data object of type \code{BssData}
-#' @param bstr_model object of type \code{BssModel}
-#' @param bstr_cmap object of type \code{BssColormap}
+#' @param bstr_data object of type \code{BstrData}
+#' @param bstr_model object of type \code{BstrModel}
+#' @param bstr_cmap object of type \code{BstrColormap}
 #' @param outdir string specifying output directory to save the results in
 #' @export
 
@@ -782,8 +782,8 @@ save_bstr_out_nifti_image <- function(measure, var_name, bstr_cmap, bstr_data, b
 #' @param measure numeric value denoting the measures used to create the output
 #' @param var_name string denoting name of variable used by the function
 #' @param label string denoting the label for the object
-#' @param bstr_data object of type \code{BssData}
-#' @param bstr_model object of type \code{BssModel}
+#' @param bstr_data object of type \code{BstrData}
+#' @param bstr_model object of type \code{BstrModel}
 #' @param outdir string specifying output directory to save the results in
 #' @export
 
@@ -800,8 +800,8 @@ save_bstr_rds <- function(measure, var_name, label, bstr_data, bstr_model, outdi
 #' @param tvalues t-values
 #' @param tvalues_adjusted adjusted t-values
 #' @param var_name string denoting name of variable used by the function
-#' @param bstr_data object of type \code{BssData}
-#' @param bstr_model object of type \code{BssModel}
+#' @param bstr_data object of type \code{BstrData}
+#' @param bstr_model object of type \code{BstrModel}
 #' @param outdir string specifying output directory to save the results in
 #' @param corr_values correlation values
 #' @param corr_values_masked_adjusted adjusted, masked correlation values
@@ -835,9 +835,9 @@ save_vol_stats_out <- function(log_pvalues, log_pvalues_adjusted, tvalues, tvalu
 }
 
 #' Get voxel coordinates of all significant clusters (up to number of clusters)
-#' @param bstr_out object of type \code{BssOut}
-#' @param bstr_data object of type \code{BssData}
-#' @param bstr_model object of type \code{BssModel}
+#' @param bstr_out object of type \code{BstrOut}
+#' @param bstr_data object of type \code{BstrData}
+#' @param bstr_model object of type \code{BstrModel}
 #' @param outdir string specifying output directory to save the results in
 #' @param nclusters numeric value specifying number of clusters
 #' @export

@@ -26,7 +26,7 @@
 #' either a categorical or a continuous variable.
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
 #' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-#' @param  bstr_data Object of type \code{\link{BssData}}
+#' @param  bstr_data Object of type \code{\link{BstrData}}
 #' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bstr_p_adjust}} for valid values.
 #' @seealso \code{\link{lm_vec}} for linear regression, \code{\link{bstr_ttest}} for independent sample and paired t-tests.
 #'
@@ -35,7 +35,7 @@
 # param niter numeric variable for the number of iterations for permutations test. Will be ignored if mult_comp="fdr"
 bstr_anova <- function(main_effect="", covariates="", bstr_data, mult_comp="fdr") { #, niter=5000
 
-  if (class(bstr_data) == "BssROIData") {
+  if (class(bstr_data) == "BstrROIData") {
     return(bstr_roi_anova(main_effect = main_effect, covariates = covariates, bstr_data = bstr_data))
   }
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
@@ -80,11 +80,11 @@ bstr_anova <- function(main_effect="", covariates="", bstr_data, mult_comp="fdr"
 #' For most scenarios, the user does not need to call this function directly. This function
 #' will be called internally from \code{\link{bstr_anova}}
 #'
-#' @param bstr_lm_full An object of type \code{\link{BssModel}} returned from \code{\link{lm_vec}}.
+#' @param bstr_lm_full An object of type \code{\link{BstrModel}} returned from \code{\link{lm_vec}}.
 #' This is a full model including both the main effect and covariates.
-#' @param bstr_lm_null An object of type \code{\link{BssModel}} returned from \code{\link{lm_vec}}.
+#' @param bstr_lm_null An object of type \code{\link{BstrModel}} returned from \code{\link{lm_vec}}.
 #' This is a null model including only the covariates.
-#' @param  bstr_data Object of type \code{\link{BssData}}
+#' @param  bstr_data Object of type \code{\link{BstrData}}
 #'
 #' @seealso \code{\link{bstr_anova}} for most commonly used function for ANOVA, \code{\link{lm_vec}} for vectorized linear regression, \code{\link{ttest_vec}} for
 #' vectorized independent sample and paired t-tests.
@@ -105,7 +105,7 @@ anova_vec <- function(bstr_lm_full, bstr_lm_null, bstr_data) {
   pvalues[abs(pvalues) <= .Machine$double.eps] <- 100*.Machine$double.eps
   tvalues_sign <- sign_tvalues(tvalues)
 
-  bstr_model <- new("BssModel", model_type="bstr_anova", main_effect = bstr_lm_full@main_effect, covariates = bstr_lm_full@covariates,
+  bstr_model <- new("BstrModel", model_type="bstr_anova", main_effect = bstr_lm_full@main_effect, covariates = bstr_lm_full@covariates,
                    demographics = bstr_data@demographics, mspec_file="")
   bstr_model@pvalues <- pvalues
   bstr_model@tvalues <- tvalues
@@ -129,7 +129,7 @@ anova_vec <- function(bstr_lm_full, bstr_lm_null, bstr_data) {
 #' either a categorical or a continuous variable.
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
 #' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-#' @param  bstr_data Object of type \code{\link{BssData}}
+#' @param  bstr_data Object of type \code{\link{BstrData}}
 #' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bstr_p_adjust}} for valid values.
 #'
 #' @export
@@ -137,7 +137,7 @@ anova_vec <- function(bstr_lm_full, bstr_lm_null, bstr_data) {
 # param  niter numeric variable for the number of iterations for permutations test. Will be ignored if mult_comp="fdr"
 bstr_lm <- function(main_effect="", covariates="", bstr_data, mult_comp = "fdr") { #, niter=5000
 
-  if (class(bstr_data) == "BssROIData") {
+  if (class(bstr_data) == "BstrROIData") {
     return(bstr_roi_anova(main_effect = main_effect, covariates = covariates, bstr_data = bstr_data))
   }
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
@@ -219,12 +219,12 @@ bstr_lm <- function(main_effect="", covariates="", bstr_data, mult_comp = "fdr")
 #' either a categorical or a continuous variable.
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
 #' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-#' @param  bstr_data Object of type \code{\link{BssData}}
+#' @param  bstr_data Object of type \code{\link{BstrData}}
 #'
 #' @export
 lm_vec <- function(main_effect = "", covariates = "", bstr_data) {
 
-  bstr_model <- new("BssModel", model_type="bstr_lm", main_effect = main_effect, covariates = covariates,
+  bstr_model <- new("BstrModel", model_type="bstr_lm", main_effect = main_effect, covariates = covariates,
                    demographics = bstr_data@demographics, mspec_file="")
 
   # lm_formula <- formula(sprintf('~ %s', paste(main_effect, '+', covariates)))
@@ -264,13 +264,13 @@ lm_vec <- function(main_effect = "", covariates = "", bstr_data) {
 #' either a categorical or a continuous variable.
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
 #' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-#' @param  bstr_data Object of type \code{\link{BssData}}
+#' @param  bstr_data Object of type \code{\link{BstrData}}
 #'
 #' @export
 
 bstr_roi_anova <- function(main_effect="", covariates="", bstr_data=bstr_data) {
   # Check the model type and call the appropriate method
-  bstr_model <- new("BssModel", model_type="bstr_lm", main_effect = main_effect, covariates = covariates,
+  bstr_model <- new("BstrModel", model_type="bstr_lm", main_effect = main_effect, covariates = covariates,
                    demographics = bstr_data@demographics, mspec_file="")
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
 
@@ -311,7 +311,7 @@ bstr_roi_anova <- function(main_effect="", covariates="", bstr_data=bstr_data) {
 
 # bstr_roi_lm <- function(main_effect="", covariates="", bstr_data=bstr_data) {
 #   # Check the model type and call the appropriate method
-#   bstr_model <- new("BssModel", model_type="bstr_lm", main_effect = main_effect, covariates = covariates,
+#   bstr_model <- new("BstrModel", model_type="bstr_lm", main_effect = main_effect, covariates = covariates,
 #                    demographics = bstr_data@demographics, mspec_file="")
 #   message('Running the statistical model. This may take a while...', appendLF = FALSE)
 #
@@ -341,7 +341,7 @@ bstr_roi_anova <- function(main_effect="", covariates="", bstr_data=bstr_data) {
 #' coefficient. The brain imaging phenotype is automatically selected from the type of \code{bstr_data}.
 #' @param corr_var Character variable name. This should be present in the demographics csv file associated
 #' with \code{bstr_data}.
-#' @param  bstr_data Object of type \code{\link{BssData}}.
+#' @param  bstr_data Object of type \code{\link{BstrData}}.
 #' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bstr_p_adjust}} for valid values.
 #' @details
 #' \code{bstr_data} can be of the type "sba", "tbm", or "roi".
@@ -350,7 +350,7 @@ bstr_roi_anova <- function(main_effect="", covariates="", bstr_data=bstr_data) {
 bstr_corr <- function(corr_var, bstr_data, mult_comp="fdr") {
 
   message('Running correlations...', appendLF = FALSE)
-  bstr_model <- new("BssModel", model_type="bstr_corr", corr_var = corr_var,
+  bstr_model <- new("BstrModel", model_type="bstr_corr", corr_var = corr_var,
                    demographics = bstr_data@demographics, mspec_file="")
 
   corr_result <- corr_vec(bstr_data@data_array, bstr_data@demographics[[corr_var]])
@@ -405,7 +405,7 @@ corr_vec <- function(X, Y) {
 #' imaging phenotypes for a categorical variable.
 #' @param group_var Categorical variable name. This should be present in the demographics csv file associated
 #' with \code{bstr_data}.
-#' @param  bstr_data Object of type \code{\link{BssData}}.
+#' @param  bstr_data Object of type \code{\link{BstrData}}.
 #' @param  paired logical; is TRUE if \code{group_var} contains matching (dependent) samples. The default value is \code{FALSE}.
 #' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bstr_p_adjust}} for valid values.
 #' @details
@@ -416,10 +416,10 @@ corr_vec <- function(X, Y) {
 bstr_ttest <- function(group_var, bstr_data, paired = FALSE, mult_comp="fdr") {
 
   if (paired == FALSE)
-    bstr_model <- new("BssModel", model_type="unpairedttest", group_var = group_var,
+    bstr_model <- new("BstrModel", model_type="unpairedttest", group_var = group_var,
                      demographics = bstr_data@demographics, mspec_file="")
   else
-    bstr_model <- new("BssModel", model_type="pairedttest", group_var = group_var,
+    bstr_model <- new("BstrModel", model_type="pairedttest", group_var = group_var,
                      demographics = bstr_data@demographics, mspec_file="")
 
   group1 <- levels(as.factor(bstr_data@demographics[[group_var]]))[1]
@@ -542,7 +542,7 @@ bstr_p_adjust <- function(pvalues, method='fdr') {
 # either a categorical or a continuous variable.
 # @param covariates Character string containing a set of other predictors (variables) in the model. If more than
 # one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-# @param bstr_data Object of type \code{\link{BssData}}
+# @param bstr_data Object of type \code{\link{BstrData}}
 # @param num_of_perm Number of iterations/shuffles for permutation test.
 # @details
 # The permutation test handles the exchangeability assumption with Freedman-Lane Method. This function also
@@ -612,7 +612,7 @@ bstr_p_adjust <- function(pvalues, method='fdr') {
 # either a categorical or a continuous variable.
 # @param covariates Character string containing a set of other predictors (variables) in the model. If more than
 # one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-# @param bstr_data Object of type \code{\link{BssData}}
+# @param bstr_data Object of type \code{\link{BstrData}}
 # @param tvalues_null Null distribution output from \code{\link{maxTperm}}. Statistics drawn from each
 # shuffle are the maximum t-statistic within ROI.
 #
@@ -648,13 +648,13 @@ bstr_p_adjust <- function(pvalues, method='fdr') {
 #' either a categorical or a continuous variable.
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
 #' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-#' @param  bstr_data Object of type \code{\link{BssData}}
+#' @param  bstr_data Object of type \code{\link{BstrData}}
 #' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bstr_p_adjust}} for valid values.
 #'
 #' @export
 bstr_lmer <- function(group_var, main_effect="", covariates="", bstr_data, mult_comp = "fdr") {
 
-  if (class(bstr_data) == "BssROIData") {
+  if (class(bstr_data) == "BstrROIData") {
     return(bstr_roi_lmer_anova(group_var, main_effect = main_effect, covariates = covariates, bstr_data = bstr_data))
   }
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
@@ -706,12 +706,12 @@ bstr_lmer <- function(group_var, main_effect="", covariates="", bstr_data, mult_
 #' either a categorical or a continuous variable.
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
 #' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-#' @param  bstr_data Object of type \code{\link{BssData}}
+#' @param  bstr_data Object of type \code{\link{BstrData}}
 #'
 #' @export
 lmer_vec <- function(group_var, main_effect = "", covariates = "", bstr_data) {
 
-  bstr_model <- new("BssModel", model_type="bstr_lmer", main_effect = main_effect, covariates = covariates,
+  bstr_model <- new("BstrModel", model_type="bstr_lmer", main_effect = main_effect, covariates = covariates,
                    group_var = group_var, demographics = bstr_data@demographics, mspec_file="")
 
   # Mass Univariate Linear Mixed Effects Analysis (still in progress)
@@ -754,13 +754,13 @@ lmer_vec <- function(group_var, main_effect = "", covariates = "", bstr_data) {
 #' either a categorical or a continuous variable.
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
 #' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-#' @param  bstr_data Object of type \code{\link{BssData}}
+#' @param  bstr_data Object of type \code{\link{BstrData}}
 #'
 #' @export
 
 bstr_roi_lmer_anova <- function(group_var, main_effect="", covariates="", bstr_data){
 
-  bstr_model <- new("BssModel", model_type="bstr_lmer", main_effect = main_effect, covariates = covariates,
+  bstr_model <- new("BstrModel", model_type="bstr_lmer", main_effect = main_effect, covariates = covariates,
                    group_var = group_var, demographics = bstr_data@demographics, mspec_file="")
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
 

@@ -14,8 +14,8 @@
 
 #' R6 super class for Rmd output functionality
 #' @export
-BssRmdOutput <-
-  R6::R6Class("BssRmdOutput",
+BstrRmdOutput <-
+  R6::R6Class("BstrRmdOutput",
               public = list(
                 #' @field outdir output directory
                 outdir = NULL,
@@ -25,8 +25,8 @@ BssRmdOutput <-
                   self$outdir <- outdir
                 },
                 #' @description Save results as Rmd
-                #' @param bstr_data object of type \code{BssData}
-                #' @param bstr_model object of type \code{BssModel}
+                #' @param bstr_data object of type \code{BstrData}
+                #' @param bstr_model object of type \code{BstrModel}
                 save_out = function(bstr_data, bstr_model){
 
                 },

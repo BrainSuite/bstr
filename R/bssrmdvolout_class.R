@@ -14,9 +14,9 @@
 
 #' R6 derived class for Rmd volume output functionality
 #' @export
-BssRmdVolumeOutput <-
-  R6::R6Class("BssRmdVolumeOutput",
-              inherit = BssRmdOutput,
+BstrRmdVolumeOutput <-
+  R6::R6Class("BstrRmdVolumeOutput",
+              inherit = BstrRmdOutput,
               public = list(
                 initialize = function(outdir = "./") {
                   initialize(outdir)

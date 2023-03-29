@@ -30,8 +30,8 @@
 #' @slot nvertices_rh numeric value containing the number of vertices for the right cortical surface atlas
 #'
 #' @export
-BssData <- setClass(
-  "BssData",
+BstrData <- setClass(
+  "BstrData",
   slots = list(
     data_array = "matrix",
     data_array_lh = "matrix",
@@ -51,45 +51,45 @@ BssData <- setClass(
   )
 )
 
-BssROIData <- setClass(
-  "BssROIData",
+BstrROIData <- setClass(
+  "BstrROIData",
   slots = list(roiids = "numeric",
                roimeas = "character"),
-  contains = "BssData"
+  contains = "BstrData"
 )
 
-BssSBAData <- setClass(
-  "BssSBAData",
+BstrSBAData <- setClass(
+  "BstrSBAData",
   slots = list(atlas_filename = "character",
                atlas_filename_lh = "character",
                atlas_filename_rh = "character",
                atlas_surface = 'list',
                atlas_surface_lh = 'list',
                atlas_surface_rh = 'list'),
-  contains = "BssData"
+  contains = "BstrData"
 )
 
 setOldClass("niftiImage") #Declare niftiImage (RNifti) so the @slot atlas_image can be defined
 
-BssTBMData <- setClass(
-  "BssTBMData",
+BstrTBMData <- setClass(
+  "BstrTBMData",
   slots = list(atlas_filename = "character",
                atlas_image = 'niftiImage',
                maskfile = 'character',
                mask_idx = 'vector'),
-  contains = "BssData"
+  contains = "BstrData"
 )
 
-BssDBAData <- setClass(
-  "BssDBAData",
+BstrDBAData <- setClass(
+  "BstrDBAData",
   slots = list(atlas_filename = "character",
                atlas_image = 'niftiImage',
                maskfile = 'character',
                mask_idx = 'vector'),
-  contains = "BssData"
+  contains = "BstrData"
 )
 
-setMethod("initialize", valueClass = "BssData", signature = "BssData", function(.Object, subjdir, csv, exclude_col) {
+setMethod("initialize", valueClass = "BstrData", signature = "BstrData", function(.Object, subjdir, csv, exclude_col) {
 
   check_file_exists(subjdir, raise_error = TRUE)
   check_file_exists(csv, raise_error = TRUE)
@@ -100,7 +100,7 @@ setMethod("initialize", valueClass = "BssData", signature = "BssData", function(
 })
 
 #' A generic function to load data for statistical analysis.
-#' @param bstr_data object of type \code{\link{BssData}}
+#' @param bstr_data object of type \code{\link{BstrData}}
 #' @param atlas_filename path name to the atlas
 #' @param maskfile path name to the mask file
 #' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right" or "both".
@@ -116,21 +116,21 @@ setMethod("initialize", valueClass = "BssData", signature = "BssData", function(
 #' @seealso \code{\link{load_bstr_data}}
 #'
 #' @export
-setGeneric("load_data", valueClass = "BssData", function(bstr_data, atlas_filename = NULL, maskfile = NULL, hemi = "left", measure = "", smooth = 0.0, eddy = TRUE, roiids = NULL, roimeas = NULL, exclude_col) {
+setGeneric("load_data", valueClass = "BstrData", function(bstr_data, atlas_filename = NULL, maskfile = NULL, hemi = "left", measure = "", smooth = 0.0, eddy = TRUE, roiids = NULL, roimeas = NULL, exclude_col) {
   standardGeneric("load_data")
 })
 
-setGeneric("load_demographics", valueClass = "BssData", function(object) {
+setGeneric("load_demographics", valueClass = "BstrData", function(object) {
   standardGeneric("load_demographics")
 })
 
 #' @rdname load_data
-setMethod("load_data", signature = "BssData", function(bstr_data, roiids = NULL, roimeas = NULL, exclude_col) {
+setMethod("load_data", signature = "BstrData", function(bstr_data, roiids = NULL, roimeas = NULL, exclude_col) {
   return(bstr_data)
 })
 
 #' @rdname load_data
-setMethod("load_data", signature = "BssSBAData", function(bstr_data, atlas_filename, hemi, smooth) {
+setMethod("load_data", signature = "BstrSBAData", function(bstr_data, atlas_filename, hemi, smooth) {
 
   bstr_data@atlas_filename <- atlas_filename
   bstr_data@atlas_surface <- readdfs(atlas_filename)
@@ -145,7 +145,7 @@ setMethod("load_data", signature = "BssSBAData", function(bstr_data, atlas_filen
 })
 
 #' @rdname load_data
-setMethod("load_data", signature = "BssTBMData", function(bstr_data, atlas_filename, maskfile = NULL, smooth) {
+setMethod("load_data", signature = "BstrTBMData", function(bstr_data, atlas_filename, maskfile = NULL, smooth) {
 
   bstr_data@atlas_filename <- atlas_filename
   bstr_data@atlas_image <- RNifti::readNifti(atlas_filename)
@@ -178,7 +178,7 @@ setMethod("load_data", signature = "BssTBMData", function(bstr_data, atlas_filen
 })
 
 #' @rdname load_data
-setMethod("load_data", signature = "BssDBAData", function(bstr_data, atlas_filename, maskfile = NULL, measure, smooth, eddy) {
+setMethod("load_data", signature = "BstrDBAData", function(bstr_data, atlas_filename, maskfile = NULL, measure, smooth, eddy) {
 
   bstr_data@atlas_filename <- atlas_filename
   bstr_data@atlas_image <- RNifti::readNifti(atlas_filename)
@@ -211,7 +211,7 @@ setMethod("load_data", signature = "BssDBAData", function(bstr_data, atlas_filen
 })
 
 #' @rdname load_data
-setMethod("load_data", signature = "BssROIData", function(bstr_data, roiids = NULL, roimeas = NULL, exclude_col) {
+setMethod("load_data", signature = "BstrROIData", function(bstr_data, roiids = NULL, roimeas = NULL, exclude_col) {
 
   bstr_data@analysis_type <- "roi"
   bstr_data@roiids <- roiids
@@ -237,16 +237,16 @@ setMethod("load_data", signature = "BssROIData", function(bstr_data, roiids = NU
 })
 
 
-setMethod ("load_demographics", "BssData", function(object) {
+setMethod ("load_demographics", "BstrData", function(object) {
   object@demographics <- read_demographics(object@csv)
   return(object)
 })
 
 
 
-# signature(c(object = "BssData", csv = "character"))
+# signature(c(object = "BstrData", csv = "character"))
 
-# setMethod("load_data", signature(object = "BssROIData", subjects_dir = "character", csv = "character", roiids = "numeric",
+# setMethod("load_data", signature(object = "BstrROIData", subjects_dir = "character", csv = "character", roiids = "numeric",
 #                                  roimeas = "character", outdir = "character"),
 #           function(object, subjects_dir, csv, roiid, roimeas, outdir=NULL) {
 #             print("hi")
@@ -339,7 +339,7 @@ load_bstr_data <- function(type="sba", subjdir="", csv="", hemi="left",
 #' @export
 load_bstr_data_from_filelist <- function(csv="", subjdir="", hemi = "left", type="sba", file_col="", atlas="", maskfile = "") {
 
-#  bstr_sba_data <- new("BssSBAData", subjdir=subjdir, csv=csv, exclude_col="")
+#  bstr_sba_data <- new("BstrSBAData", subjdir=subjdir, csv=csv, exclude_col="")
 
   switch(type,
          sba = { bstr_data <- load_sba_data_from_filelist(subjdir=subjdir, csv=csv, hemi = hemi, file_col = file_col, atlas=atlas) }
@@ -360,7 +360,7 @@ load_bstr_data_from_filelist <- function(csv="", subjdir="", hemi = "left", type
 #' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 load_sba_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="", exclude_col) {
 
-  bstr_sba_data <- new("BssSBAData", subjdir, csv, exclude_col)
+  bstr_sba_data <- new("BstrSBAData", subjdir, csv, exclude_col)
   if (atlas == "") {
     brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
     sba_surf_atlas <- get_sba_atlas(brainsuite_atlas_id, hemi)
@@ -385,7 +385,7 @@ load_sba_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="",
 #' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
 load_sba_data_from_filelist <- function(subjdir="", csv="", file_col="", atlas="", hemi="left") {
 
-  bstr_data <- new("BssSBAData", subjdir, csv, exclude_col="")
+  bstr_data <- new("BstrSBAData", subjdir, csv, exclude_col="")
 
   bstr_data@atlas_filename <- atlas
   bstr_data@atlas_surface <- readdfs(atlas)
@@ -436,7 +436,7 @@ load_sba_data_both_hemi <- function(subjdir="", csv="", hemi="left", smooth=0.0,
 #'
 load_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas="", maskfile="", exclude_col) {
 
-  bstr_tbm_data <- new("BssTBMData", subjdir, csv, exclude_col)
+  bstr_tbm_data <- new("BstrTBMData", subjdir, csv, exclude_col)
   tbm_atlas_and_mask = list()
   if (maskfile == ""  && atlas == "") {
     brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
@@ -482,7 +482,7 @@ load_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas="", maskfile="",
 
 load_dba_data <- function(subjdir="", csv="", measure="", smooth=0.0, atlas="", eddy=TRUE, maskfile="", exclude_col) {
 
-  bstr_dba_data <- new("BssDBAData", subjdir, csv, exclude_col)
+  bstr_dba_data <- new("BstrDBAData", subjdir, csv, exclude_col)
   dba_atlas_and_mask = list()
 
   dba_atlas_and_mask = list()
@@ -527,13 +527,13 @@ load_dba_data <- function(subjdir="", csv="", measure="", smooth=0.0, atlas="", 
 #' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 #'
 load_roi_data <- function(subjdir="", csv="", roiids="", roimeas="", exclude_col) {
-  bstr_roi_data <- new("BssROIData", subjdir, csv, exclude_col)
+  bstr_roi_data <- new("BstrROIData", subjdir, csv, exclude_col)
   bstr_roi_data <- load_data(bstr_roi_data, roiids = roiids, roimeas = roimeas, exclude_col=exclude_col)
   return(bstr_roi_data)
 }
 
 # #' Check that subject directory and demographics csv files exist
-# #' @param object object of type \code{BssData}
+# #' @param object object of type \code{BstrData}
 # #'
 # check_files <- function(object){
 #   if (!dir.exists(object@subjdir)) {
@@ -623,7 +623,7 @@ package_data <- function(type="sba", subjdir=NULL, csv="", hemi="left",
 #'
 copy_sba_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, outdir, exclude_col="") {
 
-  bstr_data <- new("BssSBAData", subjdir, csv, exclude_col )
+  bstr_data <- new("BstrSBAData", subjdir, csv, exclude_col )
   logfilenames <- get_brainsuite_logfilename_for_all_subjects(subjdir, csv, exclude_col)
   brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
   sba_atlas_filename <- get_sba_atlas(brainsuite_atlas_id, hemi)
@@ -653,7 +653,7 @@ copy_sba_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, outdir, e
 #'
 copy_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas, outdir, exclude_col="") {
 
-  bstr_data <- new("BssTBMData", subjdir, csv, exclude_col)
+  bstr_data <- new("BstrTBMData", subjdir, csv, exclude_col)
   logfilenames <- get_brainsuite_logfilename_for_all_subjects(subjdir, csv, exclude_col)
   brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
   tbm_atlas_mask_filename <- get_tbm_atlas_and_mask(brainsuite_atlas_id)
@@ -688,7 +688,7 @@ copy_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas, outdir, exclude
 #'
 copy_dba_data <- function(subjdir="", csv="", measure="FA", atlas="", eddy=TRUE, smooth=0.0, outdir, exclude_col="") {
 
-  bstr_data <- new("BssDBAData", subjdir, csv, exclude_col)
+  bstr_data <- new("BstrDBAData", subjdir, csv, exclude_col)
   logfilenames <- get_brainsuite_logfilename_for_all_subjects(subjdir, csv, exclude_col)
   brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
   dba_atlas_mask_filename <- get_dba_atlas_and_mask(brainsuite_atlas_id)
@@ -723,7 +723,7 @@ copy_dba_data <- function(subjdir="", csv="", measure="FA", atlas="", eddy=TRUE,
 #'
 copy_roi_data <- function(subjdir="", csv="", outdir, exclude_col="") {
 
-  bstr_data <- new("BssROIData", subjdir, csv, exclude_col)
+  bstr_data <- new("BstrROIData", subjdir, csv, exclude_col)
   roiwise_file_list <- get_roi_file_list(bstr_data)
   dest_filelist <- file.path(outdir, bstr_data@demographics$subjID, basename(roiwise_file_list))
 

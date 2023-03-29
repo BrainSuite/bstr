@@ -14,9 +14,9 @@
 
 #' R6 derived class for Rmd surface output functionality
 #' @export
-BssRmdVolumeOutput <-
-  R6::R6Class("BssRmdSurfaceOutput",
-              inherit = BssRmdOutput,
+BstrRmdVolumeOutput <-
+  R6::R6Class("BstrRmdSurfaceOutput",
+              inherit = BstrRmdOutput,
               public = list(
                 initialize = function(outdir = NULL) {
                   super$initialize(outdir)

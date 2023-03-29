@@ -189,7 +189,7 @@ get_bs_file_list <- function(analysis_type) {
 
 }
 #' Returns a list of all ROI files for all subjects
-#' @param bstr_data object of type \code{BssData}
+#' @param bstr_data object of type \code{BstrData}
 #'
 get_roi_file_list <- function(bstr_data) {
 
@@ -198,7 +198,7 @@ get_roi_file_list <- function(bstr_data) {
 
 }
 #' Returns a list of the cortical surface files for all subjects
-#' @param bstr_data object of type \code{BssData}
+#' @param bstr_data object of type \code{BstrData}
 #' @param hemi designates which hemisphere is of interest
 #' @param smooth numeric value designating the smoothing used (default is 0)
 #'
@@ -208,7 +208,7 @@ get_sba_file_list <- function(bstr_data, hemi, smooth = 0) {
   return(bids_flag_and_filelist$filelist)
 }
 #' Returns a list of the tensor-based files for all subjects
-#' @param bstr_data object of type \code{BssData}
+#' @param bstr_data object of type \code{BstrData}
 #' @param smooth numeric value designating the smoothing used (default is 0)
 #'
 get_tbm_file_list <- function(bstr_data, smooth = 0) {
@@ -218,7 +218,7 @@ get_tbm_file_list <- function(bstr_data, smooth = 0) {
 }
 
 #' Returns a list of the diffusion files for all subjects
-#' @param bstr_data object of type \code{BssData}
+#' @param bstr_data object of type \code{BstrData}
 #' @param measure numeric value denoting the measures used to create the output
 #' @param smooth numeric value designating the smoothing used (default is 0)
 #' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.

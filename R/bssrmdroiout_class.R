@@ -14,9 +14,9 @@
 
 #' R6 derived class for Rmd ROI output functionality
 #' @export
-BssRmdRoiOutput <-
-  R6::R6Class("BssRmdRoiOutput",
-              inherit = BssRmdOutput,
+BstrRmdRoiOutput <-
+  R6::R6Class("BstrRmdRoiOutput",
+              inherit = BstrRmdOutput,
               public = list(
                 initialize = function(outdir = NULL) {
                   super$initialize(outdir)

@@ -26,8 +26,8 @@
 #' @slot cposmax Maximum positive value
 #'
 #' @export
-BssColormap <- setClass(
-  "BssColormap",
+BstrColormap <- setClass(
+  "BstrColormap",
   slots = list(
     cmap_type = "character",
     cmap_name = "character",
@@ -44,7 +44,7 @@ BssColormap <- setClass(
   )
 )
 
-setMethod("initialize", valueClass = "BssColormap", signature = "BssColormap",
+setMethod("initialize", valueClass = "BstrColormap", signature = "BstrColormap",
           function(.Object, cmap_type, cmap_name, values) {
             .Object@cmap_type <- cmap_type
             .Object@cmap_name <- cmap_name
@@ -105,7 +105,7 @@ get_logpvalue_colormap <- function(cmap_name, values) {
 
 }
 
-setMethod("get_colors", valueClass = "matrix", signature = "BssColormap", function(bstr_cmap) {
+setMethod("get_colors", valueClass = "matrix", signature = "BstrColormap", function(bstr_cmap) {
 
   switch(bstr_cmap@cmap_type,
          log_pvalues = { bstr_cmap@rgbcolors <-
@@ -278,7 +278,7 @@ get_color_palette <- function(cmap_name, N) {
 }
 #' Saves the colormap values for min and max to an ini file
 #' @param filename name of the file
-#' @param bstr_cmap BssColormap object
+#' @param bstr_cmap BstrColormap object
 #' @export
 save_colormap_to_ini <- function(filename, bstr_cmap) {
   cmap_to_save <- list()

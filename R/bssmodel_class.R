@@ -55,8 +55,8 @@
 #' @slot load_data_command character string for the command used to load the data
 #'
 #' @export
-BssModel <- setClass(
-  "BssModel",
+BstrModel <- setClass(
+  "BstrModel",
   slots = list(
     mspec_file = "character",
     main_effect = "character",
@@ -208,7 +208,7 @@ parse_model <- function(main_effect="", covariates="", corr_var="", group_var = 
 }
 
 # TODO: Call read_modelspec from within initialize
-setMethod("initialize", valueClass = "BssModel", signature = "BssModel",
+setMethod("initialize", valueClass = "BstrModel", signature = "BstrModel",
           function(.Object, model_type, main_effect="", covariates="", corr_var="", group_var="", mult_comp="", demographics, mspec_file) {
 
           if (model_type == "bstr_lm" || model_type == "bstr_anova")
@@ -233,12 +233,12 @@ setMethod("initialize", valueClass = "BssModel", signature = "BssModel",
 })
 
 
-setGeneric("initialize_lm", valueClass = "BssModel", function(.Object, main_effect, covariates, demographics) {
+setGeneric("initialize_lm", valueClass = "BstrModel", function(.Object, main_effect, covariates, demographics) {
   standardGeneric("initialize_lm")
 })
 
 
-setMethod("initialize_lm", signature("BssModel", "character", "character", "data.frame"), function(.Object, main_effect, covariates, demographics) {
+setMethod("initialize_lm", signature("BstrModel", "character", "character", "data.frame"), function(.Object, main_effect, covariates, demographics) {
   .Object@fullmodel <- paste(main_effect, '+', covariates)
   .Object@nullmodel <- paste(covariates)
   # Design matrix for full model

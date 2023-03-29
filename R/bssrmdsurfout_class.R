@@ -21,7 +21,7 @@ BssRmdVolumeOutput <-
                 initialize = function(outdir = NULL) {
                   super$initialize(outdir)
                 },
-                save_out = function(bss_data, bss_model) {
+                save_out = function(bstr_data, bstr_model) {
 
                 }
               ),

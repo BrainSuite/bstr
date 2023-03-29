@@ -189,43 +189,43 @@ get_bs_file_list <- function(analysis_type) {
 
 }
 #' Returns a list of all ROI files for all subjects
-#' @param bss_data object of type \code{BssData}
+#' @param bstr_data object of type \code{BssData}
 #'
-get_roi_file_list <- function(bss_data) {
+get_roi_file_list <- function(bstr_data) {
 
-  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bss_data, type="roi", hemi="", smooth="", measure="")
+  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bstr_data, type="roi", hemi="", smooth="", measure="")
   return(bids_flag_and_filelist$filelist)
 
 }
 #' Returns a list of the cortical surface files for all subjects
-#' @param bss_data object of type \code{BssData}
+#' @param bstr_data object of type \code{BssData}
 #' @param hemi designates which hemisphere is of interest
 #' @param smooth numeric value designating the smoothing used (default is 0)
 #'
-get_sba_file_list <- function(bss_data, hemi, smooth = 0) {
+get_sba_file_list <- function(bstr_data, hemi, smooth = 0) {
 
-  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bss_data, type="sba", hemi, smooth)
+  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bstr_data, type="sba", hemi, smooth)
   return(bids_flag_and_filelist$filelist)
 }
 #' Returns a list of the tensor-based files for all subjects
-#' @param bss_data object of type \code{BssData}
+#' @param bstr_data object of type \code{BssData}
 #' @param smooth numeric value designating the smoothing used (default is 0)
 #'
-get_tbm_file_list <- function(bss_data, smooth = 0) {
+get_tbm_file_list <- function(bstr_data, smooth = 0) {
 
-  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bss_data, type="tbm", hemi="left", smooth)
+  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bstr_data, type="tbm", hemi="left", smooth)
   return(bids_flag_and_filelist$filelist)
 }
 
 #' Returns a list of the diffusion files for all subjects
-#' @param bss_data object of type \code{BssData}
+#' @param bstr_data object of type \code{BssData}
 #' @param measure numeric value denoting the measures used to create the output
 #' @param smooth numeric value designating the smoothing used (default is 0)
 #' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
 #'
-get_dba_file_list <- function(bss_data, measure, smooth = 0, eddy = TRUE) {
+get_dba_file_list <- function(bstr_data, measure, smooth = 0, eddy = TRUE) {
 
-  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bss_data, type="dba", hemi="left", smooth, measure)
+  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bstr_data, type="dba", hemi="left", smooth, measure)
   return(bids_flag_and_filelist$filelist)
 }
 #' Read the BrainSuite atlas prefix from the atlas
@@ -531,34 +531,34 @@ read_demographics <- function(csvfile, exclude_col="") {
   return(demog)
 }
 
-check_bids_compatibility_and_get_filelist <- function(bss_data, type="sba", hemi, smooth = 0, measure="FA", eddy = TRUE) {
+check_bids_compatibility_and_get_filelist <- function(bstr_data, type="sba", hemi, smooth = 0, measure="FA", eddy = TRUE) {
 
   valid_types <- c("sba", "tbm", "roi", "dba")
   if (! type %in% valid_types)
     stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
 
   if (type == "sba") {
-    filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_surface_file_string(hemi, smooth))
-    bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat', bs_surface_file_string(hemi, smooth))
+    filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, bs_surface_file_string(hemi, smooth))
+    bids_filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, 'anat', bs_surface_file_string(hemi, smooth))
   }
   else if (type == "tbm") {
-    filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_volume_jacobian_file_string(smooth), bss_data@demographics$subjID))
-    bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat', sprintf(bs_BIDS_volume_jacobian_file_string(smooth), bss_data@demographics$subjID))
+    filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, sprintf(bs_volume_jacobian_file_string(smooth), bstr_data@demographics$subjID))
+    bids_filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, 'anat', sprintf(bs_BIDS_volume_jacobian_file_string(smooth), bstr_data@demographics$subjID))
   }
   else if (type == "dba") {
     valid_dba_measures <- c('FA', 'MD', 'axial', 'radial', 'mADC', 'FRT_GFA')
     if (! measure %in% valid_dba_measures) {
       stop(sprintf("Valid dba measures are %s.", paste(valid_dba_measures, collapse = ', ')), call. = FALSE)
     }
-    filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_diffusion_file_string(measure, smooth, eddy), bss_data@demographics$subjID))
-    bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'dwi', sprintf(bs_BIDS_diffusion_file_string(measure, smooth, eddy), bss_data@demographics$subjID))
+    filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, sprintf(bs_diffusion_file_string(measure, smooth, eddy), bstr_data@demographics$subjID))
+    bids_filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, 'dwi', sprintf(bs_BIDS_diffusion_file_string(measure, smooth, eddy), bstr_data@demographics$subjID))
 
   }
   else if (type == "roi") {
-    filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID,
-                              sprintf('%s%s', bss_data@demographics$subjID, bs_file_formats$roi_txt))
-    bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat',
-                                   sprintf('%s%s', bss_data@demographics$subjID, bs_file_formats$roi_txt))
+    filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID,
+                              sprintf('%s%s', bstr_data@demographics$subjID, bs_file_formats$roi_txt))
+    bids_filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, 'anat',
+                                   sprintf('%s%s', bstr_data@demographics$subjID, bs_file_formats$roi_txt))
   }
 
   # Check BIDS compatibility

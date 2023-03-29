@@ -78,7 +78,7 @@ setMethod("initialize", valueClass = "BssColormap", signature = "BssColormap",
             return(.Object)
           })
 
-setGeneric("get_colors", valueClass = "matrix",function(bss_cmap) {
+setGeneric("get_colors", valueClass = "matrix",function(bstr_cmap) {
   standardGeneric("get_colors")
 })
 #' Get log pvalue colormap
@@ -105,18 +105,18 @@ get_logpvalue_colormap <- function(cmap_name, values) {
 
 }
 
-setMethod("get_colors", valueClass = "matrix", signature = "BssColormap", function(bss_cmap) {
+setMethod("get_colors", valueClass = "matrix", signature = "BssColormap", function(bstr_cmap) {
 
-  switch(bss_cmap@cmap_type,
-         log_pvalues = { bss_cmap@rgbcolors <-
-           get_logpvalue_colormap(bss_cmap@cmap_name, bss_cmap@values)
+  switch(bstr_cmap@cmap_type,
+         log_pvalues = { bstr_cmap@rgbcolors <-
+           get_logpvalue_colormap(bstr_cmap@cmap_name, bstr_cmap@values)
          },
-         tvalues = { bss_cmap@rgbcolors <-
-           get_tvalue_colors(bss_cmap@cmap_name, bss_cmap@values)
+         tvalues = { bstr_cmap@rgbcolors <-
+           get_tvalue_colors(bstr_cmap@cmap_name, bstr_cmap@values)
          }
   )
 
-  return(bss_cmap@rgbcolors)
+  return(bstr_cmap@rgbcolors)
 
 })
 #' Get log pvalue colors, generate lut, and calculate min/max values
@@ -278,16 +278,16 @@ get_color_palette <- function(cmap_name, N) {
 }
 #' Saves the colormap values for min and max to an ini file
 #' @param filename name of the file
-#' @param bss_cmap BssColormap object
+#' @param bstr_cmap BssColormap object
 #' @export
-save_colormap_to_ini <- function(filename, bss_cmap) {
+save_colormap_to_ini <- function(filename, bstr_cmap) {
   cmap_to_save <- list()
-  cmap_to_save[["colormap"]] <- list(cmap_type=bss_cmap@cmap_type,
-                                     cmap_name = bss_cmap@cmap_name,
-                                     cnegmin = bss_cmap@cnegmin,
-                                     cnegmax = bss_cmap@cnegmax,
-                                     cposmin = bss_cmap@cposmin,
-                                     cposmax = bss_cmap@cposmax)
+  cmap_to_save[["colormap"]] <- list(cmap_type=bstr_cmap@cmap_type,
+                                     cmap_name = bstr_cmap@cmap_name,
+                                     cnegmin = bstr_cmap@cnegmin,
+                                     cnegmax = bstr_cmap@cnegmax,
+                                     cposmin = bstr_cmap@cposmin,
+                                     cposmax = bstr_cmap@cposmax)
   ini::write.ini(cmap_to_save, filename)
 }
 #' Saves and writes the lut for BrainSuite use

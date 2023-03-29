@@ -22,7 +22,7 @@
 #' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 #' @export
 #'
-bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas, exclude_col) {
+bstr_load_roi_data <- function(subjects_dir, csv, roiids, roimeas, exclude_col) {
 
   if (!dir.exists(subjects_dir)) {
     stop(sprintf("Subjects directory %s does not exist.\n", subjects_dir), call. = FALSE)
@@ -73,14 +73,14 @@ bss_load_roi_data <- function(subjects_dir, csv, roiids, roimeas, exclude_col) {
   # Put outputted data frame together with demographics data frame
   combined_roidata_and_demographics <- cbind(demographics[,-which(names(demographics) == "File_roi")], roi_data_frame)
 
-  bss_data <- list(df=combined_roidata_and_demographics, roiids=roiids, roimeas=roimeas)
+  bstr_data <- list(df=combined_roidata_and_demographics, roiids=roiids, roimeas=roimeas)
 
   # Finally also include the command to load the data
   pasted_roiids <- paste(roiids,collapse = ", ")
-  bss_data$load_data_command <- sprintf("bss_data <- bss_load_roi_data( '%s', '%s', c( %s), '%s', '%s') ",
+  bstr_data$load_data_command <- sprintf("bstr_data <- bstr_load_roi_data( '%s', '%s', c( %s), '%s', '%s') ",
                                         subjects_dir, csv, pasted_roiids, roimeas, exclude_col)
 
-  return(bss_data)
+  return(bstr_data)
 }
 
 

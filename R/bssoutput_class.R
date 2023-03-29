@@ -63,8 +63,8 @@ setGeneric("save_out", valueClass = "BssOutput", function(bss_out, bss_data, bss
   standardGeneric("save_out")
 })
 
-BssCBMOutput <- setClass(
-  "BssCBMOutput",
+BssSBAOutput <- setClass(
+  "BssSBAOutput",
   contains = "BssOutput"
 )
 
@@ -73,8 +73,8 @@ BssTBMOutput <- setClass(
   contains = "BssOutput"
 )
 
-BssDBMOutput <- setClass(
-  "BssDBMOutput",
+BssDBAOutput <- setClass(
+  "BssDBAOutput",
   contains = "BssOutput"
 )
 
@@ -86,7 +86,7 @@ BssROIOutput <- setClass(
 
 #' @rdname save_out
 #' @inheritParams save_out
-setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", function(bss_out, bss_data, bss_model, overwrite = F) {
+setMethod("save_out", valueClass = "BssSBAOutput", signature = "BssSBAOutput", function(bss_out, bss_data, bss_model, overwrite = F) {
 
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
   if (overwrite == TRUE){
@@ -266,7 +266,7 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
 
 #' @rdname save_out
 #' @inheritParams save_out
-setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", function(bss_out, bss_data, bss_model, overwrite = F, nclusters = 10) {
+setMethod("save_out", valueClass = "BssDBAOutput", signature = "BssDBAOutput", function(bss_out, bss_data, bss_model, overwrite = F, nclusters = 10) {
 
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
   if (overwrite == TRUE){
@@ -603,21 +603,21 @@ paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m]))), "_roi",
 save_bss_out <- function(bss_data, bss_model, outdir="", overwrite = F, nclusters = 10) {
 
   outdir <- path.expand(outdir)
-  valid_types <- c("cbm", "tbm", "roi", "dbm", "nca")
+  valid_types <- c("sba", "tbm", "roi", "dba", "nca")
   if (! bss_data@analysis_type %in% valid_types)
     stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
 
   switch(bss_data@analysis_type,
-         cbm = { bss_out <- new("BssCBMOutput", outdir)},
+         sba = { bss_out <- new("BssSBAOutput", outdir)},
          tbm = { bss_out <- new("BssTBMOutput", outdir) },
-         dbm = { bss_out <- new("BssDBMOutput", outdir) },
+         dba = { bss_out <- new("BssDBAOutput", outdir) },
          roi = { bss_out <- new("BssROIOutput", outdir) }
   )
-  if (bss_data@analysis_type == "tbm" | bss_data@analysis_type == "dbm"){
+  if (bss_data@analysis_type == "tbm" | bss_data@analysis_type == "dba"){
     bss_out <- save_out(bss_out, bss_data, bss_model, overwrite = overwrite, nclusters = nclusters)
     invisible(bss_out)
-  # } else if (bss_data@analysis_type == "cbm") {
-  #   bss_out <- save_bss_out_cbm_both_hemi(bss_out, bss_data, bss_model, overwrite = overwrite)
+  # } else if (bss_data@analysis_type == "sba") {
+  #   bss_out <- save_bss_out_sba_both_hemi(bss_out, bss_data, bss_model, overwrite = overwrite)
   #   invisible(bss_out)
   }
   else {
@@ -627,7 +627,7 @@ save_bss_out <- function(bss_data, bss_model, outdir="", overwrite = F, ncluster
 }
 
 
-save_bss_out_cbm_both_hemi <- function(bss_out, bss_data, bss_model, outdir="", overwrite = F) {
+save_bss_out_sba_both_hemi <- function(bss_out, bss_data, bss_model, outdir="", overwrite = F) {
 
   if (bss_data@hemi == "both") {
     # Split the data array, model and all variables into left and right hemispheres

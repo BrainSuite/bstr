@@ -344,7 +344,7 @@ bss_roi_anova <- function(main_effect="", covariates="", bss_data=bss_data) {
 #' @param  bss_data Object of type \code{\link{BssData}}.
 #' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.
 #' @details
-#' \code{bss_data} can be of the type "cbm", "tbm", or "roi".
+#' \code{bss_data} can be of the type "sba", "tbm", or "roi".
 #'
 #' @export
 bss_corr <- function(corr_var, bss_data, mult_comp="fdr") {
@@ -410,7 +410,7 @@ corr_vec <- function(X, Y) {
 #' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bss_p_adjust}} for valid values.
 #' @details
 #' The degrees of freedom are calculated using the Welch–Satterthwaite approximation by default.
-#' \code{bss_data} can be of the type "cbm", "tbm", or "roi".
+#' \code{bss_data} can be of the type "sba", "tbm", or "roi".
 #'
 #' @export
 bss_ttest <- function(group_var, bss_data, paired = FALSE, mult_comp="fdr") {
@@ -467,7 +467,7 @@ bss_ttest <- function(group_var, bss_data, paired = FALSE, mult_comp="fdr") {
 #' For an independent samples t-test \eqn{N1} not equal to \eqn{N2}.
 #' For a dependent (paired) samples t-test, \eqn{N1 = N2}.
 #' The degrees of freedom are calculated using the Welch–Satterthwaite approximation by default.
-#' \code{bss_data} can be of the type "cbm", "tbm", or "roi".
+#' \code{bss_data} can be of the type "sba", "tbm", or "roi".
 #'
 #' @export
 ttest_vec <- function(X1, X2, group_var, paired=FALSE) {
@@ -547,7 +547,7 @@ bss_p_adjust <- function(pvalues, method='fdr') {
 # @details
 # The permutation test handles the exchangeability assumption with Freedman-Lane Method. This function also
 # utilizes multiprocessing to reduce computing time.
-# \code{bss_data} can be of the type "cbm", "tbm", or "roi".
+# \code{bss_data} can be of the type "sba", "tbm", or "roi".
 #
 # @export
 # maxTperm <- function(main_effect = "", covariates = "", bss_data, num_of_perm){

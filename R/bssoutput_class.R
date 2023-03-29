@@ -1,4 +1,4 @@
-# BrainSuite Statistics Toolbox in R (bssr)
+# BrainSuite Statistics Toolbox in R (bstr)
 # Copyright (C) 2017 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
 #
@@ -253,8 +253,8 @@ setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", f
   }
 
   # add create an R6 class function from here
-  bssrmd_volout <- BssRmdVolumeOutput$new()
-  bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = voxelcoord, outdir)
+  bstrmd_volout <- BssRmdVolumeOutput$new()
+  bstrmd_volout$save_out(bss_data, bss_model, voxelcoord = voxelcoord, outdir)
 
 
     # Copy modelspec file to the output directory
@@ -343,8 +343,8 @@ setMethod("save_out", valueClass = "BssDBAOutput", signature = "BssDBAOutput", f
   }
 
   # Create a new R6 class object here
-  bssrmd_volout <- BssRmdVolumeOutput$new()
-  bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = voxelcoord, outdir)
+  bstrmd_volout <- BssRmdVolumeOutput$new()
+  bstrmd_volout$save_out(bss_data, bss_model, voxelcoord = voxelcoord, outdir)
 
   # Copy modelspec file to the output directory
   file.copy(bss_model@mspec_file, bss_out@outdir)
@@ -393,7 +393,7 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
   nb_header <- "---\ntitle: 'BrainSuite ROI statistical analysis report'\noutput: html_document\n---"
 
   nb_libraries <-"```{r librar_cmds, echo=FALSE}\n"
-  nb_libraries <- paste(nb_libraries, "\nlibrary('bssr')\nlibrary('ggplot2')\n", sep="")
+  nb_libraries <- paste(nb_libraries, "\nlibrary('bstr')\nlibrary('ggplot2')\n", sep="")
   nb_libraries <- paste(nb_libraries, "\n```\n", sep="")
 
   nb_data_header_one <- "The following command loads the data."

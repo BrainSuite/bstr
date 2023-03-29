@@ -1,4 +1,4 @@
-# BrainSuite Statistics Toolbox in R (bssr)
+# BrainSuite Statistics Toolbox in R (bstr)
 # Copyright (C) 2017 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
 #
@@ -225,7 +225,7 @@ setMethod("load_data", signature = "BssROIData", function(bss_data, roiids = NUL
   bss_data@demographics <- as.data.frame(all_subjects[[1]])
   bss_data@data_array <- matrix(nrow=nrow(bss_data@demographics),ncol = length(bss_data@roiids))
   for (col in 1:length(bss_data@roiids)){
-    current_col <- which(colnames(bss_data@demographics) == paste0(bssr:::get_roi_tag(label_desc_df = bssr:::read_label_desc(),roiid=bss_data@roiids[col])[[1]],"(",bss_data@roiids[col],")"))
+    current_col <- which(colnames(bss_data@demographics) == paste0(bstr:::get_roi_tag(label_desc_df = bstr:::read_label_desc(),roiid=bss_data@roiids[col])[[1]],"(",bss_data@roiids[col],")"))
     bss_data@data_array[,col] <- bss_data@demographics[,current_col]
   }
   bss_data@load_data_command <- sprintf("bss_data <- load_bss_data(type= 'roi',subjdir = '%s',csv= '%s',roiids= c( %s), roimeas= '%s', exclude_col='%s')",

@@ -1,4 +1,4 @@
-# BrainSuite Statistics Toolbox in R (bssr)
+# BrainSuite Statistics Toolbox in R (bstr)
 # Copyright (C) 2017 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
 #
@@ -16,7 +16,7 @@
 #'
 #' The modelspec file specifies the subject directory, paths to the atlas files,
 #' the model specification, whether linear regerssion, correlation etc.
-#' The modelspec file was used in the previous versions of bssr.
+#' The modelspec file was used in the previous versions of bstr.
 #' Currently, the user does not have to create this explicitly.
 #' This functionality is still kept in case a future need arises to generate these automatically.
 #' @param modelspecfile path to the modelspec file
@@ -52,7 +52,7 @@ read_modelspec <- function(modelspecfile) {
 #'
 #' The modelspec file specifies the subject directory, paths to the atlas files,
 #' the model specification, whether linear regerssion, correlation etc.
-#' The modelspec file was used in the previous versions of bssr.
+#' The modelspec file was used in the previous versions of bstr.
 #' Currently, the user does not have to create this explicitly.
 #' This functionality is still kept in case a future need arises to generate these automatically.
 #' @param modelspecfile path to the modelspec file
@@ -129,7 +129,7 @@ check_modelspec_validity <- function(modelspecfile) {
 #'
 #' The modelspec file specifies the subject directory, paths to the atlas files,
 #' the model specification, whether linear regerssion, correlation etc.
-#' The modelspec file was used in the previous versions of bssr.
+#' The modelspec file was used in the previous versions of bstr.
 #' Currently, the user does not have to create this explicitly.
 #' This functionality is still kept in case a future need arises to generate these automatically.
 #' @param mspec path to the modelspec file
@@ -167,7 +167,7 @@ get_sba_atlas_files <- function(mspec, bs_atlas_path, svreg_log_file) {
 #'
 #' The modelspec file specifies the subject directory, paths to the atlas files,
 #' the model specification, whether linear regerssion, correlation etc.
-#' The modelspec file was used in the previous versions of bssr.
+#' The modelspec file was used in the previous versions of bstr.
 #' Currently, the user does not have to create this explicitly.
 #' This functionality is still kept in case a future need arises to generate these automatically.
 #' @param mspec path to the modelspec file
@@ -218,7 +218,7 @@ get_tbm_atlas_files <- function(mspec, bs_atlas_path, svreg_log_file) {
 #'
 #' The modelspec file specifies the subject directory, paths to the atlas files,
 #' the model specification, whether linear regerssion, correlation etc.
-#' The modelspec file was used in the previous versions of bssr.
+#' The modelspec file was used in the previous versions of bstr.
 #' Currently, the user does not have to create this explicitly.
 #' This functionality is still kept in case a future need arises to generate these automatically.
 #' @param mspec path to the modelspec file

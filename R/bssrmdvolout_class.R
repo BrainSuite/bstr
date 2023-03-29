@@ -1,4 +1,4 @@
-# BrainSuite Statistics Toolbox in R (bssr)
+# BrainSuite Statistics Toolbox in R (bstr)
 # Copyright (C) 2017 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
 #
@@ -294,7 +294,7 @@ BssRmdVolumeOutput <-
 
                 save_rmd_preamble = function(bss_data, bss_model, rmdfile, outdir, voxelcoord, overlay_name) {
 
-                  load_library <- "library(bssr)"
+                  load_library <- "library(bstr)"
                   data_command_1 <- paste0("bss_data <- load_bss_data(type = '",bss_data@analysis_type,"', subjdir = '",bss_data@subjdir,"', csv = '", bss_data@csv,"', measure = '", bss_data@measure,"', smooth = ",bss_data@smooth,")")
                   data_command_2 <- ifelse(bss_model@model_type=="bss_corr",
                                            paste0("bss_model <- ",bss_model@model_type,"(corr_var = '",bss_model@corr_var,"', bss_data = bss_data, mult_comp = '",bss_model@mult_comp,"')"),
@@ -305,7 +305,7 @@ BssRmdVolumeOutput <-
                   templines[1] <- "render_html = function(bss_data, bss_model, outdir, voxelcoord, overlay_name)"
                   sink(rmdfile, append=TRUE, type = "output")
                   cat("---\n")
-                  cat("title: bssr report\n")
+                  cat("title: bstr report\n")
                   cat("output: html_document\n")
                   cat("runtime: shiny\n")
                   cat("---\n")

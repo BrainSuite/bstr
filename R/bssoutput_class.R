@@ -243,7 +243,7 @@ setMethod("save_out", valueClass = "BstrTBMOutput", signature = "BstrTBMOutput",
   if (length(voxelcoord) == 0 | voxelcoord[[1]][1] == -1) {
     sink(file.path(outdir,  sprintf("report_%s_%s.Rmd", bstr_model@model_type, var_name)), type = "output")
     cat("---\n")
-    cat("title: BSSR Report\n")
+    cat("title: BSTR Report\n")
     cat("output: html_document\n")
     cat("---\n\n\n")
     cat("No detected clusters above significance threshold.")
@@ -333,7 +333,7 @@ setMethod("save_out", valueClass = "BstrDBAOutput", signature = "BstrDBAOutput",
   if (length(voxelcoord) == 0 | voxelcoord[[1]][1] == -1) {
     sink(file.path(outdir,  sprintf("report_%s_%s.Rmd", bstr_model@model_type, var_name)), type = "output")
     cat("---\n")
-    cat("title: BSSR Report\n")
+    cat("title: BSTR Report\n")
     cat("output: html_document\n")
     cat("---\n\n\n")
     cat("No detected clusters above significance threshold.")

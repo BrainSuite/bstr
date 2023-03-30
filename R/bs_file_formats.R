@@ -1,4 +1,4 @@
-# BrainSuite Statistics Toolbox in R (bssr)
+# BrainSuite Statistics Toolbox in R (bstr)
 # Copyright (C) 2017 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
 #
@@ -40,15 +40,15 @@ roi_types <- list(
 bs_atlas_files <- list(
   atlas_BS1_tbm = 'svreg/BrainSuiteAtlas1/mri.bfc.nii.gz',
   atlas_BS1_mask_tbm = 'svreg/BrainSuiteAtlas1/mri.mask.nii.gz',
-  atlas_BS1_mask_dbm = 'svreg/BrainSuiteAtlas1/mri.cortex.dewisp.mask.nii.gz',
-  lh_atlas_BS1_cbm = 'svreg/BrainSuiteAtlas1/mri.left.mid.cortex.dfs',
-  rh_atlas_BS1_cbm = 'svreg/BrainSuiteAtlas1/mri.right.mid.cortex.dfs',
+  atlas_BS1_mask_dba = 'svreg/BrainSuiteAtlas1/mri.cortex.dewisp.mask.nii.gz',
+  lh_atlas_BS1_sba = 'svreg/BrainSuiteAtlas1/mri.left.mid.cortex.dfs',
+  rh_atlas_BS1_sba = 'svreg/BrainSuiteAtlas1/mri.right.mid.cortex.dfs',
 
   atlas_BCIDNI_tbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.bfc.nii.gz',
   atlas_BCIDNI_mask_tbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.mask.nii.gz',
-  atlas_BCIDNI_mask_dbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.cortex.dewisp.mask.nii.gz',
-  lh_atlas_BCIDNI_cbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.left.mid.cortex.dfs',
-  rh_atlas_BCIDNI_cbm = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.right.mid.cortex.dfs'
+  atlas_BCIDNI_mask_dba = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.cortex.dewisp.mask.nii.gz',
+  lh_atlas_BCIDNI_sba = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.left.mid.cortex.dfs',
+  rh_atlas_BCIDNI_sba = 'svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.right.mid.cortex.dfs'
 )
 
 #' List of binaries used in BrainSuite analysis
@@ -63,15 +63,15 @@ bs_atlas_files_suffix <- list(
 
   atlas_custom_suffix_tbm = 'bfc.nii.gz',
   atlas_custom_mask_suffix_tbm = 'mask.nii.gz',
-  atlas_custom_suffix_dbm = 'bfc.nii.gz',
-  atlas_custom_mask_suffix_dbm = 'wm.mask.nii.gz'
+  atlas_custom_suffix_dba = 'bfc.nii.gz',
+  atlas_custom_mask_suffix_dba = 'wm.mask.nii.gz'
 )
 
 analysis_type_list <- list(
-  cbm = 'cbm',
+  sba = 'sba',
   tbm = 'tbm',
   roi = 'roi',
-  dbm = 'dbm',
+  dba = 'dba',
   nca = 'nca'
 )
 
@@ -189,43 +189,43 @@ get_bs_file_list <- function(analysis_type) {
 
 }
 #' Returns a list of all ROI files for all subjects
-#' @param bss_data object of type \code{BssData}
+#' @param bstr_data object of type \code{BstrData}
 #'
-get_roi_file_list <- function(bss_data) {
+get_roi_file_list <- function(bstr_data) {
 
-  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bss_data, type="roi", hemi="", smooth="", measure="")
+  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bstr_data, type="roi", hemi="", smooth="", measure="")
   return(bids_flag_and_filelist$filelist)
 
 }
 #' Returns a list of the cortical surface files for all subjects
-#' @param bss_data object of type \code{BssData}
+#' @param bstr_data object of type \code{BstrData}
 #' @param hemi designates which hemisphere is of interest
 #' @param smooth numeric value designating the smoothing used (default is 0)
 #'
-get_cbm_file_list <- function(bss_data, hemi, smooth = 0) {
+get_sba_file_list <- function(bstr_data, hemi, smooth = 0) {
 
-  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bss_data, type="cbm", hemi, smooth)
+  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bstr_data, type="sba", hemi, smooth)
   return(bids_flag_and_filelist$filelist)
 }
 #' Returns a list of the tensor-based files for all subjects
-#' @param bss_data object of type \code{BssData}
+#' @param bstr_data object of type \code{BstrData}
 #' @param smooth numeric value designating the smoothing used (default is 0)
 #'
-get_tbm_file_list <- function(bss_data, smooth = 0) {
+get_tbm_file_list <- function(bstr_data, smooth = 0) {
 
-  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bss_data, type="tbm", hemi="left", smooth)
+  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bstr_data, type="tbm", hemi="left", smooth)
   return(bids_flag_and_filelist$filelist)
 }
 
 #' Returns a list of the diffusion files for all subjects
-#' @param bss_data object of type \code{BssData}
+#' @param bstr_data object of type \code{BstrData}
 #' @param measure numeric value denoting the measures used to create the output
 #' @param smooth numeric value designating the smoothing used (default is 0)
 #' @param eddy boolean for specifying if the diffusion images were eddy-current corrected or not.
 #'
-get_dbm_file_list <- function(bss_data, measure, smooth = 0, eddy = TRUE) {
+get_dba_file_list <- function(bstr_data, measure, smooth = 0, eddy = TRUE) {
 
-  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bss_data, type="dbm", hemi="left", smooth, measure)
+  bids_flag_and_filelist <- check_bids_compatibility_and_get_filelist(bstr_data, type="dba", hemi="left", smooth, measure)
   return(bids_flag_and_filelist$filelist)
 }
 #' Read the BrainSuite atlas prefix from the atlas
@@ -328,7 +328,7 @@ get_brainsuite_logfilename_for_all_subjects <- function(subjdir, csv, exclude_co
 #' @param brainsuite_atlas_id individual subject directory that the svreg.log file exists in
 #' @param hemi designates which hemisphere of the brain
 #'
-get_cbm_atlas <- function(brainsuite_atlas_id, hemi) {
+get_sba_atlas <- function(brainsuite_atlas_id, hemi) {
 
   if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
     stop('Valid values for hemi are BrainSuiteAtlas1 or BCI-DNI_brain_atlas.', call. = FALSE)
@@ -339,12 +339,12 @@ get_cbm_atlas <- function(brainsuite_atlas_id, hemi) {
   brainsuite_install_path <- get_brainsuite_install_path()
   if (brainsuite_atlas_id == "BrainSuiteAtlas1") {
     if (hemi == "left") {
-      lh_surf_atlas <- file.path(brainsuite_install_path, bs_atlas_files$lh_atlas_BS1_cbm)
+      lh_surf_atlas <- file.path(brainsuite_install_path, bs_atlas_files$lh_atlas_BS1_sba)
       check_file_exists(lh_surf_atlas, raise_error = TRUE)
       return(lh_surf_atlas)
     }
     else if (hemi == "right") {
-      rh_surf_atlas <- file.path(brainsuite_install_path, bs_atlas_files$rh_atlas_BS1_cbm)
+      rh_surf_atlas <- file.path(brainsuite_install_path, bs_atlas_files$rh_atlas_BS1_sba)
       check_file_exists(rh_surf_atlas, raise_error = TRUE)
       return(rh_surf_atlas)
     }
@@ -352,12 +352,12 @@ get_cbm_atlas <- function(brainsuite_atlas_id, hemi) {
 
   if (brainsuite_atlas_id == "BCI-DNI_brain_atlas") {
     if (hemi == "left") {
-      lh_surf_atlas <- file.path(brainsuite_install_path, bs_atlas_files$lh_atlas_BCIDNI_cbm)
+      lh_surf_atlas <- file.path(brainsuite_install_path, bs_atlas_files$lh_atlas_BCIDNI_sba)
       check_file_exists(lh_surf_atlas, raise_error = TRUE)
       return(lh_surf_atlas)
     }
     else if (hemi == "right") {
-      rh_surf_atlas <- file.path(brainsuite_install_path, bs_atlas_files$rh_atlas_BCIDNI_cbm)
+      rh_surf_atlas <- file.path(brainsuite_install_path, bs_atlas_files$rh_atlas_BCIDNI_sba)
       check_file_exists(rh_surf_atlas, raise_error = TRUE)
       return(rh_surf_atlas)
     }
@@ -422,10 +422,10 @@ get_tbm_mask <- function(brainsuite_atlas_id) {
 
 
 #' Check that cortical surface atlas exists
-#' @param atlas filepath for cbm atlas
+#' @param atlas filepath for sba atlas
 #' @param maskfile filepath for the atlas mask file
 #'
-get_custom_cbm_atlas_and_mask <- function(atlas, maskfile="") {
+get_custom_sba_atlas_and_mask <- function(atlas, maskfile="") {
   #TODO Only the atlas file is implemented
   check_file_exists(atlas, raise_error = TRUE)
   return(atlas)
@@ -445,18 +445,18 @@ get_custom_tbm_atlas_and_mask <- function(brainsuite_custom_atlas_prefix) {
 #' Get the diffusion atlas and mask
 #' @param brainsuite_atlas_id individual subject directory that the svreg.log file exists in
 #'
-get_dbm_atlas_and_mask <- function(brainsuite_atlas_id) {
+get_dba_atlas_and_mask <- function(brainsuite_atlas_id) {
 
   if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
     stop('Valid values for atlas are BrainSuiteAtlas1 or BCI-DNI_brain_atlas.', call. = FALSE)
   brainsuite_install_path <- get_brainsuite_install_path()
   if (brainsuite_atlas_id == "BrainSuiteAtlas1") {
     nii_atlas <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BS1_tbm)
-    nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BS1_mask_dbm)
+    nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BS1_mask_dba)
   }
   if (brainsuite_atlas_id == "BCI-DNI_brain_atlas") {
     nii_atlas <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_tbm)
-    nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_mask_dbm)
+    nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_mask_dba)
   }
   check_file_exists(nii_atlas, raise_error = TRUE)
   check_file_exists(nii_atlas_mask, raise_error = TRUE)
@@ -466,7 +466,7 @@ get_dbm_atlas_and_mask <- function(brainsuite_atlas_id) {
 #' Get the BrainSuite tensor based morphometry atlas
 #' @param brainsuite_atlas_id individual subject directory that the svreg.log file exists in
 #'
-get_dbm_atlas <- function(brainsuite_atlas_id) {
+get_dba_atlas <- function(brainsuite_atlas_id) {
 
   if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
     stop('Valid values for atlas are BrainSuiteAtlas1 or BCI-DNI_brain_atlas.', call. = FALSE)
@@ -484,16 +484,16 @@ get_dbm_atlas <- function(brainsuite_atlas_id) {
 #' Get the BrainSuite tensor based morphometry mask
 #' @param brainsuite_atlas_id individual subject directory that the svreg.log file exists in
 #'
-get_dbm_mask <- function(brainsuite_atlas_id) {
+get_dba_mask <- function(brainsuite_atlas_id) {
 
   if (! brainsuite_atlas_id %in% c("BrainSuiteAtlas1", "BCI-DNI_brain_atlas"))
     stop('Valid values for atlas are BrainSuiteAtlas1 or BCI-DNI_brain_atlas.', call. = FALSE)
   brainsuite_install_path <- get_brainsuite_install_path()
   if (brainsuite_atlas_id == "BrainSuiteAtlas1") {
-    nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BS1_mask_dbm)
+    nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BS1_mask_dba)
   }
   if (brainsuite_atlas_id == "BCI-DNI_brain_atlas") {
-    nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_mask_dbm)
+    nii_atlas_mask <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_mask_dba)
   }
   check_file_exists(nii_atlas_mask, raise_error = TRUE)
   return(nii_atlas_mask)
@@ -504,11 +504,11 @@ get_dbm_mask <- function(brainsuite_atlas_id) {
 #' Get the diffusion custom atlas and mask
 #' @param brainsuite_custom_atlas_prefix file prefix for atlas
 #'
-get_custom_dbm_atlas_and_mask <- function(brainsuite_custom_atlas_prefix) {
+get_custom_dba_atlas_and_mask <- function(brainsuite_custom_atlas_prefix) {
 
   brainsuite_custom_atlas_prefix <- get_brainsute_custom_volume_atlas_prefix(brainsuite_custom_atlas_prefix)
-  nii_atlas <- paste(brainsuite_custom_atlas_prefix, ".", bs_atlas_files_suffix$atlas_custom_suffix_dbm, sep = "")
-  nii_atlas_mask <- paste(brainsuite_custom_atlas_prefix, ".", bs_atlas_files_suffix$atlas_custom_mask_suffix_dbm, sep = "")
+  nii_atlas <- paste(brainsuite_custom_atlas_prefix, ".", bs_atlas_files_suffix$atlas_custom_suffix_dba, sep = "")
+  nii_atlas_mask <- paste(brainsuite_custom_atlas_prefix, ".", bs_atlas_files_suffix$atlas_custom_mask_suffix_dba, sep = "")
   check_file_exists(nii_atlas, raise_error = TRUE)
   check_file_exists(nii_atlas_mask, raise_error = TRUE)
   return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
@@ -531,34 +531,34 @@ read_demographics <- function(csvfile, exclude_col="") {
   return(demog)
 }
 
-check_bids_compatibility_and_get_filelist <- function(bss_data, type="cbm", hemi, smooth = 0, measure="FA", eddy = TRUE) {
+check_bids_compatibility_and_get_filelist <- function(bstr_data, type="sba", hemi, smooth = 0, measure="FA", eddy = TRUE) {
 
-  valid_types <- c("cbm", "tbm", "roi", "dbm")
+  valid_types <- c("sba", "tbm", "roi", "dba")
   if (! type %in% valid_types)
     stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
 
-  if (type == "cbm") {
-    filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, bs_surface_file_string(hemi, smooth))
-    bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat', bs_surface_file_string(hemi, smooth))
+  if (type == "sba") {
+    filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, bs_surface_file_string(hemi, smooth))
+    bids_filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, 'anat', bs_surface_file_string(hemi, smooth))
   }
   else if (type == "tbm") {
-    filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_volume_jacobian_file_string(smooth), bss_data@demographics$subjID))
-    bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat', sprintf(bs_BIDS_volume_jacobian_file_string(smooth), bss_data@demographics$subjID))
+    filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, sprintf(bs_volume_jacobian_file_string(smooth), bstr_data@demographics$subjID))
+    bids_filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, 'anat', sprintf(bs_BIDS_volume_jacobian_file_string(smooth), bstr_data@demographics$subjID))
   }
-  else if (type == "dbm") {
-    valid_dbm_measures <- c('FA', 'MD', 'axial', 'radial', 'mADC', 'FRT_GFA')
-    if (! measure %in% valid_dbm_measures) {
-      stop(sprintf("Valid dbm measures are %s.", paste(valid_dbm_measures, collapse = ', ')), call. = FALSE)
+  else if (type == "dba") {
+    valid_dba_measures <- c('FA', 'MD', 'axial', 'radial', 'mADC', 'FRT_GFA')
+    if (! measure %in% valid_dba_measures) {
+      stop(sprintf("Valid dba measures are %s.", paste(valid_dba_measures, collapse = ', ')), call. = FALSE)
     }
-    filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, sprintf(bs_diffusion_file_string(measure, smooth, eddy), bss_data@demographics$subjID))
-    bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'dwi', sprintf(bs_BIDS_diffusion_file_string(measure, smooth, eddy), bss_data@demographics$subjID))
+    filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, sprintf(bs_diffusion_file_string(measure, smooth, eddy), bstr_data@demographics$subjID))
+    bids_filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, 'dwi', sprintf(bs_BIDS_diffusion_file_string(measure, smooth, eddy), bstr_data@demographics$subjID))
 
   }
   else if (type == "roi") {
-    filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID,
-                              sprintf('%s%s', bss_data@demographics$subjID, bs_file_formats$roi_txt))
-    bids_filelist <- file.path(bss_data@subjdir, bss_data@demographics$subjID, 'anat',
-                                   sprintf('%s%s', bss_data@demographics$subjID, bs_file_formats$roi_txt))
+    filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID,
+                              sprintf('%s%s', bstr_data@demographics$subjID, bs_file_formats$roi_txt))
+    bids_filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, 'anat',
+                                   sprintf('%s%s', bstr_data@demographics$subjID, bs_file_formats$roi_txt))
   }
 
   # Check BIDS compatibility

@@ -1,4 +1,4 @@
-# BrainSuite Statistics Toolbox in R (bssr)
+# BrainSuite Statistics Toolbox in R (bstr)
 # Copyright (C) 2017 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
 #
@@ -16,7 +16,7 @@
 #'
 #' The modelspec file specifies the subject directory, paths to the atlas files,
 #' the model specification, whether linear regerssion, correlation etc.
-#' The modelspec file was used in the previous versions of bssr.
+#' The modelspec file was used in the previous versions of bstr.
 #' Currently, the user does not have to create this explicitly.
 #' This functionality is still kept in case a future need arises to generate these automatically.
 #' @param modelspecfile path to the modelspec file
@@ -40,7 +40,7 @@ read_modelspec <- function(modelspecfile) {
 
   # Get atlas files
   switch(mspec$stats$type,
-         cbm = { mspec <- get_cbm_atlas_files(mspec, bs_atlas_path, svreg_log_file) },
+         sba = { mspec <- get_sba_atlas_files(mspec, bs_atlas_path, svreg_log_file) },
          tbm = { mspec <- get_tbm_atlas_files(mspec, bs_atlas_path, svreg_log_file) },
          croi = { mspec <- get_roi_specs(mspec) }
          )
@@ -52,7 +52,7 @@ read_modelspec <- function(modelspecfile) {
 #'
 #' The modelspec file specifies the subject directory, paths to the atlas files,
 #' the model specification, whether linear regerssion, correlation etc.
-#' The modelspec file was used in the previous versions of bssr.
+#' The modelspec file was used in the previous versions of bstr.
 #' Currently, the user does not have to create this explicitly.
 #' This functionality is still kept in case a future need arises to generate these automatically.
 #' @param modelspecfile path to the modelspec file
@@ -98,11 +98,11 @@ check_modelspec_validity <- function(modelspecfile) {
 
   # Check for existence of [stats] fields
   if (is.null(mspec$stats$type))
-    stop('Section type under [stats] not found. It should be either cbm, tbm or croi.', call. = FALSE)
+    stop('Section type under [stats] not found. It should be either sba, tbm or croi.', call. = FALSE)
   else {
-    # Check if type is cbm, tbm or roi
-    if (! (identical(mspec$stats$type, 'tbm') || identical(mspec$stats$type, 'cbm') || identical(mspec$stats$type, 'croi')))
-      stop('Section type under [stats] should be either cbm, tbm or croi.', call. = FALSE)
+    # Check if type is sba, tbm or roi
+    if (! (identical(mspec$stats$type, 'tbm') || identical(mspec$stats$type, 'sba') || identical(mspec$stats$type, 'croi')))
+      stop('Section type under [stats] should be either sba, tbm or croi.', call. = FALSE)
     mspec$type <- mspec$stats$type
   }
 
@@ -129,14 +129,14 @@ check_modelspec_validity <- function(modelspecfile) {
 #'
 #' The modelspec file specifies the subject directory, paths to the atlas files,
 #' the model specification, whether linear regerssion, correlation etc.
-#' The modelspec file was used in the previous versions of bssr.
+#' The modelspec file was used in the previous versions of bstr.
 #' Currently, the user does not have to create this explicitly.
 #' This functionality is still kept in case a future need arises to generate these automatically.
 #' @param mspec path to the modelspec file
 #' @param bs_atlas_path path to the atlas file
 #' @param svreg_log_file file containing svreg log output
 #'
-get_cbm_atlas_files <- function(mspec, bs_atlas_path, svreg_log_file) {
+get_sba_atlas_files <- function(mspec, bs_atlas_path, svreg_log_file) {
 
   lh_atlas_file <- file.path(dirname(bs_atlas_path), bs_file_formats$surf_atlas_left)
   rh_atlas_file <- file.path(dirname(bs_atlas_path), bs_file_formats$surf_atlas_right)
@@ -167,7 +167,7 @@ get_cbm_atlas_files <- function(mspec, bs_atlas_path, svreg_log_file) {
 #'
 #' The modelspec file specifies the subject directory, paths to the atlas files,
 #' the model specification, whether linear regerssion, correlation etc.
-#' The modelspec file was used in the previous versions of bssr.
+#' The modelspec file was used in the previous versions of bstr.
 #' Currently, the user does not have to create this explicitly.
 #' This functionality is still kept in case a future need arises to generate these automatically.
 #' @param mspec path to the modelspec file
@@ -218,7 +218,7 @@ get_tbm_atlas_files <- function(mspec, bs_atlas_path, svreg_log_file) {
 #'
 #' The modelspec file specifies the subject directory, paths to the atlas files,
 #' the model specification, whether linear regerssion, correlation etc.
-#' The modelspec file was used in the previous versions of bssr.
+#' The modelspec file was used in the previous versions of bstr.
 #' Currently, the user does not have to create this explicitly.
 #' This functionality is still kept in case a future need arises to generate these automatically.
 #' @param mspec path to the modelspec file

@@ -1,4 +1,4 @@
-# BrainSuite Statistics Toolbox in R (bssr)
+# BrainSuite Statistics Toolbox in R (bstr)
 # Copyright (C) 2017 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
 #
@@ -12,11 +12,11 @@
 # You should have received a copy of the GNU General Public License along with this program;
 # if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#' Setup script for bssr
+#' Setup script for bstr
 #'
-#' This script reads from and writes to the setup configuration file (bssr.ini) for bss.
+#' This script reads from and writes to the setup configuration file (bstr.ini) for bstr.
 #' Usually this will be called automatically when the package is installed and loaded
-#' for the first time. Optionally, it can be executed by the user immediately after installing bssr.
+#' for the first time. Optionally, it can be executed by the user immediately after installing bstr.
 #'
 #' @param brainsuite_path path to the BrainSuite installation
 #' @param quiet logical; if \code{FALSE} does not display messages to the user
@@ -24,8 +24,8 @@
 #' value is \code{FALSE}, in which case the function returns {FALSE} without stopping the execution.
 #' @export
 setup <- function(brainsuite_path = NULL, quiet = FALSE, raise_error = TRUE) {
-  bssr_ini_file <- get_bssr_ini_path()
-  bs_settings <- ini::read.ini(bssr_ini_file)
+  bstr_ini_file <- get_bstr_ini_path()
+  bs_settings <- ini::read.ini(bstr_ini_file)
 
   if (is.null(brainsuite_path)) { # The user didn't specify the BrainSuite location
     message('Finding BrainSuite installation paths...', appendLF = FALSE)
@@ -36,16 +36,16 @@ setup <- function(brainsuite_path = NULL, quiet = FALSE, raise_error = TRUE) {
   # Check if BrainSuite atlas files and binaries are present in the user specified location
   if (check_bs_atlas_binaries_exist(brainsuite_path, quiet = quiet, raise_error = raise_error)) {
     # At this point, a valid brainsuite_path should exist
-    # Write it to the bssr.ini file
+    # Write it to the bstr.ini file
     bs_settings$path$brainsuite_path <- brainsuite_path
-    message(bssr_ini_file, appendLF = TRUE)
-    ini::write.ini(bs_settings, bssr_ini_file)
-    message('bssr setup is complete.', appendLF = TRUE)
+    message(bstr_ini_file, appendLF = TRUE)
+    ini::write.ini(bs_settings, bstr_ini_file)
+    message('bstr setup is complete.', appendLF = TRUE)
   }
 
   else
-    message(paste('bssr setup is not complete.\n',
-                  'After making sure BrainSuite is installed, please run bssr::setup("/path/to/brainsuite/") manually.', sep = ""), appendLF = TRUE)
+    message(paste('bstr setup is not complete.\n',
+                  'After making sure BrainSuite is installed, please run bstr::setup("/path/to/brainsuite/") manually.', sep = ""), appendLF = TRUE)
 }
 
 get_os <- function() {
@@ -157,16 +157,16 @@ check_bs_atlas_binaries_exist <- function(brainsuite_path, quiet=FALSE, raise_er
 #'
 #' Check if the BrainSuite installation is valid by verifying if the appropriate
 #' atlas files and data exist. This function is called from \code{\link{.onLoad}}
-#' when the package is loaded. It opens \code{bssr.ini} and checks if all the
+#' when the package is loaded. It opens \code{bstr.ini} and checks if all the
 #' paths are valid.
 #' @param  quiet boolean specifying whether warnings/messages should be displayed
 #' @param  raise_error boolean specifying whether an exception should be raised
 #'
 #' @export
 is_brainsute_installed <- function(quiet = FALSE, raise_error = FALSE) {
-  bssr_ini_file <- get_bssr_ini_path()
-  if (check_file_exists(bssr_ini_file, raise_error = raise_error)) {
-    bs_settings <- ini::read.ini(bssr_ini_file)
+  bstr_ini_file <- get_bstr_ini_path()
+  if (check_file_exists(bstr_ini_file, raise_error = raise_error)) {
+    bs_settings <- ini::read.ini(bstr_ini_file)
     if (bs_settings$path$brainsuite_path=='////')
       return (FALSE)
     if (check_bs_atlas_binaries_exist(bs_settings$path$brainsuite_path, quiet = quiet, raise_error = raise_error))
@@ -178,12 +178,12 @@ is_brainsute_installed <- function(quiet = FALSE, raise_error = FALSE) {
     return(FALSE)
 }
 
-#' Retrieve bssr.ini path in the package
+#' Retrieve bstr.ini path in the package
 #'
 #' @export
-get_bssr_ini_path <- function() {
-  bssr_ini_file <- system.file("extdata", "bssr.ini", package = 'bssr')
-  if (check_file_exists(bssr_ini_file, raise_error = TRUE)) return(bssr_ini_file) else return("")
+get_bstr_ini_path <- function() {
+  bstr_ini_file <- system.file("extdata", "bstr.ini", package = 'bstr')
+  if (check_file_exists(bstr_ini_file, raise_error = TRUE)) return(bstr_ini_file) else return("")
 }
 
 #' Retrieve label description path in the package
@@ -200,53 +200,53 @@ get_labeldesc_path <- function() {
 #'
 #' @export
 get_brainsuite_install_path <- function(quiet = TRUE, raise_error = FALSE) {
-  brainsuite_path_bssr_ini <- get_brainsuite_path_from_bssr_ini()
+  brainsuite_path_bstr_ini <- get_brainsuite_path_from_bstr_ini()
   switch(get_os(),
          macOS = {brainsuite_path <- get_brainsuite_path_on_macOS(quiet, raise_error)},
          unix = {brainsuite_path <- get_brainsuite_path_on_unix(quiet, raise_error)},
          windows = {brainsuite_path <- get_brainsuite_path_on_windows(quiet, raise_error)}
   )
 
-  if (is_valid_brainsute_install_path(brainsuite_path_bssr_ini))
+  if (is_valid_brainsute_install_path(brainsuite_path_bstr_ini))
   {
-    bs_paths = sort(c(brainsuite_path_bssr_ini, brainsuite_path), decreasing = TRUE)
-    if (bs_paths[1] == brainsuite_path_bssr_ini)
-      return(brainsuite_path_bssr_ini)
+    bs_paths = sort(c(brainsuite_path_bstr_ini, brainsuite_path), decreasing = TRUE)
+    if (bs_paths[1] == brainsuite_path_bstr_ini)
+      return(brainsuite_path_bstr_ini)
     else #bs_path[1] points to an upgraded version of BrainSuite
     {
       message('A new version of BrainSuite is detected.', appendLF = TRUE)
-      message(sprintf('Previous BrainSuite install path was %s', brainsuite_path_bssr_ini), appendLF = TRUE)
+      message(sprintf('Previous BrainSuite install path was %s', brainsuite_path_bstr_ini), appendLF = TRUE)
       message(sprintf('Updating BrainSuite install path to the new location %s', bs_paths[1]), appendLF = TRUE)
-      set_brainsuite_path_in_bssr_ini(bs_paths[1])
+      set_brainsuite_path_in_bstr_ini(bs_paths[1])
       brainsuite_path = bs_paths[1]
     }
   }
   else
-    set_brainsuite_path_in_bssr_ini(brainsuite_path)
+    set_brainsuite_path_in_bstr_ini(brainsuite_path)
 
   return(brainsuite_path)
 }
 
-#' Retrieve BrainSuite installation path from bssr.ini
+#' Retrieve BrainSuite installation path from bstr.ini
 #'
 #' @export
-get_brainsuite_path_from_bssr_ini <- function() {
-  bssr_ini_file <- get_bssr_ini_path()
-  bs_settings <- ini::read.ini(bssr_ini_file)
+get_brainsuite_path_from_bstr_ini <- function() {
+  bstr_ini_file <- get_bstr_ini_path()
+  bs_settings <- ini::read.ini(bstr_ini_file)
   return(bs_settings$path$brainsuite_path)
 }
 
-#' Set BrainSuite installation path in bssr.ini
+#' Set BrainSuite installation path in bstr.ini
 #' @param brainsuite_path path to the BrainSuite installation
 #' @export
-set_brainsuite_path_in_bssr_ini <- function(brainsuite_path) {
+set_brainsuite_path_in_bstr_ini <- function(brainsuite_path) {
   if (is_valid_brainsute_install_path(brainsuite_path))
   {
-    bssr_ini_file <- get_bssr_ini_path()
-    bs_settings <- ini::read.ini(bssr_ini_file)
+    bstr_ini_file <- get_bstr_ini_path()
+    bs_settings <- ini::read.ini(bstr_ini_file)
     bs_settings$path$brainsuite_path <- brainsuite_path
-    ini::write.ini(bs_settings, bssr_ini_file)
-    message(sprintf('BrainSuite installation path in bssr points to %s.', brainsuite_path), appendLF = TRUE)
+    ini::write.ini(bs_settings, bstr_ini_file)
+    message(sprintf('BrainSuite installation path in bstr points to %s.', brainsuite_path), appendLF = TRUE)
   }
   else
   {

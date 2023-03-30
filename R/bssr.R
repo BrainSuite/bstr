@@ -1,4 +1,4 @@
-# BrainSuite Statistics Toolbox in R (bssr)
+# BrainSuite Statistics Toolbox in R (bstr)
 # Copyright (C) 2017 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
 #
@@ -12,7 +12,7 @@
 # You should have received a copy of the GNU General Public License along with this program;
 # if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#' bssr: BrainSuite Statistics toolbox
+#' bstr: BrainSuite Statistics toolbox
 #'
 #' The BrainSuite Statistics toolbox allows the application of advanced
 #' statistical models to volumetric image, cortical surface and sulcal
@@ -26,5 +26,5 @@
 #'
 #'
 #' @docType package
-#' @name bssr
+#' @name bstr
 NULL

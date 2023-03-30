@@ -1,4 +1,4 @@
-# BrainSuite Statistics Toolbox in R (bssr)
+# BrainSuite Statistics Toolbox in R (bstr)
 # Copyright (C) 2017 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
 #
@@ -14,8 +14,8 @@
 
 #' R6 super class for Rmd output functionality
 #' @export
-BssRmdOutput <-
-  R6::R6Class("BssRmdOutput",
+BstrRmdOutput <-
+  R6::R6Class("BstrRmdOutput",
               public = list(
                 #' @field outdir output directory
                 outdir = NULL,
@@ -25,9 +25,9 @@ BssRmdOutput <-
                   self$outdir <- outdir
                 },
                 #' @description Save results as Rmd
-                #' @param bss_data object of type \code{BssData}
-                #' @param bss_model object of type \code{BssModel}
-                save_out = function(bss_data, bss_model){
+                #' @param bstr_data object of type \code{BstrData}
+                #' @param bstr_model object of type \code{BstrModel}
+                save_out = function(bstr_data, bstr_model){
 
                 },
                 #' @description finalize function

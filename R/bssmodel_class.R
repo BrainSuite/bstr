@@ -1,4 +1,4 @@
-# BrainSuite Statistics Toolbox in R (bssr)
+# BrainSuite Statistics Toolbox in R (bstr)
 # Copyright (C) 2017 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
 #
@@ -21,13 +21,13 @@
 #' @slot covariates character string containing a set of other predictors (variables) in the model. If more than
 #' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
 #' @slot corr_var character variable name. This should be present in the demographics csv file associated
-#' with \code{bss_data}.
+#' with \code{bstr_data}.
 #' @slot corr_values numeric vector to store correlation coefficients
 #' @slot corr_values_masked_adjusted numeric vector storing the masked correlation coefficients corresponding to the adjusted p-values
 #' @slot group_var Categorical variable name. This should be present in the demographics csv file associated
-#' with \code{bss_data}.
-#' @slot model_type character string denoting the type of model. Should be one of \code{"bss_anova"},
-#' \code{"bss_corr"}, \code{"bss_corr"}, \code{"pairedttest"}, \code{"unpairedttest"} or \code{"bss_lmer"}
+#' with \code{bstr_data}.
+#' @slot model_type character string denoting the type of model. Should be one of \code{"bstr_anova"},
+#' \code{"bstr_corr"}, \code{"bstr_corr"}, \code{"pairedttest"}, \code{"unpairedttest"} or \code{"bstr_lmer"}
 #' @slot fullmodel character string like an R formula denoting the full model including both
 #' the main effect and covariates.
 #' @slot nullmodel character string like an R formula denoting the null model including covariates
@@ -55,8 +55,8 @@
 #' @slot load_data_command character string for the command used to load the data
 #'
 #' @export
-BssModel <- setClass(
-  "BssModel",
+BstrModel <- setClass(
+  "BstrModel",
   slots = list(
     mspec_file = "character",
     main_effect = "character",
@@ -208,10 +208,10 @@ parse_model <- function(main_effect="", covariates="", corr_var="", group_var = 
 }
 
 # TODO: Call read_modelspec from within initialize
-setMethod("initialize", valueClass = "BssModel", signature = "BssModel",
+setMethod("initialize", valueClass = "BstrModel", signature = "BstrModel",
           function(.Object, model_type, main_effect="", covariates="", corr_var="", group_var="", mult_comp="", demographics, mspec_file) {
 
-          if (model_type == "bss_lm" || model_type == "bss_anova")
+          if (model_type == "bstr_lm" || model_type == "bstr_anova")
             parse_model_result <- parse_lm(main_effect, covariates, corr_var, group_var, model_type, demographics)
           else
             parse_model_result <- parse_model(main_effect, covariates, corr_var, group_var, model_type, demographics)
@@ -233,12 +233,12 @@ setMethod("initialize", valueClass = "BssModel", signature = "BssModel",
 })
 
 
-setGeneric("initialize_lm", valueClass = "BssModel", function(.Object, main_effect, covariates, demographics) {
+setGeneric("initialize_lm", valueClass = "BstrModel", function(.Object, main_effect, covariates, demographics) {
   standardGeneric("initialize_lm")
 })
 
 
-setMethod("initialize_lm", signature("BssModel", "character", "character", "data.frame"), function(.Object, main_effect, covariates, demographics) {
+setMethod("initialize_lm", signature("BstrModel", "character", "character", "data.frame"), function(.Object, main_effect, covariates, demographics) {
   .Object@fullmodel <- paste(main_effect, '+', covariates)
   .Object@nullmodel <- paste(covariates)
   # Design matrix for full model
@@ -260,10 +260,10 @@ setMethod("initialize_lm", signature("BssModel", "character", "character", "data
 })
 
 model_type_list <- list(
-  bss_anova = 'bss_anova',
-  bss_lm = 'bss_lm',
-  bss_lmer = 'bss_lmer',
-  bss_corr = 'bss_corr',
+  bstr_anova = 'bstr_anova',
+  bstr_lm = 'bstr_lm',
+  bstr_lmer = 'bstr_lmer',
+  bstr_corr = 'bstr_corr',
   pairedttest = 'pairedttest',
   unpairedttest = 'unpairedttest'
 )

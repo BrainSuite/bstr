@@ -1,4 +1,4 @@
-# BrainSuite Statistics Toolbox in R (bssr)
+# BrainSuite Statistics Toolbox in R (bstr)
 # Copyright (C) 2017 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
 #
@@ -14,14 +14,14 @@
 
 #' R6 derived class for Rmd ROI output functionality
 #' @export
-BssRmdRoiOutput <-
-  R6::R6Class("BssRmdRoiOutput",
-              inherit = BssRmdOutput,
+BstrRmdRoiOutput <-
+  R6::R6Class("BstrRmdRoiOutput",
+              inherit = BstrRmdOutput,
               public = list(
                 initialize = function(outdir = NULL) {
                   super$initialize(outdir)
                 },
-                save_out = function(bss_data, bss_model) {
+                save_out = function(bstr_data, bstr_model) {
 
                 }
               ),

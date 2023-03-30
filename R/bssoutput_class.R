@@ -1,4 +1,4 @@
-# BrainSuite Statistics Toolbox in R (bssr)
+# BrainSuite Statistics Toolbox in R (bstr)
 # Copyright (C) 2017 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
 #
@@ -13,7 +13,7 @@
 # if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #' Check that subject directory and demographics files exist
-#' @param object object of type \code{BssOutput}
+#' @param object object of type \code{BstrOutput}
 #'
 check_files <- function(object){
   if (!dir.exists(object@subjdir)) {
@@ -28,15 +28,15 @@ check_files <- function(object){
 #' S4 class for saving results of statistical analysis
 #' @slot outdir output directory to save the results
 #'
-BssOutput <- setClass(
-  "BssOutput",
+BstrOutput <- setClass(
+  "BstrOutput",
   slots = list(
     outdir = "character"
   ),
   validity = check_files
 )
 
-setMethod("initialize", valueClass = "BssOutput", signature = "BssOutput", function(.Object, outdir) {
+setMethod("initialize", valueClass = "BstrOutput", signature = "BstrOutput", function(.Object, outdir) {
   if (!dir.exists(outdir)) {
     dir.create(outdir)
     .Object@outdir <- outdir
@@ -48,127 +48,127 @@ setMethod("initialize", valueClass = "BssOutput", signature = "BssOutput", funct
   return(.Object)
 })
 
-#' Generic save function for \code{BssOutput}
-#' @param bss_out object of type \code{BssOutput}
-#' @param bss_data object of type \code{BssData}
-#' @param bss_model object of type \code{BssModel}
+#' Generic save function for \code{BstrOutput}
+#' @param bstr_out object of type \code{BstrOutput}
+#' @param bstr_data object of type \code{BstrData}
+#' @param bstr_model object of type \code{BstrModel}
 #' @param overwrite logical parameter denoting if existing output directory should be overwritten or not (default is FALSE)
 #' @param ... Extra named arguments passed to save_out
 #' @details
 #' For the most part, the user will never have to call this function directly.
-#' Instead the user should call \code{\link{save_bss_out}}.
-#' @seealso \code{\link{save_bss_out}}
+#' Instead the user should call \code{\link{save_bstr_out}}.
+#' @seealso \code{\link{save_bstr_out}}
 #' @export
-setGeneric("save_out", valueClass = "BssOutput", function(bss_out, bss_data, bss_model, overwrite = FALSE, ...) {
+setGeneric("save_out", valueClass = "BstrOutput", function(bstr_out, bstr_data, bstr_model, overwrite = FALSE, ...) {
   standardGeneric("save_out")
 })
 
-BssCBMOutput <- setClass(
-  "BssCBMOutput",
-  contains = "BssOutput"
+BstrSBAOutput <- setClass(
+  "BstrSBAOutput",
+  contains = "BstrOutput"
 )
 
-BssTBMOutput <- setClass(
-  "BssTBMOutput",
-  contains = "BssOutput"
+BstrTBMOutput <- setClass(
+  "BstrTBMOutput",
+  contains = "BstrOutput"
 )
 
-BssDBMOutput <- setClass(
-  "BssDBMOutput",
-  contains = "BssOutput"
+BstrDBAOutput <- setClass(
+  "BstrDBAOutput",
+  contains = "BstrOutput"
 )
 
-BssROIOutput <- setClass(
-  "BssROIOutput",
-  contains = "BssOutput"
+BstrROIOutput <- setClass(
+  "BstrROIOutput",
+  contains = "BstrOutput"
 )
 
 
 #' @rdname save_out
 #' @inheritParams save_out
-setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", function(bss_out, bss_data, bss_model, overwrite = F) {
+setMethod("save_out", valueClass = "BstrSBAOutput", signature = "BstrSBAOutput", function(bstr_out, bstr_data, bstr_model, overwrite = F) {
 
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
   if (overwrite == TRUE){
-    delete_and_recreate_dir(bss_out@outdir)
+    delete_and_recreate_dir(bstr_out@outdir)
   }
   # else {
-  #   if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
-  #     stop(sprintf("Output directory %s is not empty.\n", bss_out@outdir), call. = FALSE)
+  #   if (length(list.files(bstr_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+  #     stop(sprintf("Output directory %s is not empty.\n", bstr_out@outdir), call. = FALSE)
   #   }
   # }
 
-  log_pvalues <- log10_transform(bss_model@pvalues)
-  outdir <- bss_out@outdir
-  log_pvalues_adjusted <- log10_transform(bss_model@pvalues_adjusted)
-  bss_model@tvalues[abs(log_pvalues) <= -1*log10(0.05)] <- 0
+  log_pvalues <- log10_transform(bstr_model@pvalues)
+  outdir <- bstr_out@outdir
+  log_pvalues_adjusted <- log10_transform(bstr_model@pvalues_adjusted)
+  bstr_model@tvalues[abs(log_pvalues) <= -1*log10(0.05)] <- 0
 
-  switch(bss_model@model_type,
-         bss_anova = {
-           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@main_effect, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(log_pvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@main_effect, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(log_pvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(bss_model@tvalues, bss_model@main_effect, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(bss_model@tvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(bss_model@tvalues_adjusted, bss_model@main_effect, "tvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(bss_model@tvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           save_bss_rds(bss_model@pvalues, bss_model@main_effect, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
+  switch(bstr_model@model_type,
+         bstr_anova = {
+           bstr_cmap <- save_bstr_color_files(log_pvalues, bstr_model@main_effect, "log_pvalues", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(log_pvalues, bstr_model@main_effect, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(log_pvalues_adjusted, bstr_model@main_effect, "log_pvalues_adjusted", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(log_pvalues_adjusted, bstr_model@main_effect, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(bstr_model@tvalues, bstr_model@main_effect, "tvalues", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(bstr_model@tvalues, bstr_model@main_effect, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(bstr_model@tvalues_adjusted, bstr_model@main_effect, "tvalues_adjusted", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(bstr_model@tvalues_adjusted, bstr_model@main_effect, bstr_cmap, bstr_data, bstr_model, outdir)
+           save_bstr_rds(bstr_model@pvalues, bstr_model@main_effect, "pvalues", bstr_data, bstr_model, outdir) # Save pvalues as a rds file
          },
-         bss_lm = {
-           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@main_effect, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(log_pvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@main_effect, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(log_pvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(bss_model@tvalues, bss_model@main_effect, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(bss_model@tvalues, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(bss_model@tvalues_adjusted, bss_model@main_effect, "tvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(bss_model@tvalues_adjusted, bss_model@main_effect, bss_cmap, bss_data, bss_model, outdir)
-           save_bss_rds(bss_model@pvalues, bss_model@main_effect, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
+         bstr_lm = {
+           bstr_cmap <- save_bstr_color_files(log_pvalues, bstr_model@main_effect, "log_pvalues", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(log_pvalues, bstr_model@main_effect, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(log_pvalues_adjusted, bstr_model@main_effect, "log_pvalues_adjusted", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(log_pvalues_adjusted, bstr_model@main_effect, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(bstr_model@tvalues, bstr_model@main_effect, "tvalues", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(bstr_model@tvalues, bstr_model@main_effect, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(bstr_model@tvalues_adjusted, bstr_model@main_effect, "tvalues_adjusted", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(bstr_model@tvalues_adjusted, bstr_model@main_effect, bstr_cmap, bstr_data, bstr_model, outdir)
+           save_bstr_rds(bstr_model@pvalues, bstr_model@main_effect, "pvalues", bstr_data, bstr_model, outdir) # Save pvalues as a rds file
            },
-         bss_corr = {
-           bss_model@corr_values[abs(log_pvalues) <= -1*log10(0.05)] <- 0
-           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@corr_var, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(log_pvalues, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@corr_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(log_pvalues_adjusted, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(bss_model@tvalues, bss_model@corr_var, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(bss_model@tvalues, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(bss_model@tvalues_adjusted, bss_model@corr_var, "tvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(bss_model@tvalues_adjusted, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(bss_model@corr_values, bss_model@corr_var, "corr_values", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(bss_model@corr_values, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(bss_model@corr_values_masked_adjusted, bss_model@corr_var, "corr_values_masked_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(bss_model@corr_values_masked_adjusted, bss_model@corr_var, bss_cmap, bss_data, bss_model, outdir)
-           save_bss_rds(bss_model@pvalues, bss_model@corr_var, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
+         bstr_corr = {
+           bstr_model@corr_values[abs(log_pvalues) <= -1*log10(0.05)] <- 0
+           bstr_cmap <- save_bstr_color_files(log_pvalues, bstr_model@corr_var, "log_pvalues", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(log_pvalues, bstr_model@corr_var, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(log_pvalues_adjusted, bstr_model@corr_var, "log_pvalues_adjusted", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(log_pvalues_adjusted, bstr_model@corr_var, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(bstr_model@tvalues, bstr_model@corr_var, "tvalues", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(bstr_model@tvalues, bstr_model@corr_var, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(bstr_model@tvalues_adjusted, bstr_model@corr_var, "tvalues_adjusted", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(bstr_model@tvalues_adjusted, bstr_model@corr_var, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(bstr_model@corr_values, bstr_model@corr_var, "corr_values", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(bstr_model@corr_values, bstr_model@corr_var, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(bstr_model@corr_values_masked_adjusted, bstr_model@corr_var, "corr_values_masked_adjusted", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(bstr_model@corr_values_masked_adjusted, bstr_model@corr_var, bstr_cmap, bstr_data, bstr_model, outdir)
+           save_bstr_rds(bstr_model@pvalues, bstr_model@corr_var, "pvalues", bstr_data, bstr_model, outdir) # Save pvalues as a rds file
            },
          pairedttest = {
-           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@group_var, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(log_pvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@group_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(bss_model@tvalues, bss_model@group_var, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(bss_model@tvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(bss_model@tvalues_adjusted, bss_model@group_var, "tvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(bss_model@tvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           save_bss_rds(bss_model@pvalues, bss_model@group_var, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
+           bstr_cmap <- save_bstr_color_files(log_pvalues, bstr_model@group_var, "log_pvalues", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(log_pvalues, bstr_model@group_var, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(log_pvalues_adjusted, bstr_model@group_var, "log_pvalues_adjusted", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(log_pvalues_adjusted, bstr_model@group_var, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(bstr_model@tvalues, bstr_model@group_var, "tvalues", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(bstr_model@tvalues, bstr_model@group_var, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(bstr_model@tvalues_adjusted, bstr_model@group_var, "tvalues_adjusted", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(bstr_model@tvalues_adjusted, bstr_model@group_var, bstr_cmap, bstr_data, bstr_model, outdir)
+           save_bstr_rds(bstr_model@pvalues, bstr_model@group_var, "pvalues", bstr_data, bstr_model, outdir) # Save pvalues as a rds file
          },
          unpairedttest = {
-           bss_cmap <- save_bss_color_files(log_pvalues, bss_model@group_var, "log_pvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(log_pvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(log_pvalues_adjusted, bss_model@group_var, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(log_pvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(bss_model@tvalues, bss_model@group_var, "tvalues", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(bss_model@tvalues, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           bss_cmap <- save_bss_color_files(bss_model@tvalues_adjusted, bss_model@group_var, "tvalues_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_surface_both_hemi(bss_model@tvalues_adjusted, bss_model@group_var, bss_cmap, bss_data, bss_model, outdir)
-           save_bss_rds(bss_model@pvalues, bss_model@group_var, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
+           bstr_cmap <- save_bstr_color_files(log_pvalues, bstr_model@group_var, "log_pvalues", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(log_pvalues, bstr_model@group_var, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(log_pvalues_adjusted, bstr_model@group_var, "log_pvalues_adjusted", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(log_pvalues_adjusted, bstr_model@group_var, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(bstr_model@tvalues, bstr_model@group_var, "tvalues", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(bstr_model@tvalues, bstr_model@group_var, bstr_cmap, bstr_data, bstr_model, outdir)
+           bstr_cmap <- save_bstr_color_files(bstr_model@tvalues_adjusted, bstr_model@group_var, "tvalues_adjusted", bstr_data, bstr_model, outdir)
+           save_bstr_out_surface_both_hemi(bstr_model@tvalues_adjusted, bstr_model@group_var, bstr_cmap, bstr_data, bstr_model, outdir)
+           save_bstr_rds(bstr_model@pvalues, bstr_model@group_var, "pvalues", bstr_data, bstr_model, outdir) # Save pvalues as a rds file
          }
   )
 
   # Copy modelspec file to the output directory
-  file.copy(bss_model@mspec_file, bss_out@outdir)
-  return(bss_out)
+  file.copy(bstr_model@mspec_file, bstr_out@outdir)
+  return(bstr_out)
   }
 )
 
@@ -176,185 +176,185 @@ setMethod("save_out", valueClass = "BssCBMOutput", signature = "BssCBMOutput", f
 #' @rdname save_out
 #' @inheritParams save_out
 #' @param nclusters numeric parameter denoting number of clusters (default is 10)
-setMethod("save_out", valueClass = "BssTBMOutput", signature = "BssTBMOutput", function(bss_out, bss_data, bss_model, overwrite = F, nclusters = 10) {
+setMethod("save_out", valueClass = "BstrTBMOutput", signature = "BstrTBMOutput", function(bstr_out, bstr_data, bstr_model, overwrite = F, nclusters = 10) {
 
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
   if (overwrite == TRUE){
-    delete_and_recreate_dir(bss_out@outdir)
+    delete_and_recreate_dir(bstr_out@outdir)
   } else {
-    if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
-      stop(sprintf("Output directory %s is not empty.\n", bss_out@outdir), call. = FALSE)
+    if (length(list.files(bstr_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+      stop(sprintf("Output directory %s is not empty.\n", bstr_out@outdir), call. = FALSE)
     }
   }
 
-  log_pvalues <- rep(1, length(bss_data@atlas_image))
-  log_pvalues[bss_data@mask_idx] <- log10_transform(bss_model@pvalues)
-  dim(log_pvalues) <- dim(bss_data@atlas_image)
+  log_pvalues <- rep(1, length(bstr_data@atlas_image))
+  log_pvalues[bstr_data@mask_idx] <- log10_transform(bstr_model@pvalues)
+  dim(log_pvalues) <- dim(bstr_data@atlas_image)
 
-  log_pvalues_adjusted <- rep(1, length(bss_data@atlas_image))
-  log_pvalues_adjusted[bss_data@mask_idx] <- log10_transform(bss_model@pvalues_adjusted)
-  dim(log_pvalues_adjusted) <- dim(bss_data@atlas_image)
-  outdir <- bss_out@outdir
+  log_pvalues_adjusted <- rep(1, length(bstr_data@atlas_image))
+  log_pvalues_adjusted[bstr_data@mask_idx] <- log10_transform(bstr_model@pvalues_adjusted)
+  dim(log_pvalues_adjusted) <- dim(bstr_data@atlas_image)
+  outdir <- bstr_out@outdir
 
-  tvalues <- rep(0, length(bss_data@atlas_image))
-  tvalues[bss_data@mask_idx] <- bss_model@tvalues
-  dim(tvalues) <- dim(bss_data@atlas_image)
+  tvalues <- rep(0, length(bstr_data@atlas_image))
+  tvalues[bstr_data@mask_idx] <- bstr_model@tvalues
+  dim(tvalues) <- dim(bstr_data@atlas_image)
 
-  tvalues_adjusted <- rep(0, length(bss_data@atlas_image))
-  tvalues_adjusted[bss_data@mask_idx] <- bss_model@tvalues_adjusted
-  dim(tvalues_adjusted) <- dim(bss_data@atlas_image)
+  tvalues_adjusted <- rep(0, length(bstr_data@atlas_image))
+  tvalues_adjusted[bstr_data@mask_idx] <- bstr_model@tvalues_adjusted
+  dim(tvalues_adjusted) <- dim(bstr_data@atlas_image)
   measure <- NULL
-  switch(bss_model@model_type,
-         bss_anova = {
-           var_name = bss_model@main_effect
+  switch(bstr_model@model_type,
+         bstr_anova = {
+           var_name = bstr_model@main_effect
          },
-         bss_lm = {
-           var_name = bss_model@main_effect
+         bstr_lm = {
+           var_name = bstr_model@main_effect
          },
-         bss_corr = {
-           corr_values <- rep(0, length(bss_data@atlas_image))
-           corr_values[bss_data@mask_idx] <- bss_model@corr_values
-           dim(corr_values) <- dim(bss_data@atlas_image)
+         bstr_corr = {
+           corr_values <- rep(0, length(bstr_data@atlas_image))
+           corr_values[bstr_data@mask_idx] <- bstr_model@corr_values
+           dim(corr_values) <- dim(bstr_data@atlas_image)
 
-           corr_values_masked_adjusted <- rep(0, length(bss_data@atlas_image))
-           corr_values_masked_adjusted[bss_data@mask_idx] <- bss_model@corr_values_masked_adjusted
-           dim(corr_values_masked_adjusted) <- dim(bss_data@atlas_image)
+           corr_values_masked_adjusted <- rep(0, length(bstr_data@atlas_image))
+           corr_values_masked_adjusted[bstr_data@mask_idx] <- bstr_model@corr_values_masked_adjusted
+           dim(corr_values_masked_adjusted) <- dim(bstr_data@atlas_image)
 
-           var_name = bss_model@corr_var
+           var_name = bstr_model@corr_var
          },
          pairedttest = {
-           var_name = bss_model@group_var
+           var_name = bstr_model@group_var
          },
          unpairedttest = {
-           var_name = bss_model@group_var
+           var_name = bstr_model@group_var
          }
   )
 
-  if (bss_model@model_type == "bss_corr") {
+  if (bstr_model@model_type == "bstr_corr") {
     save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted,
-                       var_name, bss_data, bss_model, outdir, corr_values, corr_values_masked_adjusted)
+                       var_name, bstr_data, bstr_model, outdir, corr_values, corr_values_masked_adjusted)
   } else {
-    save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
+    save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bstr_data, bstr_model, outdir)
   }
 
-  voxelcoord <- get_voxelcoord(bss_out, bss_data, bss_model, outdir, nclusters)
+  voxelcoord <- get_voxelcoord(bstr_out, bstr_data, bstr_model, outdir, nclusters)
 
   # Check if voxelcoord is empty
   if (length(voxelcoord) == 0 | voxelcoord[[1]][1] == -1) {
-    sink(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, var_name)), type = "output")
+    sink(file.path(outdir,  sprintf("report_%s_%s.Rmd", bstr_model@model_type, var_name)), type = "output")
     cat("---\n")
-    cat("title: BSSR Report\n")
+    cat("title: BSTR Report\n")
     cat("output: html_document\n")
     cat("---\n\n\n")
     cat("No detected clusters above significance threshold.")
     sink()
-    rmarkdown::render(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, var_name)))
+    rmarkdown::render(file.path(outdir,  sprintf("report_%s_%s.Rmd", bstr_model@model_type, var_name)))
     stop("No detected clusters above significance threshold.")
   }
 
   # add create an R6 class function from here
-  bssrmd_volout <- BssRmdVolumeOutput$new()
-  bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = voxelcoord, outdir)
+  bstrmd_volout <- BstrRmdVolumeOutput$new()
+  bstrmd_volout$save_out(bstr_data, bstr_model, voxelcoord = voxelcoord, outdir)
 
 
     # Copy modelspec file to the output directory
-  file.copy(bss_model@mspec_file, bss_out@outdir)
-  invisible(bss_out)
+  file.copy(bstr_model@mspec_file, bstr_out@outdir)
+  invisible(bstr_out)
   }
 )
 
 
 #' @rdname save_out
 #' @inheritParams save_out
-setMethod("save_out", valueClass = "BssDBMOutput", signature = "BssDBMOutput", function(bss_out, bss_data, bss_model, overwrite = F, nclusters = 10) {
+setMethod("save_out", valueClass = "BstrDBAOutput", signature = "BstrDBAOutput", function(bstr_out, bstr_data, bstr_model, overwrite = F, nclusters = 10) {
 
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
   if (overwrite == TRUE){
-    delete_and_recreate_dir(bss_out@outdir)
+    delete_and_recreate_dir(bstr_out@outdir)
   } else {
-    if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
-      stop(sprintf("Output directory %s is not empty.\n", bss_out@outdir), call. = FALSE)
+    if (length(list.files(bstr_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+      stop(sprintf("Output directory %s is not empty.\n", bstr_out@outdir), call. = FALSE)
     }
   }
 
-  log_pvalues <- rep(1, length(bss_data@atlas_image))
-  log_pvalues[bss_data@mask_idx] <- log10_transform(bss_model@pvalues)
-  dim(log_pvalues) <- dim(bss_data@atlas_image)
+  log_pvalues <- rep(1, length(bstr_data@atlas_image))
+  log_pvalues[bstr_data@mask_idx] <- log10_transform(bstr_model@pvalues)
+  dim(log_pvalues) <- dim(bstr_data@atlas_image)
 
-  log_pvalues_adjusted <- rep(1, length(bss_data@atlas_image))
-  log_pvalues_adjusted[bss_data@mask_idx] <- log10_transform(bss_model@pvalues_adjusted)
-  dim(log_pvalues_adjusted) <- dim(bss_data@atlas_image)
-  outdir <- bss_out@outdir
+  log_pvalues_adjusted <- rep(1, length(bstr_data@atlas_image))
+  log_pvalues_adjusted[bstr_data@mask_idx] <- log10_transform(bstr_model@pvalues_adjusted)
+  dim(log_pvalues_adjusted) <- dim(bstr_data@atlas_image)
+  outdir <- bstr_out@outdir
 
-  tvalues <- rep(0, length(bss_data@atlas_image))
-  tvalues[bss_data@mask_idx] <- bss_model@tvalues
-  dim(tvalues) <- dim(bss_data@atlas_image)
+  tvalues <- rep(0, length(bstr_data@atlas_image))
+  tvalues[bstr_data@mask_idx] <- bstr_model@tvalues
+  dim(tvalues) <- dim(bstr_data@atlas_image)
 
-  tvalues_adjusted <- rep(0, length(bss_data@atlas_image))
-  tvalues_adjusted[bss_data@mask_idx] <- bss_model@tvalues_adjusted
-  dim(tvalues_adjusted) <- dim(bss_data@atlas_image)
+  tvalues_adjusted <- rep(0, length(bstr_data@atlas_image))
+  tvalues_adjusted[bstr_data@mask_idx] <- bstr_model@tvalues_adjusted
+  dim(tvalues_adjusted) <- dim(bstr_data@atlas_image)
   measure <- NULL
-  switch(bss_model@model_type,
-         bss_anova = {
-           var_name = bss_model@main_effect
+  switch(bstr_model@model_type,
+         bstr_anova = {
+           var_name = bstr_model@main_effect
          },
-         bss_lm = {
-           var_name = bss_model@main_effect
+         bstr_lm = {
+           var_name = bstr_model@main_effect
          },
-         bss_corr = {
-           corr_values <- rep(0, length(bss_data@atlas_image))
-           corr_values[bss_data@mask_idx] <- bss_model@corr_values
-           dim(corr_values) <- dim(bss_data@atlas_image)
+         bstr_corr = {
+           corr_values <- rep(0, length(bstr_data@atlas_image))
+           corr_values[bstr_data@mask_idx] <- bstr_model@corr_values
+           dim(corr_values) <- dim(bstr_data@atlas_image)
 
-           corr_values_masked_adjusted <- rep(0, length(bss_data@atlas_image))
-           corr_values_masked_adjusted[bss_data@mask_idx] <- bss_model@corr_values_masked_adjusted
-           dim(corr_values_masked_adjusted) <- dim(bss_data@atlas_image)
+           corr_values_masked_adjusted <- rep(0, length(bstr_data@atlas_image))
+           corr_values_masked_adjusted[bstr_data@mask_idx] <- bstr_model@corr_values_masked_adjusted
+           dim(corr_values_masked_adjusted) <- dim(bstr_data@atlas_image)
 
-           var_name = bss_model@corr_var
+           var_name = bstr_model@corr_var
          },
          pairedttest = {
-           var_name = bss_model@group_var
+           var_name = bstr_model@group_var
          },
          unpairedttest = {
-           var_name = bss_model@group_var
+           var_name = bstr_model@group_var
          }
   )
 
-  if (bss_model@model_type == "bss_corr") {
+  if (bstr_model@model_type == "bstr_corr") {
     save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted,
-                       var_name, bss_data, bss_model, outdir, corr_values, corr_values_masked_adjusted)
+                       var_name, bstr_data, bstr_model, outdir, corr_values, corr_values_masked_adjusted)
   } else {
-    save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bss_data, bss_model, outdir)
+    save_vol_stats_out(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted, var_name, bstr_data, bstr_model, outdir)
   }
 
-  voxelcoord <- get_voxelcoord(bss_out, bss_data, bss_model, outdir, nclusters)
+  voxelcoord <- get_voxelcoord(bstr_out, bstr_data, bstr_model, outdir, nclusters)
 
   # Check if voxelcoord is empty
   if (length(voxelcoord) == 0 | voxelcoord[[1]][1] == -1) {
-    sink(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, var_name)), type = "output")
+    sink(file.path(outdir,  sprintf("report_%s_%s.Rmd", bstr_model@model_type, var_name)), type = "output")
     cat("---\n")
-    cat("title: BSSR Report\n")
+    cat("title: BSTR Report\n")
     cat("output: html_document\n")
     cat("---\n\n\n")
     cat("No detected clusters above significance threshold.")
     sink()
-    rmarkdown::render(file.path(outdir,  sprintf("report_%s_%s.Rmd", bss_model@model_type, var_name)))
+    rmarkdown::render(file.path(outdir,  sprintf("report_%s_%s.Rmd", bstr_model@model_type, var_name)))
     stop("No detected clusters above significance threshold.")
   }
 
   # Create a new R6 class object here
-  bssrmd_volout <- BssRmdVolumeOutput$new()
-  bssrmd_volout$save_out(bss_data, bss_model, voxelcoord = voxelcoord, outdir)
+  bstrmd_volout <- BstrRmdVolumeOutput$new()
+  bstrmd_volout$save_out(bstr_data, bstr_model, voxelcoord = voxelcoord, outdir)
 
   # Copy modelspec file to the output directory
-  file.copy(bss_model@mspec_file, bss_out@outdir)
-  invisible(bss_out)
+  file.copy(bstr_model@mspec_file, bstr_out@outdir)
+  invisible(bstr_out)
 }
 )
 
 #' @rdname save_out
 #' @inheritParams save_out
-setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", function(bss_out, bss_data, bss_model, overwrite = F) {
+setMethod("save_out", valueClass = "BstrROIOutput", signature = "BstrROIOutput", function(bstr_out, bstr_data, bstr_model, overwrite = F) {
 
   # # Create the output directory
   # if (is.null(outdir)) {
@@ -372,28 +372,28 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
   #   dir.create(file.path(outdir), showWarnings = FALSE)
   # }
   #
-  # write.table(bss_data@demographics, outdir, sep = data_separator,row.names = FALSE)
+  # write.table(bstr_data@demographics, outdir, sep = data_separator,row.names = FALSE)
 
   # If output directory is not empty, then empty if overwrite is true or stop if overwrite is false
   if (overwrite == TRUE){
-    delete_and_recreate_dir(bss_out@outdir)
+    delete_and_recreate_dir(bstr_out@outdir)
   } else {
-    if (length(list.files(bss_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
-      stop(sprintf("Output directory %s is not empty.\n", bss_out@outdir), call. = FALSE)
+    if (length(list.files(bstr_out@outdir, all.files = TRUE, include.dirs = TRUE, no.. = TRUE)) != 0){
+      stop(sprintf("Output directory %s is not empty.\n", bstr_out@outdir), call. = FALSE)
     }
   }
 
   # Get the absolute path of outdir
-  outdir <- tools::file_path_as_absolute(bss_out@outdir)
+  outdir <- tools::file_path_as_absolute(bstr_out@outdir)
 
   # Copy demographics csv file to output directory
-  csvfilename <- paste0(file.path(bss_out@outdir, tools::file_path_sans_ext(basename(bss_data@csv))),".csv")
-  write.csv(bss_data@demographics, csvfilename)
+  csvfilename <- paste0(file.path(bstr_out@outdir, tools::file_path_sans_ext(basename(bstr_data@csv))),".csv")
+  write.csv(bstr_data@demographics, csvfilename)
 
   nb_header <- "---\ntitle: 'BrainSuite ROI statistical analysis report'\noutput: html_document\n---"
 
   nb_libraries <-"```{r librar_cmds, echo=FALSE}\n"
-  nb_libraries <- paste(nb_libraries, "\nlibrary('bssr')\nlibrary('ggplot2')\n", sep="")
+  nb_libraries <- paste(nb_libraries, "\nlibrary('bstr')\nlibrary('ggplot2')\n", sep="")
   nb_libraries <- paste(nb_libraries, "\n```\n", sep="")
 
   nb_data_header_one <- "The following command loads the data."
@@ -401,164 +401,164 @@ setMethod("save_out", valueClass = "BssROIOutput", signature = "BssROIOutput", f
   # Add commands to load the data
   nb_data_command_one <- sprintf("\n```{r message=FALSE, warning=FALSE, results='hide', data_command_one}\n")
   nb_data_command_one <- paste(nb_data_command_one,"\n",
-                            bss_data@load_data_command,"\n",sep = "")
+                            bstr_data@load_data_command,"\n",sep = "")
   nb_data_command_one <- paste(nb_data_command_one, "\n```\n", sep = "")
 
 
   nb_load_data <- sprintf("```{r echo=FALSE, message=FALSE, warning=FALSE, load_data}\n")
-  nb_load_data <- paste0(nb_load_data, "\nDT::datatable(bss_data@demographics[,-(ncol(bss_data@demographics))], rownames = FALSE)\n")
+  nb_load_data <- paste0(nb_load_data, "\nDT::datatable(bstr_data@demographics[,-(ncol(bstr_data@demographics))], rownames = FALSE)\n")
   nb_load_data <- paste0(nb_load_data, "\n```\n")
 
 
   nb_data_header_two <- "The following command creates the model used to analyze the data."
 
   nb_data_command_two <- sprintf("\n```{r message=FALSE, warning=FALSE, results='hide', data_command_two}\n")
-  nb_data_command_two <- paste(nb_data_command_two, "\n",bss_model@load_data_command,"\n")
+  nb_data_command_two <- paste(nb_data_command_two, "\n",bstr_model@load_data_command,"\n")
   nb_data_command_two <- paste0(nb_data_command_two, "\n```\n")
 
   nb_data_header_three <- "The final command (below) was used to render this document."
 
-  command_save_bss_out <- sprintf("save_bss_out(bss_data, bss_model, outdir = '%s')", bss_out@outdir)
+  command_save_bstr_out <- sprintf("save_bstr_out(bstr_data, bstr_model, outdir = '%s')", bstr_out@outdir)
 
   nb_data_command_three <-  sprintf("\n```{r eval=FALSE, message=FALSE, warning=FALSE, data_command_three}\n")
-  nb_data_command_three <- paste(nb_data_command_three, "\n", command_save_bss_out,"\n")
+  nb_data_command_three <- paste(nb_data_command_three, "\n", command_save_bstr_out,"\n")
   nb_data_command_three <- paste0(nb_data_command_three, "\n```\n")
 
 
-  nb_commands <- lapply(as.character(bss_data@roiids),function(x){sprintf("```{r warning=FALSE, run_command_%s}\n",x)})
-  nb_plots <- lapply(as.character(bss_data@roiids),function(x){sprintf("```{r echo=FALSE, message=FALSE, warning=FALSE, plot_%s}\n",x)})
-  if (bss_model@model_type != 'bss_corr'){
-    nb_calculations <- lapply(as.character(bss_data@roiids),function(x){sprintf("```{r echo=FALSE, message=FALSE, warning=FALSE, pval_%s}\n",x)})
+  nb_commands <- lapply(as.character(bstr_data@roiids),function(x){sprintf("```{r warning=FALSE, run_command_%s}\n",x)})
+  nb_plots <- lapply(as.character(bstr_data@roiids),function(x){sprintf("```{r echo=FALSE, message=FALSE, warning=FALSE, plot_%s}\n",x)})
+  if (bstr_model@model_type != 'bstr_corr'){
+    nb_calculations <- lapply(as.character(bstr_data@roiids),function(x){sprintf("```{r echo=FALSE, message=FALSE, warning=FALSE, pval_%s}\n",x)})
   }
 
-  selected_col <- rep(NA, length(bss_data@roiids))
-  for (i in 1:length(bss_data@roiids)){
-    selected_col[i] <- paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i])), "(",bss_data@roiids[i],")")
-    bss_data@demographics[,selected_col[i]]
+  selected_col <- rep(NA, length(bstr_data@roiids))
+  for (i in 1:length(bstr_data@roiids)){
+    selected_col[i] <- paste0(as.character(get_roi_tag(read_label_desc(),bstr_data@roiids[i])), "(",bstr_data@roiids[i],")")
+    bstr_data@demographics[,selected_col[i]]
   }
 
-  if (bss_model@model_type != 'pairedttest' & bss_model@model_type != 'unpairedttest') {
-    if (bss_model@model_type=="bss_lmer"){ comparison_stat = "Chisq"}
+  if (bstr_model@model_type != 'pairedttest' & bstr_model@model_type != 'unpairedttest') {
+    if (bstr_model@model_type=="bstr_lmer"){ comparison_stat = "Chisq"}
     else {comparison_stat = "F"}
 
-    for (m in 1:length(bss_data@roiids)){
-      if (bss_model@model_type != 'bss_corr'){
-        for (i in 1:length(bss_model@stats_commands[[m]])) {
-          nb_commands[[m]] <- paste0(nb_commands[[m]], bss_model@stats_commands[[m]][i], "\n")
+    for (m in 1:length(bstr_data@roiids)){
+      if (bstr_model@model_type != 'bstr_corr'){
+        for (i in 1:length(bstr_model@stats_commands[[m]])) {
+          nb_commands[[m]] <- paste0(nb_commands[[m]], bstr_model@stats_commands[[m]][i], "\n")
         }
         nb_commands[[m]] <- paste0(nb_commands[[m]], "```\n\n")
         nb_calculations[[m]] <- paste0(nb_calculations[[m]],"anova_table <- ",
-                                       substr(bss_model@stats_commands[[m]][3],nchar("pander::pander(")+1,nchar(bss_model@stats_commands[[m]][3])-1),
-                                       "\np_val_",bss_data@roiids[m],"<- round(anova_table$`Pr(>",comparison_stat,")`[2],digits=4)\n",
-                                       "pval_string <- paste('pvalue:', as.character(p_val_",bss_data@roiids[m],"))\n```\n\n")
+                                       substr(bstr_model@stats_commands[[m]][3],nchar("pander::pander(")+1,nchar(bstr_model@stats_commands[[m]][3])-1),
+                                       "\np_val_",bstr_data@roiids[m],"<- round(anova_table$`Pr(>",comparison_stat,")`[2],digits=4)\n",
+                                       "pval_string <- paste('pvalue:', as.character(p_val_",bstr_data@roiids[m],"))\n```\n\n")
       }
-      if (class(bss_data@demographics[,gsub("([[:alnum:]_]+).*", "\\1", bss_model@fullmodel)])=="integer"|class(bss_data@demographics[,gsub("([[:alnum:]_]+).*", "\\1", bss_model@fullmodel)])=="double"|bss_model@model_type == 'bss_corr'){
-        if (bss_model@model_type == "bss_corr"){
-          x_var = bss_model@corr_var
-          annotate_label = paste0("paste('corr val:',",round(bss_model@corr_values[m],5),")")
+      if (class(bstr_data@demographics[,gsub("([[:alnum:]_]+).*", "\\1", bstr_model@fullmodel)])=="integer"|class(bstr_data@demographics[,gsub("([[:alnum:]_]+).*", "\\1", bstr_model@fullmodel)])=="double"|bstr_model@model_type == 'bstr_corr'){
+        if (bstr_model@model_type == "bstr_corr"){
+          x_var = bstr_model@corr_var
+          annotate_label = paste0("paste('corr val:',",round(bstr_model@corr_values[m],5),")")
         } else {
-          x_var = gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel)
-          annotate_label = paste0("paste('pvalue:', as.character(p_val_",bss_data@roiids[m],"))")
+          x_var = gsub('([[:alnum:]_]+).*', '\\1', bstr_model@fullmodel)
+          annotate_label = paste0("paste('pvalue:', as.character(p_val_",bstr_data@roiids[m],"))")
         }
-        nb_plots[[m]]<-paste0(nb_plots[[m]],"ggplot2::ggplot(data=bss_data@demographics, ggplot2::aes(x=",
+        nb_plots[[m]]<-paste0(nb_plots[[m]],"ggplot2::ggplot(data=bstr_data@demographics, ggplot2::aes(x=",
                               x_var,", y = `",selected_col[m],"`)) + ggplot2::geom_point() + ggplot2::ggtitle('",
-                              as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
-                              " ", bss_data@roimeas,
+                              as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bstr_data@roiids[m])[[1]]),
+                              " ", bstr_data@roimeas,
                               " vs ", x_var, "') + ggplot2::labs(y='",
-                              as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
+                              as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bstr_data@roiids[m])[[1]]),
                               "') + ggplot2::geom_smooth(method=lm, se=TRUE) +
-                              ggplot2::xlim(",min(bss_data@demographics[,x_var]),", ",max(bss_data@demographics[,x_var])+6,") +
+                              ggplot2::xlim(",min(bstr_data@demographics[,x_var]),", ",max(bstr_data@demographics[,x_var])+6,") +
                               ggplot2::theme(axis.title=ggplot2::element_text(size=16,face='bold')) +
                               ggplot2::theme(plot.title=ggplot2::element_text(size=18,face='bold')) +
-                              ggplot2::annotate('label',x=",max(bss_data@demographics[,x_var])+2,",y= max(bss_data@demographics$`",selected_col[m],"`)",
+                              ggplot2::annotate('label',x=",max(bstr_data@demographics[,x_var])+2,",y= max(bstr_data@demographics$`",selected_col[m],"`)",
                               ",label= ",annotate_label,")\n
                               ggplot2::ggsave(filename='",
-                              paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m]))), "_roi",bss_data@roiids[m],
-                              "_", bss_data@roimeas,
+                              paste0(as.character(get_roi_tag(read_label_desc(),bstr_data@roiids[m]))), "_roi",bstr_data@roiids[m],
+                              "_", bstr_data@roimeas,
                               "_vs_", x_var, ".pdf',device='pdf')\n```\n")
-      } else if (class(bss_data@demographics[,gsub("([[:alnum:]_]+).*", "\\1", bss_model@fullmodel)])=="factor"){
+      } else if (class(bstr_data@demographics[,gsub("([[:alnum:]_]+).*", "\\1", bstr_model@fullmodel)])=="factor"){
         nb_plots[[m]]<-paste0(nb_plots[[m]],
-                              "mean_lengths <- rep(NA, length(levels(bss_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),")))
-                              std_devs <- rep(NA, length(levels(bss_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),")))
-                              for (i in 1:length(levels(bss_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),"))){
-                              mean_lengths[i] <-  mean(bss_data@demographics[bss_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),
-                              " == levels(bss_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),")[i],]$`",
+                              "mean_lengths <- rep(NA, length(levels(bstr_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bstr_model@fullmodel),")))
+                              std_devs <- rep(NA, length(levels(bstr_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bstr_model@fullmodel),")))
+                              for (i in 1:length(levels(bstr_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bstr_model@fullmodel),"))){
+                              mean_lengths[i] <-  mean(bstr_data@demographics[bstr_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bstr_model@fullmodel),
+                              " == levels(bstr_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bstr_model@fullmodel),")[i],]$`",
                               selected_col[m],"`)
-                              std_devs[i] <- sd (bss_data@demographics[bss_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),
-                              " == levels(bss_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),")[i],]$`",
+                              std_devs[i] <- sd (bstr_data@demographics[bstr_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bstr_model@fullmodel),
+                              " == levels(bstr_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bstr_model@fullmodel),")[i],]$`",
                               selected_col[m],"`)
                               } \n",
-"modified_df <- data.frame(len = mean_lengths, sd = std_devs,",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel)," = levels(bss_data@demographics$",
-gsub('([A-Z_a-z]+).*', '\\1', bss_model@fullmodel),"))\n",
-"ggplot2::ggplot(data=modified_df, ggplot2::aes(x = ",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),
-", y = len, color = ",gsub('([[:alnum:]_]+).*', '\\1', bss_model@fullmodel),
+"modified_df <- data.frame(len = mean_lengths, sd = std_devs,",gsub('([[:alnum:]_]+).*', '\\1', bstr_model@fullmodel)," = levels(bstr_data@demographics$",
+gsub('([A-Z_a-z]+).*', '\\1', bstr_model@fullmodel),"))\n",
+"ggplot2::ggplot(data=modified_df, ggplot2::aes(x = ",gsub('([[:alnum:]_]+).*', '\\1', bstr_model@fullmodel),
+", y = len, color = ",gsub('([[:alnum:]_]+).*', '\\1', bstr_model@fullmodel),
 ")) +
 ggplot2::geom_bar(stat = 'identity') + ggplot2::ggtitle('",
-as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
-" ", bss_data@roimeas,
-" vs ", bss_model@main_effect,"') +
-ggplot2::labs(y='",as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
+as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bstr_data@roiids[m])[[1]]),
+" ", bstr_data@roimeas,
+" vs ", bstr_model@main_effect,"') +
+ggplot2::labs(y='",as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bstr_data@roiids[m])[[1]]),
 "') +
 ggplot2::geom_errorbar(mapping=aes(ymin=len-sd, ymax=len+sd)) +
 ggplot2::theme(axis.title=ggplot2::element_text(size=16,face='bold')) +
 ggplot2::theme(plot.title=ggplot2::element_text(size=18,face='bold')) +
 ggplot2::scale_color_discrete(name= pval_string)\n
 ggplot2::ggsave(filename='",
-paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m]))), "_roi",bss_data@roiids[m],
-" ", bss_data@roimeas,
-" vs ", bss_model@main_effect, ".pdf',device='pdf')\n```\n")
+paste0(as.character(get_roi_tag(read_label_desc(),bstr_data@roiids[m]))), "_roi",bstr_data@roiids[m],
+" ", bstr_data@roimeas,
+" vs ", bstr_model@main_effect, ".pdf',device='pdf')\n```\n")
       }
-      if (bss_model@model_type == 'bss_corr'){
+      if (bstr_model@model_type == 'bstr_corr'){
         nb_commands[[m]] <- paste0(sprintf("\n#### Main effect of %s (%d) %s on %s \n",
-                                           as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
-                                           bss_data@roiids[m],
-                                           bss_data@roimeas, bss_model@corr_var),
+                                           as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bstr_data@roiids[m])[[1]]),
+                                           bstr_data@roiids[m],
+                                           bstr_data@roimeas, bstr_model@corr_var),
                                    nb_commands[[m]])
       } else{
         nb_commands[[m]] <- paste0(sprintf("\n#### Main effect of %s (%d) %s on %s controlling for %s \n",
-                                           as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[m])[[1]]),
-                                           bss_data@roiids[m],
-                                           bss_data@roimeas, bss_model@main_effect,bss_model@covariates ),
+                                           as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bstr_data@roiids[m])[[1]]),
+                                           bstr_data@roiids[m],
+                                           bstr_data@roimeas, bstr_model@main_effect,bstr_model@covariates ),
                                    nb_commands[[m]])
       }
 
       }
   } else {
-    for (i in 1:length(bss_data@roiids)){
-      current_t_test_table<-paste0("data.frame('P-Values' = ",round(bss_model@pvalues[i],6),",'T-Values' = ",round(bss_model@tvalues[i],6),
-                                       ",'Adjusted P-Values' = ",round(bss_model@pvalues_adjusted[i],6), ",'Adjusted T-Values' = ",round(bss_model@tvalues_adjusted[i],6),
-                                   ",row.names = paste0('roiid ',",bss_data@roiids[i],"))")
+    for (i in 1:length(bstr_data@roiids)){
+      current_t_test_table<-paste0("data.frame('P-Values' = ",round(bstr_model@pvalues[i],6),",'T-Values' = ",round(bstr_model@tvalues[i],6),
+                                       ",'Adjusted P-Values' = ",round(bstr_model@pvalues_adjusted[i],6), ",'Adjusted T-Values' = ",round(bstr_model@tvalues_adjusted[i],6),
+                                   ",row.names = paste0('roiid ',",bstr_data@roiids[i],"))")
       nb_calculations[[i]] <- paste0(sprintf("\n#### T-test output for differences between means of brain imaging phenotypes for %s for roiid %d \n",
-                                             bss_model@group_var,bss_data@roiids[i]),
+                                             bstr_model@group_var,bstr_data@roiids[i]),
                                      nb_calculations[[i]],"\nDT::formatStyle(DT::datatable(",current_t_test_table,
-                                     "),column = 'P.Values',color = ifelse(",abs(round(bss_model@pvalues[i],6)),
+                                     "),column = 'P.Values',color = ifelse(",abs(round(bstr_model@pvalues[i],6)),
                                      "<=0.05,'red','black'))\n```\n")
-      nb_plots[[i]]<-paste0(nb_plots[[i]],"ggplot2::ggplot(data=bss_data@demographics, ggplot2::aes(x=factor(",
-                            bss_model@group_var,"), y = `",selected_col[i],"`, color = factor(",bss_model@group_var,"))) + ggplot2::geom_boxplot() + ggplot2::ggtitle('",
-                            as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[i])[[1]]),
-                            " ", bss_data@roimeas,
-                            " vs ", bss_model@group_var, "') + ggplot2::labs(x = '",bss_model@group_var,"', y='",
-                            as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bss_data@roiids[i])[[1]]),
-                            "', colour = '",bss_model@group_var,"') +
+      nb_plots[[i]]<-paste0(nb_plots[[i]],"ggplot2::ggplot(data=bstr_data@demographics, ggplot2::aes(x=factor(",
+                            bstr_model@group_var,"), y = `",selected_col[i],"`, color = factor(",bstr_model@group_var,"))) + ggplot2::geom_boxplot() + ggplot2::ggtitle('",
+                            as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bstr_data@roiids[i])[[1]]),
+                            " ", bstr_data@roimeas,
+                            " vs ", bstr_model@group_var, "') + ggplot2::labs(x = '",bstr_model@group_var,"', y='",
+                            as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bstr_data@roiids[i])[[1]]),
+                            "', colour = '",bstr_model@group_var,"') +
                             ggplot2::theme(axis.title=ggplot2::element_text(size=16,face='bold')) +
                             ggplot2::theme(plot.title=ggplot2::element_text(size=18,face='bold')) \n
                             ggplot2::ggsave(filename='",
-                            paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[i]))), "_roi",bss_data@roiids[i],
-                            "_", bss_data@roimeas,
-                            "_vs_", bss_model@group_var, ".pdf',device='pdf')\n```\n")
+                            paste0(as.character(get_roi_tag(read_label_desc(),bstr_data@roiids[i]))), "_roi",bstr_data@roiids[i],
+                            "_", bstr_data@roimeas,
+                            "_vs_", bstr_model@group_var, ".pdf',device='pdf')\n```\n")
     }
   }
 
 
 
-  rmdfileconn<-file(file.path(outdir, sprintf("report_%s_%s.Rmd", bss_model@model_type, switch(bss_model@model_type,
-                                                                                               bss_corr = {bss_model@corr_var},
-                                                                                               unpairedttest = {bss_model@group_var},
-                                                                                               pairedttest = {bss_model@group_var},
-                                                                                               bss_anova = {bss_model@main_effect},
-                                                                                               bss_lm = {bss_model@main_effect},
-                                                                                               bss_lmer = {bss_model@main_effect}))))
-  if (bss_model@model_type == 'bss_corr'){
+  rmdfileconn<-file(file.path(outdir, sprintf("report_%s_%s.Rmd", bstr_model@model_type, switch(bstr_model@model_type,
+                                                                                               bstr_corr = {bstr_model@corr_var},
+                                                                                               unpairedttest = {bstr_model@group_var},
+                                                                                               pairedttest = {bstr_model@group_var},
+                                                                                               bstr_anova = {bstr_model@main_effect},
+                                                                                               bstr_lm = {bstr_model@main_effect},
+                                                                                               bstr_lmer = {bstr_model@main_effect}))))
+  if (bstr_model@model_type == 'bstr_corr'){
     writeLines(c(nb_header, nb_libraries, nb_data_header_one, nb_data_command_one,
                  nb_load_data, nb_data_header_two, nb_data_command_two,
                  nb_data_header_three, nb_data_command_three,
@@ -572,79 +572,79 @@ paste0(as.character(get_roi_tag(read_label_desc(),bss_data@roiids[m]))), "_roi",
   close(rmdfileconn)
 
   # Render the markdown
-  rmarkdown::render(file.path(outdir, sprintf("report_%s_%s.Rmd", bss_model@model_type, switch(bss_model@model_type,
-                                                                                               bss_corr = {bss_model@corr_var},
-                                                                                               unpairedttest = {bss_model@group_var},
-                                                                                               pairedttest = {bss_model@group_var},
-                                                                                               bss_anova = {bss_model@main_effect},
-                                                                                               bss_lm = {bss_model@main_effect},
-                                                                                               bss_lmer = {bss_model@main_effect}))),
-                    output_file=file.path(outdir, sprintf("report_%s_%s.html", bss_model@model_type, switch(bss_model@model_type,
-                                                                                                           bss_corr = {bss_model@corr_var},
-                                                                                                           unpairedttest = {bss_model@group_var},
-                                                                                                           pairedttest = {bss_model@group_var},
-                                                                                                           bss_anova = {bss_model@main_effect},
-                                                                                                           bss_lm = {bss_model@main_effect},
-                                                                                                           bss_lmer = {bss_model@main_effect}))), quiet = TRUE)
+  rmarkdown::render(file.path(outdir, sprintf("report_%s_%s.Rmd", bstr_model@model_type, switch(bstr_model@model_type,
+                                                                                               bstr_corr = {bstr_model@corr_var},
+                                                                                               unpairedttest = {bstr_model@group_var},
+                                                                                               pairedttest = {bstr_model@group_var},
+                                                                                               bstr_anova = {bstr_model@main_effect},
+                                                                                               bstr_lm = {bstr_model@main_effect},
+                                                                                               bstr_lmer = {bstr_model@main_effect}))),
+                    output_file=file.path(outdir, sprintf("report_%s_%s.html", bstr_model@model_type, switch(bstr_model@model_type,
+                                                                                                           bstr_corr = {bstr_model@corr_var},
+                                                                                                           unpairedttest = {bstr_model@group_var},
+                                                                                                           pairedttest = {bstr_model@group_var},
+                                                                                                           bstr_anova = {bstr_model@main_effect},
+                                                                                                           bstr_lm = {bstr_model@main_effect},
+                                                                                                           bstr_lmer = {bstr_model@main_effect}))), quiet = TRUE)
 
   # Copy modelspec file to the output directory
-  file.copy(bss_model@mspec_file, bss_out@outdir)
-  return(bss_out)
+  file.copy(bstr_model@mspec_file, bstr_out@outdir)
+  return(bstr_out)
   }
 )
 
 #' Save the statistical analysis output
-#' @param bss_data object of type \code{BssData}
-#' @param bss_model object of type \code{BssModel}
+#' @param bstr_data object of type \code{BstrData}
+#' @param bstr_model object of type \code{BstrModel}
 #' @param outdir output directory to save the results
 #' @param overwrite logical parameter denoting if existing output directory should be overwritten or not (default is FALSE)
 #' @param nclusters numeric value denoting number of clusters (default is 10)
 #' @export
-save_bss_out <- function(bss_data, bss_model, outdir="", overwrite = F, nclusters = 10) {
+save_bstr_out <- function(bstr_data, bstr_model, outdir="", overwrite = F, nclusters = 10) {
 
   outdir <- path.expand(outdir)
-  valid_types <- c("cbm", "tbm", "roi", "dbm", "nca")
-  if (! bss_data@analysis_type %in% valid_types)
+  valid_types <- c("sba", "tbm", "roi", "dba", "nca")
+  if (! bstr_data@analysis_type %in% valid_types)
     stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)
 
-  switch(bss_data@analysis_type,
-         cbm = { bss_out <- new("BssCBMOutput", outdir)},
-         tbm = { bss_out <- new("BssTBMOutput", outdir) },
-         dbm = { bss_out <- new("BssDBMOutput", outdir) },
-         roi = { bss_out <- new("BssROIOutput", outdir) }
+  switch(bstr_data@analysis_type,
+         sba = { bstr_out <- new("BstrSBAOutput", outdir)},
+         tbm = { bstr_out <- new("BstrTBMOutput", outdir) },
+         dba = { bstr_out <- new("BstrDBAOutput", outdir) },
+         roi = { bstr_out <- new("BstrROIOutput", outdir) }
   )
-  if (bss_data@analysis_type == "tbm" | bss_data@analysis_type == "dbm"){
-    bss_out <- save_out(bss_out, bss_data, bss_model, overwrite = overwrite, nclusters = nclusters)
-    invisible(bss_out)
-  # } else if (bss_data@analysis_type == "cbm") {
-  #   bss_out <- save_bss_out_cbm_both_hemi(bss_out, bss_data, bss_model, overwrite = overwrite)
-  #   invisible(bss_out)
+  if (bstr_data@analysis_type == "tbm" | bstr_data@analysis_type == "dba"){
+    bstr_out <- save_out(bstr_out, bstr_data, bstr_model, overwrite = overwrite, nclusters = nclusters)
+    invisible(bstr_out)
+  # } else if (bstr_data@analysis_type == "sba") {
+  #   bstr_out <- save_bstr_out_sba_both_hemi(bstr_out, bstr_data, bstr_model, overwrite = overwrite)
+  #   invisible(bstr_out)
   }
   else {
-    bss_out <- save_out(bss_out, bss_data, bss_model, overwrite = overwrite)
-    invisible(bss_out)
+    bstr_out <- save_out(bstr_out, bstr_data, bstr_model, overwrite = overwrite)
+    invisible(bstr_out)
   }
 }
 
 
-save_bss_out_cbm_both_hemi <- function(bss_out, bss_data, bss_model, outdir="", overwrite = F) {
+save_bstr_out_sba_both_hemi <- function(bstr_out, bstr_data, bstr_model, outdir="", overwrite = F) {
 
-  if (bss_data@hemi == "both") {
+  if (bstr_data@hemi == "both") {
     # Split the data array, model and all variables into left and right hemispheres
-    save_out(bss_out, bss_data, bss_model, overwrite = overwrite)
-    # bss_data_lh <- bss_data
-    # bss_data_lh@atlas_filename = bss_data@atlas_filename_lh
-    # bss_data_lh@atlas_surface <- bss_data_both@atlas_surface_lh
-    # save_out(bss_out, bss_data_lh, bss_model, overwrite = T)
+    save_out(bstr_out, bstr_data, bstr_model, overwrite = overwrite)
+    # bstr_data_lh <- bstr_data
+    # bstr_data_lh@atlas_filename = bstr_data@atlas_filename_lh
+    # bstr_data_lh@atlas_surface <- bstr_data_both@atlas_surface_lh
+    # save_out(bstr_out, bstr_data_lh, bstr_model, overwrite = T)
     #
-    # bss_data_rh <- bss_data
-    # bss_data_rh@atlas_filename = bss_data@atlas_filename_rh
-    # bss_data_rh@atlas_surface <- bss_data_both@atlas_surface_rh
-    # save_out(bss_out, bss_data_rh, bss_model, overwrite = F)
+    # bstr_data_rh <- bstr_data
+    # bstr_data_rh@atlas_filename = bstr_data@atlas_filename_rh
+    # bstr_data_rh@atlas_surface <- bstr_data_both@atlas_surface_rh
+    # save_out(bstr_out, bstr_data_rh, bstr_model, overwrite = F)
 
   }
   else {
-    save_out(bss_out, bss_data, bss_model, overwrite = overwrite)
+    save_out(bstr_out, bstr_data, bstr_model, overwrite = overwrite)
   }
 }
 
@@ -652,145 +652,145 @@ save_bss_out_cbm_both_hemi <- function(bss_out, bss_data, bss_model, outdir="", 
 #' @param measure numeric value denoting the measures used to create the color file
 #' @param var_name string denoting name of variable that the color file is being created for
 #' @param cmap_title string denoting the type of color map
-#' @param bss_data object of type \code{BssData}
-#' @param bss_model object of type \code{BssModel}
+#' @param bstr_data object of type \code{BstrData}
+#' @param bstr_model object of type \code{BstrModel}
 #' @param outdir string specifying output directory to save the results in
 #' @export
 
-save_bss_color_files <- function(measure, var_name, cmap_title, bss_data, bss_model, outdir) {
+save_bstr_color_files <- function(measure, var_name, cmap_title, bstr_data, bstr_model, outdir) {
 
   measure <- as.numeric(measure)
-  bss_cmap <- new("BssColormap", cmap_title, "RdYlBu", measure)
-  if (bss_data@hemi == "both")
-    cbar_filename <- paste(paste(bss_model@model_type, var_name, 'both_hemi', bss_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
+  bstr_cmap <- new("BstrColormap", cmap_title, "RdYlBu", measure)
+  if (bstr_data@hemi == "both")
+    cbar_filename <- paste(paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
   else
-      cbar_filename <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
-      basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
-  save_colorbar(file.path(outdir,cbar_filename), bss_cmap@lut, bss_cmap@vmin, bss_cmap@vmax, cmap_title)
+      cbar_filename <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(
+      basename(bstr_data@atlas_filename)), bstr_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
+  save_colorbar(file.path(outdir,cbar_filename), bstr_cmap@lut, bstr_cmap@vmin, bstr_cmap@vmax, cmap_title)
 
-  if (bss_data@hemi == "both")
-    cbar_filename <- paste(paste(bss_model@model_type, var_name, 'both_hemi', bss_cmap@cmap_type, sep = '_'), '_cbar.png', sep = '')
+  if (bstr_data@hemi == "both")
+    cbar_filename <- paste(paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_'), '_cbar.png', sep = '')
   else
-    cbar_filename <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
-      basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '_cbar.png', sep = '')
+    cbar_filename <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(
+      basename(bstr_data@atlas_filename)), bstr_cmap@cmap_type, sep = '_'), '_cbar.png', sep = '')
 
-  save_colorbar(file.path(outdir,cbar_filename), bss_cmap@lut, bss_cmap@vmin, bss_cmap@vmax, cmap_title)
+  save_colorbar(file.path(outdir,cbar_filename), bstr_cmap@lut, bstr_cmap@vmin, bstr_cmap@vmax, cmap_title)
 
   # save the color LUT
-  if (bss_data@hemi == "both")
-    lut_fileprefix <- paste(paste(bss_model@model_type, var_name, 'both_hemi', bss_cmap@cmap_type, sep = '_'), '.lut', sep = '')
+  if (bstr_data@hemi == "both")
+    lut_fileprefix <- paste(paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_'), '.lut', sep = '')
   else
-    lut_fileprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
-      basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.lut', sep = '')
+    lut_fileprefix <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(
+      basename(bstr_data@atlas_filename)), bstr_cmap@cmap_type, sep = '_'), '.lut', sep = '')
 
-  save_BrainSuiteLUT(file.path(outdir, lut_fileprefix), bss_cmap@lut)
+  save_BrainSuiteLUT(file.path(outdir, lut_fileprefix), bstr_cmap@lut)
 
   # save the cbar json file with colormap for BrainSuite statmap
-  #cbarlist <- list("colorbar", bss_cmap@vmin, bss_cmap@vmax, t(col2rgb(bss_cmap@lut)/255))
+  #cbarlist <- list("colorbar", bstr_cmap@vmin, bstr_cmap@vmax, t(col2rgb(bstr_cmap@lut)/255))
 
 
 
-  cbarlist <- list("colorbar", bss_cmap@cnegmax, bss_cmap@cnegmin, bss_cmap@cposmin, bss_cmap@cposmax, t(col2rgb(bss_cmap@lut)/255))
+  cbarlist <- list("colorbar", bstr_cmap@cnegmax, bstr_cmap@cnegmin, bstr_cmap@cposmin, bstr_cmap@cposmax, t(col2rgb(bstr_cmap@lut)/255))
   #names(cbarlist) <- c("jsonid", "cbarmin", "cbarmax", "colormap")
   names(cbarlist) <- c("jsonid", "cbarmin", "cbarlowerthresh", "cbarupperthresh", "cbarmax", "colormap")
   cbar_json <- jsonlite::toJSON(cbarlist, pretty = TRUE, auto_unbox=TRUE)
-  if (bss_data@hemi == "both")
-    cbar_json_filename <- paste(paste(bss_model@model_type, var_name, 'both_hemi', bss_cmap@cmap_type, sep = '_'), '.cbar', sep = '')
+  if (bstr_data@hemi == "both")
+    cbar_json_filename <- paste(paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_'), '.cbar', sep = '')
   else
-    cbar_json_filename <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
-      basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.cbar', sep = '')
+    cbar_json_filename <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(
+      basename(bstr_data@atlas_filename)), bstr_cmap@cmap_type, sep = '_'), '.cbar', sep = '')
 
   write(cbar_json, file.path(outdir,cbar_json_filename))
 
   # save ini colormap with ranges
-  if (bss_data@hemi == "both")
-    ini_fileprefix <- paste(paste(bss_model@model_type, var_name, 'both_hemi', bss_cmap@cmap_type, sep = '_'), '.ini', sep = '')
+  if (bstr_data@hemi == "both")
+    ini_fileprefix <- paste(paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_'), '.ini', sep = '')
   else
-    ini_fileprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
-      basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), '.ini', sep = '')
+    ini_fileprefix <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(
+      basename(bstr_data@atlas_filename)), bstr_cmap@cmap_type, sep = '_'), '.ini', sep = '')
 
-  save_colormap_to_ini(file.path(outdir, ini_fileprefix), bss_cmap)
-  return(bss_cmap)
+  save_colormap_to_ini(file.path(outdir, ini_fileprefix), bstr_cmap)
+  return(bstr_cmap)
 }
 
 #' Save the surface output to the given ouput directory
 #' @param measure numeric value denoting the measures used to create the output
 #' @param var_name string denoting name of variable used by the function
-#' @param bss_data object of type \code{BssData}
-#' @param bss_model object of type \code{BssModel}
-#' @param bss_cmap object of type \code{BssColormap}
+#' @param bstr_data object of type \code{BstrData}
+#' @param bstr_model object of type \code{BstrModel}
+#' @param bstr_cmap object of type \code{BstrColormap}
 #' @param outdir string specifying output directory to save the results in
 #' @export
 
-save_bss_out_surface <- function(measure, var_name, bss_cmap, bss_data, bss_model, outdir) {
+save_bstr_out_surface <- function(measure, var_name, bstr_cmap, bstr_data, bstr_model, outdir) {
 
-  s1 <- bss_data@atlas_surface
+  s1 <- bstr_data@atlas_surface
   s1$attributes <- measure
-  s1$vColor <- bss_cmap@rgbcolors
+  s1$vColor <- bstr_cmap@rgbcolors
   s1$vColor <- matrix(s1$vColor, nrow=3, ncol=s1$hdr$nVertices, byrow = TRUE)
-  outprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), bss_data@data_type, sep = '')
+  outprefix <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(
+    basename(bstr_data@atlas_filename)), bstr_cmap@cmap_type, sep = '_'), bstr_data@data_type, sep = '')
   writedfs(file.path(outdir, outprefix), s1)
 }
 
-save_bss_out_surface_both_hemi <- function(measure, var_name, bss_cmap, bss_data, bss_model, outdir) {
+save_bstr_out_surface_both_hemi <- function(measure, var_name, bstr_cmap, bstr_data, bstr_model, outdir) {
 
-  if (bss_data@hemi == "both") {
-    idx_lh <- 1:bss_data@nvertices_lh
-    idx_rh <- (bss_data@nvertices_lh+1):(bss_data@nvertices_lh+bss_data@nvertices_rh)
+  if (bstr_data@hemi == "both") {
+    idx_lh <- 1:bstr_data@nvertices_lh
+    idx_rh <- (bstr_data@nvertices_lh+1):(bstr_data@nvertices_lh+bstr_data@nvertices_rh)
 
-    bss_data_lh <- bss_data
-    bss_data_lh@atlas_filename = bss_data@atlas_filename_lh
-    bss_data_lh@atlas_surface <- bss_data@atlas_surface_lh
+    bstr_data_lh <- bstr_data
+    bstr_data_lh@atlas_filename = bstr_data@atlas_filename_lh
+    bstr_data_lh@atlas_surface <- bstr_data@atlas_surface_lh
     measure_lh <- measure[idx_lh]
-    bss_cmap_lh <- bss_cmap
-    bss_cmap_lh@values <- bss_cmap@values[idx_lh]
-    bss_cmap_lh@rgbcolors <- bss_cmap@rgbcolors[idx_lh,1:3]
-    save_bss_out_surface(measure_lh, var_name, bss_cmap_lh, bss_data_lh, bss_model, outdir)
+    bstr_cmap_lh <- bstr_cmap
+    bstr_cmap_lh@values <- bstr_cmap@values[idx_lh]
+    bstr_cmap_lh@rgbcolors <- bstr_cmap@rgbcolors[idx_lh,1:3]
+    save_bstr_out_surface(measure_lh, var_name, bstr_cmap_lh, bstr_data_lh, bstr_model, outdir)
 
-    bss_data_rh <- bss_data
-    bss_data_rh@atlas_filename = bss_data@atlas_filename_rh
-    bss_data_rh@atlas_surface <- bss_data@atlas_surface_rh
+    bstr_data_rh <- bstr_data
+    bstr_data_rh@atlas_filename = bstr_data@atlas_filename_rh
+    bstr_data_rh@atlas_surface <- bstr_data@atlas_surface_rh
     measure_rh <- measure[idx_rh]
-    bss_cmap_rh <- bss_cmap
-    bss_cmap_rh@values <- bss_cmap@values[idx_rh]
-    bss_cmap_rh@rgbcolors <- bss_cmap@rgbcolors[idx_rh,1:3]
-    save_bss_out_surface(measure_rh, var_name, bss_cmap_rh, bss_data_rh, bss_model, outdir)
+    bstr_cmap_rh <- bstr_cmap
+    bstr_cmap_rh@values <- bstr_cmap@values[idx_rh]
+    bstr_cmap_rh@rgbcolors <- bstr_cmap@rgbcolors[idx_rh,1:3]
+    save_bstr_out_surface(measure_rh, var_name, bstr_cmap_rh, bstr_data_rh, bstr_model, outdir)
 
   }
   else {
-      save_bss_out_surface(measure, var_name, bss_cmap, bss_data, bss_model, outdir)
+      save_bstr_out_surface(measure, var_name, bstr_cmap, bstr_data, bstr_model, outdir)
   }
 }
 #' Save the nifti image to the output file
 #' @param measure denotes the measure used to create the output
 #' @param var_name string denoting name of variable used by the function
-#' @param bss_data object of type \code{BssData}
-#' @param bss_model object of type \code{BssModel}
-#' @param bss_cmap object of type \code{BssColormap}
+#' @param bstr_data object of type \code{BstrData}
+#' @param bstr_model object of type \code{BstrModel}
+#' @param bstr_cmap object of type \code{BstrColormap}
 #' @param outdir string specifying output directory to save the results in
 #' @export
 
-save_bss_out_nifti_image <- function(measure, var_name, bss_cmap, bss_data, bss_model, outdir) {
+save_bstr_out_nifti_image <- function(measure, var_name, bstr_cmap, bstr_data, bstr_model, outdir) {
 
-  outprefix <- paste0(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), bss_cmap@cmap_type, sep = '_'), bss_data@data_type)
-  RNifti::writeNifti(measure, file.path(outdir, outprefix), template = bss_data@atlas_image)
+  outprefix <- paste0(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(
+    basename(bstr_data@atlas_filename)), bstr_cmap@cmap_type, sep = '_'), bstr_data@data_type)
+  RNifti::writeNifti(measure, file.path(outdir, outprefix), template = bstr_data@atlas_image)
 }
 
 #' Save the measure to the output directory
 #' @param measure numeric value denoting the measures used to create the output
 #' @param var_name string denoting name of variable used by the function
 #' @param label string denoting the label for the object
-#' @param bss_data object of type \code{BssData}
-#' @param bss_model object of type \code{BssModel}
+#' @param bstr_data object of type \code{BstrData}
+#' @param bstr_model object of type \code{BstrModel}
 #' @param outdir string specifying output directory to save the results in
 #' @export
 
-save_bss_rds <- function(measure, var_name, label, bss_data, bss_model, outdir) {
+save_bstr_rds <- function(measure, var_name, label, bstr_data, bstr_model, outdir) {
 
-  outprefix <- paste(paste(bss_model@model_type, var_name, tools::file_path_sans_ext(
-    basename(bss_data@atlas_filename)), label, sep = '_'), ".rds", sep = '')
+  outprefix <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(
+    basename(bstr_data@atlas_filename)), label, sep = '_'), ".rds", sep = '')
   saveRDS(measure, file=file.path(outdir, outprefix))
 }
 
@@ -800,61 +800,61 @@ save_bss_rds <- function(measure, var_name, label, bss_data, bss_model, outdir) 
 #' @param tvalues t-values
 #' @param tvalues_adjusted adjusted t-values
 #' @param var_name string denoting name of variable used by the function
-#' @param bss_data object of type \code{BssData}
-#' @param bss_model object of type \code{BssModel}
+#' @param bstr_data object of type \code{BstrData}
+#' @param bstr_model object of type \code{BstrModel}
 #' @param outdir string specifying output directory to save the results in
 #' @param corr_values correlation values
 #' @param corr_values_masked_adjusted adjusted, masked correlation values
 #' @export
 
 save_vol_stats_out <- function(log_pvalues, log_pvalues_adjusted, tvalues, tvalues_adjusted,
-                                var_name, bss_data, bss_model, outdir, corr_values = NULL, corr_values_masked_adjusted = NULL) {
+                                var_name, bstr_data, bstr_model, outdir, corr_values = NULL, corr_values_masked_adjusted = NULL) {
 
-  bss_cmap <- save_bss_color_files(log_pvalues, var_name, "log_pvalues", bss_data, bss_model, outdir)
-  save_bss_out_nifti_image(log_pvalues, var_name, bss_cmap, bss_data, bss_model, outdir)
+  bstr_cmap <- save_bstr_color_files(log_pvalues, var_name, "log_pvalues", bstr_data, bstr_model, outdir)
+  save_bstr_out_nifti_image(log_pvalues, var_name, bstr_cmap, bstr_data, bstr_model, outdir)
 
-  bss_cmap <- save_bss_color_files(log_pvalues_adjusted, var_name, "log_pvalues_adjusted", bss_data, bss_model, outdir)
-  save_bss_out_nifti_image(log_pvalues_adjusted, var_name, bss_cmap, bss_data, bss_model, outdir)
+  bstr_cmap <- save_bstr_color_files(log_pvalues_adjusted, var_name, "log_pvalues_adjusted", bstr_data, bstr_model, outdir)
+  save_bstr_out_nifti_image(log_pvalues_adjusted, var_name, bstr_cmap, bstr_data, bstr_model, outdir)
 
-  bss_cmap <- save_bss_color_files(tvalues, var_name, "tvalues", bss_data, bss_model, outdir)
-  save_bss_out_nifti_image(tvalues, var_name, bss_cmap, bss_data, bss_model, outdir)
+  bstr_cmap <- save_bstr_color_files(tvalues, var_name, "tvalues", bstr_data, bstr_model, outdir)
+  save_bstr_out_nifti_image(tvalues, var_name, bstr_cmap, bstr_data, bstr_model, outdir)
 
-  bss_cmap <- save_bss_color_files(tvalues_adjusted, var_name, "tvalues_adjusted", bss_data, bss_model, outdir)
-  save_bss_out_nifti_image(tvalues_adjusted, var_name, bss_cmap, bss_data, bss_model, outdir)
-  save_bss_rds(bss_model@pvalues, var_name, "pvalues", bss_data, bss_model, outdir) # Save pvalues as a rds file
+  bstr_cmap <- save_bstr_color_files(tvalues_adjusted, var_name, "tvalues_adjusted", bstr_data, bstr_model, outdir)
+  save_bstr_out_nifti_image(tvalues_adjusted, var_name, bstr_cmap, bstr_data, bstr_model, outdir)
+  save_bstr_rds(bstr_model@pvalues, var_name, "pvalues", bstr_data, bstr_model, outdir) # Save pvalues as a rds file
 
-  switch(bss_model@model_type,
-         bss_corr = {
-           bss_cmap <- save_bss_color_files(corr_values, var_name, "corr_values", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(corr_values, var_name, bss_cmap, bss_data, bss_model, outdir)
+  switch(bstr_model@model_type,
+         bstr_corr = {
+           bstr_cmap <- save_bstr_color_files(corr_values, var_name, "corr_values", bstr_data, bstr_model, outdir)
+           save_bstr_out_nifti_image(corr_values, var_name, bstr_cmap, bstr_data, bstr_model, outdir)
 
-           bss_cmap <- save_bss_color_files(corr_values_masked_adjusted, var_name, "corr_values_masked_adjusted", bss_data, bss_model, outdir)
-           save_bss_out_nifti_image(corr_values_masked_adjusted, var_name, bss_cmap, bss_data, bss_model, outdir)
+           bstr_cmap <- save_bstr_color_files(corr_values_masked_adjusted, var_name, "corr_values_masked_adjusted", bstr_data, bstr_model, outdir)
+           save_bstr_out_nifti_image(corr_values_masked_adjusted, var_name, bstr_cmap, bstr_data, bstr_model, outdir)
          }
   )
 }
 
 #' Get voxel coordinates of all significant clusters (up to number of clusters)
-#' @param bss_out object of type \code{BssOut}
-#' @param bss_data object of type \code{BssData}
-#' @param bss_model object of type \code{BssModel}
+#' @param bstr_out object of type \code{BstrOut}
+#' @param bstr_data object of type \code{BstrData}
+#' @param bstr_model object of type \code{BstrModel}
 #' @param outdir string specifying output directory to save the results in
 #' @param nclusters numeric value specifying number of clusters
 #' @export
 
-get_voxelcoord <- function(bss_out, bss_data, bss_model, outdir, nclusters){
+get_voxelcoord <- function(bstr_out, bstr_data, bstr_model, outdir, nclusters){
   # Call cluster code from terminal
-  switch(bss_model@model_type,
-         bss_anova = {var_name = bss_model@main_effect},
-         bss_lm = {var_name = bss_model@main_effect},
-         bss_lmer = {var_name = bss_model@main_effect},
-         bss_corr = {var_name = bss_model@corr_var},
-         pairedttest = {var_name = bss_model@group_var},
-         unpairedttest = {var_name = bss_model@group_var}
+  switch(bstr_model@model_type,
+         bstr_anova = {var_name = bstr_model@main_effect},
+         bstr_lm = {var_name = bstr_model@main_effect},
+         bstr_lmer = {var_name = bstr_model@main_effect},
+         bstr_corr = {var_name = bstr_model@corr_var},
+         pairedttest = {var_name = bstr_model@group_var},
+         unpairedttest = {var_name = bstr_model@group_var}
   )
-  voxelcoord_call <- paste0("\"",file.path(get_brainsuite_install_path(),bs_binary_files$clustermap),"\" -i \"", outdir,"/",bss_model@model_type,
-                            "_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)),
-                            "_tvalues_adjusted.nii.gz\""," -m \"", bss_data@maskfile, "\" -o \"", outdir, "/cluster.tsv\"", " -n ", nclusters)
+  voxelcoord_call <- paste0("\"",file.path(get_brainsuite_install_path(),bs_binary_files$clustermap),"\" -i \"", outdir,"/",bstr_model@model_type,
+                            "_",var_name,"_", tools::file_path_sans_ext(basename(bstr_data@atlas_filename)),
+                            "_tvalues_adjusted.nii.gz\""," -m \"", bstr_data@maskfile, "\" -o \"", outdir, "/cluster.tsv\"", " -n ", nclusters)
   system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
   if(file.info(paste0(outdir, "/cluster.tsv"))$size!=0){
     vox_table <- read.table(paste0(outdir,"/cluster.tsv"),header=F,sep="\t")
@@ -867,9 +867,9 @@ get_voxelcoord <- function(bss_out, bss_data, bss_model, outdir, nclusters){
   }
   # Use tvalues instead of adjusted tvalues if no clusters are found
   if (file.info(paste0(outdir, "/cluster.tsv"))$size==0){
-    voxelcoord_call <- paste0("\"",file.path(get_brainsuite_install_path(),bs_binary_files$clustermap),"\" -i \"", outdir,"/",bss_model@model_type,
-                              "_",var_name,"_", tools::file_path_sans_ext(basename(bss_data@atlas_filename)), "_tvalues.nii.gz\"",
-                              " -m \"", bss_data@maskfile, "\" -o \"", outdir, "/cluster.tsv\"", " -n ", nclusters)
+    voxelcoord_call <- paste0("\"",file.path(get_brainsuite_install_path(),bs_binary_files$clustermap),"\" -i \"", outdir,"/",bstr_model@model_type,
+                              "_",var_name,"_", tools::file_path_sans_ext(basename(bstr_data@atlas_filename)), "_tvalues.nii.gz\"",
+                              " -m \"", bstr_data@maskfile, "\" -o \"", outdir, "/cluster.tsv\"", " -n ", nclusters)
     system(voxelcoord_call,intern=FALSE, ignore.stdout=FALSE, ignore.stderr=FALSE, wait=TRUE, input=NULL)
     if(file.info(paste0(outdir, "/cluster.tsv"))$size!=0){
       vox_table <- read.table(paste0(outdir,"/cluster.tsv"),header=F,sep="\t")

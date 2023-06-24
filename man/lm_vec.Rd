@@ -4,7 +4,7 @@
 \alias{lm_vec}
 \title{Vectorized linear regression for brain imaging phenotypes.}
 \usage{
-lm_vec(main_effect = "", covariates = "", bss_data)
+lm_vec(main_effect = "", covariates = "", bstr_data)
 }
 \arguments{
 \item{main_effect}{Character string containing an independent variable whose effect you want to measure.
@@ -14,7 +14,7 @@ either a categorical or a continuous variable.}
 \item{covariates}{Character string containing a set of other predictors (variables) in the model. If more than
 one covariates are included, they should be separated by a \code{+} operator similar to an R formula.}
 
-\item{bss_data}{Object of type \code{\link{BssData}}}
+\item{bstr_data}{Object of type \code{\link{BstrData}}}
 }
 \description{
 This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and performs

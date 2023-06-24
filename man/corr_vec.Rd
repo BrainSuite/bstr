@@ -13,5 +13,5 @@ corr_vec(X, Y)
 }
 \description{
 For most scenarios, the user does not need to call this function directly.
-Instead call \code{\link{bss_corr}} which calls this function internally.
+Instead call \code{\link{bstr_corr}} which calls this function internally.
 }

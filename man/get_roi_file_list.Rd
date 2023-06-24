@@ -4,10 +4,10 @@
 \alias{get_roi_file_list}
 \title{Returns a list of all ROI files for all subjects}
 \usage{
-get_roi_file_list(bss_data)
+get_roi_file_list(bstr_data)
 }
 \arguments{
-\item{bss_data}{object of type \code{BssData}}
+\item{bstr_data}{object of type \code{BstrData}}
 }
 \description{
 Returns a list of all ROI files for all subjects

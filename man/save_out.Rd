@@ -2,28 +2,28 @@
 % Please edit documentation in R/bssoutput_class.R
 \name{save_out}
 \alias{save_out}
-\alias{save_out,BssCBMOutput-method}
-\alias{save_out,BssTBMOutput-method}
-\alias{save_out,BssDBMOutput-method}
-\alias{save_out,BssROIOutput-method}
-\title{Generic save function for \code{BssOutput}}
+\alias{save_out,BstrSBAOutput-method}
+\alias{save_out,BstrTBMOutput-method}
+\alias{save_out,BstrDBAOutput-method}
+\alias{save_out,BstrROIOutput-method}
+\title{Generic save function for \code{BstrOutput}}
 \usage{
-save_out(bss_out, bss_data, bss_model, overwrite = FALSE, ...)
+save_out(bstr_out, bstr_data, bstr_model, overwrite = FALSE, ...)
 
-\S4method{save_out}{BssCBMOutput}(bss_out, bss_data, bss_model, overwrite = F)
+\S4method{save_out}{BstrSBAOutput}(bstr_out, bstr_data, bstr_model, overwrite = F)
 
-\S4method{save_out}{BssTBMOutput}(bss_out, bss_data, bss_model, overwrite = F, nclusters = 10)
+\S4method{save_out}{BstrTBMOutput}(bstr_out, bstr_data, bstr_model, overwrite = F, nclusters = 10)
 
-\S4method{save_out}{BssDBMOutput}(bss_out, bss_data, bss_model, overwrite = F, nclusters = 10)
+\S4method{save_out}{BstrDBAOutput}(bstr_out, bstr_data, bstr_model, overwrite = F, nclusters = 10)
 
-\S4method{save_out}{BssROIOutput}(bss_out, bss_data, bss_model, overwrite = F)
+\S4method{save_out}{BstrROIOutput}(bstr_out, bstr_data, bstr_model, overwrite = F)
 }
 \arguments{
-\item{bss_out}{object of type \code{BssOutput}}
+\item{bstr_out}{object of type \code{BstrOutput}}
 
-\item{bss_data}{object of type \code{BssData}}
+\item{bstr_data}{object of type \code{BstrData}}
 
-\item{bss_model}{object of type \code{BssModel}}
+\item{bstr_model}{object of type \code{BstrModel}}
 
 \item{overwrite}{logical parameter denoting if existing output directory should be overwritten or not (default is FALSE)}
 
@@ -32,12 +32,12 @@ save_out(bss_out, bss_data, bss_model, overwrite = FALSE, ...)
 \item{nclusters}{numeric parameter denoting number of clusters (default is 10)}
 }
 \description{
-Generic save function for \code{BssOutput}
+Generic save function for \code{BstrOutput}
 }
 \details{
 For the most part, the user will never have to call this function directly.
-Instead the user should call \code{\link{save_bss_out}}.
+Instead the user should call \code{\link{save_bstr_out}}.
 }
 \seealso{
-\code{\link{save_bss_out}}
+\code{\link{save_bstr_out}}
 }

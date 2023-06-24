@@ -10,8 +10,8 @@ save_vol_stats_out(
   tvalues,
   tvalues_adjusted,
   var_name,
-  bss_data,
-  bss_model,
+  bstr_data,
+  bstr_model,
   outdir,
   corr_values = NULL,
   corr_values_masked_adjusted = NULL
@@ -28,9 +28,9 @@ save_vol_stats_out(
 
 \item{var_name}{string denoting name of variable used by the function}
 
-\item{bss_data}{object of type \code{BssData}}
+\item{bstr_data}{object of type \code{BstrData}}
 
-\item{bss_model}{object of type \code{BssModel}}
+\item{bstr_model}{object of type \code{BstrModel}}
 
 \item{outdir}{string specifying output directory to save the results in}
 

@@ -5,7 +5,7 @@
 \title{#' Read BrainSuite label description file
 #' @export
 read_label_desc_xml2 <- function() {
-  label_desc_filename <- system.file("extdata", "brainsuite_labeldescriptions_14May2014.xml", package = 'bssr')
+  label_desc_filename <- system.file("extdata", "brainsuite_labeldescriptions_14May2014.xml", package = 'bstr')
   x1 <- xml2::read_xml(label_desc_filename)
   labels <-xml2::xml_find_all(x1, './/label')
   return (data.frame(roiid = xml2::xml_attr(labels, 'id'), roiname = xml2::xml_attr(labels, 'fullname')))
@@ -18,7 +18,7 @@ read_label_desc()
 #' Read BrainSuite label description file
 #' @export
 read_label_desc_xml2 <- function() {
-  label_desc_filename <- system.file("extdata", "brainsuite_labeldescriptions_14May2014.xml", package = 'bssr')
+  label_desc_filename <- system.file("extdata", "brainsuite_labeldescriptions_14May2014.xml", package = 'bstr')
   x1 <- xml2::read_xml(label_desc_filename)
   labels <-xml2::xml_find_all(x1, './/label')
   return (data.frame(roiid = xml2::xml_attr(labels, 'id'), roiname = xml2::xml_attr(labels, 'fullname')))

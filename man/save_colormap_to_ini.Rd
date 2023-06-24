@@ -4,12 +4,12 @@
 \alias{save_colormap_to_ini}
 \title{Saves the colormap values for min and max to an ini file}
 \usage{
-save_colormap_to_ini(filename, bss_cmap)
+save_colormap_to_ini(filename, bstr_cmap)
 }
 \arguments{
 \item{filename}{name of the file}
 
-\item{bss_cmap}{BssColormap object}
+\item{bstr_cmap}{BstrColormap object}
 }
 \description{
 Saves the colormap values for min and max to an ini file

@@ -4,11 +4,11 @@
 \alias{lmer_vec}
 \title{Vectorized linear mixed-effects regression for brain imaging phenotypes.}
 \usage{
-lmer_vec(group_var, main_effect = "", covariates = "", bss_data)
+lmer_vec(group_var, main_effect = "", covariates = "", bstr_data)
 }
 \arguments{
 \item{group_var}{Categorical variable name. This should be present in the demographics csv file associated
-with \code{bss_data}.}
+with \code{bstr_data}.}
 
 \item{main_effect}{Character string containing an independent variable whose effect you want to measure.
 It could be disease status, age, gender etc. This should strictly be a single variable. This can be
@@ -17,7 +17,7 @@ either a categorical or a continuous variable.}
 \item{covariates}{Character string containing a set of other predictors (variables) in the model. If more than
 one covariates are included, they should be separated by a \code{+} operator similar to an R formula.}
 
-\item{bss_data}{Object of type \code{\link{BssData}}}
+\item{bstr_data}{Object of type \code{\link{BstrData}}}
 }
 \description{
 This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and performs

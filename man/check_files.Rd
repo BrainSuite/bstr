@@ -7,7 +7,7 @@
 check_files(object)
 }
 \arguments{
-\item{object}{object of type \code{BssOutput}}
+\item{object}{object of type \code{BstrOutput}}
 }
 \description{
 Check that subject directory and demographics files exist

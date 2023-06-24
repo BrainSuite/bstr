@@ -4,14 +4,14 @@
 \alias{get_voxelcoord}
 \title{Get voxel coordinates of all significant clusters (up to number of clusters)}
 \usage{
-get_voxelcoord(bss_out, bss_data, bss_model, outdir, nclusters)
+get_voxelcoord(bstr_out, bstr_data, bstr_model, outdir, nclusters)
 }
 \arguments{
-\item{bss_out}{object of type \code{BssOut}}
+\item{bstr_out}{object of type \code{BstrOut}}
 
-\item{bss_data}{object of type \code{BssData}}
+\item{bstr_data}{object of type \code{BstrData}}
 
-\item{bss_model}{object of type \code{BssModel}}
+\item{bstr_model}{object of type \code{BstrModel}}
 
 \item{outdir}{string specifying output directory to save the results in}
 

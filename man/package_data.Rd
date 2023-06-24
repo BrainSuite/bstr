@@ -5,13 +5,13 @@
 \title{Package data for reproducible statistical analysis.}
 \usage{
 package_data(
-  type = "cbm",
+  type = "sba",
   subjdir = NULL,
   csv = "",
   hemi = "left",
-  cbmsmooth = 0,
+  sbasmooth = 0,
   tbmsmooth = 0,
-  dbmsmooth = 0,
+  dbasmooth = 0,
   measure = "FA",
   atlas = "",
   eddy = TRUE,
@@ -20,7 +20,7 @@ package_data(
 )
 }
 \arguments{
-\item{type}{character string denoting type of analysis. Should be cbm, tbm, or roi.}
+\item{type}{character string denoting type of analysis. Should be sba, tbm, or roi.}
 
 \item{subjdir}{subject directory containing BrainSuite processed data.}
 
@@ -31,11 +31,11 @@ and should be exactly equal to the individual subject directory name.}
 
 \item{hemi}{chaaracter string denoting the brain hemisphere. Should either be "left" or "right".}
 
-\item{cbmsmooth}{numeric value denoting the smoothing level for cbm.}
+\item{sbasmooth}{numeric value denoting the smoothing level for sba.}
 
 \item{tbmsmooth}{numeric value denoting the smoothing level for tbm.}
 
-\item{dbmsmooth}{numeric value denoting the smoothing level for dbm.}
+\item{dbasmooth}{numeric value denoting the smoothing level for dba.}
 
 \item{measure}{character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".}
 
@@ -48,7 +48,7 @@ and should be exactly equal to the individual subject directory name.}
 \item{exclude_col}{character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.}
 }
 \description{
-Takes same parameters as \code{\link{load_bss_data}} and copies the data to a new directory specified by outdir. You can repeatedly call this function to copy data of different types (tbm -- nii.gz, cbm -- .dfs files etc.) to the same output directory.
+Takes same parameters as \code{\link{load_bstr_data}} and copies the data to a new directory specified by outdir. You can repeatedly call this function to copy data of different types (tbm -- nii.gz, sba -- .dfs files etc.) to the same output directory.
 Prior to using this function, BrainSuite and svreg should be run on all subjects.
 If required, smoothing should be performed on cortical surface or volumetric image based measures.
 A csv file containing subject demographic information should exist. The first column of this csv file

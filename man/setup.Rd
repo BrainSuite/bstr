@@ -2,7 +2,7 @@
 % Please edit documentation in R/bss_setup.R
 \name{setup}
 \alias{setup}
-\title{Setup script for bssr}
+\title{Setup script for bstr}
 \usage{
 setup(brainsuite_path = NULL, quiet = FALSE, raise_error = TRUE)
 }
@@ -15,7 +15,7 @@ setup(brainsuite_path = NULL, quiet = FALSE, raise_error = TRUE)
 value is \code{FALSE}, in which case the function returns {FALSE} without stopping the execution.}
 }
 \description{
-This script reads from and writes to the setup configuration file (bssr.ini) for bss.
+This script reads from and writes to the setup configuration file (bstr.ini) for bstr.
 Usually this will be called automatically when the package is installed and loaded
-for the first time. Optionally, it can be executed by the user immediately after installing bssr.
+for the first time. Optionally, it can be executed by the user immediately after installing bstr.
 }

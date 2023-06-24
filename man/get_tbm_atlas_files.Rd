@@ -16,7 +16,7 @@ get_tbm_atlas_files(mspec, bs_atlas_path, svreg_log_file)
 \description{
 The modelspec file specifies the subject directory, paths to the atlas files,
 the model specification, whether linear regerssion, correlation etc.
-The modelspec file was used in the previous versions of bssr.
+The modelspec file was used in the previous versions of bstr.
 Currently, the user does not have to create this explicitly.
 This functionality is still kept in case a future need arises to generate these automatically.
 }

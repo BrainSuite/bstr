@@ -2,15 +2,15 @@
 % Please edit documentation in R/bssdata_class.R
 \name{load_data}
 \alias{load_data}
-\alias{load_data,BssData-method}
-\alias{load_data,BssCBMData-method}
-\alias{load_data,BssTBMData-method}
-\alias{load_data,BssDBMData-method}
-\alias{load_data,BssROIData-method}
+\alias{load_data,BstrData-method}
+\alias{load_data,BstrSBAData-method}
+\alias{load_data,BstrTBMData-method}
+\alias{load_data,BstrDBAData-method}
+\alias{load_data,BstrROIData-method}
 \title{A generic function to load data for statistical analysis.}
 \usage{
 load_data(
-  bss_data,
+  bstr_data,
   atlas_filename = NULL,
   maskfile = NULL,
   hemi = "left",
@@ -22,24 +22,24 @@ load_data(
   exclude_col
 )
 
-\S4method{load_data}{BssData}(bss_data, roiids = NULL, roimeas = NULL, exclude_col)
+\S4method{load_data}{BstrData}(bstr_data, roiids = NULL, roimeas = NULL, exclude_col)
 
-\S4method{load_data}{BssCBMData}(bss_data, atlas_filename, hemi, smooth)
+\S4method{load_data}{BstrSBAData}(bstr_data, atlas_filename, hemi, smooth)
 
-\S4method{load_data}{BssTBMData}(bss_data, atlas_filename, maskfile = NULL, smooth)
+\S4method{load_data}{BstrTBMData}(bstr_data, atlas_filename, maskfile = NULL, smooth)
 
-\S4method{load_data}{BssDBMData}(bss_data, atlas_filename, maskfile = NULL, measure, smooth, eddy)
+\S4method{load_data}{BstrDBAData}(bstr_data, atlas_filename, maskfile = NULL, measure, smooth, eddy)
 
-\S4method{load_data}{BssROIData}(bss_data, roiids = NULL, roimeas = NULL, exclude_col)
+\S4method{load_data}{BstrROIData}(bstr_data, roiids = NULL, roimeas = NULL, exclude_col)
 }
 \arguments{
-\item{bss_data}{object of type \code{\link{BssData}}}
+\item{bstr_data}{object of type \code{\link{BstrData}}}
 
 \item{atlas_filename}{path name to the atlas}
 
 \item{maskfile}{path name to the mask file}
 
-\item{hemi}{chaaracter string denoting the brain hemisphere. Should either be "left" or "right".}
+\item{hemi}{chaaracter string denoting the brain hemisphere. Should either be "left" or "right" or "both".}
 
 \item{measure}{character specifying the brain imaging measure. If analyzing diffusion data, should be "FA".}
 
@@ -58,8 +58,8 @@ A generic function to load data for statistical analysis.
 }
 \details{
 For the most part, the user will never have to call this function directly.
-Instead the user should call \code{\link{load_bss_data}}.
+Instead the user should call \code{\link{load_bstr_data}}.
 }
 \seealso{
-\code{\link{load_bss_data}}
+\code{\link{load_bstr_data}}
 }

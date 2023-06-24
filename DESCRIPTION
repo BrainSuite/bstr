@@ -1,44 +1,32 @@
-Package: bssr
+Package: bstr
 Type: Package
-Title: BrainSuite Statistics Toolbox
-Version: 0.3.3
+Title: BrainSuite Statistics Toolbox in R
+Version: 0.4
 Authors@R: c(person(given="Shantanu", family="Joshi", role=c("cre","aut"), email="shjoshi@ieee.org"),
              person("Yeun", "Kim", role="aut"),
              person("Kayla", "Schroeder", role="aut"),
              person("David", "Shattuck", role="ctb")
              )
-Description: The BrainSuite Statistics toolbox allows the application of advanced 
+Description: The BrainSuite Statistics toolbox in R allows the application of advanced 
   statistical models to volumetric image, cortical surface and sulcal curve based 
   outputs generated from BrainSuite. This enables population or group analysis of 
   cortical surface based data, volumetric deformation fields (tensors) or sulcal 
   morphology. 
 License: GPL-2 | file LICENSE
 Copyright: The Regents of the University of California.
-LazyData: true
 Encoding: UTF-8
-Imports:
-    iterators,
-    magrittr,
-    gtable,
-    htmlwidgets,
-    jsonlite (>= 1.6),
-    pander (>= 0.6.0),
-    rmarkdown (>= 1.3.0),
-    DT (>= 0.2.0),
-    ini,
-    tools,
-    RColorBrewer,
-    RNifti,
-    methods,
-    ggplot2 (>= 2.2.1),
-    scales (>= 0.4.1),
-    doParallel,
-    foreach,
-    bit,
-    Matrix,
-    R6,
-    shinyjs,
-    lme4
-RoxygenNote: 7.1.2
-URL: http://brainsuite.org/bssr
+Imports: iterators, magrittr, gtable, htmlwidgets, jsonlite (>= 1.6),
+        pander (>= 0.6.0), rmarkdown (>= 1.3.0), DT (>= 0.2.0), ini,
+        tools, RColorBrewer, RNifti, methods, ggplot2 (>= 2.2.1),
+        scales (>= 0.4.1), doParallel, foreach, bit, Matrix, R6,
+        shinyjs, lme4
+RoxygenNote: 7.2.3
+URL: http://brainsuite.org/bstr
 Suggests: testthat
+NeedsCompilation: no
+Packaged: 2023-06-16 02:38:21 UTC; sjoshi
+Author: Shantanu Joshi [cre, aut],
+  Yeun Kim [aut],
+  Kayla Schroeder [aut],
+  David Shattuck [ctb]
+Maintainer: Shantanu Joshi <shjoshi@ieee.org>

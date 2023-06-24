@@ -1,4 +1,4 @@
-# BrainSuite Statistics Toolbox in R (bssr)
+# BrainSuite Statistics Toolbox in R (bstr)
 # Copyright (C) 2017 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
 #
@@ -55,7 +55,7 @@ test_that("corr_vec is same as R cor.test", {
 
 test_that("lm_vec is same as R lm", {
 
-  data <- read.csv(system.file("extdata/testdata", "design.csv", package="bssr"))
+  data <- read.csv(system.file("extdata/testdata", "design.csv", package="bstr"))
   main_effect <- "Age"
   covariates <- "Sex + Height"
 
@@ -63,20 +63,20 @@ test_that("lm_vec is same as R lm", {
   lm_full <- lm(formula(sprintf('V1000 ~ %s', paste(main_effect, '+', covariates))), data = data)
 
   # Fit model using lm_vec
-  bss_data <- new("BssData", getwd(), system.file("extdata/testdata", "design.csv", package = 'bssr'), exclude_col="")
+  bst_data <- new("BstrData", getwd(), system.file("extdata/testdata", "design.csv", package = 'bstr'), exclude_col="")
 
-  bss_data@data_array <- as.matrix(data[, "V1000"])
-  bss_model <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data)
+  bst_data@data_array <- as.matrix(data[, "V1000"])
+  bst_model <- lm_vec(main_effect = main_effect, covariates = covariates, bst_data)
 
   # Test for equality of tvalue, beta coefficient, and pvalue
-  expect_equal(bss_model@tvalues, summary(lm_full)$coefficients[main_effect, "t value"])
-  expect_equal(bss_model@beta_coeff[[main_effect, 1]], summary(lm_full)$coefficients[main_effect, "Estimate"])
-  expect_equal(bss_model@pvalues, summary(lm_full)$coefficients[main_effect, "Pr(>|t|)"])
+  expect_equal(bst_model@tvalues, summary(lm_full)$coefficients[main_effect, "t value"])
+  expect_equal(bst_model@beta_coeff[[main_effect, 1]], summary(lm_full)$coefficients[main_effect, "Estimate"])
+  expect_equal(bst_model@pvalues, summary(lm_full)$coefficients[main_effect, "Pr(>|t|)"])
 })
 
-test_that("bss_anova is same as R model comparison using anova", {
+test_that("bstr_anova is same as R model comparison using anova", {
 
-  data <- read.csv(system.file("extdata/testdata", "design.csv", package="bssr"))
+  data <- read.csv(system.file("extdata/testdata", "design.csv", package="bstr"))
   main_effect <- "Age"
   covariates <- "Sex + Height"
 
@@ -87,20 +87,20 @@ test_that("bss_anova is same as R model comparison using anova", {
   # Compare full and null in R
   R_model_cmp <- anova(lm_full, lm_null)
 
-  bss_data <- new("BssData", getwd(), system.file("extdata/testdata", "design.csv", package = 'bssr'), exclude_col="")
-  bss_data@data_array <- as.matrix(data[, "V1000"])
-  # Fit full model using bss first
-  bss_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bss_data = bss_data)
-  # Fit null model using bss first
-  bss_lm_null <- lm_vec(main_effect = "", covariates = covariates, bss_data = bss_data)
-  # Compare full and null in bss
-  bss_model <- anova_vec(bss_lm_full, bss_lm_null, bss_data)
+  bst_data <- new("BstrData", getwd(), system.file("extdata/testdata", "design.csv", package = 'bstr'), exclude_col="")
+  bst_data@data_array <- as.matrix(data[, "V1000"])
+  # Fit full model using bstr first
+  bst_lm_full <- lm_vec(main_effect = main_effect, covariates = covariates, bstr_data = bst_data)
+  # Fit null model using bstr first
+  bst_lm_null <- lm_vec(main_effect = "", covariates = covariates, bstr_data = bst_data)
+  # Compare full and null in bstr
+  bst_model <- anova_vec(bst_lm_full, bst_lm_null, bst_data)
 
   # Test for equality of pvalue, Fstat, and RSS
-  expect_equal(bss_model@pvalues, R_model_cmp$`Pr(>F)`[2])
-  expect_equal(bss_model@Fstat, R_model_cmp$F[2])
-  expect_equal(bss_lm_full@rss, R_model_cmp$RSS[1])
-  expect_equal(bss_lm_null@rss, R_model_cmp$RSS[2])
+  expect_equal(bst_model@pvalues, R_model_cmp$`Pr(>F)`[2])
+  expect_equal(bst_model@Fstat, R_model_cmp$F[2])
+  expect_equal(bst_lm_full@rss, R_model_cmp$RSS[1])
+  expect_equal(bst_lm_null@rss, R_model_cmp$RSS[2])
 })
 
 

@@ -91,7 +91,7 @@ readdfs <- function(filename) {
 #' @export
 readdfsattributes <- function(filename) {
   dfs_fid = file(filename, "rb")
-  dfs_magic <- readBin(dfs_fid, character(12))
+  dfs_magic <- readChar(dfs_fid, 12)
   hdr <- data.frame(dfs_magic)
   if (!grepl("DFS", dfs_magic)) {
     stop(sprintf("File %s is not a dfs file.\n", filename), call. = FALSE)

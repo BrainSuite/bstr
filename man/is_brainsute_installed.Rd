@@ -14,6 +14,6 @@ is_brainsute_installed(quiet = FALSE, raise_error = FALSE)
 \description{
 Check if the BrainSuite installation is valid by verifying if the appropriate
 atlas files and data exist. This function is called from \code{\link{.onLoad}}
-when the package is loaded. It opens \code{bssr.ini} and checks if all the
+when the package is loaded. It opens \code{bstr.ini} and checks if all the
 paths are valid.
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-# BrainSuite Statistics Toolbox in R (bssr)
+# BrainSuite Statistics Toolbox in R (bstr)
 # Copyright (C) 2017 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
 #
@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License along with this program;
 # if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 library(methods)
-library(bssr)
+library(bstr)
 
 "usage:
 bss_tbm_anova.R --subjdir=<subjdir> --csv=<csv> --main_effect=<main_effect> --covariates=<covariates> --odir=<odir> [--smooth=<smooth>]

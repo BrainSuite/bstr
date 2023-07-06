@@ -267,9 +267,9 @@ get_brainsuite_atlas_id_from_logfile <- function(logfile) {
   fid = file(logfile, "rt")
   log_lines <- readLines(fid, n=2)
   close(fid)
-  if (grepl("/BrainSuiteAtlas1/", log_lines[2], fixed = TRUE))
+  if (grepl("BrainSuiteAtlas1", log_lines[2], fixed = TRUE))
     return("BrainSuiteAtlas1")
-  else if (grepl("/BCI-DNI_brain_atlas/", log_lines[2], fixed = TRUE))
+  else if (grepl("DNI_brain_atlas", log_lines[2], fixed = TRUE))
     return("BCI-DNI_brain_atlas")
   else
     stop(paste("Could not determine the BrainSuite atlas used for registration.\n",

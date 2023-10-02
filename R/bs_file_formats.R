@@ -531,7 +531,7 @@ read_demographics <- function(csvfile, exclude_col="") {
   return(demog)
 }
 
-check_bids_compatibility_and_get_filelist <- function(bstr_data, type="sba", hemi, smooth = 0, measure="FA", eddy = TRUE) {
+check_bids_compatibility_and_get_filelist <- function(bstr_data, type="sba", hemi, smooth = 0, measure="FA", eddy = TRUE, roimeas = "gmthickness") {
 
   valid_types <- c("sba", "tbm", "roi", "dba")
   if (! type %in% valid_types)
@@ -555,10 +555,21 @@ check_bids_compatibility_and_get_filelist <- function(bstr_data, type="sba", hem
 
   }
   else if (type == "roi") {
-    filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID,
-                              sprintf('%s%s', bstr_data@demographics$subjID, bs_file_formats$roi_txt))
-    bids_filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, 'anat',
-                                   sprintf('%s%s', bstr_data@demographics$subjID, bs_file_formats$roi_txt))
+    valid_roi_measures <- c(roi_types$svreg_roi_types, roi_types$swm_roi_types, roi_types$swm_roi_types)
+    if (roimeas %in% roi_types$svreg_roi_types || roimeas %in% roi_types$swm_roi_types) {
+      bids_filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, 'anat',
+                                     sprintf('%s%s%s', bstr_data@demographics$subjID, '_T1w', bs_file_formats$roi_txt))
+      filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID,
+                                 sprintf('%s%s%s', bstr_data@demographics$subjID, '_T1w', bs_file_formats$roi_txt))
+
+    }
+    else if (roimeas %in% roi_types$wm_roi_types) {
+      bids_filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID, 'dwi',
+                                     sprintf('%s%s%s', bstr_data@demographics$subjID, '_T1w', bs_file_formats$wm_roi_txt))
+      filelist <- file.path(bstr_data@subjdir, bstr_data@demographics$subjID,
+                                 sprintf('%s%s%s', bstr_data@demographics$subjID, '_T1w', bs_file_formats$wm_roi_txt))
+
+    }
   }
 
   # Check BIDS compatibility
@@ -572,7 +583,7 @@ check_bids_compatibility_and_get_filelist <- function(bstr_data, type="sba", hem
   else {
     message('Following subjects have missing files')
     print(filelist[which(!file.exists(filelist))], row.names = FALSE)
-    stop('\nCheck if SVREG was run succesfully on all the subjects. Also check the smoothing level (smooth= under [subject]).\nIt is possible that surface or volume files at the specified smoothing level do not exist.',
+    stop('\nCheck if SVREG was run succesfully on all the subjects. Optionally, check the smoothing level (smooth= under [subject]).\nIt is possible that surface or volume files at the specified smoothing level do not exist.',
          call. = FALSE)
 
 #    stop('\nCould not understand the directory hierarchy. Check if svreg was run succesfully on all the subjects. Also check the smoothing level (smooth= under [subject]).\nIt is possible that surface files at the specified smoothing level do not exist.',
@@ -583,7 +594,7 @@ check_bids_compatibility_and_get_filelist <- function(bstr_data, type="sba", hem
   if ( !all(file.exists(filelist))) {
     message('Following subjects have missing files')
     print(filelist[which(!file.exists(filelist))], row.names = FALSE)
-    stop('\nCheck if SVREG was run succesfully on all the subjects. Also check the smoothing level (smooth= under [subject]).\nIt is possible that surface or volume files at the specified smoothing level do not exist.',
+    stop('\nCheck if SVREG was run succesfully on all the subjects. Optionally, check the smoothing level (smooth= under [subject]).\nIt is possible that surface or volume files at the specified smoothing level do not exist.',
          call. = FALSE)
   }
   return (list("bids_compatible" = bids_compatible, "filelist" = filelist))

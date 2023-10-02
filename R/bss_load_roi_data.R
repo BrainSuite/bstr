@@ -34,32 +34,9 @@ bstr_load_roi_data <- function(subjects_dir, csv, roiids, roimeas, exclude_col) 
   }
 
   demographics$subjID <- as.character(demographics$subjID)
-  if (roimeas %in% roi_types$svreg_roi_types || roimeas %in% roi_types$swm_roi_types) {
-    roi_bids_filelist <- file.path(subjects_dir, demographics$subjID, 'anat',
-                                   sprintf('%s%s%s', demographics$subjID, '_T1w', bs_file_formats$roi_txt))
-  }
-  else if (roimeas %in% roi_types$wm_roi_types) {
-    roi_bids_filelist <- file.path(subjects_dir, demographics$subjID, 'dwi',
-                                   sprintf('%s%s%s', demographics$subjID, '_T1w', bs_file_formats$wm_roi_txt))
-  }
 
-  if(all(file.exists(roi_bids_filelist)))
-    additional_dir <- 'anat'
-  else
-    additional_dir <- '/'
-  if (roimeas %in% roi_types$svreg_roi_types || roimeas %in% roi_types$swm_roi_types) {
-    roiwise_file_list <- lapply(demographics$subjID,
-                              function(i) {
-                                Sys.glob(file.path(subjects_dir, i, additional_dir, "*roiwise.stats.txt"))[1]
-                              })
-  }
-  else if (roimeas %in% roi_types$wm_roi_types) {
-    roiwise_file_list <- lapply(demographics$subjID,
-                              function(i) {
-                                Sys.glob(file.path(subjects_dir, i, additional_dir, "*wm.stats.tsv"))[1]
-                              })
-  }
-
+  bstr_data <- new("BstrROIData", subjects_dir, csv, exclude_col)
+  roiwise_file_list <- get_roi_file_list(bstr_data)
 
   if (any(is.na(roiwise_file_list))) {
     stop(sprintf("Subject %s is either missing the roiwise.stats.txt or the wm.stats.tsv file depending on the ROI measure used.\n",

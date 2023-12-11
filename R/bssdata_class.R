@@ -342,6 +342,7 @@ load_bstr_data_from_filelist <- function(csv="", subjdir="", hemi = "left", type
 #  bstr_sba_data <- new("BstrSBAData", subjdir=subjdir, csv=csv, exclude_col="")
 
   switch(type,
+         tbm = { bstr_data <- load_tbm_data_from_filelist(subjdir = subjdir, csv = csv, file_col = file_col, atlas = atlas, maskfile = maskfile) },
          sba = { bstr_data <- load_sba_data_from_filelist(subjdir=subjdir, csv=csv, hemi = hemi, file_col = file_col, atlas=atlas) }
   )
   return(bstr_data)
@@ -383,6 +384,7 @@ load_sba_data <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="",
 #' @param file_col character string for the full file path.
 #' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
 #' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right".
+#' @export
 load_sba_data_from_filelist <- function(subjdir="", csv="", file_col="", atlas="", hemi="left") {
 
   bstr_data <- new("BstrSBAData", subjdir, csv, exclude_col="")
@@ -438,33 +440,61 @@ load_tbm_data <- function(subjdir="", csv="", smooth=0.0, atlas="", maskfile="",
 
   bstr_tbm_data <- new("BstrTBMData", subjdir, csv, exclude_col)
   tbm_atlas_and_mask = list()
-  if (maskfile == ""  && atlas == "") {
-    brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
-    tbm_atlas_and_mask <- get_tbm_atlas_and_mask(brainsuite_atlas_id)
-  }
-  else {
-    if (maskfile != "" && atlas == "") {
-      brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
-      check_file_exists(maskfile, raise_error = TRUE)
-      tbm_atlas_and_mask$nii_atlas_mask <- maskfile
-      tbm_atlas_and_mask$nii_atlas <- get_tbm_atlas(brainsuite_atlas_id)
-    }
-    else if (maskfile== "" && atlas != "") {
-      brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
-      check_file_exists(atlas, raise_error = TRUE)
-      tbm_atlas_and_mask$nii_atlas <- atlas
-      tbm_atlas_and_mask$nii_atlas_mask <- get_tbm_mask(brainsuite_atlas_id)
-    }
-    else if (maskfile!= "" && atlas != "") {
-      check_file_exists(maskfile, raise_error = TRUE)
-      check_file_exists(atlas, raise_error = TRUE)
-      tbm_atlas_and_mask <- list("nii_atlas" = atlas, "nii_atlas_mask" = maskfile)
-    }
-  }
+
+  tbm_atlas_and_mask <- check_tbm_atlas_and_mask(subjdir, csv, atlas, maskfile, exclude_col)
+
   bstr_tbm_data <- load_data(bstr_tbm_data, atlas_filename = tbm_atlas_and_mask$nii_atlas, maskfile = tbm_atlas_and_mask$nii_atlas_mask, smooth=smooth)
   bstr_tbm_data@data_type <- bs_data_types$nifti_image
   return(bstr_tbm_data)
 }
+
+#' Load TBM data from file list for statistical analysis.
+#' @param subjdir subject directory containing BrainSuite processed data.
+#' @param csv filename of a comma separated (csv) file containing the subject demographic information.
+#' The first column of this csv file
+#' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
+#' and should be exactly equal to the individual subject directory name.
+#' @param file_col character string for the full file path.
+#' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
+#' @param maskfile filename of the mask for tbm or diffusion parameter analysis. The mask has to be in the atlas space.
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
+#' @export
+#'
+load_tbm_data_from_filelist <- function(subjdir="", csv="", file_col="", atlas="", maskfile="", exclude_col = "") {
+
+  bstr_data <- new("BstrTBMData", subjdir, csv, exclude_col="")
+  tbm_atlas_and_mask <- check_tbm_atlas_and_mask(subjdir, csv, atlas, maskfile, exclude_col)
+
+  bstr_data@atlas_filename <- tbm_atlas_and_mask$nii_atlas
+  bstr_data@atlas_image <- RNifti::readNifti(tbm_atlas_and_mask$nii_atlas)
+  bstr_data@filelist <- bstr_data@demographics[, file_col]
+  bstr_data@smooth <- 0.0
+  bstr_data@measure <- ""
+
+  attrib_siz <- length(bstr_data@atlas_image)
+  if ( !is.null(maskfile) ) {
+    bstr_data@maskfile <- maskfile
+    mask_image <- as.vector(RNifti::readNifti(tbm_atlas_and_mask$nii_atlas))
+    if ( length(mask_image) != attrib_siz) {
+      stop(sprintf('Dimensions of atlas file %s and maskfile %s do not match', bstr_data@atlas_filename, maskfile), call. = FALSE)
+    }
+    bstr_data@mask_idx <- which(mask_image > 0)
+  }
+  else
+    bstr_data@mask_idx = 1:attrib_siz
+  first_subject_file <- as.vector(RNifti::readNifti(bstr_data@filelist[1]))
+  # Check if the dimensions of first subject file and atlas match (the dimensions of atlas and mask are already checked above)
+  if ( length(first_subject_file) != attrib_siz) {
+    stop(sprintf('Dimensions of the atlas file %s and subject %s do not match. Check if you are using the correct atlas', bstr_data@atlas_filename, bstr_data@filelist[1]), call. = FALSE)
+  }
+  bstr_data@data_array <- read_nii_images_for_all_subjects(bstr_data@filelist, attrib_siz, bstr_data@mask_idx)
+  bstr_data@analysis_type <- "tbm"
+  bstr_data@data_type <- bs_data_types$nifti_image
+  bstr_data@hemi <- "NA"
+
+  return(bstr_data)
+}
+
 #' Load diffusion data for statistical analysis.
 #' @param subjdir subject directory containing BrainSuite processed data.
 #' @param csv filename of a comma separated (csv) file containing the subject demographic information.

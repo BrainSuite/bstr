@@ -384,6 +384,49 @@ get_tbm_atlas_and_mask <- function(brainsuite_atlas_id) {
   return(list("nii_atlas" = nii_atlas, "nii_atlas_mask" = nii_atlas_mask))
 }
 
+#' Check and return the maskfile and the atlas file
+#' @param subjdir subject directory containing BrainSuite processed data.
+#' @param csv filename of a comma separated (csv) file containing the subject demographic information.
+#' The first column of this csv file
+#' should be "subjID" and should have subject identifiers you wish to analyze. subjID can be alphanumeric
+#' and should be exactly equal to the individual subject directory name.
+#' @param atlas character specifying the file path prefix (all characters in the file name upto the first ".") for the custom atlas. If empty, the atlas will be read from the svreg.log file in the subject directory.
+#' Otherwise, for example, if the atlas for tensor based morphometry is located at /path/to/atlas/myatlas.mri.bfc.nii.gz, then specify atlas="/path/to/atlas/myatlas".
+#' @param maskfile filename of the mask for tbm or diffusion parameter analysis. The mask has to be in the atlas space.
+#' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
+#'
+check_tbm_atlas_and_mask <- function(subjdir="", csv="", atlas="", maskfile="", exclude_col) {
+
+  if (maskfile == ""  && atlas == "") {
+    brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
+    tbm_atlas_and_mask <- get_tbm_atlas_and_mask(brainsuite_atlas_id)
+  }
+  else {
+    if (maskfile != "" && atlas == "") {
+      brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
+      check_file_exists(maskfile, raise_error = TRUE)
+      tbm_atlas_and_mask$nii_atlas_mask <- maskfile
+      tbm_atlas_and_mask$nii_atlas <- get_tbm_atlas(brainsuite_atlas_id)
+    }
+    else if (maskfile== "" && atlas != "") {
+      brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))
+      check_file_exists(atlas, raise_error = TRUE)
+      tbm_atlas_and_mask$nii_atlas <- atlas
+      tbm_atlas_and_mask$nii_atlas_mask <- get_tbm_mask(brainsuite_atlas_id)
+    }
+    else if (maskfile!= "" && atlas != "") {
+      check_file_exists(maskfile, raise_error = TRUE)
+      check_file_exists(atlas, raise_error = TRUE)
+      tbm_atlas_and_mask <- list("nii_atlas" = atlas, "nii_atlas_mask" = maskfile)
+    }
+  }
+
+  return(tbm_atlas_and_mask)
+
+}
+
+
+
 #' Get the BrainSuite tensor based morphometry atlas
 #' @param brainsuite_atlas_id individual subject directory that the svreg.log file exists in
 #'

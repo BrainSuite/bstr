@@ -9,3 +9,4 @@ src/*.so
 src/*.dll
 packrat/*
 packrat/lib*/
+docs

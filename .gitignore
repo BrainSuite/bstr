@@ -10,3 +10,4 @@ src/*.dll
 packrat/*
 packrat/lib*/
 docs
+.DS_Store

@@ -455,27 +455,29 @@ setMethod("save_out", valueClass = "BstrROIOutput", signature = "BstrROIOutput",
       if (class(bstr_data@demographics[,gsub("([[:alnum:]_]+).*", "\\1", bstr_model@fullmodel)])=="integer"|class(bstr_data@demographics[,gsub("([[:alnum:]_]+).*", "\\1", bstr_model@fullmodel)])=="double"|bstr_model@model_type == 'bstr_corr'){
         if (bstr_model@model_type == "bstr_corr"){
           x_var = bstr_model@corr_var
+          group_var = bstr_model@group_var
           annotate_label = paste0("paste('corr val:',",round(bstr_model@corr_values[m],5),")")
         } else {
           x_var = gsub('([[:alnum:]_]+).*', '\\1', bstr_model@fullmodel)
           annotate_label = paste0("paste('pvalue:', as.character(p_val_",bstr_data@roiids[m],"))")
         }
-        nb_plots[[m]]<-paste0(nb_plots[[m]],"ggplot2::ggplot(data=bstr_data@demographics, ggplot2::aes(x=",
-                              x_var,", y = `",selected_col[m],"`)) + ggplot2::geom_point() + ggplot2::ggtitle('",
-                              as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bstr_data@roiids[m])[[1]]),
-                              " ", bstr_data@roimeas,
-                              " vs ", x_var, "') + ggplot2::labs(y='",
-                              as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bstr_data@roiids[m])[[1]]),
-                              "') + ggplot2::geom_smooth(method=lm, se=TRUE) +
-                              ggplot2::xlim(",min(bstr_data@demographics[,x_var]),", ",max(bstr_data@demographics[,x_var])+6,") +
-                              ggplot2::theme(axis.title=ggplot2::element_text(size=16,face='bold')) +
-                              ggplot2::theme(plot.title=ggplot2::element_text(size=18,face='bold')) +
-                              ggplot2::annotate('label',x=",max(bstr_data@demographics[,x_var])+2,",y= max(bstr_data@demographics$`",selected_col[m],"`)",
-                              ",label= ",annotate_label,")\n
-                              ggplot2::ggsave(filename='",
-                              paste0(as.character(get_roi_tag(read_label_desc(),bstr_data@roiids[m]))), "_roi",bstr_data@roiids[m],
-                              "_", bstr_data@roimeas,
-                              "_vs_", x_var, ".pdf',device='pdf')\n```\n")
+        pdf_filename <- sprintf("%s_roi%d_%s_vs_%s.pdf", as.character(get_roi_tag(read_label_desc(),bstr_data@roiids[m])), bstr_data@roiids[m], bstr_data@roimeas, x_var)
+
+        nb_plots[[m]] <- sprintf("ggplot2::ggplot(bstr_data@demographics, aes(x=%s, y=`%s`, color=%s)) +
+        ggplot2::geom_point(shape=21, size=2, aes_string(fill='%s')) + ggplot2::geom_smooth(aes_string(fill='%s'),  method=lm, se=TRUE) +
+        ggplot2::theme(aspect.ratio=1) + ggplot2::ggtitle('%s %s vs %s') + ggplot2::labs(y='%s') +
+        ggplot2::theme(axis.title.x = element_text(size = rel(1.5))) + ggplot2::theme(axis.title.y = element_text(size = rel(1.5))) +
+        ggplot2::theme(axis.text.x=ggplot2::element_text(size=20,face='bold')) +
+        ggplot2::theme(axis.text.y=ggplot2::element_text(size=20,face='bold')) +
+        paletteer::scale_color_paletteer_d('ggprism::floral')\n
+        ggplot2::ggsave(filename='%s')\n```\n",
+                                 x_var, selected_col[m], bstr_model@group_var, bstr_model@group_var, bstr_model@group_var,
+                                 get_roi_tag(read_label_desc(),bstr_data@roiids[m]),
+                                 bstr_data@roimeas, x_var,
+                                 as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bstr_data@roiids[m])[[1]]),
+                                 pdf_filename)
+
+
       } else if (class(bstr_data@demographics[,gsub("([[:alnum:]_]+).*", "\\1", bstr_model@fullmodel)])=="factor"){
         nb_plots[[m]]<-paste0(nb_plots[[m]],
                               "mean_lengths <- rep(NA, length(levels(bstr_data@demographics$",gsub('([[:alnum:]_]+).*', '\\1', bstr_model@fullmodel),")))

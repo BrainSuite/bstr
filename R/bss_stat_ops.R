@@ -342,15 +342,16 @@ bstr_roi_anova <- function(main_effect="", covariates="", bstr_data=bstr_data) {
 #' @param corr_var Character variable name. This should be present in the demographics csv file associated
 #' with \code{bstr_data}.
 #' @param  bstr_data Object of type \code{\link{BstrData}}.
+#' @param  group_var Character variable for groups in the data. Currently this argument is only used in plotting for ROI analysis.
 #' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bstr_p_adjust}} for valid values.
 #' @details
 #' \code{bstr_data} can be of the type "sba", "tbm", or "roi".
 #'
 #' @export
-bstr_corr <- function(corr_var, bstr_data, mult_comp="fdr") {
+bstr_corr <- function(corr_var, bstr_data, group_var = "", mult_comp="fdr") {
 
   message('Running correlations...', appendLF = FALSE)
-  bstr_model <- new("BstrModel", model_type="bstr_corr", corr_var = corr_var,
+  bstr_model <- new("BstrModel", model_type="bstr_corr", corr_var = corr_var, group_var = group_var,
                    demographics = bstr_data@demographics, mspec_file="")
 
   corr_result <- corr_vec(bstr_data@data_array, bstr_data@demographics[[corr_var]])

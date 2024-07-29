@@ -472,7 +472,6 @@ setMethod("save_out", valueClass = "BstrROIOutput", signature = "BstrROIOutput",
         ggplot2::theme(axis.text.y=ggplot2::element_text(size=14,face='bold')) +
         paletteer::scale_color_paletteer_d('ggthemes::excel_Headlines') +
     		paletteer::scale_fill_paletteer_d('ggthemes::excel_Headlines')\n
-        paletteer::scale_color_paletteer_d('ggprism::floral')\n
         ggplot2::ggsave(filename='%s')\n```\n",
                                  x_var, selected_col[m], bstr_model@group_var, bstr_model@group_var, bstr_model@group_var,
                                  as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bstr_data@roiids[m])[[1]]),

@@ -464,17 +464,19 @@ setMethod("save_out", valueClass = "BstrROIOutput", signature = "BstrROIOutput",
         pdf_filename <- sprintf("%s_roi%d_%s_vs_%s.pdf", as.character(get_roi_tag(read_label_desc(),bstr_data@roiids[m])), bstr_data@roiids[m], bstr_data@roimeas, x_var)
 
         nb_plots[[m]] <- sprintf("ggplot2::ggplot(bstr_data@demographics, aes(x=%s, y=`%s`, color=%s)) +
-        ggplot2::geom_point(shape=21, size=2, aes_string(fill='%s')) + ggplot2::geom_smooth(aes_string(fill='%s'),  method=lm, se=TRUE) +
-        ggplot2::theme(aspect.ratio=1) + ggplot2::ggtitle('%s %s vs %s') + ggplot2::labs(y='%s') +
-        ggplot2::theme(axis.title.x = element_text(size = rel(1.5))) + ggplot2::theme(axis.title.y = element_text(size = rel(1.5))) +
-        ggplot2::theme(axis.text.x=ggplot2::element_text(size=20,face='bold')) +
-        ggplot2::theme(axis.text.y=ggplot2::element_text(size=20,face='bold')) +
+        ggplot2::geom_point(shape=21, size=1.5, aes_string(fill='%s')) + ggplot2::geom_smooth(aes_string(fill='%s'),  method=lm, se=TRUE) +
+        ggplot2::theme(aspect.ratio=1) + ggplot2::ggtitle('%s') + ggplot2::labs(y='%s') +
+        ggplot2::theme(axis.title.x = element_text(size = rel(1.6))) + ggplot2::theme(axis.title.y = element_text(size = rel(1.6))) +
+        ggplot2::theme(plot.title= ggplot2::element_text(size=20)) +
+        ggplot2::theme(axis.text.x=ggplot2::element_text(size=14,face='bold')) +
+        ggplot2::theme(axis.text.y=ggplot2::element_text(size=14,face='bold')) +
+        paletteer::scale_color_paletteer_d('ggthemes::excel_Headlines') +
+    		paletteer::scale_fill_paletteer_d('ggthemes::excel_Headlines')\n
         paletteer::scale_color_paletteer_d('ggprism::floral')\n
         ggplot2::ggsave(filename='%s')\n```\n",
                                  x_var, selected_col[m], bstr_model@group_var, bstr_model@group_var, bstr_model@group_var,
-                                 get_roi_tag(read_label_desc(),bstr_data@roiids[m]),
-                                 bstr_data@roimeas, x_var,
                                  as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bstr_data@roiids[m])[[1]]),
+                                 bstr_data@roimeas,
                                  pdf_filename)
 
 

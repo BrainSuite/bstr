@@ -396,14 +396,14 @@ BstrRmdVolumeOutput <-
                     sagWidth <- dims_mm[3] * scaledPNGdimensions[2]/scaledPNGdimensions[3];
                     corWidth <- dims_mm[3] * scaledPNGdimensions[1]/scaledPNGdimensions[3];
                     axWidth  <- dims_mm[2] * scaledPNGdimensions[1]/scaledPNGdimensions[2];
-                    # we then rescale this physical width relative to the total width and multiply by 93 to leave 7% space for the colorbar
+                    # we then rescale this physical width relative to the total width and multiply by 86 to leave 14% space for the colorbar
                     totalWidth <- sagWidth + corWidth + axWidth
-                    sagWidth <- 93 * sagWidth / totalWidth
-                    corWidth <- 93 * corWidth / totalWidth
-                    axWidth <- 93 * axWidth / totalWidth
-                    # This leaves 7% for the color bar.
-                    width <- c(paste0(sagWidth,"%"),paste0(corWidth,"%"),paste0(axWidth,"%"),"7%")
-                    
+                    sagWidth <- 86 * sagWidth / totalWidth
+                    corWidth <- 86 * corWidth / totalWidth
+                    axWidth <- 86 * axWidth / totalWidth
+                    # This leaves 14% for the color bar.
+                    width <- c(paste0(sagWidth,"%"),paste0(corWidth,"%"),paste0(axWidth,"%"),"14%")
+
                     if (bstr_model@model_type=="bstr_corr"){
                       panel_names<- c("Adjusted Correlation Values","Correlation Values")
                       overlay <- c(bs_stat_overlays$corr_values_masked_adjusted,bs_stat_overlays$corr_values)

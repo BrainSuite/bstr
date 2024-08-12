@@ -90,6 +90,69 @@ bs_stat_overlays <- list(
   corr_values = "corr_values",
   corr_values_masked_adjusted = "corr_values_masked_adjusted"
 )
+
+#' Mapping of stat overlays to label strings
+bs_stat_overlays_mapping_to_label <- list(
+  log_pvalues_adjusted = "adjusted log(p-values)",
+  tvalues_adjusted = "adjusted t-values",
+  log_pvalues = "log(p-values)",
+  tvalues = "t-values",
+  pvalues = "p-values",
+  corr_values = "correlations",
+  corr_values_masked_adjusted = "masked adjusted correlations"
+)
+
+#' Mapping of model_type to readable string
+bs_model_type_to_readable_string <- list(
+  bstr_anova = "ANOVA",
+  bstr_lm = "Linear Fixed-effects Model",
+  bstr_lmer = "Linear Mixed-effects Model",
+  bstr_corr = "Correlation",
+  pairedttest = "Paired T-test",
+  unpairedttest = "Unpaired T-test"
+)
+
+#' Mapping of analysis_type to readable string
+bs_analysis_type_to_readable_string <- list(
+  tbm = "TBM",
+  sba = "SBA",
+  roi = "ROI",
+  dba = "DBA"
+)
+
+create_rmd_report_title_str <- function(bstr_data, bstr_model) {
+
+  title_string <- paste(bstr:::bs_analysis_type_to_readable_string[[bstr_data@analysis_type]], " ",
+                        bstr:::bs_model_type_to_readable_string[[bstr_model@model_type]], '-- ', sep="")
+
+
+  switch(bstr_model@model_type,
+         bstr_anova = {
+           title_string <- paste(title_string, "Main effect of", bstr_model@main_effect, "with covariates",
+                 bstr_model@covariates)
+         },
+         bstr_lm = {
+           title_string <- paste(title_string, "Main effect of", bstr_model@main_effect, "with covariates",
+                 bstr_model@covariates)
+         },
+         bstr_lmer = {
+           title_string <- paste(title_string, "Fixed effect of", bstr_model@main_effect, "with covariates",
+                 bstr_model@covariates, ", Random effect of", bstr_model@group_var)
+         },
+         bstr_corr = {
+           title_string <- paste(title_string, "with", bstr_model@corr_var)
+         },
+         pairedttest = {
+           title_string <- paste(title_string, "between samples for", bstr_model@group_var)
+         },
+         unpairedttest = {
+           title_string <- paste(title_string, "between samples for", bstr_model@group_var)
+         }
+  )
+
+  return(title_string)
+}
+
 #' Returns the filename for the designated image
 #' @param outdir string denoting the output directory
 #' @param voxelcoord all outputted voxelcoordinates

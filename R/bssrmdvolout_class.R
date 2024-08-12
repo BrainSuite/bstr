@@ -305,7 +305,8 @@ BstrRmdVolumeOutput <-
                   templines[1] <- "render_html = function(bstr_data, bstr_model, outdir, voxelcoord, overlay_name)"
                   sink(rmdfile, append=TRUE, type = "output")
                   cat("---\n")
-                  cat("title: bstr report\n")
+                  bstr_report_title_str <- create_rmd_report_title_str(bstr_data, bstr_model)
+                  cat(sprintf("title: Bstr Report -- %s \n", bstr_report_title_str))
                   cat("output: html_document\n")
                   cat("runtime: shiny\n")
                   cat("---\n")

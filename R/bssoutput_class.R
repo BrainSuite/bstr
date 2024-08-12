@@ -243,7 +243,8 @@ setMethod("save_out", valueClass = "BstrTBMOutput", signature = "BstrTBMOutput",
   if (length(voxelcoord) == 0 | voxelcoord[[1]][1] == -1) {
     sink(file.path(outdir,  sprintf("report_%s_%s.Rmd", bstr_model@model_type, var_name)), type = "output")
     cat("---\n")
-    cat("title: BSTR Report\n")
+    bstr_report_title_str <- create_rmd_report_title_str(bstr_data, bstr_model)
+    cat(sprintf("title: Bstr Report -- %s \n", bstr_report_title_str))
     cat("output: html_document\n")
     cat("---\n\n\n")
     cat("No detected clusters above significance threshold.")
@@ -333,7 +334,8 @@ setMethod("save_out", valueClass = "BstrDBAOutput", signature = "BstrDBAOutput",
   if (length(voxelcoord) == 0 | voxelcoord[[1]][1] == -1) {
     sink(file.path(outdir,  sprintf("report_%s_%s.Rmd", bstr_model@model_type, var_name)), type = "output")
     cat("---\n")
-    cat("title: BSTR Report\n")
+    bstr_report_title_str <- create_rmd_report_title_str(bstr_data, bstr_model)
+    cat(sprintf("title: Bstr Report -- %s \n", bstr_report_title_str))
     cat("output: html_document\n")
     cat("---\n\n\n")
     cat("No detected clusters above significance threshold.")
@@ -730,12 +732,14 @@ save_bstr_color_files <- function(measure, var_name, cmap_title, bstr_data, bstr
 
   measure <- as.numeric(measure)
   bstr_cmap <- new("BstrColormap", cmap_title, "RdYlBu", measure)
+  colorbar_label_text <- bs_stat_overlays_mapping_to_label[[cmap_title]]
+
   if (bstr_data@hemi == "both")
     cbar_filename <- paste(paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
   else
       cbar_filename <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(
       basename(bstr_data@atlas_filename)), bstr_cmap@cmap_type, sep = '_'), '_cbar.pdf', sep = '')
-  save_colorbar(file.path(outdir,cbar_filename), bstr_cmap@lut, bstr_cmap@vmin, bstr_cmap@vmax, cmap_title)
+  save_colorbar(file.path(outdir,cbar_filename), bstr_cmap@lut, bstr_cmap@vmin, bstr_cmap@vmax, colorbar_label_text)
 
   if (bstr_data@hemi == "both")
     cbar_filename <- paste(paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_'), '_cbar.png', sep = '')
@@ -743,7 +747,7 @@ save_bstr_color_files <- function(measure, var_name, cmap_title, bstr_data, bstr
     cbar_filename <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(
       basename(bstr_data@atlas_filename)), bstr_cmap@cmap_type, sep = '_'), '_cbar.png', sep = '')
 
-  save_colorbar(file.path(outdir,cbar_filename), bstr_cmap@lut, bstr_cmap@vmin, bstr_cmap@vmax, cmap_title)
+  save_colorbar(file.path(outdir,cbar_filename), bstr_cmap@lut, bstr_cmap@vmin, bstr_cmap@vmax, colorbar_label_text)
 
   # save the color LUT
   if (bstr_data@hemi == "both")

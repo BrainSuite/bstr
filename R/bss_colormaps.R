@@ -237,8 +237,8 @@ save_colorbar <- function(filename, lut, vmin, vmax, labeltxt) {
     ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), axis.text.x = ggplot2::element_blank()) +
     ggplot2::guides(fill="none") +
     ggplot2::labs(y=labeltxt) +
-    ggplot2::theme(axis.text.y = ggplot2::element_text(size=14)) +
-    ggplot2::theme(axis.title.y = ggplot2::element_text(size = 16, vjust=-1)) +
+    ggplot2::theme(axis.text.y = ggplot2::element_text(size=16)) +
+    ggplot2::theme(axis.title.y = ggplot2::element_text(size = 18, vjust=0.5)) +
     ggplot2::theme(axis.ticks.length=ggplot2::unit(0.25, "cm"),
           axis.text.y = ggplot2::element_text(margin=ggplot2::unit(c(1.5,1.5,1.5,1.5), "cm")) ) +
     ggplot2::scale_y_continuous(expand = c(0, 0), breaks= scales::pretty_breaks(n=10), position='right') +

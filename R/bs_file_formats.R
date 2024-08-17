@@ -122,8 +122,15 @@ bs_analysis_type_to_readable_string <- list(
 
 create_rmd_report_title_str <- function(bstr_data, bstr_model) {
 
-  title_string <- paste(bstr:::bs_analysis_type_to_readable_string[[bstr_data@analysis_type]], " ",
-                        bstr:::bs_model_type_to_readable_string[[bstr_model@model_type]], '-- ', sep="")
+  if(bstr_data@analysis_type == "dba") {
+    title_string <- paste(bstr:::bs_analysis_type_to_readable_string[[bstr_data@analysis_type]], " ", bstr_data@measure, " ",
+                          bstr:::bs_model_type_to_readable_string[[bstr_model@model_type]], '-- ', sep="")
+  }
+  else {
+    title_string <- paste(bstr:::bs_analysis_type_to_readable_string[[bstr_data@analysis_type]], " ",
+                          bstr:::bs_model_type_to_readable_string[[bstr_model@model_type]], '-- ', sep="")
+  }
+
 
 
   switch(bstr_model@model_type,

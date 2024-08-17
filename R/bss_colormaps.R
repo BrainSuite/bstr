@@ -238,14 +238,14 @@ save_colorbar <- function(filename, lut, vmin, vmax, labeltxt) {
     ggplot2::guides(fill="none") +
     ggplot2::labs(y=labeltxt) +
     ggplot2::theme(axis.text.y = ggplot2::element_text(size=16)) +
-    ggplot2::theme(axis.title.y = ggplot2::element_text(size = 18, vjust=0.5)) +
+    ggplot2::theme(axis.title.y = ggplot2::element_text(size = 18, vjust=0.0)) +
     ggplot2::theme(axis.ticks.length=ggplot2::unit(0.25, "cm"),
-          axis.text.y = ggplot2::element_text(margin=ggplot2::unit(c(1.5,1.5,1.5,1.5), "cm")) ) +
+          axis.text.y = ggplot2::element_text(margin=ggplot2::unit(c(2,2,2,2), "cm")) ) +
     ggplot2::scale_y_continuous(expand = c(0, 0), breaks= scales::pretty_breaks(n=10), position='right') +
     ggplot2::scale_x_continuous(expand = c(0, 0)) +
     ggplot2::theme(plot.background = ggplot2::element_blank()) +
     ggplot2::theme(panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1))
-    ggplot2::ggsave(filename, width = 1.3, height = 3.5, dpi = 600)
+    ggplot2::ggsave(filename, width = 1.5, height = 4, dpi = 600)
 
 }
 

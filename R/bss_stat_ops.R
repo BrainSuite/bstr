@@ -376,6 +376,13 @@ bstr_corr <- function(corr_var, bstr_data, group_var = "", mult_comp="fdr") {
   bstr_model@load_data_command <- sprintf("bstr_model <- bstr_corr(corr_var = '%s', bstr_data = bstr_data, mult_comp= '%s')",
                                          corr_var, mult_comp)
 
+  if (bstr_data@analysis_type == "roi") {
+    rois_string <- paste(as.character(bstr_data@roiids), collapse = ', ')
+    corr_values_string <- sprintf("%.2f", bstr_model@corr_values)
+
+    paste(as.character(bstr_model@corr_values), collapse = ', ')
+    message(sprintf("Correlation(s) of %s with %s for ROI(s) %s are %s: ", bstr_data@roimeas, corr_var, rois_string, corr_values_string), appendLF = TRUE)
+  }
   message('Done.')
   return(bstr_model)
 

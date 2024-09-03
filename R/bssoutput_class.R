@@ -481,8 +481,8 @@ setMethod("save_out", valueClass = "BstrROIOutput", signature = "BstrROIOutput",
             group_var = bstr_model@group_var
             annotate_label = paste0("paste('corr val:',",round(bstr_model@corr_values[m],5),")")
             pdf_filename <- sprintf("%s_roi%d_%s_vs_%s.pdf", as.character(get_roi_tag(read_label_desc(),bstr_data@roiids[m])), bstr_data@roiids[m], bstr_data@roimeas, x_var)
-            nb_plots[[m]] <- sprintf("ggplot2::ggplot(bstr_data@demographics, aes(x=%s, y=`%s`, color=as.factor(%s))) +
-            ggplot2::geom_point(shape=21, size=1.5, aes(fill=as.factor(%s))) + ggplot2::geom_smooth(aes(fill=as.factor(%s)),  method=lm, se=TRUE) +
+            nb_plots[[m]] <- sprintf("ggplot2::ggplot(bstr_data@demographics, aes(x=%s, y=`%s`, color=%s)) +
+            ggplot2::geom_point(shape=21, size=1.5, aes(fill=%s)) + ggplot2::geom_smooth(aes(fill=%s),  method=lm, se=TRUE) +
             ggplot2::theme(aspect.ratio=1) + ggplot2::ggtitle('%s') + ggplot2::labs(y='%s') + ggplot2::labs(x='%s') +
             ggplot2::theme(axis.title.x = element_text(size = rel(1.6))) + ggplot2::theme(axis.title.y = element_text(size = rel(1.6))) +
             ggplot2::theme(plot.title= ggplot2::element_text(size=20)) +
@@ -493,9 +493,9 @@ setMethod("save_out", valueClass = "BstrROIOutput", signature = "BstrROIOutput",
             paletteer::scale_color_paletteer_d('ggsci::category10_d3') +
         		paletteer::scale_fill_paletteer_d('ggsci::category10_d3')\n
             ggplot2::ggsave(filename='%s')\n```\n",
-                                       x_var, selected_col[m], bstr_model@group_var, bstr_model@group_var, bstr_model@group_var,
-                                       as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bstr_data@roiids[m])[[1]]),
-                                       bstr_data@roimeas, bstr_model@group_var,
+                                       x_var, selected_col[m], bstr_model@group_var,
+                                       bstr_model@group_var, bstr_model@group_var,
+                                       as.character(get_roi_name(label_desc_df = read_label_desc(),roiid=bstr_data@roiids[m])[[1]]), bstr_data@roimeas, x_var,
                                        pdf_filename)
           }
 
@@ -505,7 +505,7 @@ setMethod("save_out", valueClass = "BstrROIOutput", signature = "BstrROIOutput",
           pdf_filename <- sprintf("%s_roi%d_%s_vs_%s.pdf", as.character(get_roi_tag(read_label_desc(),bstr_data@roiids[m])), bstr_data@roiids[m], bstr_data@roimeas, x_var)
           if (is.factor(bstr_data@demographics[[bstr_model@main_effect]]) ){
             bstr_data@demographics[[bstr_model@main_effect]] <- as.factor(bstr_data@demographics[[bstr_model@main_effect]])
-            nb_plots[[m]] <- sprintf("```{r echo=TRUE, warning=FALSE, message=FALSE}\n\n ggplot2::ggplot(bstr_data@demographics, aes(x=as.factor(%s), y=`%s`, fill=as.factor(%s))) +
+            nb_plots[[m]] <- sprintf("```{r echo=TRUE, warning=FALSE, message=FALSE}\n\n ggplot2::ggplot(bstr_data@demographics, aes(x=as.factor(%s), y=`%s`, fill=%s)) +
             ggplot2::geom_boxplot(width = 0.4, alpha=0.5, position=position_dodge(width = 0.4), outlier.colour='black')  +
       		  geom_violin(alpha = 0.5, trim=FALSE, position = position_dodge(width = 0.4)  ) +
       		  ggplot2::geom_point(shape=21, position = position_jitterdodge(seed = 1, dodge.width = 0.4), size=0.3) +

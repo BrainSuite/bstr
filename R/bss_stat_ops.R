@@ -35,7 +35,7 @@
 # param niter numeric variable for the number of iterations for permutations test. Will be ignored if mult_comp="fdr"
 bstr_anova <- function(main_effect="", covariates="", bstr_data, mult_comp="fdr") { #, niter=5000
 
-  if (class(bstr_data) == "BstrROIData") {
+  if (inherits(bstr_data, "BstrROIData")) {
     return(bstr_roi_anova(main_effect = main_effect, covariates = covariates, bstr_data = bstr_data))
   }
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
@@ -137,7 +137,7 @@ anova_vec <- function(bstr_lm_full, bstr_lm_null, bstr_data) {
 # param  niter numeric variable for the number of iterations for permutations test. Will be ignored if mult_comp="fdr"
 bstr_lm <- function(main_effect="", covariates="", bstr_data, mult_comp = "fdr") { #, niter=5000
 
-  if (class(bstr_data) == "BstrROIData") {
+  if (inherits(bstr_data, "BstrROIData")) {
     return(bstr_roi_anova(main_effect = main_effect, covariates = covariates, bstr_data = bstr_data))
   }
   message('Running the statistical model. This may take a while...', appendLF = FALSE)
@@ -662,7 +662,7 @@ bstr_p_adjust <- function(pvalues, method='fdr') {
 #' @export
 bstr_lmer <- function(group_var, main_effect="", covariates="", bstr_data, mult_comp = "fdr") {
 
-  if (class(bstr_data) == "BstrROIData") {
+  if (inherits(bstr_data, "BstrROIData")) {
     return(bstr_roi_lmer_anova(group_var, main_effect = main_effect, covariates = covariates, bstr_data = bstr_data))
   }
   message('Running the statistical model. This may take a while...', appendLF = FALSE)

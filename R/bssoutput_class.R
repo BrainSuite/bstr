@@ -454,7 +454,9 @@ setMethod("save_out", valueClass = "BstrROIOutput", signature = "BstrROIOutput",
                                        "\np_val_",bstr_data@roiids[m],"<- round(anova_table$`Pr(>",comparison_stat,")`[2],digits=4)\n",
                                        "pval_string <- paste('pvalue:', as.character(p_val_",bstr_data@roiids[m],"))\n```\n\n")
       }
-      if (class(bstr_data@demographics[,gsub("([[:alnum:]_]+).*", "\\1", bstr_model@fullmodel)])=="integer"|class(bstr_data@demographics[,gsub("([[:alnum:]_]+).*", "\\1", bstr_model@fullmodel)])=="double"|bstr_model@model_type == 'bstr_corr' | bstr_model@model_type == 'bstr_lm' | bstr_model@model_type == 'bstr_anova'){
+      if (inherits(bstr_data@demographics[,gsub("([[:alnum:]_]+).*", "\\1", bstr_model@fullmodel)], "integer") |
+          inherits(bstr_data@demographics[,gsub("([[:alnum:]_]+).*", "\\1", bstr_model@fullmodel)], "double") |
+          bstr_model@model_type == 'bstr_corr' | bstr_model@model_type == 'bstr_lm' | bstr_model@model_type == 'bstr_anova'){
         if (bstr_model@model_type == "bstr_corr"){
           x_var = bstr_model@corr_var
           if (bstr_model@group_var == "") {

@@ -29,7 +29,7 @@ For more detailed installation instructions, usage examples, or to check for upd
 ### Online Installation
 ```
 install.packages('devtools')
-devtools::install_url('http://brainsuite.org/wp-content/uploads/2024/09/bstr_0.5.1tar.gz')
+devtools::install_url('http://brainsuite.org/wp-content/uploads/2024/09/bstr_0.5.1.tar.gz')
 ```
 
 ### Mac or Linux - Install from folder

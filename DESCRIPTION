@@ -30,3 +30,4 @@ Author: Shantanu Joshi [cre, aut],
   Kayla Schroeder [aut],
   David Shattuck [ctb]
 Maintainer: Shantanu Joshi <shjoshi@ieee.org>
+Roxygen: list(markdown = TRUE)

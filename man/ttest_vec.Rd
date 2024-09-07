@@ -20,7 +20,7 @@ with \code{bstr_data}.}
 Perform independent sample and paired sample t-tests between two numerfor differences between means of brain
 imaging phenotypes for a categorical variable.
 For most scenarios, the user does not need to call this function directly. This function
-will be called internally from \code{\link{bstr_ttest}}
+will be called internally from \code{\link[=bstr_ttest]{bstr_ttest()}}
 }
 \details{
 For an independent samples t-test \eqn{N1} not equal to \eqn{N2}.

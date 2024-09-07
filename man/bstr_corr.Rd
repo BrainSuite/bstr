@@ -10,11 +10,11 @@ bstr_corr(corr_var, bstr_data, group_var = "", mult_comp = "fdr")
 \item{corr_var}{Character variable name. This should be present in the demographics csv file associated
 with \code{bstr_data}.}
 
-\item{bstr_data}{Object of type \code{\link{BstrData}}.}
+\item{bstr_data}{Object of type \code{\link[=BstrData]{BstrData()}}.}
 
 \item{group_var}{Character variable for groups in the data. Currently this argument is only used in plotting for ROI analysis.}
 
-\item{mult_comp}{method for multiple comparisons correction. The default method is "fdr". See \code{\link{bstr_p_adjust}} for valid values.}
+\item{mult_comp}{method for multiple comparisons correction. The default method is "fdr". See \code{\link[=bstr_p_adjust]{bstr_p_adjust()}} for valid values.}
 }
 \description{
 Test for correlation between a brain imaging phenotype (cortical thickness, determinant

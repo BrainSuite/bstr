@@ -14,7 +14,7 @@
 
 #' log10 transform
 #' @param values numeric vector
-#' @return numeric vector containing the log10 transformed \code{values}
+#' @return numeric vector containing the log10 transformed `values`
 #' @export
 log10_transform <- function(values) {
   eps <- .Machine$double.eps

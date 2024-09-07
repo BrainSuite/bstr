@@ -43,11 +43,11 @@ only}
 
 \item{\code{nullvars}}{character list of individual variables in the null model}
 
-\item{\code{lm_formula}}{R \code{\link{formula}}}
+\item{\code{lm_formula}}{R \code{\link[=formula]{formula()}}}
 
-\item{\code{X_design_full}}{a design matrix of the type \code{\link{model.matrix}} for the full model}
+\item{\code{X_design_full}}{a design matrix of the type \code{\link[=model.matrix]{model.matrix()}} for the full model}
 
-\item{\code{X_design_null}}{a design matrix of the type \code{\link{model.matrix}} for the null model}
+\item{\code{X_design_null}}{a design matrix of the type \code{\link[=model.matrix]{model.matrix()}} for the null model}
 
 \item{\code{Npfull}}{number of variables in the full model}
 

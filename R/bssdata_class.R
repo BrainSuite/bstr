@@ -100,7 +100,7 @@ setMethod("initialize", valueClass = "BstrData", signature = "BstrData", functio
 })
 
 #' A generic function to load data for statistical analysis.
-#' @param bstr_data object of type \code{\link{BstrData}}
+#' @param bstr_data object of type [BstrData()]
 #' @param atlas_filename path name to the atlas
 #' @param maskfile path name to the mask file
 #' @param hemi chaaracter string denoting the brain hemisphere. Should either be "left" or "right" or "both".
@@ -112,8 +112,8 @@ setMethod("initialize", valueClass = "BstrData", signature = "BstrData", functio
 #' @param exclude_col character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.
 #' @details
 #' For the most part, the user will never have to call this function directly.
-#' Instead the user should call \code{\link{load_bstr_data}}.
-#' @seealso \code{\link{load_bstr_data}}
+#' Instead the user should call [load_bstr_data()].
+#' @seealso [load_bstr_data()]
 #'
 #' @export
 setGeneric("load_data", valueClass = "BstrData", function(bstr_data, atlas_filename = NULL, maskfile = NULL, hemi = "left", measure = "", smooth = 0.0, eddy = TRUE, roiids = NULL, roimeas = NULL, exclude_col) {
@@ -313,7 +313,7 @@ load_bstr_data <- function(type="sba", subjdir="", csv="", hemi="left",
 #' Loading data is usually the first step before running any statistical analysis.
 #' Prior to using this function, BrainSuite and svreg should be run on all subjects.
 #' If required, smoothing should be performed on cortical surface or volumetric image based measures.
-#' Unlike \code{\link{load_bstr_data}}, this function loads data from a csv that contains a column for filelist
+#' Unlike [load_bstr_data()], this function loads data from a csv that contains a column for filelist
 #' A csv file containing subject demographic information should exist. The first column of this csv file
 #' should have the subject identifiers. Subject identifiers can be alphanumeric
 #' and should be exactly equal to the individual subject directory names.
@@ -577,7 +577,7 @@ load_roi_data <- function(subjdir="", csv="", roiids="", roimeas="", exclude_col
 
 #' Package data for reproducible statistical analysis.
 #'
-#' Takes same parameters as \code{\link{load_bstr_data}} and copies the data to a new directory specified by outdir. You can repeatedly call this function to copy data of different types (tbm -- nii.gz, sba -- .dfs files etc.) to the same output directory.
+#' Takes same parameters as [load_bstr_data()] and copies the data to a new directory specified by outdir. You can repeatedly call this function to copy data of different types (tbm -- nii.gz, sba -- .dfs files etc.) to the same output directory.
 #' Prior to using this function, BrainSuite and svreg should be run on all subjects.
 #' If required, smoothing should be performed on cortical surface or volumetric image based measures.
 #' A csv file containing subject demographic information should exist. The first column of this csv file

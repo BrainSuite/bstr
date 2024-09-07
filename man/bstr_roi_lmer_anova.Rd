@@ -17,7 +17,7 @@ either a categorical or a continuous variable.}
 \item{covariates}{Character string containing a set of other predictors (variables) in the model. If more than
 one covariates are included, they should be separated by a \code{+} operator similar to an R formula.}
 
-\item{bstr_data}{Object of type \code{\link{BstrData}}}
+\item{bstr_data}{Object of type \code{\link[=BstrData]{BstrData()}}}
 }
 \description{
 This function performs the ANOVA Linear Mixed Effects analysis for ROIs

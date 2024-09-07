@@ -43,7 +43,7 @@ read_label_desc <- function() {
 
 
 #' Get the ROI name from the ROI label
-#' @param label_desc_df \code{\link{data.frame}} containing fields from the label description file
+#' @param label_desc_df [data.frame()] containing fields from the label description file
 #' @param roiid ROI label identifier
 #' @export
 get_roi_name <- function(label_desc_df, roiid) {
@@ -51,7 +51,7 @@ get_roi_name <- function(label_desc_df, roiid) {
 }
 
 #' Get the ROI tag from the ROI label
-#' @param label_desc_df \code{\link{data.frame}} containing fields from the label description file
+#' @param label_desc_df [data.frame()] containing fields from the label description file
 #' @param roiid ROI label identifier
 #' @export
 get_roi_tag <- function(label_desc_df, roiid) {

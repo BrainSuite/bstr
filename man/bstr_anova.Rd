@@ -14,9 +14,9 @@ either a categorical or a continuous variable.}
 \item{covariates}{Character string containing a set of other predictors (variables) in the model. If more than
 one covariates are included, they should be separated by a \code{+} operator similar to an R formula.}
 
-\item{bstr_data}{Object of type \code{\link{BstrData}}}
+\item{bstr_data}{Object of type \code{\link[=BstrData]{BstrData()}}}
 
-\item{mult_comp}{method for multiple comparisons correction. The default method is "fdr". See \code{\link{bstr_p_adjust}} for valid values.}
+\item{mult_comp}{method for multiple comparisons correction. The default method is "fdr". See \code{\link[=bstr_p_adjust]{bstr_p_adjust()}} for valid values.}
 }
 \description{
 This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and uses an
@@ -28,5 +28,5 @@ Slightly different from the standard R anova function, \code{bstr_anova} current
 results from \code{lm_vec}. This could be accomodated in the future versions.
 }
 \seealso{
-\code{\link{lm_vec}} for linear regression, \code{\link{bstr_ttest}} for independent sample and paired t-tests.
+\code{\link[=lm_vec]{lm_vec()}} for linear regression, \code{\link[=bstr_ttest]{bstr_ttest()}} for independent sample and paired t-tests.
 }

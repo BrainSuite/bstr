@@ -14,21 +14,21 @@
 
 #' Perform analysis of variance (ANOVA) for brain imaging data.
 #'
-#' This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and uses an
-#' F-test to compare the full model including the \code{main_effect + covariates} with the reduced (null) model
-#' that only includes the \code{covariates}.
+#' This function accepts a `main_effect` and a set of covariates (using the R formula notation) and uses an
+#' F-test to compare the full model including the `main_effect + covariates` with the reduced (null) model
+#' that only includes the `covariates`.
 #'
-#' Slightly different from the standard R anova function, \code{bstr_anova} currently does not directly accept the
-#' results from \code{lm_vec}. This could be accomodated in the future versions.
+#' Slightly different from the standard R anova function, `bstr_anova` currently does not directly accept the
+#' results from `lm_vec`. This could be accomodated in the future versions.
 
 #' @param main_effect Character string containing an independent variable whose effect you want to measure.
 #' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
 #' either a categorical or a continuous variable.
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
-#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-#' @param  bstr_data Object of type \code{\link{BstrData}}
-#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bstr_p_adjust}} for valid values.
-#' @seealso \code{\link{lm_vec}} for linear regression, \code{\link{bstr_ttest}} for independent sample and paired t-tests.
+#' one covariates are included, they should be separated by a `+` operator similar to an R formula.
+#' @param  bstr_data Object of type [BstrData()]
+#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See [bstr_p_adjust()] for valid values.
+#' @seealso [lm_vec()] for linear regression, [bstr_ttest()] for independent sample and paired t-tests.
 #'
 #' @export
 
@@ -75,18 +75,18 @@ bstr_anova <- function(main_effect="", covariates="", bstr_data, mult_comp="fdr"
 
 #' A vectorized version of analysis of variance (ANOVA).
 #'
-#' This function compares results of model fitting after \code{\link{lm_vec}}.
+#' This function compares results of model fitting after [lm_vec()].
 #' It accepts a full model and and a reduced model and compares them using an F-test.
 #' For most scenarios, the user does not need to call this function directly. This function
-#' will be called internally from \code{\link{bstr_anova}}
+#' will be called internally from [bstr_anova()]
 #'
-#' @param bstr_lm_full An object of type \code{\link{BstrModel}} returned from \code{\link{lm_vec}}.
+#' @param bstr_lm_full An object of type [BstrModel()] returned from [lm_vec()].
 #' This is a full model including both the main effect and covariates.
-#' @param bstr_lm_null An object of type \code{\link{BstrModel}} returned from \code{\link{lm_vec}}.
+#' @param bstr_lm_null An object of type [BstrModel()] returned from [lm_vec()].
 #' This is a null model including only the covariates.
-#' @param  bstr_data Object of type \code{\link{BstrData}}
+#' @param  bstr_data Object of type [BstrData()]
 #'
-#' @seealso \code{\link{bstr_anova}} for most commonly used function for ANOVA, \code{\link{lm_vec}} for vectorized linear regression, \code{\link{ttest_vec}} for
+#' @seealso [bstr_anova()] for most commonly used function for ANOVA, [lm_vec()] for vectorized linear regression, [ttest_vec()] for
 #' vectorized independent sample and paired t-tests.
 #'
 #' @export
@@ -117,20 +117,20 @@ anova_vec <- function(bstr_lm_full, bstr_lm_null, bstr_data) {
 
 #' Linear regression for brain imaging data.
 #'
-#' This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and performs
-#' a linear regression including \code{main_effect + covariates}.
+#' This function accepts a `main_effect` and a set of covariates (using the R formula notation) and performs
+#' a linear regression including `main_effect + covariates`.
 #'
-#' Slightly different from the standard R \code{lm} function, \code{bstr_lm} currently does not directly accept an R formula.
+#' Slightly different from the standard R `lm` function, `bstr_lm` currently does not directly accept an R formula.
 #' This could be accomodated in the future versions.
-#' Also currently, this function returns the p-values and the t-statistics for the \code{main_effect}
+#' Also currently, this function returns the p-values and the t-statistics for the `main_effect`
 #' only. Returning the statistics for all variables could be accomodated in the future versions.
 #' @param main_effect Character string containing an independent variable whose effect you want to measure.
 #' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
 #' either a categorical or a continuous variable.
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
-#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-#' @param  bstr_data Object of type \code{\link{BstrData}}
-#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bstr_p_adjust}} for valid values.
+#' one covariates are included, they should be separated by a `+` operator similar to an R formula.
+#' @param  bstr_data Object of type [BstrData()]
+#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See [bstr_p_adjust()] for valid values.
 #'
 #' @export
 
@@ -207,19 +207,19 @@ bstr_lm <- function(main_effect="", covariates="", bstr_data, mult_comp = "fdr")
 
 #' Vectorized linear regression for brain imaging phenotypes.
 #'
-#' This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and performs
-#' a linear regression including \code{main_effect + covariates}.
+#' This function accepts a `main_effect` and a set of covariates (using the R formula notation) and performs
+#' a linear regression including `main_effect + covariates`.
 #'
-#' Slightly different from the standard R \code{lm} function, \code{lm_vec} currently does not directly accept an R formula.
+#' Slightly different from the standard R `lm` function, `lm_vec` currently does not directly accept an R formula.
 #' This could be accomodated in the future versions.
-#' Also currently, this function returns the p-values and the t-statistics for the \code{main_effect}
+#' Also currently, this function returns the p-values and the t-statistics for the `main_effect`
 #' only. Returning the statistics for all variables could be accomodated in the future versions.
 #' @param main_effect Character string containing an independent variable whose effect you want to measure.
 #' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
 #' either a categorical or a continuous variable.
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
-#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-#' @param  bstr_data Object of type \code{\link{BstrData}}
+#' one covariates are included, they should be separated by a `+` operator similar to an R formula.
+#' @param  bstr_data Object of type [BstrData()]
 #'
 #' @export
 lm_vec <- function(main_effect = "", covariates = "", bstr_data) {
@@ -263,8 +263,8 @@ lm_vec <- function(main_effect = "", covariates = "", bstr_data) {
 #' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
 #' either a categorical or a continuous variable.
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
-#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-#' @param  bstr_data Object of type \code{\link{BstrData}}
+#' one covariates are included, they should be separated by a `+` operator similar to an R formula.
+#' @param  bstr_data Object of type [BstrData()]
 #'
 #' @export
 
@@ -334,18 +334,18 @@ bstr_roi_anova <- function(main_effect="", covariates="", bstr_data=bstr_data) {
 #
 # }
 
-#' Test for Correlation between a variable \code{corr_var} and a brain imaging phenotype.
+#' Test for Correlation between a variable `corr_var` and a brain imaging phenotype.
 #'
 #' Test for correlation between a brain imaging phenotype (cortical thickness, determinant
-#' of the jacobian matrix) and \code{corr_var} using the Pearson's product moment correlation
-#' coefficient. The brain imaging phenotype is automatically selected from the type of \code{bstr_data}.
+#' of the jacobian matrix) and `corr_var` using the Pearson's product moment correlation
+#' coefficient. The brain imaging phenotype is automatically selected from the type of `bstr_data`.
 #' @param corr_var Character variable name. This should be present in the demographics csv file associated
-#' with \code{bstr_data}.
-#' @param  bstr_data Object of type \code{\link{BstrData}}.
+#' with `bstr_data`.
+#' @param  bstr_data Object of type [BstrData()].
 #' @param  group_var Character variable for groups in the data. Currently this argument is only used in plotting for ROI analysis.
-#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bstr_p_adjust}} for valid values.
+#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See [bstr_p_adjust()] for valid values.
 #' @details
-#' \code{bstr_data} can be of the type "sba", "tbm", or "roi".
+#' `bstr_data` can be of the type "sba", "tbm", or "roi".
 #'
 #' @export
 bstr_corr <- function(corr_var, bstr_data, group_var = "", mult_comp="fdr") {
@@ -391,7 +391,7 @@ bstr_corr <- function(corr_var, bstr_data, group_var = "", mult_comp="fdr") {
 #' Vectorized correlation between a variable and brain imaging data.
 #'
 #' For most scenarios, the user does not need to call this function directly.
-#' Instead call \code{\link{bstr_corr}} which calls this function internally.
+#' Instead call [bstr_corr()] which calls this function internally.
 #' @param X matrix of dimensions (\eqn{N x T}), where \eqn{N} = number of subjects and \eqn{T} = number of vertices/voxels.
 #' @param Y vector of length \eqn{N}.
 #' @export
@@ -412,13 +412,13 @@ corr_vec <- function(X, Y) {
 #' Perform independent sample and paired sample t-tests for differences between means of brain
 #' imaging phenotypes for a categorical variable.
 #' @param group_var Categorical variable name. This should be present in the demographics csv file associated
-#' with \code{bstr_data}.
-#' @param  bstr_data Object of type \code{\link{BstrData}}.
-#' @param  paired logical; is TRUE if \code{group_var} contains matching (dependent) samples. The default value is \code{FALSE}.
-#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bstr_p_adjust}} for valid values.
+#' with `bstr_data`.
+#' @param  bstr_data Object of type [BstrData()].
+#' @param  paired logical; is TRUE if `group_var` contains matching (dependent) samples. The default value is `FALSE`.
+#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See [bstr_p_adjust()] for valid values.
 #' @details
 #' The degrees of freedom are calculated using the Welch–Satterthwaite approximation by default.
-#' \code{bstr_data} can be of the type "sba", "tbm", or "roi".
+#' `bstr_data` can be of the type "sba", "tbm", or "roi".
 #'
 #' @export
 bstr_ttest <- function(group_var, bstr_data, paired = FALSE, mult_comp="fdr") {
@@ -465,17 +465,17 @@ bstr_ttest <- function(group_var, bstr_data, paired = FALSE, mult_comp="fdr") {
 #' Perform independent sample and paired sample t-tests between two numerfor differences between means of brain
 #' imaging phenotypes for a categorical variable.
 #' For most scenarios, the user does not need to call this function directly. This function
-#' will be called internally from \code{\link{bstr_ttest}}
+#' will be called internally from [bstr_ttest()]
 #' @param X1 matrix of dimensions (\eqn{N1 x T}), where \eqn{N1} = number of subjects and \eqn{T} = number of vertices/voxels.
 #' @param  X2 matrix of dimensions (\eqn{N2 x T}), where \eqn{N2} = number of subjects and \eqn{T} = number of vertices/voxels.
 #' @param group_var Categorical variable name. This should be present in the demographics csv file associated
-#' with \code{bstr_data}.
-#' @param  paired logical; is TRUE if \code{group_var} contains matching (dependent) samples. The default value is \code{FALSE}.
+#' with `bstr_data`.
+#' @param  paired logical; is TRUE if `group_var` contains matching (dependent) samples. The default value is `FALSE`.
 #' @details
 #' For an independent samples t-test \eqn{N1} not equal to \eqn{N2}.
 #' For a dependent (paired) samples t-test, \eqn{N1 = N2}.
 #' The degrees of freedom are calculated using the Welch–Satterthwaite approximation by default.
-#' \code{bstr_data} can be of the type "sba", "tbm", or "roi".
+#' `bstr_data` can be of the type "sba", "tbm", or "roi".
 #'
 #' @export
 ttest_vec <- function(X1, X2, group_var, paired=FALSE) {
@@ -520,7 +520,7 @@ ttest_vec <- function(X1, X2, group_var, paired=FALSE) {
 #' Perform multiple comparisons correction for mass univariate tests.
 #' @param pvalues numeric vector of p values.
 #' @param method character string specifying the method for correction. The default method is 'fdr'. Supported methods are
-#' all types given in \code{\link{p.adjust.methods}}
+#' all types given in [p.adjust.methods()]
 #'
 #' @export
 bstr_p_adjust <- function(pvalues, method='fdr') {
@@ -642,22 +642,22 @@ bstr_p_adjust <- function(pvalues, method='fdr') {
 #'
 #' Linear regression for brain imaging data.
 #'
-#' This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and performs
-#' a linear regression including \code{main_effect + covariates}.
+#' This function accepts a `main_effect` and a set of covariates (using the R formula notation) and performs
+#' a linear regression including `main_effect + covariates`.
 #'
-#' Slightly different from the standard R \code{lmer} function, \code{bstr_lmer} currently does not directly accept an R formula.
+#' Slightly different from the standard R `lmer` function, `bstr_lmer` currently does not directly accept an R formula.
 #' This could be accomodated in the future versions.
-#' Also currently, this function returns the p-values and the t-statistics for the \code{main_effect}
+#' Also currently, this function returns the p-values and the t-statistics for the `main_effect`
 #' only. Returning the statistics for all variables could be accomodated in the future versions.
 #' @param group_var Categorical variable name. This should be present in the demographics csv file associated
-#' with \code{bstr_data}.
+#' with `bstr_data`.
 #' @param main_effect Character string containing an independent variable whose effect you want to measure.
 #' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
 #' either a categorical or a continuous variable.
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
-#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-#' @param  bstr_data Object of type \code{\link{BstrData}}
-#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See \code{\link{bstr_p_adjust}} for valid values.
+#' one covariates are included, they should be separated by a `+` operator similar to an R formula.
+#' @param  bstr_data Object of type [BstrData()]
+#' @param  mult_comp method for multiple comparisons correction. The default method is "fdr". See [bstr_p_adjust()] for valid values.
 #'
 #' @export
 bstr_lmer <- function(group_var, main_effect="", covariates="", bstr_data, mult_comp = "fdr") {
@@ -700,21 +700,21 @@ bstr_lmer <- function(group_var, main_effect="", covariates="", bstr_data, mult_
 
 #' Vectorized linear mixed-effects regression for brain imaging phenotypes.
 #'
-#' This function accepts a \code{main_effect} and a set of covariates (using the R formula notation) and performs
-#' a linear regression including \code{main_effect + covariates}.
+#' This function accepts a `main_effect` and a set of covariates (using the R formula notation) and performs
+#' a linear regression including `main_effect + covariates`.
 #'
-#' Slightly different from the standard R \code{lmer} function, \code{lmer_vec} currently does not directly accept an R formula.
+#' Slightly different from the standard R `lmer` function, `lmer_vec` currently does not directly accept an R formula.
 #' This could be accomodated in the future versions.
-#' Also currently, this function returns the p-values and the t-statistics for the \code{main_effect}
+#' Also currently, this function returns the p-values and the t-statistics for the `main_effect`
 #' only. Returning the statistics for all variables could be accomodated in the future versions.
 #' @param group_var Categorical variable name. This should be present in the demographics csv file associated
-#' with \code{bstr_data}.
+#' with `bstr_data`.
 #' @param main_effect Character string containing an independent variable whose effect you want to measure.
 #' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
 #' either a categorical or a continuous variable.
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
-#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-#' @param  bstr_data Object of type \code{\link{BstrData}}
+#' one covariates are included, they should be separated by a `+` operator similar to an R formula.
+#' @param  bstr_data Object of type [BstrData()]
 #'
 #' @export
 lmer_vec <- function(group_var, main_effect = "", covariates = "", bstr_data) {
@@ -756,13 +756,13 @@ lmer_vec <- function(group_var, main_effect = "", covariates = "", bstr_data) {
 #' This function performs the ANOVA Linear Mixed Effects analysis for ROIs
 #'
 #' @param group_var Categorical variable name. This should be present in the demographics csv file associated
-#' with \code{bstr_data}.
+#' with `bstr_data`.
 #' @param main_effect Character string containing an independent variable whose effect you want to measure.
 #' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
 #' either a categorical or a continuous variable.
 #' @param covariates Character string containing a set of other predictors (variables) in the model. If more than
-#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
-#' @param  bstr_data Object of type \code{\link{BstrData}}
+#' one covariates are included, they should be separated by a `+` operator similar to an R formula.
+#' @param  bstr_data Object of type [BstrData()]
 #'
 #' @export
 

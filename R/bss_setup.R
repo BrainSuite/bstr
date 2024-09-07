@@ -19,9 +19,9 @@
 #' for the first time. Optionally, it can be executed by the user immediately after installing bstr.
 #'
 #' @param brainsuite_path path to the BrainSuite installation
-#' @param quiet logical; if \code{FALSE} does not display messages to the user
-#' @param raise_error logical; if \code{TRUE}, stops the execution if file does not exist. The default
-#' value is \code{FALSE}, in which case the function returns {FALSE} without stopping the execution.
+#' @param quiet logical; if `FALSE` does not display messages to the user
+#' @param raise_error logical; if `TRUE`, stops the execution if file does not exist. The default
+#' value is `FALSE`, in which case the function returns {FALSE} without stopping the execution.
 #' @export
 setup <- function(brainsuite_path = NULL, quiet = FALSE, raise_error = TRUE) {
   bstr_ini_file <- get_bstr_ini_path()
@@ -156,8 +156,8 @@ check_bs_atlas_binaries_exist <- function(brainsuite_path, quiet=FALSE, raise_er
 #' Check if BrainSuite is installed.
 #'
 #' Check if the BrainSuite installation is valid by verifying if the appropriate
-#' atlas files and data exist. This function is called from \code{\link{.onLoad}}
-#' when the package is loaded. It opens \code{bstr.ini} and checks if all the
+#' atlas files and data exist. This function is called from [.onLoad()]
+#' when the package is loaded. It opens `bstr.ini` and checks if all the
 #' paths are valid.
 #' @param  quiet boolean specifying whether warnings/messages should be displayed
 #' @param  raise_error boolean specifying whether an exception should be raised

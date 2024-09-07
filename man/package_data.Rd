@@ -48,7 +48,7 @@ and should be exactly equal to the individual subject directory name.}
 \item{exclude_col}{character string for the column in demographics csv (contains 1 or 0 for each row) specifying the subjects to exclude. 1 denotes include, 0 denotes exclude.}
 }
 \description{
-Takes same parameters as \code{\link{load_bstr_data}} and copies the data to a new directory specified by outdir. You can repeatedly call this function to copy data of different types (tbm -- nii.gz, sba -- .dfs files etc.) to the same output directory.
+Takes same parameters as \code{\link[=load_bstr_data]{load_bstr_data()}} and copies the data to a new directory specified by outdir. You can repeatedly call this function to copy data of different types (tbm -- nii.gz, sba -- .dfs files etc.) to the same output directory.
 Prior to using this function, BrainSuite and svreg should be run on all subjects.
 If required, smoothing should be performed on cortical surface or volumetric image based measures.
 A csv file containing subject demographic information should exist. The first column of this csv file

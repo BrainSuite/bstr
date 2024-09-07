@@ -1,7 +1,7 @@
 # README
 bstr: BrainSuite Statistics Toolbox in R
 
-Copyright (C) 2023 The Regents of the University of California
+Copyright (C) 2024 The Regents of the University of California
 
 Created by Shantanu H. Joshi, Yeun Kim, Kayla A. Schroeder, and David W. Shattuck
 
@@ -29,7 +29,7 @@ For more detailed installation instructions, usage examples, or to check for upd
 ### Online Installation
 ```
 install.packages('devtools')
-devtools::install_url('http://brainsuite.org/wp-content/uploads/2023/07/bstr_0.5.tar.gz')
+devtools::install_url('http://brainsuite.org/wp-content/uploads/2024/07/bstr_0.5.tar.gz')
 ```
 
 ### Mac or Linux - Install from folder
@@ -70,8 +70,8 @@ Bstr performs statistical analysis on the outputs of the BrainSuite structural w
 Bstr supports the following analysis methods:
 
 * tensor based morphometry (TBM) analysis of voxel-wise magnitudes of the 3D deformation fields of MRI images registered to the atlas
-* cortical surface analysis of the vertex-wise thickness in the atlas space
-* diffusion parameter maps analysis (e.g., fractional anisotropy, mean diffusivity, radial diffusivity) 
+* cortical surface analysis (SBA) of the vertex-wise thickness in the atlas space
+* diffusion parameter maps analysis (DBA) of fractional anisotropy, mean diffusivity, radial diffusivity
 * region of interest (ROI)-based analysis of average gray matter thickness, surface area, and gray matter volume within cortical ROIs
 * correction for multiple comparisons using false discovery rate (FDR) or permutation testing methods
 

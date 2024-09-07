@@ -7,7 +7,7 @@
 get_roi_tag(label_desc_df, roiid)
 }
 \arguments{
-\item{label_desc_df}{\code{\link{data.frame}} containing fields from the label description file}
+\item{label_desc_df}{\code{\link[=data.frame]{data.frame()}} containing fields from the label description file}
 
 \item{roiid}{ROI label identifier}
 }

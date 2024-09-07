@@ -19,27 +19,27 @@
 #' It could be disease status, age, gender etc. This should strictly be a single variable. This can be
 #' either a categorical or a continuous variable.
 #' @slot covariates character string containing a set of other predictors (variables) in the model. If more than
-#' one covariates are included, they should be separated by a \code{+} operator similar to an R formula.
+#' one covariates are included, they should be separated by a `+` operator similar to an R formula.
 #' @slot corr_var character variable name. This should be present in the demographics csv file associated
-#' with \code{bstr_data}.
+#' with `bstr_data`.
 #' @slot corr_values numeric vector to store correlation coefficients
 #' @slot corr_values_masked_adjusted numeric vector storing the masked correlation coefficients corresponding to the adjusted p-values
 #' @slot group_var Categorical variable name. This should be present in the demographics csv file associated
-#' with \code{bstr_data}.
-#' @slot model_type character string denoting the type of model. Should be one of \code{"bstr_anova"},
-#' \code{"bstr_corr"}, \code{"bstr_corr"}, \code{"pairedttest"}, \code{"unpairedttest"} or \code{"bstr_lmer"}
+#' with `bstr_data`.
+#' @slot model_type character string denoting the type of model. Should be one of `"bstr_anova"`,
+#' `"bstr_corr"`, `"bstr_corr"`, `"pairedttest"`, `"unpairedttest"` or `"bstr_lmer"`
 #' @slot fullmodel character string like an R formula denoting the full model including both
 #' the main effect and covariates.
 #' @slot nullmodel character string like an R formula denoting the null model including covariates
 #' only
 #' @slot fullvars character list of individual variables in the full model
 #' @slot nullvars character list of individual variables in the null model
-#' @slot lm_formula R \code{\link{formula}}
-#' @slot X_design_full a design matrix of the type \code{\link{model.matrix}} for the full model
-#' @slot X_design_null a design matrix of the type \code{\link{model.matrix}} for the null model
+#' @slot lm_formula R [formula()]
+#' @slot X_design_full a design matrix of the type [model.matrix()] for the full model
+#' @slot X_design_null a design matrix of the type [model.matrix()] for the null model
 #' @slot Npfull number of variables in the full model
 #' @slot Npnull number of variables in the null model
-#' @slot unique unique variable obtained as a \code{setdiff(fullvars, nullvars)}
+#' @slot unique unique variable obtained as a `setdiff(fullvars, nullvars)`
 #' @slot pvalues numeric vector storing the p-values
 #' @slot tvalues numeric vector storing the t-statistics
 #' @slot tvalues_sign numeric vector storing the sign of the t-statistics

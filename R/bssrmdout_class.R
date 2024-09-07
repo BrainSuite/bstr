@@ -25,8 +25,8 @@ BstrRmdOutput <-
                   self$outdir <- outdir
                 },
                 #' @description Save results as Rmd
-                #' @param bstr_data object of type \code{BstrData}
-                #' @param bstr_model object of type \code{BstrModel}
+                #' @param bstr_data object of type `BstrData`
+                #' @param bstr_model object of type `BstrModel`
                 save_out = function(bstr_data, bstr_model){
 
                 },

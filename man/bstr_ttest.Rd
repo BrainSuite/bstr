@@ -10,11 +10,11 @@ bstr_ttest(group_var, bstr_data, paired = FALSE, mult_comp = "fdr")
 \item{group_var}{Categorical variable name. This should be present in the demographics csv file associated
 with \code{bstr_data}.}
 
-\item{bstr_data}{Object of type \code{\link{BstrData}}.}
+\item{bstr_data}{Object of type \code{\link[=BstrData]{BstrData()}}.}
 
 \item{paired}{logical; is TRUE if \code{group_var} contains matching (dependent) samples. The default value is \code{FALSE}.}
 
-\item{mult_comp}{method for multiple comparisons correction. The default method is "fdr". See \code{\link{bstr_p_adjust}} for valid values.}
+\item{mult_comp}{method for multiple comparisons correction. The default method is "fdr". See \code{\link[=bstr_p_adjust]{bstr_p_adjust()}} for valid values.}
 }
 \description{
 Perform independent sample and paired sample t-tests for differences between means of brain

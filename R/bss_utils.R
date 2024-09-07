@@ -16,8 +16,8 @@
 #'
 #'
 #' @param filename Name of file.
-#' @param raise_error logical; if \code{TRUE}, stops the execution if file does not exist. The default
-#' value is \code{FALSE}, in which case the function returns {FALSE} without stopping the execution.
+#' @param raise_error logical; if `TRUE`, stops the execution if file does not exist. The default
+#' value is `FALSE`, in which case the function returns {FALSE} without stopping the execution.
 #' @param errmesg character string of optional error message
 #'
 #' @export

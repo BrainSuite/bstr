@@ -36,8 +36,8 @@ Generic save function for \code{BstrOutput}
 }
 \details{
 For the most part, the user will never have to call this function directly.
-Instead the user should call \code{\link{save_bstr_out}}.
+Instead the user should call \code{\link[=save_bstr_out]{save_bstr_out()}}.
 }
 \seealso{
-\code{\link{save_bstr_out}}
+\code{\link[=save_bstr_out]{save_bstr_out()}}
 }

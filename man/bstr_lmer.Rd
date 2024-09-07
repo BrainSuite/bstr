@@ -23,9 +23,9 @@ either a categorical or a continuous variable.}
 \item{covariates}{Character string containing a set of other predictors (variables) in the model. If more than
 one covariates are included, they should be separated by a \code{+} operator similar to an R formula.}
 
-\item{bstr_data}{Object of type \code{\link{BstrData}}}
+\item{bstr_data}{Object of type \code{\link[=BstrData]{BstrData()}}}
 
-\item{mult_comp}{method for multiple comparisons correction. The default method is "fdr". See \code{\link{bstr_p_adjust}} for valid values.}
+\item{mult_comp}{method for multiple comparisons correction. The default method is "fdr". See \code{\link[=bstr_p_adjust]{bstr_p_adjust()}} for valid values.}
 }
 \description{
 Linear regression for brain imaging data.

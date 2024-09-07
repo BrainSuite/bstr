@@ -13,7 +13,7 @@
 # if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #' Check that subject directory and demographics files exist
-#' @param object object of type \code{BstrOutput}
+#' @param object object of type `BstrOutput`
 #'
 check_files <- function(object){
   if (!dir.exists(object@subjdir)) {
@@ -48,16 +48,16 @@ setMethod("initialize", valueClass = "BstrOutput", signature = "BstrOutput", fun
   return(.Object)
 })
 
-#' Generic save function for \code{BstrOutput}
-#' @param bstr_out object of type \code{BstrOutput}
-#' @param bstr_data object of type \code{BstrData}
-#' @param bstr_model object of type \code{BstrModel}
+#' Generic save function for `BstrOutput`
+#' @param bstr_out object of type `BstrOutput`
+#' @param bstr_data object of type `BstrData`
+#' @param bstr_model object of type `BstrModel`
 #' @param overwrite logical parameter denoting if existing output directory should be overwritten or not (default is FALSE)
 #' @param ... Extra named arguments passed to save_out
 #' @details
 #' For the most part, the user will never have to call this function directly.
-#' Instead the user should call \code{\link{save_bstr_out}}.
-#' @seealso \code{\link{save_bstr_out}}
+#' Instead the user should call [save_bstr_out()].
+#' @seealso [save_bstr_out()]
 #' @export
 setGeneric("save_out", valueClass = "BstrOutput", function(bstr_out, bstr_data, bstr_model, overwrite = FALSE, ...) {
   standardGeneric("save_out")
@@ -667,8 +667,8 @@ paste0(as.character(get_roi_tag(read_label_desc(),bstr_data@roiids[m]))), "_roi"
 )
 
 #' Save the statistical analysis output
-#' @param bstr_data object of type \code{BstrData}
-#' @param bstr_model object of type \code{BstrModel}
+#' @param bstr_data object of type `BstrData`
+#' @param bstr_model object of type `BstrModel`
 #' @param outdir output directory to save the results
 #' @param overwrite logical parameter denoting if existing output directory should be overwritten or not (default is FALSE)
 #' @param nclusters numeric value denoting number of clusters (default is 10)
@@ -725,8 +725,8 @@ save_bstr_out_sba_both_hemi <- function(bstr_out, bstr_data, bstr_model, outdir=
 #' @param measure numeric value denoting the measures used to create the color file
 #' @param var_name string denoting name of variable that the color file is being created for
 #' @param cmap_title string denoting the type of color map
-#' @param bstr_data object of type \code{BstrData}
-#' @param bstr_model object of type \code{BstrModel}
+#' @param bstr_data object of type `BstrData`
+#' @param bstr_model object of type `BstrModel`
 #' @param outdir string specifying output directory to save the results in
 #' @export
 
@@ -791,9 +791,9 @@ save_bstr_color_files <- function(measure, var_name, cmap_title, bstr_data, bstr
 #' Save the surface output to the given ouput directory
 #' @param measure numeric value denoting the measures used to create the output
 #' @param var_name string denoting name of variable used by the function
-#' @param bstr_data object of type \code{BstrData}
-#' @param bstr_model object of type \code{BstrModel}
-#' @param bstr_cmap object of type \code{BstrColormap}
+#' @param bstr_data object of type `BstrData`
+#' @param bstr_model object of type `BstrModel`
+#' @param bstr_cmap object of type `BstrColormap`
 #' @param outdir string specifying output directory to save the results in
 #' @export
 
@@ -840,9 +840,9 @@ save_bstr_out_surface_both_hemi <- function(measure, var_name, bstr_cmap, bstr_d
 #' Save the nifti image to the output file
 #' @param measure denotes the measure used to create the output
 #' @param var_name string denoting name of variable used by the function
-#' @param bstr_data object of type \code{BstrData}
-#' @param bstr_model object of type \code{BstrModel}
-#' @param bstr_cmap object of type \code{BstrColormap}
+#' @param bstr_data object of type `BstrData`
+#' @param bstr_model object of type `BstrModel`
+#' @param bstr_cmap object of type `BstrColormap`
 #' @param outdir string specifying output directory to save the results in
 #' @export
 
@@ -857,8 +857,8 @@ save_bstr_out_nifti_image <- function(measure, var_name, bstr_cmap, bstr_data, b
 #' @param measure numeric value denoting the measures used to create the output
 #' @param var_name string denoting name of variable used by the function
 #' @param label string denoting the label for the object
-#' @param bstr_data object of type \code{BstrData}
-#' @param bstr_model object of type \code{BstrModel}
+#' @param bstr_data object of type `BstrData`
+#' @param bstr_model object of type `BstrModel`
 #' @param outdir string specifying output directory to save the results in
 #' @export
 
@@ -875,8 +875,8 @@ save_bstr_rds <- function(measure, var_name, label, bstr_data, bstr_model, outdi
 #' @param tvalues t-values
 #' @param tvalues_adjusted adjusted t-values
 #' @param var_name string denoting name of variable used by the function
-#' @param bstr_data object of type \code{BstrData}
-#' @param bstr_model object of type \code{BstrModel}
+#' @param bstr_data object of type `BstrData`
+#' @param bstr_model object of type `BstrModel`
 #' @param outdir string specifying output directory to save the results in
 #' @param corr_values correlation values
 #' @param corr_values_masked_adjusted adjusted, masked correlation values
@@ -910,9 +910,9 @@ save_vol_stats_out <- function(log_pvalues, log_pvalues_adjusted, tvalues, tvalu
 }
 
 #' Get voxel coordinates of all significant clusters (up to number of clusters)
-#' @param bstr_out object of type \code{BstrOut}
-#' @param bstr_data object of type \code{BstrData}
-#' @param bstr_model object of type \code{BstrModel}
+#' @param bstr_out object of type `BstrOut`
+#' @param bstr_data object of type `BstrData`
+#' @param bstr_model object of type `BstrModel`
 #' @param outdir string specifying output directory to save the results in
 #' @param nclusters numeric value specifying number of clusters
 #' @export

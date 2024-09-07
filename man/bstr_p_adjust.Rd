@@ -10,7 +10,7 @@ bstr_p_adjust(pvalues, method = "fdr")
 \item{pvalues}{numeric vector of p values.}
 
 \item{method}{character string specifying the method for correction. The default method is 'fdr'. Supported methods are
-all types given in \code{\link{p.adjust.methods}}}
+all types given in \code{\link[=p.adjust.methods]{p.adjust.methods()}}}
 }
 \description{
 Perform multiple comparisons correction for mass univariate tests.

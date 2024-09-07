@@ -33,7 +33,7 @@ load_data(
 \S4method{load_data}{BstrROIData}(bstr_data, roiids = NULL, roimeas = NULL, exclude_col)
 }
 \arguments{
-\item{bstr_data}{object of type \code{\link{BstrData}}}
+\item{bstr_data}{object of type \code{\link[=BstrData]{BstrData()}}}
 
 \item{atlas_filename}{path name to the atlas}
 
@@ -58,8 +58,8 @@ A generic function to load data for statistical analysis.
 }
 \details{
 For the most part, the user will never have to call this function directly.
-Instead the user should call \code{\link{load_bstr_data}}.
+Instead the user should call \code{\link[=load_bstr_data]{load_bstr_data()}}.
 }
 \seealso{
-\code{\link{load_bstr_data}}
+\code{\link[=load_bstr_data]{load_bstr_data()}}
 }

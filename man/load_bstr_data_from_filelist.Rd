@@ -37,7 +37,7 @@ Otherwise, for example, if the atlas for tensor based morphometry is located at 
 Loading data is usually the first step before running any statistical analysis.
 Prior to using this function, BrainSuite and svreg should be run on all subjects.
 If required, smoothing should be performed on cortical surface or volumetric image based measures.
-Unlike \code{\link{load_bstr_data}}, this function loads data from a csv that contains a column for filelist
+Unlike \code{\link[=load_bstr_data]{load_bstr_data()}}, this function loads data from a csv that contains a column for filelist
 A csv file containing subject demographic information should exist. The first column of this csv file
 should have the subject identifiers. Subject identifiers can be alphanumeric
 and should be exactly equal to the individual subject directory names.

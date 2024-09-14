@@ -291,9 +291,18 @@ setMethod ("load_demographics", "BstrData", function(object) {
 load_bstr_data <- function(type="sba", subjdir="", csv="", hemi="left",
                           smooth=0.0, roiids=0, roimeas="gmthickness", measure="", atlas="", maskfile = "", eddy=TRUE, exclude_col = "") {
 
-  atlas <- path.expand(normalizePath(atlas))
-  maskfile <- path.expand(normalizePath(maskfile))
-  subjdir <- path.expand(normalizePath(subjdir))
+  if (subjdir == "")
+    stop("Error: subjdir is not specified.", call. = FALSE)
+  if (csv == "")
+    stop("Error: csv file is not specified.", call. = FALSE)
+
+  subjdir <- normalizePath(path.expand(subjdir), mustWork = T)
+  csv <- normalizePath(path.expand(csv), mustWork = T)
+
+  if (atlas != "")
+    atlas <- normalizePath(path.expand(atlas), mustWork = T)
+  if (maskfile != "")
+    maskfile <- normalizePath(path.expand(maskfile), mustWork = T)
 
   valid_types <- c("sba", "tbm", "roi","dba","nca")
   if (! type %in% valid_types)

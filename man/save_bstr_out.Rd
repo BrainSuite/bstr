@@ -22,8 +22,8 @@ The parent directory of the output directory should exist.
 As an  e.g., if you specify /dir1/dir2/dir3 as the output directory,
 it is required that the directory dir2 should exist.
 If dir2 doesn't exist, the function will fail.
-if dir3 exists, and the overwrite flag is set to TRUE., dir3 will be deleted and recreated.
-if dir3 exists, and the overwrite flag is set to FALSE, the function will return an error.
+If dir3 exists, and the overwrite flag is set to TRUE, dir3 will be deleted and recreated.
+If dir3 exists, and the overwrite flag is set to FALSE, the function will return an error.
 By default overwrite flag is set to FALSE (see the \code{overwrite} flag below)}
 
 \item{overwrite}{logical parameter denoting if existing output directory should be overwritten or not (default is FALSE)}

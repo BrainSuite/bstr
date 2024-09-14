@@ -291,9 +291,9 @@ setMethod ("load_demographics", "BstrData", function(object) {
 load_bstr_data <- function(type="sba", subjdir="", csv="", hemi="left",
                           smooth=0.0, roiids=0, roimeas="gmthickness", measure="", atlas="", maskfile = "", eddy=TRUE, exclude_col = "") {
 
-  atlas <- path.expand(atlas)
-  maskfile <- path.expand(maskfile)
-  subjdir <- path.expand(subjdir)
+  atlas <- path.expand(normalizePath(atlas))
+  maskfile <- path.expand(normalizePath(maskfile))
+  subjdir <- path.expand(normalizePath(subjdir))
 
   valid_types <- c("sba", "tbm", "roi","dba","nca")
   if (! type %in% valid_types)

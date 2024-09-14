@@ -669,13 +669,20 @@ paste0(as.character(get_roi_tag(read_label_desc(),bstr_data@roiids[m]))), "_roi"
 #' Save the statistical analysis output
 #' @param bstr_data object of type `BstrData`
 #' @param bstr_model object of type `BstrModel`
-#' @param outdir output directory to save the results
+#' @param outdir path for the output directory to save the results
+#' The parent directory of the output directory should exist.
+#' As an  e.g., if you specify /dir1/dir2/dir3 as the output directory,
+#' it is required that the directory dir2 should exist.
+#' If dir2 doesn't exist, the function will fail.
+#' if dir3 exists, and the overwrite flag is set to TRUE., dir3 will be deleted and recreated.
+#' if dir3 exists, and the overwrite flag is set to FALSE, the function will return an error.
+#' By default overwrite flag is set to FALSE (see the `overwrite` flag below)
 #' @param overwrite logical parameter denoting if existing output directory should be overwritten or not (default is FALSE)
 #' @param nclusters numeric value denoting number of clusters (default is 10)
 #' @export
 save_bstr_out <- function(bstr_data, bstr_model, outdir="", overwrite = F, nclusters = 10) {
 
-  outdir <- path.expand(outdir)
+  outdir <- path.expand(normalizePath(outdir))
   valid_types <- c("sba", "tbm", "roi", "dba", "nca")
   if (! bstr_data@analysis_type %in% valid_types)
     stop(sprintf("Valid data types are %s.", paste(valid_types, collapse = ', ')), call. = FALSE)

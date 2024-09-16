@@ -22,21 +22,21 @@ For more detailed installation instructions, usage examples, or to check for upd
 * Windows only: Install Rtools, available at https://cran.r-project.org/bin/windows/Rtools/
 
 ### Steps for installation
-* Open RStudio and enter the following commands to install **bstr version 0.5.1**.
-* You can pull directly from the BrainSuite server (Online Installation), or you can download the bstr_0.5.1.tar.gz file directly and install from your downloads folder.
-* Do not untar on uncompress bstr_0.5.1.tar.gz -- the installer needs it in this format.
+* Open RStudio and enter the following commands to install **bstr version 0.5.2**.
+* You can pull directly from the BrainSuite server (Online Installation), or you can download the bstr_0.5.2.tar.gz file directly and install from your downloads folder.
+* Do not untar on uncompress bstr_0.5.2.tar.gz -- the installer needs it in this format.
 
 ### Online Installation
 ```
 install.packages('devtools')
-devtools::install_url('http://brainsuite.org/wp-content/uploads/2024/09/bstr_0.5.1.tar.gz')
+devtools::install_url('http://brainsuite.org/wp-content/uploads/2024/09/bstr_0.5.2.tar.gz')
 ```
 
 ### Mac or Linux - Install from folder
 Replace `/path/to/` with the path to the folder where you downloaded bstr.
 ```
 install.packages('devtools')
-devtools::install_local('/path/to/bstr_0.5.1.tar.gz')
+devtools::install_local('/path/to/bstr_0.5.2.tar.gz')
 ```
 
 ### Windows - Install from folder
@@ -44,12 +44,12 @@ Note that on Windows, you will need to use double backslashes (\\) in the path b
 Replace `C:\\path\\to\\` or `C:/path/to/` with the path to the folder where you downloaded bstr.
 ```
 install.packages('devtools')
-devtools::install_local('C:\\path\\to\\bstr_0.5.1.tar.gz')
+devtools::install_local('C:\\path\\to\\bstr_0.5.2.tar.gz')
 ```
 or
 ```
 install.packages('devtools')
-devtools::install_local('C:/path/to/bstr_0.5.1.tar.gz')
+devtools::install_local('C:/path/to/bstr_0.5.2.tar.gz')
 ```
 
 ### Check your installation

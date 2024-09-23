@@ -55,7 +55,8 @@ bs_atlas_files <- list(
 #' @export
 bs_binary_files <- list(
   clustermap = 'bin/clustermap',
-  statmap = 'bin/statmap'
+  statmap = 'bin/statmap',
+  renderdfs = 'bin/renderdfs'
 )
 
 #' List of suffixes for atlas files used in BrainSuite

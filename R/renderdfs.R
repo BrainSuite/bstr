@@ -52,22 +52,22 @@ renderSurfaceFigure <- function(surface_output_base,
                                  left_hemi_file, right_hemi_file, atlas_image,
                                  colorbar_file = "", colorbar_label = "",
                                  image_pixels = 512) {
-
-  renderdfs <- paste0("\"",file.path(get_brainsuite_install_path(),bs_binary_files$renderdfs),"\"")
+  renderdfs <-file.path(get_brainsuite_install_path(),bs_binary_files$renderdfs)
   if (!file.exists(renderdfs))
   {
+    print(renderdfs)
     warning("renderdfs is not part of your BrainSuite installation -- please visit https://brainsuite.org/bstr for information on how to obtain this program.")
     return(NULL);
   }
-  exit_code = suppressWarnings(system(renderdfs))
-  if (exit_code != 0 || exit_code != NULL)
+  exit_code <- suppressWarnings(system(paste0("\"",renderdfs,"\""),intern = FALSE, ignore.stdout = TRUE, ignore.stderr = TRUE, wait = TRUE, input = NULL))
+  if (exit_code != 0)
   {
     warning("renderdfs is not configured to run -- please visit https://brainsuite.org/bstr.")
     return(NULL);
   }
   zoom <- 0.45
   border <- floor(image_pixels / 32)
-  callbase <- paste0(renderdfs," --vol ", atlas_image, " --zoom ", zoom, " -x ", image_pixels, " -y ", image_pixels)
+  callbase <- paste0("\"",renderdfs,"\""," --vol ", atlas_image, " --zoom ", zoom, " -x ", image_pixels, " -y ", image_pixels)
   system_call_output<-system(paste0(callbase, " --left -s ", left_hemi_file, " -o ", surface_output_base, "_left.png"),
     intern = TRUE, ignore.stdout = FALSE, ignore.stderr = TRUE, wait = TRUE, input = NULL)
   system_call_output<-system(paste0(callbase, " --right -s ", right_hemi_file, " -o ", surface_output_base, "_right.png"),

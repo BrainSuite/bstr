@@ -1,7 +1,7 @@
 Package: bstr
 Type: Package
 Title: BrainSuite Statistics Toolbox in R
-Version: 0.5.2
+Version: 0.5.3
 Authors@R: c(person(given="Shantanu", family="Joshi", role=c("cre","aut"), email="shjoshi@ieee.org"),
              person("Yeun", "Kim", role="aut"),
              person("Kayla", "Schroeder", role="aut"),
@@ -24,7 +24,7 @@ RoxygenNote: 7.2.3
 URL: http://brainsuite.org/bstr
 Suggests: testthat
 NeedsCompilation: no
-Packaged: 2024-09-15 02:38:21 UTC; sjoshi
+Packaged: 2024-09-21 02:38:21 UTC; sjoshi
 Author: Shantanu Joshi [cre, aut],
   Yeun Kim [aut],
   Kayla Schroeder [aut],

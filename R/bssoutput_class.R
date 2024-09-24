@@ -813,6 +813,7 @@ save_bstr_out_surface <- function(measure, var_name, bstr_cmap, bstr_data, bstr_
   outprefix <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(
     basename(bstr_data@atlas_filename)), bstr_cmap@cmap_type, sep = '_'), bstr_data@data_type, sep = '')
   writedfs(file.path(outdir, outprefix), s1)
+  return (file.path(outdir, outprefix))
 }
 
 save_bstr_out_surface_both_hemi <- function(measure, var_name, bstr_cmap, bstr_data, bstr_model, outdir) {
@@ -828,7 +829,7 @@ save_bstr_out_surface_both_hemi <- function(measure, var_name, bstr_cmap, bstr_d
     bstr_cmap_lh <- bstr_cmap
     bstr_cmap_lh@values <- bstr_cmap@values[idx_lh]
     bstr_cmap_lh@rgbcolors <- bstr_cmap@rgbcolors[idx_lh,1:3]
-    save_bstr_out_surface(measure_lh, var_name, bstr_cmap_lh, bstr_data_lh, bstr_model, outdir)
+    leftfile <- save_bstr_out_surface(measure_lh, var_name, bstr_cmap_lh, bstr_data_lh, bstr_model, outdir)
 
     bstr_data_rh <- bstr_data
     bstr_data_rh@atlas_filename = bstr_data@atlas_filename_rh
@@ -837,8 +838,27 @@ save_bstr_out_surface_both_hemi <- function(measure, var_name, bstr_cmap, bstr_d
     bstr_cmap_rh <- bstr_cmap
     bstr_cmap_rh@values <- bstr_cmap@values[idx_rh]
     bstr_cmap_rh@rgbcolors <- bstr_cmap@rgbcolors[idx_rh,1:3]
-    save_bstr_out_surface(measure_rh, var_name, bstr_cmap_rh, bstr_data_rh, bstr_model, outdir)
+    rightfile <- save_bstr_out_surface(measure_rh, var_name, bstr_cmap_rh, bstr_data_rh, bstr_model, outdir)
 
+# if we need to compute name from scratch
+# righthemifile <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(
+#   basename(bstr_data_rh@atlas_filename)), bstr_cmap@cmap_type, sep = '_'), bstr_data_rh@data_type, sep = '')
+# lefthemifile  <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(
+#   basename(bstr_data_rh@atlas_filename)), bstr_cmap@cmap_type, sep = '_'), bstr_data_lh@data_type, sep = '')
+    surfdir <- file.path(outdir,"surfacepngs");
+    if (!dir.exists(surfdir)) {
+      dir.create(surfdir)
+    }
+    outprefix <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(
+      basename(bstr_data@atlas_filename)), bstr_cmap@cmap_type, sep = '_'))
+    sublegend <- stringr::str_replace(str_remove(str_remove(bstr_cmap@cmap_type,"log_"), "_adjusted"),"values","-values")
+    cbar_filename <- paste(paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_'), '_cbar.png', sep = '')
+    cdr_montage <- renderSurfaceFigure(surface_output_base = file.path(surfdir,outprefix),
+      left_hemi_file = leftfile, right_hemi_file = rightfile,
+      atlas_image = file.path(get_brainsuite_install_path(),bs_atlas_files$atlas_BCIDNI_tbm),
+      colorbar_file = file.path(outdir,cbar_filename), colorbar_label = paste0(var_name,"\n(",sublegend,")"),
+      image_pixels = 512)
+    image_write(cdr_montage,paste0(file.path(outdir,outprefix), "_figure.png"),format="png")
   }
   else {
       save_bstr_out_surface(measure, var_name, bstr_cmap, bstr_data, bstr_model, outdir)

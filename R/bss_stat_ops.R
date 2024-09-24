@@ -236,7 +236,14 @@ lm_vec <- function(main_effect = "", covariates = "", bstr_data) {
 
   X <- model.matrix(lm_formula, data = bstr_data@demographics)
   X_hat <- solve(t(X) %*% X) %*% t(X) # pre hat matrix
+  if (nrow(t(X_hat)) !=  nrow(bstr_data@data_array)) {
+    # This means there is a mismatch between the number of rows of the demographics variables and the number of rows in the data_array
+    message('There is a mismatch in the number of subjects in bstr_data@data_array and the number of rows of the model matrix.')
+    print(bstr_data@demographics$subjID[which(!complete.cases(bstr_data@demographics))], row.names=FALSE)
+    stop('Check the above subject(s) for missing variables in the demographics file and exclude if you want to run this analysis.', call. = FALSE)
+  }
   beta_coeff <- X_hat %*% bstr_data@data_array  # beta coefficients
+
   Y <- X %*% beta_coeff  # predicted response
   rss <- colSums((bstr_data@data_array - Y)^2) # residual sum of squares
 

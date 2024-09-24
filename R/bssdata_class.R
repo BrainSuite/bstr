@@ -63,6 +63,7 @@ BstrSBAData <- setClass(
   slots = list(atlas_filename = "character",
                atlas_filename_lh = "character",
                atlas_filename_rh = "character",
+               atlas_filename_nii = "character",
                atlas_surface = 'list',
                atlas_surface_lh = 'list',
                atlas_surface_rh = 'list'),
@@ -412,7 +413,28 @@ load_sba_data_from_filelist <- function(subjdir="", csv="", file_col="", atlas="
 }
 
 load_sba_data_both_hemi <- function(subjdir="", csv="", hemi="left", smooth=0.0, atlas="", exclude_col) {
-    if (hemi == "both") {
+    atlas_filename_nii = ""
+    if (atlas == "") {
+      brainsuite_atlas_id <- get_brainsuite_atlas_id_from_logfile(get_brainsuite_logfilename(subjdir, csv, exclude_col))    
+      brainsuite_install_path <- get_brainsuite_install_path()
+      if (brainsuite_atlas_id == "BrainSuiteAtlas1") {
+          atlas_filename_nii <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BS1_tbm)
+          print(atlas_filename_nii)
+          check_file_exists(atlas_filename_nii, raise_error = TRUE)
+      }
+      else if (brainsuite_atlas_id == "BCI-DNI_brain_atlas") {
+          atlas_filename_nii <- file.path(brainsuite_install_path, bs_atlas_files$atlas_BCIDNI_tbm)
+          print(atlas_filename_nii)
+          check_file_exists(atlas_filename_nii, raise_error = TRUE)
+      }
+      else {
+# TODO: warning here
+      }
+    }
+    else {
+# TODO: load custom atlas nii filename
+    }
+    if (hemi == "both") {      
       bstr_data_lh <- load_sba_data(subjdir=subjdir, csv=csv, hemi="left", smooth = smooth, atlas=atlas, exclude_col=exclude_col)
       bstr_data_rh <- load_sba_data(subjdir=subjdir, csv=csv, hemi="right", smooth = smooth, atlas=atlas, exclude_col=exclude_col)
       bstr_sba_data_both_hemi <- bstr_data_lh
@@ -424,10 +446,12 @@ load_sba_data_both_hemi <- function(subjdir="", csv="", hemi="left", smooth=0.0,
       bstr_sba_data_both_hemi@hemi <- "both"
       bstr_sba_data_both_hemi@atlas_filename_lh <- bstr_data_lh@atlas_filename
       bstr_sba_data_both_hemi@atlas_filename_rh <- bstr_data_rh@atlas_filename
+      bstr_sba_data_both_hemi@atlas_filename_nii <- atlas_filename_nii
       return(bstr_sba_data_both_hemi)
     }
     else {
       bstr_data <- load_sba_data(subjdir=subjdir, csv=csv, hemi=hemi, smooth = smooth, atlas=atlas, exclude_col=exclude_col)
+      bstr_data@atlas_filename_nii <- atlas_filename_nii
       return(bstr_data)
     }
 }

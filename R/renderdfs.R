@@ -21,18 +21,18 @@
 #'
 #' @export
 label_color_bar <- function(colorbar_file, label) {
-  cbar <- image_read(colorbar_file)
-  h <- image_info(cbar)["height"]
+  cbar <- magick::image_read(colorbar_file)
+  h <- magick::image_info(cbar)["height"]
   cbar <- cbar |>
-          image_transparent(color="white") |>
-          image_trim() |>
-          image_repage() |>
-          image_border(color = "transparent", geometry = paste0("0x",floor(0.125*h)))
-  h2 <- image_info(cbar)["height"]
-  w <- image_info(cbar)["width"]
-  cbar <- cbar |> image_extent(geometry = paste0(w, "x", h2 + floor(0.125*h)), gravity="North") |>
-          image_border(color = "transparent", geometry = paste0(floor(w/5), "x0")) |>
-          image_annotate(label, font="helvetica", gravity="South", location="+0+50", size=180)
+          magick::image_transparent(color="white") |>
+          magick::image_trim() |>
+          magick::image_repage() |>
+          magick::image_border(color = "transparent", geometry = paste0("0x",floor(0.125*h)))
+  h2 <- magick::image_info(cbar)["height"]
+  w <- magick::image_info(cbar)["width"]
+  cbar <- cbar |> magick::image_extent(geometry = paste0(w, "x", h2 + floor(0.125*h)), gravity="North") |>
+          magick::image_border(color = "transparent", geometry = paste0(floor(w/5), "x0")) |>
+          magick::image_annotate(label, font="helvetica", gravity="South", location="+0+50", size=180)
   return (cbar)
 }
 

@@ -849,8 +849,8 @@ save_bstr_out_surface_both_hemi <- function(measure, var_name, bstr_cmap, bstr_d
     if (!dir.exists(surfdir)) {
       dir.create(surfdir)
     }
-    
-    sublegend <- stringr::str_replace(str_remove(str_remove(bstr_cmap@cmap_type,"log_"), "_adjusted"),"values","-values")
+
+    sublegend <- stringr::str_replace(stringr::str_remove(stringr::str_remove(bstr_cmap@cmap_type,"log_"), "_adjusted"),"values","-values")
     # outprefix <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(basename(bstr_data@atlas_filename)), bstr_cmap@cmap_type, sep = '_'))
     outprefix <- paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_')
     cbar_filename <- paste(paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_'), '_cbar.png', sep = '')
@@ -860,7 +860,7 @@ save_bstr_out_surface_both_hemi <- function(measure, var_name, bstr_cmap, bstr_d
       colorbar_file = file.path(outdir,cbar_filename), colorbar_label = paste0(var_name,"\n(",sublegend,")"),
       image_pixels = 512)
     if (!is.null(cdr_montage))
-      image_write(cdr_montage,paste0(file.path(outdir,outprefix), "_figure.png"),format="png")
+      magick::image_write(cdr_montage,paste0(file.path(outdir,outprefix), "_figure.png"),format="png")
   }
   else {
       save_bstr_out_surface(measure, var_name, bstr_cmap, bstr_data, bstr_model, outdir)

@@ -642,9 +642,9 @@ read_demographics <- function(csvfile, exclude_col="") {
       stop(sprintf("Exclude column specified as %s does not exist in %s.", exclude_col, csvfile), call. = FALSE)
     demog <- demog[demog[, exclude_col] == 0,]
   }
-  if (length(which(!complete.cases(demog))) > 0) {
+  if (length(which(!stats::complete.cases(demog))) > 0) {
     message(sprintf('The following subject(s) have missing variables in the demographics file: %s', csvfile))
-    print(demog$subjID[which(!complete.cases(demog))], row.names=FALSE)
+    print(demog$subjID[which(!stats::complete.cases(demog))], row.names=FALSE)
     stop('Either fill in the missing data or exclude the above subject(s) if you want to run further analyses.', call. = FALSE)
   }
 

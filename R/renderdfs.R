@@ -12,6 +12,14 @@
 # You should have received a copy of the GNU General Public License along with this program;
 # if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+
+#' Add text label and border to existing colorbar image
+#'
+#'
+#' @param colorbar_file Name of file.
+#' @param label Text label that goes under the colorbar (assumed to be two lines for scaling)
+#'
+#' @export
 label_color_bar <- function(colorbar_file, label) {
   cbar <- image_read(colorbar_file)
   h <- image_info(cbar)["height"]
@@ -28,16 +36,40 @@ label_color_bar <- function(colorbar_file, label) {
   return (cbar)
 }
 
-renderSurfaceMontage <- function(studybase, studysuffix, surface_output_base, bfc_file,
+#' Create a figure from six views of a pair of hemisphere surfaces.
+#'
+#'
+#' @param studybase path and prefix for the surface files. Usually, this will be something
+#' similar to bstr_results/sba_anova_MMSE_smooth2/bstr_anova_MMSE_BCI-DNI_brain
+#' which specifies the filename of the dfs file up to the hemisphere descriptor
+#' @param studysuffix type of result presented on the surface, e.g., log_pvalues_adjusted.
+#' For example, bstr_results/sba_anova_MMSE_smooth2/bstr_anova_MMSE_BCI-DNI_brain.left.mid.cortex_log_pvalues_adjusted.dfs
+#' would use studybase="bstr_results/sba_anova_MMSE_smooth2/bstr_anova_MMSE_BCI-DNI_brain"
+#' and studysuffix="log_pvalues_adjusted"
+#' @param atlas_image a volumetric image from the atlas, e.g., the bfc file.
+#' @param colorbar_file the colorbar file (png) output by the surface output program (optional)
+#' @param colorbar_label text that will be displayed beneath the colorbar (optional)
+#' @param image_pixels image height for initial renderings of dfs files, which will be cropped after rendering.
+#'
+#' @export
+renderSurfaceMontage <- function(studybase, studysuffix, surface_output_base, atlas_image,
                                  colorbar_file = "", colorbar_label = "",
-                                 image_pixels = 1024) {
+                                 image_pixels = 512) {
+
+  dfs <- paste0("\"",file.path(get_brainsuite_install_path(),bs_binary_files$renderdfs),"\" ")
+  # exit_code = suppressWarnings(system(dfs))
+  # if (exit_code != 0 || exit_code != NULL)
+  # {
+  #   warning("renderdfs is not part of your BrainSuite installation -- please visit https://brainsuite.org/bstr for information on how to obtain this program.")
+  #   return(NULL);
+  # }
+
   zoom <- 0.45
   border <- floor(image_pixels / 32)
   left <- paste0(studybase, ".left.mid.cortex_", studysuffix, ".dfs")
   right <- paste0(studybase, ".right.mid.cortex_", studysuffix, ".dfs")
 
-  dfs <- paste0("\"",file.path(get_brainsuite_install_path(),"bin/renderdfs"),"\" ")
-  callbase <- paste0(dfs," --vol ", bfc_file, " --zoom ", zoom, " -x ", image_pixels, " -y ", image_pixels)
+    callbase <- paste0(dfs," --vol ", atlas_image, " --zoom ", zoom, " -x ", image_pixels, " -y ", image_pixels)
 
   system_call_output<-system(paste0(callbase, " --left -s ", left, " -o ", surface_output_base, ".left.png"),
     intern = TRUE, ignore.stdout = FALSE, ignore.stderr = TRUE, wait = TRUE, input = NULL)

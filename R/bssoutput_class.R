@@ -859,7 +859,8 @@ save_bstr_out_surface_both_hemi <- function(measure, var_name, bstr_cmap, bstr_d
       atlas_image = file.path(get_brainsuite_install_path(),bs_atlas_files$atlas_BCIDNI_tbm),
       colorbar_file = file.path(outdir,cbar_filename), colorbar_label = paste0(var_name,"\n(",sublegend,")"),
       image_pixels = 512)
-    image_write(cdr_montage,paste0(file.path(outdir,outprefix), "_figure.png"),format="png")
+    if (!is.null(cdr_montage))
+      image_write(cdr_montage,paste0(file.path(outdir,outprefix), "_figure.png"),format="png")
   }
   else {
       save_bstr_out_surface(measure, var_name, bstr_cmap, bstr_data, bstr_model, outdir)

@@ -53,16 +53,17 @@ renderSurfaceFigure <- function(surface_output_base,
                                  colorbar_file = "", colorbar_label = "",
                                  image_pixels = 512) {
 
-  dfs <- paste0("\"",file.path(get_brainsuite_install_path(),bs_binary_files$renderdfs),"\" ")
-  # exit_code = suppressWarnings(system(dfs))
+  renderdfs <- paste0("\"",file.path(get_brainsuite_install_path(),bs_binary_files$renderdfs),"\" ")
+  # exit_code = suppressWarnings(system(renderdfs))
   # if (exit_code != 0 || exit_code != NULL)
-  # {
-  #   warning("renderdfs is not part of your BrainSuite installation -- please visit https://brainsuite.org/bstr for information on how to obtain this program.")
-  #   return(NULL);
-  # }
+  if (!file.exists(renderdfs))
+  {
+    warning("renderdfs is not part of your BrainSuite installation -- please visit https://brainsuite.org/bstr for information on how to obtain this program.")
+    return(NULL);
+  }
   zoom <- 0.45
   border <- floor(image_pixels / 32)
-  callbase <- paste0(dfs," --vol ", atlas_image, " --zoom ", zoom, " -x ", image_pixels, " -y ", image_pixels)
+  callbase <- paste0(renderdfs," --vol ", atlas_image, " --zoom ", zoom, " -x ", image_pixels, " -y ", image_pixels)
   system_call_output<-system(paste0(callbase, " --left -s ", left_hemi_file, " -o ", surface_output_base, "_left.png"),
     intern = TRUE, ignore.stdout = FALSE, ignore.stderr = TRUE, wait = TRUE, input = NULL)
   system_call_output<-system(paste0(callbase, " --right -s ", right_hemi_file, " -o ", surface_output_base, "_right.png"),
@@ -90,72 +91,6 @@ renderSurfaceFigure <- function(surface_output_base,
   if (colorbar_file != "") {
     cbar <- label_color_bar(colorbar_file, colorbar_label)
     montage <- magick::image_append(c(montage, magick::image_resize(cbar,geometry=paste0("x",magick::image_info(montage)["height"]))))
-  }
-  return(montage)
-}
-
-#' Create a figure from six views of a pair of hemisphere surfaces (original version).
-#'
-#'
-#' @param studybase path and prefix for the surface files. Usually, this will be something
-#' similar to bstr_results/sba_anova_MMSE_smooth2/bstr_anova_MMSE_BCI-DNI_brain
-#' which specifies the filename of the dfs file up to the hemisphere descriptor
-#' @param studysuffix type of result presented on the surface, e.g., log_pvalues_adjusted.
-#' For example, bstr_results/sba_anova_MMSE_smooth2/bstr_anova_MMSE_BCI-DNI_brain.left.mid.cortex_log_pvalues_adjusted.dfs
-#' would use studybase="bstr_results/sba_anova_MMSE_smooth2/bstr_anova_MMSE_BCI-DNI_brain"
-#' and studysuffix="log_pvalues_adjusted"
-#' @param atlas_image a volumetric image from the atlas, e.g., the bfc file.
-#' @param colorbar_file the colorbar file (png) output by the surface output program (optional)
-#' @param colorbar_label text that will be displayed beneath the colorbar (optional)
-#' @param image_pixels image height for initial renderings of dfs files, which will be cropped after rendering.
-#'
-#' @export
-renderSurfaceMontage <- function(studybase, studysuffix, surface_output_base, atlas_image,
-                                 colorbar_file = "", colorbar_label = "",
-                                 image_pixels = 512) {
-
-  dfs <- paste0("\"",file.path(get_brainsuite_install_path(),bs_binary_files$renderdfs),"\" ")
-  # exit_code = suppressWarnings(system(dfs))
-  # if (exit_code != 0 || exit_code != NULL)
-  # {
-  #   warning("renderdfs is not part of your BrainSuite installation -- please visit https://brainsuite.org/bstr for information on how to obtain this program.")
-  #   return(NULL);
-  # }
-
-  zoom <- 0.45
-  border <- floor(image_pixels / 32)
-  left <- paste0(studybase, ".left.mid.cortex_", studysuffix, ".dfs")
-  right <- paste0(studybase, ".right.mid.cortex_", studysuffix, ".dfs")
-
-    callbase <- paste0(dfs," --vol ", atlas_image, " --zoom ", zoom, " -x ", image_pixels, " -y ", image_pixels)
-
-  system_call_output<-system(paste0(callbase, " --left -s ", left, " -o ", surface_output_base, ".left.png"),
-    intern = TRUE, ignore.stdout = FALSE, ignore.stderr = TRUE, wait = TRUE, input = NULL)
-  system_call_output<-system(paste0(callbase, " --right -s ", right, " -o ", surface_output_base, ".right.png"),
-    intern = TRUE, ignore.stdout = FALSE, ignore.stderr = TRUE, wait = TRUE, input = NULL)
-  system_call_output<-system(paste0(callbase, " --right -s ", left, " -o ", surface_output_base, ".left_medial.png"),
-    intern = TRUE, ignore.stdout = FALSE, ignore.stderr = TRUE, wait = TRUE, input = NULL)
-  system_call_output<-system(paste0(callbase, " --left -s ", right, " -o ", surface_output_base, ".right_medial.png"),
-    intern = TRUE, ignore.stdout = FALSE, ignore.stderr = TRUE, wait = TRUE, input = NULL)
-  system_call_output<-system(paste0(callbase, " --ant -s ", left, " ", right, " -o ", surface_output_base, ".anterior.png"),
-    intern = TRUE, ignore.stdout = FALSE, ignore.stderr = TRUE, wait = TRUE, input = NULL)
-  system_call_output<-system(paste0(callbase, " --pos -s ", left, " ", right, " -o ", surface_output_base, ".posterior.png"),
-    intern = TRUE, ignore.stdout = FALSE, ignore.stderr = TRUE, wait = TRUE, input = NULL)
-
-  views <- c(".left.png",      ".anterior.png",  ".right.png",
-             ".left_medial.png", ".posterior.png", ".right_medial.png")
-  for (i in 1:6) {
-    views[i] <- paste0(surface_output_base, views[i])
-  }
-  images <- magick::image_read(views)
-  images <- image_repage(image_trim(images))
-  for (i in 1:6) {
-    magick::image_write(images[i], path = views[i])
-  }
-  montage <- image_transparent(image_montage(images, bg = "transparent", tile="3x2", geometry = paste0("+", border, "+", border)), color = "black")
-  if (colorbar_file != "") {
-    cbar <- label_color_bar(colorbar_file, colorbar_label)
-    montage <- image_append(c(montage, image_resize(cbar,geometry=paste0("x",image_info(montage)["height"]))))
   }
   return(montage)
 }

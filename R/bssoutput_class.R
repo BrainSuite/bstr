@@ -849,9 +849,10 @@ save_bstr_out_surface_both_hemi <- function(measure, var_name, bstr_cmap, bstr_d
     if (!dir.exists(surfdir)) {
       dir.create(surfdir)
     }
-    outprefix <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(
-      basename(bstr_data@atlas_filename)), bstr_cmap@cmap_type, sep = '_'))
+    
     sublegend <- stringr::str_replace(str_remove(str_remove(bstr_cmap@cmap_type,"log_"), "_adjusted"),"values","-values")
+    # outprefix <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(basename(bstr_data@atlas_filename)), bstr_cmap@cmap_type, sep = '_'))
+    outprefix <- paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_')
     cbar_filename <- paste(paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_'), '_cbar.png', sep = '')
     cdr_montage <- renderSurfaceFigure(surface_output_base = file.path(surfdir,outprefix),
       left_hemi_file = leftfile, right_hemi_file = rightfile,

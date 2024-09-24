@@ -854,13 +854,13 @@ save_bstr_out_surface_both_hemi <- function(measure, var_name, bstr_cmap, bstr_d
     # outprefix <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(basename(bstr_data@atlas_filename)), bstr_cmap@cmap_type, sep = '_'))
     outprefix <- paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_')
     cbar_filename <- paste(paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_'), '_cbar.png', sep = '')
-    cdr_montage <- renderSurfaceFigure(surface_output_base = file.path(surfdir,outprefix),
+    surface_figure <- renderSurfaceFigure(surface_output_base = file.path(surfdir,outprefix),
       left_hemi_file = leftfile, right_hemi_file = rightfile,
-      atlas_image = file.path(get_brainsuite_install_path(),bs_atlas_files$atlas_BCIDNI_tbm),
+      atlas_image = bstr_data@atlas_filename_nii,
       colorbar_file = file.path(outdir,cbar_filename), colorbar_label = paste0(var_name,"\n(",sublegend,")"),
       image_pixels = 512)
-    if (!is.null(cdr_montage))
-      magick::image_write(cdr_montage,paste0(file.path(outdir,outprefix), "_figure.png"),format="png")
+    if (!is.null(surface_figure))
+      magick::image_write(surface_figure,paste0(file.path(outdir,outprefix), "_figure.png"),format="png")
   }
   else {
       save_bstr_out_surface(measure, var_name, bstr_cmap, bstr_data, bstr_model, outdir)

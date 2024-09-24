@@ -53,12 +53,16 @@ renderSurfaceFigure <- function(surface_output_base,
                                  colorbar_file = "", colorbar_label = "",
                                  image_pixels = 512) {
 
-  renderdfs <- paste0("\"",file.path(get_brainsuite_install_path(),bs_binary_files$renderdfs),"\" ")
-  # exit_code = suppressWarnings(system(renderdfs))
-  # if (exit_code != 0 || exit_code != NULL)
+  renderdfs <- paste0("\"",file.path(get_brainsuite_install_path(),bs_binary_files$renderdfs),"\"")
   if (!file.exists(renderdfs))
   {
     warning("renderdfs is not part of your BrainSuite installation -- please visit https://brainsuite.org/bstr for information on how to obtain this program.")
+    return(NULL);
+  }
+  exit_code = suppressWarnings(system(renderdfs))
+  if (exit_code != 0 || exit_code != NULL)
+  {
+    warning("renderdfs is not configured to run -- please visit https://brainsuite.org/bstr.")
     return(NULL);
   }
   zoom <- 0.45

@@ -1,5 +1,5 @@
 # BrainSuite Statistics Toolbox in R (bstr)
-# Copyright (C) 2017 The Regents of the University of California
+# Copyright (C) 2024 The Regents of the University of California
 # Creator: Shantanu H. Joshi, Department of Neurology, Ahmanson Lovelace Brain Mapping Center, UCLA
 #
 # This program is free software; you can redistribute it and/or modify it under the terms

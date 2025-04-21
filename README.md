@@ -1,7 +1,7 @@
 # README
 bstr: BrainSuite Statistics Toolbox in R
 
-Copyright (C) 2024 The Regents of the University of California
+Copyright (C) 2025 The Regents of the University of California
 
 Created by Shantanu H. Joshi, Yeun Kim, Kayla A. Schroeder, and David W. Shattuck
 

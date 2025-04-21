@@ -24,7 +24,7 @@ RoxygenNote: 7.2.3
 URL: http://brainsuite.org/bstr
 Suggests: testthat
 NeedsCompilation: no
-Packaged: 2024-09-21 02:38:21 UTC; sjoshi
+Packaged: 2025-04-21 07:09:21 UTC; shjoshi
 Author: Shantanu Joshi [cre, aut],
   Yeun Kim [aut],
   Kayla Schroeder [aut],

@@ -12,59 +12,32 @@ Please see the enclosed LICENSE file for more details.
 
 The BrainSuite Statistics toolbox in R (bstr) is a software package developed in R that performs statistical analysis of population-level neuroimaging data processed using BrainSuite [1]. Specifically, it provides statistical tools for conducting cortical thickness analysis, tensor based morphometry, and analysis of diffusion measures.
 
-## bstr Installation
-For more detailed installation instructions, usage examples, or to check for updated versions of bstr, please visit the bstr website: http://brainsuite.org/bstr/.
+## Installation
 
 ### Prerequisites
-* Ensure BrainSuite is installed on your computer: <http://brainsuite.org/download>
-* Ensure R is installed on your computer: https://cran.r-project.org/
-* Install RStudio: https://www.rstudio.com/products/rstudio/#Desktop
-* Windows only: Install Rtools, available at https://cran.r-project.org/bin/windows/Rtools/
+* Install [R](https://cran.r-project.org), [RStudio](https://posit.co/products/open-source/rstudio/), and [Rools](https://cran.r-project.org/bin/windows/Rtools) (users on MS Windows only)
+* Install [BrainSuite](https://brainsuite.org)
 
-### Steps for installation
-* Open RStudio and enter the following commands to install **bstr version 0.5.4**.
-* You can pull directly from the BrainSuite server (Online Installation), or you can download the bstr_0.5.4.tar.gz file directly and install from your downloads folder.
-* Do not untar on uncompress bstr_0.5.4.tar.gz -- the installer needs it in this format.
-
-### Online Installation
+### Install from GitHub (recommended)
+* Open RStudio and enter the following commands to install the latest version of [bstr](https://github.com/BrainSuite/bstr). 
 ```
-install.packages('devtools')
-devtools::install_url('http://brainsuite.org/wp-content/uploads/2024/09/bstr_0.5.4.tar.gz')
-```
-
-### Mac or Linux - Install from folder
-Replace `/path/to/` with the path to the folder where you downloaded bstr.
-```
-install.packages('devtools')
-devtools::install_local('/path/to/bstr_0.5.4.tar.gz')
-```
-
-### Windows - Install from folder
-Note that on Windows, you will need to use double backslashes (\\) in the path because backslash is an escape character. You can also replace the backslashes with forward slashes.
-Replace `C:\\path\\to\\` or `C:/path/to/` with the path to the folder where you downloaded bstr.
-```
-install.packages('devtools')
-devtools::install_local('C:\\path\\to\\bstr_0.5.4.tar.gz')
-```
-or
-```
-install.packages('devtools')
-devtools::install_local('C:/path/to/bstr_0.5.4.tar.gz')
+install.packages('remotes')
+remotes::install_github("BrainSuite/bstr/")
 ```
 
 ### Check your installation
 Type
 ```
 library(bstr)
-```
-then 
-```
 get_brainsuite_install_path()
 ```
 This should display the BrainSuite installation path.
 
+### Statistical analysis using *bstr*
+Please follow detailed instructions for data preparation, workflows, and usage examples at [brainsuite.org/bstr](http://brainsuite.org/bstr/).
 
-## Methods
+
+## Types of Analyses 
 Bstr performs statistical analysis on the outputs of the BrainSuite structural workflow, which performs cortical surface extraction [1], alignment to a reference atlas using surface-constrained volumetric registration (SVReg) [2], and, optionally, processing of diffusion MRI data using the BrainSuite diffusion pipeline (BDP) [3]. SVReg performs surface registration of triangular meshes based on curvature and volumetric registration based on image intensities. BDP performs distortion correction, alignment of diffusion MRI to T1-weighted MRI, and fitting of various diffusion models to the corrected diffusion data. Bstr is used to perform population-level statistical analysis of various neuroimaging measures produced by these components. Statistical analysis of voxel-wise and surface-based data is performed in the common coordinate space of the atlas by resampling the data from subject coordinates to a the atlas space using SVReg.
 
 Bstr supports the following analysis methods:

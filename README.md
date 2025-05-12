@@ -15,8 +15,11 @@ The BrainSuite Statistics toolbox in R (bstr) is a software package developed in
 ## Installation
 
 ### Prerequisites
-* Install [R](https://cran.r-project.org), [RStudio](https://posit.co/products/open-source/rstudio/), and [Rools](https://cran.r-project.org/bin/windows/Rtools) (users on MS Windows only)
 * Install [BrainSuite](https://brainsuite.org)
+* Install [R](https://cran.r-project.org), [RStudio](https://posit.co/products/open-source/rstudio/), and [Rools](https://cran.r-project.org/bin/windows/Rtools) (users on MS Windows only)
+* Install ImageMagick from https://imagemagick.org/
+  * On macOS, we recommend using [`homebrew`](https://brew.sh/) to install
+  
 
 ### Install from GitHub (recommended)
 * Open RStudio and enter the following commands to install the latest version of [bstr](https://github.com/BrainSuite/bstr). 

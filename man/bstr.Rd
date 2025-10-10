@@ -2,6 +2,7 @@
 % Please edit documentation in R/bstr.R
 \docType{package}
 \name{bstr}
+\alias{bstr-package}
 \alias{bstr}
 \title{bstr: BrainSuite Statistics toolbox}
 \description{
@@ -14,4 +15,26 @@ Pearson correlation
 General linear model
 ANOVA
 Paired and Independent samples t-test
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{http://brainsuite.org/bstr}
+}
+
+}
+\author{
+\strong{Maintainer}: Shantanu Joshi \email{shjoshi@ieee.org}
+
+Authors:
+\itemize{
+  \item Yeun Kim
+  \item Kayla Schroeder
+}
+
+Other contributors:
+\itemize{
+  \item David Shattuck [contributor]
+}
+
 }

@@ -114,7 +114,7 @@ setMethod("save_out", valueClass = "BstrSBAOutput", signature = "BstrSBAOutput",
            bstr_cmap <- save_bstr_color_files(bstr_model@tvalues_adjusted, bstr_model@main_effect, "tvalues_adjusted", bstr_data, bstr_model, outdir)
            save_bstr_out_surface_both_hemi(bstr_model@tvalues_adjusted, bstr_model@main_effect, bstr_cmap, bstr_data, bstr_model, outdir)
            save_bstr_rds(bstr_model@pvalues, bstr_model@main_effect, "pvalues", bstr_data, bstr_model, outdir) # Save pvalues as a rds file
-           save_bstr_sba_rmd_html(outdir, bstr_data, bstr_model, bstr_cmap)
+           save_bstr_sba_rmd_html(outdir, bstr_data, bstr_model, bstr_cmap, bstr_model@main_effect)
          },
          bstr_lm = {
            bstr_cmap <- save_bstr_color_files(log_pvalues, bstr_model@main_effect, "log_pvalues", bstr_data, bstr_model, outdir)
@@ -1012,7 +1012,7 @@ get_voxelcoord <- function(bstr_out, bstr_data, bstr_model, outdir, nclusters){
 #' @param outdir string specifying output directory to save the results in
 #' @export
 
-save_bstr_sba_rmd_html <- function(outdir, bstr_data, bstr_model, bstr_cmap){
+save_bstr_sba_rmd_html <- function(outdir, bstr_data, bstr_model, bstr_cmap, var_name){
 
   rmd_preamble <- readLines(system.file("extdata", "report_preamble.Rmd", package="bstr"))
   rmd_preamble <- paste(rmd_preamble, collapse = "\n")

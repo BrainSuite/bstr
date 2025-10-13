@@ -1,0 +1,33 @@
+---
+title: Bstr Report
+output: html_document
+---
+
+
+<style>
+    .nav-tabs > li > a {
+      font-size: 18px; /* Adjust font size */
+      color: #2b67ab;    /* Adjust font color */
+    }
+    .nav-tabs > li.active > a {
+      color: black; /* Color for active tab header */
+    }
+</style>
+    
+
+<style>
+
+table, td, th {
+min-width: 50%;
+margin-left: auto;
+margin-right: auto;
+margin-top: 1em;
+margin-bottom: 1em;
+}
+
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.align = "center", out.width = "70%")
+```
+

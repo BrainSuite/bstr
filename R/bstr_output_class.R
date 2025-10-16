@@ -1019,33 +1019,37 @@ save_bstr_sba_rmd_html <- function(outdir, bstr_data, bstr_model, bstr_cmap, var
 
   rmd_text <- rmd_preamble
   bstr_report_title_str <- paste0("## ", create_rmd_report_title_str(bstr_data, bstr_model))
-
-  rmd_text <- paste0("### Adjusted P-values", "\n")
+  rmd_text <- paste0(rmd_text, bstr_report_title_str, " {.tabset}\n")
+  rmd_text <- paste0(rmd_text, "\n\n", "### Adjusted P-values", "\n")
   rmd_text <- paste0(rmd_text, "\n", "```{r adj_pvalues, fig.cap=''}")
-  outprefix <- paste0(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_')
-  png_filename <- paste0(file.path(outdir,outprefix), "_figure.png")
+  outprefix <- paste0(bstr_model@model_type, "_", var_name, '_both_hemi_', "log_pvalues_adjusted", sep = '_')
+  png_filename <- paste0(file.path(outdir,outprefix), "figure.png")
   rmd_text <- paste0(rmd_text, "\n", sprintf("knitr::include_graphics('%s')", png_filename))
   rmd_text <- paste0(rmd_text, "\n```\n")
 
-  rmd_text <- paste0("### Adjusted T-values", "\n")
+  rmd_text <- paste0(rmd_text, "\n", "### Adjusted T-values", "\n")
   rmd_text <- paste0(rmd_text, "\n", "```{r adj_tvalues, fig.cap=''}")
-  outprefix <- paste0(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_')
-  png_filename <- paste0(file.path(outdir,outprefix), "_figure.png")
+  outprefix <- paste0(bstr_model@model_type, "_", var_name, '_both_hemi_', "tvalues_adjusted", sep = '_')
+  png_filename <- paste0(file.path(outdir,outprefix), "figure.png")
   rmd_text <- paste0(rmd_text, "\n", sprintf("knitr::include_graphics('%s')", png_filename))
   rmd_text <- paste0(rmd_text, "\n```\n")
 
-  rmd_text <- paste0("### P-values", "\n")
+  rmd_text <- paste0(rmd_text, "\n", "### P-values", "\n")
   rmd_text <- paste0(rmd_text, "\n", "```{r pvalues, fig.cap=''}")
-  outprefix <- paste0(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_')
-  png_filename <- paste0(file.path(outdir,outprefix), "_figure.png")
+  outprefix <- paste0(bstr_model@model_type, "_", var_name, '_both_hemi_', "log_pvalues", sep = '_')
+  png_filename <- paste0(file.path(outdir,outprefix), "figure.png")
   rmd_text <- paste0(rmd_text, "\n", sprintf("knitr::include_graphics('%s')", png_filename))
   rmd_text <- paste0(rmd_text, "\n```\n")
 
-  rmd_text <- paste0("### T-values", "\n")
+  rmd_text <- paste0(rmd_text, "\n","### T-values", "\n")
   rmd_text <- paste0(rmd_text, "\n", "```{r tvalues, fig.cap=''}")
-  outprefix <- paste0(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_')
-  png_filename <- paste0(file.path(outdir,outprefix), "_figure.png")
+  outprefix <- paste0(bstr_model@model_type, "_", var_name, '_both_hemi_', "tvalues", sep = '_')
+  png_filename <- paste0(file.path(outdir,outprefix), "figure.png")
+  rmd_text <- paste0(rmd_text, "\n", sprintf("knitr::include_graphics('%s')", png_filename))
   rmd_text <- paste0(rmd_text, "\n```\n")
 
-  writeLines(rmd_text, sprintf("report_%s_%s.Rmd", bstr_model@model_type, var_name))
+  rmd_filename <- file.path(outdir, sprintf("report_%s_%s.Rmd", bstr_model@model_type, var_name))
+  writeLines(rmd_text, rmd_filename)
+  rmarkdown::render(rmd_filename)
+
 }

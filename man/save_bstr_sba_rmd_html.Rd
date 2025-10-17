@@ -4,7 +4,14 @@
 \alias{save_bstr_sba_rmd_html}
 \title{Save Bstr SBA rmarkdown report including Rmd and the html file}
 \usage{
-save_bstr_sba_rmd_html(outdir, bstr_data, bstr_model)
+save_bstr_sba_rmd_html(
+  outdir,
+  bstr_data,
+  bstr_model,
+  bstr_cmap,
+  var_name,
+  stats_string
+)
 }
 \arguments{
 \item{outdir}{string specifying output directory to save the results in}
@@ -13,7 +20,11 @@ save_bstr_sba_rmd_html(outdir, bstr_data, bstr_model)
 
 \item{bstr_model}{object of type \code{BstrModel}}
 
-\item{bstr_out}{object of type \code{BstrOut}}
+\item{bstr_cmap}{object of type \code{BstrColorMap}}
+
+\item{var_name}{string specifying the variable name}
+
+\item{stats_string}{string specifying the statistical measure}
 }
 \description{
 Save Bstr SBA rmarkdown report including Rmd and the html file

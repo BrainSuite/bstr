@@ -114,7 +114,8 @@ setMethod("save_out", valueClass = "BstrSBAOutput", signature = "BstrSBAOutput",
            bstr_cmap <- save_bstr_color_files(bstr_model@tvalues_adjusted, bstr_model@main_effect, "tvalues_adjusted", bstr_data, bstr_model, outdir)
            save_bstr_out_surface_both_hemi(bstr_model@tvalues_adjusted, bstr_model@main_effect, bstr_cmap, bstr_data, bstr_model, outdir)
            save_bstr_rds(bstr_model@pvalues, bstr_model@main_effect, "pvalues", bstr_data, bstr_model, outdir) # Save pvalues as a rds file
-           save_bstr_sba_rmd_html(outdir, bstr_data, bstr_model, bstr_cmap, bstr_model@main_effect)
+           stats_string <- c("log_pvalues_adjusted", "log_pvalues", "tvalues_adjusted", "tvalues")
+           save_bstr_sba_rmd_html(outdir, bstr_data, bstr_model, bstr_cmap, bstr_model@main_effect, stats_string)
          },
          bstr_lm = {
            bstr_cmap <- save_bstr_color_files(log_pvalues, bstr_model@main_effect, "log_pvalues", bstr_data, bstr_model, outdir)
@@ -126,6 +127,8 @@ setMethod("save_out", valueClass = "BstrSBAOutput", signature = "BstrSBAOutput",
            bstr_cmap <- save_bstr_color_files(bstr_model@tvalues_adjusted, bstr_model@main_effect, "tvalues_adjusted", bstr_data, bstr_model, outdir)
            save_bstr_out_surface_both_hemi(bstr_model@tvalues_adjusted, bstr_model@main_effect, bstr_cmap, bstr_data, bstr_model, outdir)
            save_bstr_rds(bstr_model@pvalues, bstr_model@main_effect, "pvalues", bstr_data, bstr_model, outdir) # Save pvalues as a rds file
+           stats_string <- c("log_pvalues_adjusted", "log_pvalues", "tvalues_adjusted", "tvalues")
+           save_bstr_sba_rmd_html(outdir, bstr_data, bstr_model, bstr_cmap, bstr_model@main_effect, stats_string)
            },
          bstr_corr = {
            bstr_model@corr_values[abs(log_pvalues) <= -1*log10(0.05)] <- 0
@@ -142,7 +145,10 @@ setMethod("save_out", valueClass = "BstrSBAOutput", signature = "BstrSBAOutput",
            bstr_cmap <- save_bstr_color_files(bstr_model@corr_values_masked_adjusted, bstr_model@corr_var, "corr_values_masked_adjusted", bstr_data, bstr_model, outdir)
            save_bstr_out_surface_both_hemi(bstr_model@corr_values_masked_adjusted, bstr_model@corr_var, bstr_cmap, bstr_data, bstr_model, outdir)
            save_bstr_rds(bstr_model@pvalues, bstr_model@corr_var, "pvalues", bstr_data, bstr_model, outdir) # Save pvalues as a rds file
+           stats_string <- c("corr_values_masked_adjusted", "corr_values", "log_pvalues_adjusted", "log_pvalues")
+           save_bstr_sba_rmd_html(outdir, bstr_data, bstr_model, bstr_cmap, bstr_model@corr_var, stats_string)
            },
+
          pairedttest = {
            bstr_cmap <- save_bstr_color_files(log_pvalues, bstr_model@group_var, "log_pvalues", bstr_data, bstr_model, outdir)
            save_bstr_out_surface_both_hemi(log_pvalues, bstr_model@group_var, bstr_cmap, bstr_data, bstr_model, outdir)
@@ -153,6 +159,8 @@ setMethod("save_out", valueClass = "BstrSBAOutput", signature = "BstrSBAOutput",
            bstr_cmap <- save_bstr_color_files(bstr_model@tvalues_adjusted, bstr_model@group_var, "tvalues_adjusted", bstr_data, bstr_model, outdir)
            save_bstr_out_surface_both_hemi(bstr_model@tvalues_adjusted, bstr_model@group_var, bstr_cmap, bstr_data, bstr_model, outdir)
            save_bstr_rds(bstr_model@pvalues, bstr_model@group_var, "pvalues", bstr_data, bstr_model, outdir) # Save pvalues as a rds file
+           stats_string <- c("log_pvalues_adjusted", "log_pvalues", "tvalues_adjusted", "tvalues")
+           save_bstr_sba_rmd_html(outdir, bstr_data, bstr_model, bstr_cmap, bstr_model@group_var, stats_string)
          },
          unpairedttest = {
            bstr_cmap <- save_bstr_color_files(log_pvalues, bstr_model@group_var, "log_pvalues", bstr_data, bstr_model, outdir)
@@ -164,6 +172,8 @@ setMethod("save_out", valueClass = "BstrSBAOutput", signature = "BstrSBAOutput",
            bstr_cmap <- save_bstr_color_files(bstr_model@tvalues_adjusted, bstr_model@group_var, "tvalues_adjusted", bstr_data, bstr_model, outdir)
            save_bstr_out_surface_both_hemi(bstr_model@tvalues_adjusted, bstr_model@group_var, bstr_cmap, bstr_data, bstr_model, outdir)
            save_bstr_rds(bstr_model@pvalues, bstr_model@group_var, "pvalues", bstr_data, bstr_model, outdir) # Save pvalues as a rds file
+           stats_string <- c("log_pvalues_adjusted", "log_pvalues", "tvalues_adjusted", "tvalues")
+           save_bstr_sba_rmd_html(outdir, bstr_data, bstr_model, bstr_cmap, bstr_model@group_var, stats_string)
          }
   )
 
@@ -851,14 +861,15 @@ save_bstr_out_surface_both_hemi <- function(measure, var_name, bstr_cmap, bstr_d
       dir.create(surfdir)
     }
 
-    sublegend <- stringr::str_replace(stringr::str_remove(stringr::str_remove(bstr_cmap@cmap_type,"log_"), "_adjusted"),"values","-values")
+    # sublegend <- stringr::str_replace(stringr::str_remove(stringr::str_remove(bstr_cmap@cmap_type,"log_"), "_adjusted"),"values","-values")
     # outprefix <- paste(paste(bstr_model@model_type, var_name, tools::file_path_sans_ext(basename(bstr_data@atlas_filename)), bstr_cmap@cmap_type, sep = '_'))
     outprefix <- paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_')
     cbar_filename <- paste(paste(bstr_model@model_type, var_name, 'both_hemi', bstr_cmap@cmap_type, sep = '_'), '_cbar.png', sep = '')
     surface_figure <- renderSurfaceFigure(surface_output_base = file.path(surfdir,outprefix),
       left_hemi_file = leftfile, right_hemi_file = rightfile,
       atlas_image = bstr_data@atlas_filename_nii,
-      colorbar_file = file.path(outdir,cbar_filename), colorbar_label = paste0(var_name,"\n(",sublegend,")"),
+      colorbar_file = file.path(outdir,cbar_filename), colorbar_label = paste0(var_name,"\n "), # Note the space after \n. Please do not remove. It's important for aligning text.
+      #colorbar_file = file.path(outdir,cbar_filename), colorbar_label = paste0(var_name,"\n(",sublegend,")"),
       image_pixels = 512)
     if (!is.null(surface_figure))
       magick::image_write(surface_figure,paste0(file.path(outdir,outprefix), "_figure.png"),format="png")
@@ -1006,13 +1017,14 @@ get_voxelcoord <- function(bstr_out, bstr_data, bstr_model, outdir, nclusters){
 
 
 #' Save Bstr SBA rmarkdown report including Rmd and the html file
-#' @param bstr_out object of type `BstrOut`
+#' @param outdir string specifying output directory to save the results in
 #' @param bstr_data object of type `BstrData`
 #' @param bstr_model object of type `BstrModel`
-#' @param outdir string specifying output directory to save the results in
+#' @param bstr_cmap object of type `BstrColorMap`
+#' @param var_name string specifying the variable name
+#' @param stats_string string specifying the statistical measure
 #' @export
-
-save_bstr_sba_rmd_html <- function(outdir, bstr_data, bstr_model, bstr_cmap, var_name){
+save_bstr_sba_rmd_html <- function(outdir, bstr_data, bstr_model, bstr_cmap, var_name, stats_string){
 
   rmd_preamble <- readLines(system.file("extdata", "report_preamble.Rmd", package="bstr"))
   rmd_preamble <- paste(rmd_preamble, collapse = "\n")
@@ -1020,36 +1032,17 @@ save_bstr_sba_rmd_html <- function(outdir, bstr_data, bstr_model, bstr_cmap, var
   rmd_text <- rmd_preamble
   bstr_report_title_str <- paste0("## ", create_rmd_report_title_str(bstr_data, bstr_model))
   rmd_text <- paste0(rmd_text, bstr_report_title_str, " {.tabset}\n")
-  rmd_text <- paste0(rmd_text, "\n\n", "### Adjusted P-values", "\n")
-  rmd_text <- paste0(rmd_text, "\n", "```{r adj_pvalues, fig.cap=''}")
-  outprefix <- paste0(bstr_model@model_type, "_", var_name, '_both_hemi_', "log_pvalues_adjusted", sep = '_')
-  png_filename <- paste0(file.path(outdir,outprefix), "figure.png")
-  rmd_text <- paste0(rmd_text, "\n", sprintf("knitr::include_graphics('%s')", png_filename))
-  rmd_text <- paste0(rmd_text, "\n```\n")
 
-  rmd_text <- paste0(rmd_text, "\n", "### Adjusted T-values", "\n")
-  rmd_text <- paste0(rmd_text, "\n", "```{r adj_tvalues, fig.cap=''}")
-  outprefix <- paste0(bstr_model@model_type, "_", var_name, '_both_hemi_', "tvalues_adjusted", sep = '_')
-  png_filename <- paste0(file.path(outdir,outprefix), "figure.png")
-  rmd_text <- paste0(rmd_text, "\n", sprintf("knitr::include_graphics('%s')", png_filename))
-  rmd_text <- paste0(rmd_text, "\n```\n")
-
-  rmd_text <- paste0(rmd_text, "\n", "### P-values", "\n")
-  rmd_text <- paste0(rmd_text, "\n", "```{r pvalues, fig.cap=''}")
-  outprefix <- paste0(bstr_model@model_type, "_", var_name, '_both_hemi_', "log_pvalues", sep = '_')
-  png_filename <- paste0(file.path(outdir,outprefix), "figure.png")
-  rmd_text <- paste0(rmd_text, "\n", sprintf("knitr::include_graphics('%s')", png_filename))
-  rmd_text <- paste0(rmd_text, "\n```\n")
-
-  rmd_text <- paste0(rmd_text, "\n","### T-values", "\n")
-  rmd_text <- paste0(rmd_text, "\n", "```{r tvalues, fig.cap=''}")
-  outprefix <- paste0(bstr_model@model_type, "_", var_name, '_both_hemi_', "tvalues", sep = '_')
-  png_filename <- paste0(file.path(outdir,outprefix), "figure.png")
-  rmd_text <- paste0(rmd_text, "\n", sprintf("knitr::include_graphics('%s')", png_filename))
-  rmd_text <- paste0(rmd_text, "\n```\n")
+  for (ii in stats_string){
+    rmd_text <- paste0(rmd_text, "\n\n", sprintf("### %s", stats_string_to_rmd_section_title[ii]), "\n")
+    rmd_text <- paste0(rmd_text, "\n",  sprintf("```{r %s, fig.cap=''}", ii))
+    outprefix <- paste0(bstr_model@model_type, "_", var_name, '_both_hemi_', ii, sep = '_')
+    png_filename <- paste0(file.path(outdir,outprefix), "figure.png")
+    rmd_text <- paste0(rmd_text, "\n", sprintf("knitr::include_graphics('%s')", png_filename))
+    rmd_text <- paste0(rmd_text, "\n```\n")
+  }
 
   rmd_filename <- file.path(outdir, sprintf("report_%s_%s.Rmd", bstr_model@model_type, var_name))
   writeLines(rmd_text, rmd_filename)
   rmarkdown::render(rmd_filename)
-
 }

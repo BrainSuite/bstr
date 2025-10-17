@@ -113,6 +113,16 @@ bs_model_type_to_readable_string <- list(
   unpairedttest = "Unpaired T-test"
 )
 
+#' Mapping of stats measures to readable string to be used as a section title on the Rmd report
+stats_string_to_rmd_section_title <- list(
+  log_pvalues_adjusted = "Adjusted P-values",
+  log_pvalues = "P-values",
+  tvalues_adjusted = "Adjusted T-values",
+  tvalues = "T-values",
+  corr_values_masked_adjusted = "Masked Adjusted correlations",
+  corr_values = "Correlations"
+)
+
 #' Mapping of analysis_type to readable string
 bs_analysis_type_to_readable_string <- list(
   tbm = "TBM",

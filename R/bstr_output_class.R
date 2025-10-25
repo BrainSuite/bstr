@@ -1046,3 +1046,29 @@ save_bstr_sba_rmd_html <- function(outdir, bstr_data, bstr_model, bstr_cmap, var
   writeLines(rmd_text, rmd_filename)
   rmarkdown::render(rmd_filename)
 }
+
+
+#' Save Bstr TBM rmarkdown report including Rmd and the html file
+#' @param outdir string specifying output directory to save the results in
+#' @param bstr_data object of type `BstrData`
+#' @param bstr_model object of type `BstrModel`
+#' @param bstr_cmap object of type `BstrColorMap`
+#' @param var_name string specifying the variable name
+#' @param stats_string string specifying the statistical measure
+#' @export
+save_bstr_tbm_rmd_html <- function(outdir, bstr_data, bstr_model, bstr_cmap, var_name, stats_string){
+
+  rmd_preamble <- readLines(system.file("extdata", "report_preamble.Rmd", package="bstr"))
+  rmd_preamble <- paste(rmd_preamble, collapse = "\n")
+
+  rmd_text <- rmd_preamble
+  bstr_report_title_str <- paste0("## ", create_rmd_report_title_str(bstr_data, bstr_model))
+  rmd_text <- paste0(rmd_text, bstr_report_title_str, " {.tabset}\n")
+
+  rmd_text <- paste0(rmd_text, "\n### {-}\n")
+
+  rmd_filename <- file.path(outdir, sprintf("report_%s_%s.Rmd", bstr_model@model_type, var_name))
+  writeLines(rmd_text, rmd_filename)
+  rmarkdown::render(rmd_filename)
+
+}

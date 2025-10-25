@@ -1071,4 +1071,8 @@ save_bstr_tbm_rmd_html <- function(outdir, bstr_data, bstr_model, bstr_cmap, var
   writeLines(rmd_text, rmd_filename)
   rmarkdown::render(rmd_filename)
 
+  rmd_text <- paste0(rmd_text, "\n### {-}\n")
+  rmd_filename <- file.path(outdir, sprintf("report_%s_%s.Rmd", bstr_model@model_type, var_name))
+  writeLines(rmd_text, rmd_filename)
+  rmarkdown::render(rmd_filename)
 }

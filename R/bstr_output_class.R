@@ -103,6 +103,7 @@ setMethod("save_out", valueClass = "BstrSBAOutput", signature = "BstrSBAOutput",
   log_pvalues_adjusted <- log10_transform(bstr_model@pvalues_adjusted)
   bstr_model@tvalues[abs(log_pvalues) <= -1*log10(0.05)] <- 0
 
+  # TODO: Could simplify this by relying on the variable stat_string as defined below. Merge repetitive statements in a loop. See save_bstr_sba_rmd_html()
   switch(bstr_model@model_type,
          bstr_anova = {
            bstr_cmap <- save_bstr_color_files(log_pvalues, bstr_model@main_effect, "log_pvalues", bstr_data, bstr_model, outdir)
@@ -263,6 +264,10 @@ setMethod("save_out", valueClass = "BstrTBMOutput", signature = "BstrTBMOutput",
     rmarkdown::render(file.path(outdir,  sprintf("report_%s_%s.Rmd", bstr_model@model_type, var_name)))
     stop("No detected clusters above significance threshold.")
   }
+
+
+  # For each cluster, do the following:
+
 
   # add create an R6 class function from here
   bstrmd_volout <- BstrRmdVolumeOutput$new()

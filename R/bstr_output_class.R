@@ -219,9 +219,11 @@ setMethod("save_out", valueClass = "BstrTBMOutput", signature = "BstrTBMOutput",
   switch(bstr_model@model_type,
          bstr_anova = {
            var_name = bstr_model@main_effect
+           stats_string <- c("log_pvalues_adjusted", "log_pvalues", "tvalues_adjusted", "tvalues")
          },
          bstr_lm = {
            var_name = bstr_model@main_effect
+           stats_string <- c("log_pvalues_adjusted", "log_pvalues", "tvalues_adjusted", "tvalues")
          },
          bstr_corr = {
            corr_values <- rep(0, length(bstr_data@atlas_image))
@@ -233,12 +235,15 @@ setMethod("save_out", valueClass = "BstrTBMOutput", signature = "BstrTBMOutput",
            dim(corr_values_masked_adjusted) <- dim(bstr_data@atlas_image)
 
            var_name = bstr_model@corr_var
+           stats_string <- c("corr_values_masked_adjusted", "corr_values", "log_pvalues_adjusted", "log_pvalues")
          },
          pairedttest = {
            var_name = bstr_model@group_var
+           stats_string <- c("log_pvalues_adjusted", "log_pvalues", "tvalues_adjusted", "tvalues")
          },
          unpairedttest = {
            var_name = bstr_model@group_var
+           stats_string <- c("log_pvalues_adjusted", "log_pvalues", "tvalues_adjusted", "tvalues")
          }
   )
 
@@ -265,16 +270,10 @@ setMethod("save_out", valueClass = "BstrTBMOutput", signature = "BstrTBMOutput",
     stop("No detected clusters above significance threshold.")
   }
 
+  render_statmap_on_atlas(outdir, bstr_data, bstr_model, var_name, stats_string, voxelcoord)
+  save_bstr_vol_rmd_html(outdir, bstr_data, bstr_model, voxelcoord, var_name, stats_string)
 
-  # For each cluster, do the following:
-
-
-  # add create an R6 class function from here
-  bstrmd_volout <- BstrRmdVolumeOutput$new()
-  bstrmd_volout$save_out(bstr_data, bstr_model, voxelcoord = voxelcoord, outdir)
-
-
-    # Copy modelspec file to the output directory
+  # Copy modelspec file to the output directory
   file.copy(bstr_model@mspec_file, bstr_out@outdir)
   invisible(bstr_out)
   }
@@ -314,9 +313,11 @@ setMethod("save_out", valueClass = "BstrDBAOutput", signature = "BstrDBAOutput",
   switch(bstr_model@model_type,
          bstr_anova = {
            var_name = bstr_model@main_effect
+           stats_string <- c("log_pvalues_adjusted", "log_pvalues", "tvalues_adjusted", "tvalues")
          },
          bstr_lm = {
            var_name = bstr_model@main_effect
+           stats_string <- c("log_pvalues_adjusted", "log_pvalues", "tvalues_adjusted", "tvalues")
          },
          bstr_corr = {
            corr_values <- rep(0, length(bstr_data@atlas_image))
@@ -328,12 +329,15 @@ setMethod("save_out", valueClass = "BstrDBAOutput", signature = "BstrDBAOutput",
            dim(corr_values_masked_adjusted) <- dim(bstr_data@atlas_image)
 
            var_name = bstr_model@corr_var
+           stats_string <- c("corr_values_masked_adjusted", "corr_values", "log_pvalues_adjusted", "log_pvalues")
          },
          pairedttest = {
            var_name = bstr_model@group_var
+           stats_string <- c("log_pvalues_adjusted", "log_pvalues", "tvalues_adjusted", "tvalues")
          },
          unpairedttest = {
            var_name = bstr_model@group_var
+           stats_string <- c("log_pvalues_adjusted", "log_pvalues", "tvalues_adjusted", "tvalues")
          }
   )
 
@@ -360,9 +364,8 @@ setMethod("save_out", valueClass = "BstrDBAOutput", signature = "BstrDBAOutput",
     stop("No detected clusters above significance threshold.")
   }
 
-  # Create a new R6 class object here
-  bstrmd_volout <- BstrRmdVolumeOutput$new()
-  bstrmd_volout$save_out(bstr_data, bstr_model, voxelcoord = voxelcoord, outdir)
+  render_statmap_on_atlas(outdir, bstr_data, bstr_model, var_name, stats_string, voxelcoord)
+  save_bstr_vol_rmd_html(outdir, bstr_data, bstr_model, voxelcoord, var_name, stats_string)
 
   # Copy modelspec file to the output directory
   file.copy(bstr_model@mspec_file, bstr_out@outdir)
@@ -1053,7 +1056,8 @@ save_bstr_sba_rmd_html <- function(outdir, bstr_data, bstr_model, bstr_cmap, var
 }
 
 
-#' Save Bstr TBM rmarkdown report including Rmd and the html file
+#' Save Bstr Volumetric rmarkdown report including Rmd and the html file
+#' This function is used to save Rmd report for both TBM and DBA
 #' @param outdir string specifying output directory to save the results in
 #' @param bstr_data object of type `BstrData`
 #' @param bstr_model object of type `BstrModel`
@@ -1061,23 +1065,36 @@ save_bstr_sba_rmd_html <- function(outdir, bstr_data, bstr_model, bstr_cmap, var
 #' @param var_name string specifying the variable name
 #' @param stats_string string specifying the statistical measure
 #' @export
-save_bstr_tbm_rmd_html <- function(outdir, bstr_data, bstr_model, bstr_cmap, var_name, stats_string){
+save_bstr_vol_rmd_html <- function(outdir, bstr_data, bstr_model, voxelcoord, var_name, stats_string){
 
   rmd_preamble <- readLines(system.file("extdata", "report_preamble.Rmd", package="bstr"))
   rmd_preamble <- paste(rmd_preamble, collapse = "\n")
 
   rmd_text <- rmd_preamble
   bstr_report_title_str <- paste0("## ", create_rmd_report_title_str(bstr_data, bstr_model))
-  rmd_text <- paste0(rmd_text, bstr_report_title_str, " {.tabset}\n")
+  rmd_text <- paste0(rmd_text, bstr_report_title_str, "\n\n")
+  # Display the cluster table
+  rmd_text <- paste0(rmd_text, "\n\n```{r eval=TRUE, echo=FALSE}\n")
+  rmd_text <- paste0(rmd_text, sprintf("vox_table <- read.table(file.path('%s', 'cluster.tsv'), header = F, sep = '	')\n", outdir))
+  rmd_text <- paste0(rmd_text, "\ncolnames(vox_table) <- c('Cluster Number', 'Number of Voxels',  'T-Value' , 'X Coord', 'Y Coord', 'Z Coord')\n")
+  rmd_text <- paste0(rmd_text, "\nDT::datatable(vox_table, rownames = FALSE)\n")
+  rmd_text <- paste0(rmd_text, "```\n\n")
 
-  rmd_text <- paste0(rmd_text, "\n### {-}\n")
+  for (jj in seq_along(voxelcoord)) {
+    rmd_text <- paste0(rmd_text, sprintf("## Cluster %d: Voxel coordinate (%d, %d, %d)", jj, voxelcoord[[jj]][1], voxelcoord[[jj]][2], voxelcoord[[jj]][3]), " {.tabset}\n")
+    for (ii in stats_string){
+      rmd_text <- paste0(rmd_text, "\n\n", sprintf("### %s", stats_string_to_rmd_section_title[ii]), "\n")
+      rmd_text <- paste0(rmd_text, "\n",  sprintf("```{r cluster%s_%s, fig.cap=''}", jj, ii))
+      outprefix <- paste0(bstr_model@model_type, "_", var_name, '_both_hemi_', ii, sep = '_')
+      png_filename <- paste0(file.path(outdir,sprintf("cluster%s_", jj)), ii, "_figure.png")
+      rmd_text <- paste0(rmd_text, "\n", sprintf("knitr::include_graphics('%s')", png_filename))
+      rmd_text <- paste0(rmd_text, "\n```\n")
+    }
+    rmd_text <- paste0(rmd_text, "\n### {-}\n\n")
+  }
 
   rmd_filename <- file.path(outdir, sprintf("report_%s_%s.Rmd", bstr_model@model_type, var_name))
   writeLines(rmd_text, rmd_filename)
   rmarkdown::render(rmd_filename)
 
-  rmd_text <- paste0(rmd_text, "\n### {-}\n")
-  rmd_filename <- file.path(outdir, sprintf("report_%s_%s.Rmd", bstr_model@model_type, var_name))
-  writeLines(rmd_text, rmd_filename)
-  rmarkdown::render(rmd_filename)
 }

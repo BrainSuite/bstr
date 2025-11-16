@@ -96,7 +96,17 @@ BstrRmdVolumeOutput <-
               )
   )
 
-#' @export
+#' @param bstr_data object of type `BstrData`
+#' @param bstr_model object of type `BstrModel`
+#' @param outdir output directory
+#' @param voxelcoord_index numeric value denoting desired voxel coordinate
+#' @param voxelcoord list of peak voxel coordinates
+#' @param atlaspath path to the atlas
+#' @param overlaypath path to the overlay file
+#' @param outdir output directory path
+#' @param name string of name
+#' @param alpha numeric transparency value
+#' @param lutpaths path to the color table LUTs
 render_overlay <- function(bstr_data, bstr_model, voxelcoord_index,voxelcoord,atlaspath,overlaypath,outdir,name,alpha,lutpaths,min_vals,max_vals) {
   view_order <- c("sag","cor","ax")
   switch(bstr_model@model_type,
@@ -135,7 +145,11 @@ render_overlay <- function(bstr_data, bstr_model, voxelcoord_index,voxelcoord,at
   return(0)
 }
 
-#' @export
+
+#' @param voxelcoord_index numeric value denoting desired voxel coordinate
+#' @param voxelcoord list of peak voxel coordinates
+#' @param atlaspath path to the atlas
+#' @param outdir output directory path
 render_atlas <- function(voxelcoord_index,voxelcoord,atlaspath,outdir) {
   view_name <- c("ax","cor","sag")
   view_order <- c(3,2,1)
@@ -149,7 +163,12 @@ render_atlas <- function(voxelcoord_index,voxelcoord,atlaspath,outdir) {
 }
 
 
-#' @export
+#' @param bstr_data object of type `BstrData`
+#' @param bstr_model object of type `BstrModel`
+#' @param rmdfile path to output Rmd file
+#' @param outdir output directory
+#' @param voxelcoord list of peak voxel coordinates
+#' @param overlay_name string denoting the type of statistical analysis
 save_rmd_preamble <- function(bstr_data, bstr_model, rmdfile, outdir, voxelcoord, overlay_name) {
 
   load_library <- "library(bstr)"
@@ -202,7 +221,11 @@ save_rmd_preamble <- function(bstr_data, bstr_model, rmdfile, outdir, voxelcoord
 }
 
 
-#' @export
+#' @param bstr_data object of type `BstrData`
+#' @param bstr_model object of type `BstrModel`
+#' @param outdir output directory
+#' @param voxelcoord list of peak voxel coordinates
+#' @param overlay_name string denoting the name of the overlay
 render_html <- function(bstr_data, bstr_model, outdir, voxelcoord, overlay_name) {
   overlay <- c(bs_stat_overlays$log_pvalues_adjusted, bs_stat_overlays$tvalues_adjusted, bs_stat_overlays$log_pvalues, bs_stat_overlays$tvalues, bs_stat_overlays$corr_values_masked_adjusted, bs_stat_overlays$corr_values)
   if (bstr_model@model_type=="bstr_corr"){
@@ -311,7 +334,7 @@ get_render_image_filename <- function(outdir, voxelcoord, overlay_name, brain_se
   return(paste0("./png_images_crosshairs/", view_order[brain_sector_index], voxelcoord[[voxelcoord_index]][brain_sector_index],"_",overlay_name,"_cluster",voxelcoord_index,".png"))
 }
 
-#' @export
+#' @param outdir output directory path
 get_custom_overlays <- function(outdir) {
   if (bstr_model@model_type=="unpairedttest" | bstr_model@model_type=="pairedttest"){
     indep_var <- bstr_model@group_var

@@ -21,11 +21,11 @@ save_bstr_vol_rmd_html(
 
 \item{bstr_model}{object of type \code{BstrModel}}
 
+\item{voxelcoord}{list of peak voxel cluster coordinates}
+
 \item{var_name}{string specifying the variable name}
 
 \item{stats_string}{string specifying the statistical measure}
-
-\item{bstr_cmap}{object of type \code{BstrColorMap}}
 }
 \description{
 Save Bstr Volumetric rmarkdown report including Rmd and the html file

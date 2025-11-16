@@ -1061,7 +1061,7 @@ save_bstr_sba_rmd_html <- function(outdir, bstr_data, bstr_model, bstr_cmap, var
 #' @param outdir string specifying output directory to save the results in
 #' @param bstr_data object of type `BstrData`
 #' @param bstr_model object of type `BstrModel`
-#' @param bstr_cmap object of type `BstrColorMap`
+#' @param voxelcoord list of peak voxel cluster coordinates
 #' @param var_name string specifying the variable name
 #' @param stats_string string specifying the statistical measure
 #' @export
